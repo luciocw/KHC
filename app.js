@@ -3,10 +3,26 @@ const KHC_CONFIG = {
     '2025': {
         leagues: [
             { id: '1245850693172998144', name: 'KHC Serie A', tier: 'serie-a' },
+            { id: '1249749216419397632', name: 'KHC Serie B', tier: 'serie-b' },
         ],
+        // Estrutura expandida: 1º, 2º, 3º, 4º lugar de cada liga (playoffs)
+        standings: {
+            'KHC Serie A': [
+                { position: 1, team: 'Dark Side - Satanás!!', owner: 'Khrstxn' },
+                { position: 2, team: 'Gold and Run', owner: 'RobsonF90' },
+                { position: 3, team: 'markinhosfc11', owner: 'markinhosfc11' },
+                { position: 4, team: 'Los Pollos Hermanos', owner: 'LucioWagner' }
+            ],
+            'KHC Serie B': [
+                { position: 1, team: 'timbu2001', owner: 'timbu2001' },
+                { position: 2, team: 'Diogoashura', owner: 'Diogoashura' },
+                { position: 3, team: 'GORDINHAS AJEITADAS', owner: 'Dedi' },
+                { position: 4, team: 'Cão Farejador', owner: 'Caofarejador' }
+            ]
+        },
         champions: [
-            { tier: 'KHC Serie A', team: 'Nome do Campeão 25', owner: 'Dono' },
-            { tier: 'KHC Serie B', team: 'Nome do Campeão 25', owner: 'Dono' }
+            { tier: 'KHC Serie A', team: 'Dark Side - Satanás!!', owner: 'Khrstxn' },
+            { tier: 'KHC Serie B', team: 'timbu2001', owner: 'timbu2001' }
         ]
     },
     '2026': {
@@ -598,42 +614,104 @@ function renderGlobalStandings() {
 
 function renderPowerRankings() {
     const container = document.getElementById('powerContainer');
-    const leagues = {};
 
-    appState.rosterData.forEach(t => {
-        const safeName = t.leagueName;
-        if (!leagues[safeName]) {
-            leagues[safeName] = { points: 0, count: 0, tier: t.leagueTier };
-        }
-        leagues[safeName].points += t.fpts;
-        leagues[safeName].count += 1;
-    });
-
-    const leagueKeys = Object.keys(leagues);
-
-    if (leagueKeys.length === 0) {
+    if (appState.rosterData.length === 0) {
         container.innerHTML = '<div style="padding:1rem; text-align:center" role="status">Sem dados</div>';
         return;
     }
 
-    let html = '';
-    leagueKeys.forEach((key, index) => {
-        const l = leagues[key];
-        const avg = l.count > 0 ? (l.points / l.count).toFixed(1) : '0.0';
-        const colorClass = l.tier === 'elite' ? 'text-gold' : 'text-orange';
-        const safeKey = escapeHtml(key);
+    // Ordena todos os times por pontos (maior para menor)
+    const sortedTeams = [...appState.rosterData].sort((a, b) => b.fpts - a.fpts);
 
-        // ARIA label descritivo
-        const ariaLabel = `${safeKey}: média de ${avg} pontos por time`;
+    // Calcula estatísticas para determinar os tiers
+    const points = sortedTeams.map(t => t.fpts);
+    const maxPts = Math.max(...points);
+    const minPts = Math.min(...points);
+    const range = maxPts - minPts;
+
+    // Define os thresholds para cada tier (percentuais do range)
+    const tierThresholds = {
+        S: maxPts - (range * 0.10),  // Top 10%
+        A: maxPts - (range * 0.30),  // Top 30%
+        B: maxPts - (range * 0.55),  // Top 55%
+        C: maxPts - (range * 0.80),  // Top 80%
+        D: minPts                     // Bottom 20%
+    };
+
+    // Agrupa times por tier
+    const tiers = { S: [], A: [], B: [], C: [], D: [] };
+
+    sortedTeams.forEach(team => {
+        const pts = team.fpts;
+        if (pts >= tierThresholds.S) {
+            tiers.S.push(team);
+        } else if (pts >= tierThresholds.A) {
+            tiers.A.push(team);
+        } else if (pts >= tierThresholds.B) {
+            tiers.B.push(team);
+        } else if (pts >= tierThresholds.C) {
+            tiers.C.push(team);
+        } else {
+            tiers.D.push(team);
+        }
+    });
+
+    // Configuração visual de cada tier
+    const tierConfig = {
+        S: { label: 'S', color: 'tier-s', description: 'Elite' },
+        A: { label: 'A', color: 'tier-a', description: 'Excelente' },
+        B: { label: 'B', color: 'tier-b', description: 'Bom' },
+        C: { label: 'C', color: 'tier-c', description: 'Regular' },
+        D: { label: 'D', color: 'tier-d', description: 'Em Construção' }
+    };
+
+    let html = '<div class="tier-list">';
+    let tierIndex = 0;
+
+    Object.keys(tiers).forEach(tierKey => {
+        const tierTeams = tiers[tierKey];
+        const config = tierConfig[tierKey];
+
+        // Só mostra tier se tiver times
+        if (tierTeams.length === 0) return;
+
+        const ariaLabel = `Tier ${config.label} - ${config.description}: ${tierTeams.length} times`;
 
         html += `
-            <article class="power-card stagger-item" aria-label="${ariaLabel}" style="animation-delay: ${index * STAGGER_DELAY_MS}ms">
-                <div class="power-label">${safeKey}</div>
-                <div class="power-val ${colorClass}" aria-hidden="true">${avg}</div>
-                <div style="font-size:0.7rem; color:#666" aria-hidden="true">Média de pts/time</div>
-            </article>
+            <div class="tier-row stagger-item ${config.color}" role="region" aria-label="${ariaLabel}" style="animation-delay: ${tierIndex * STAGGER_DELAY_MS}ms">
+                <div class="tier-label">
+                    <span class="tier-letter">${config.label}</span>
+                    <span class="tier-desc">${config.description}</span>
+                </div>
+                <div class="tier-teams">
         `;
+
+        tierTeams.forEach(team => {
+            const safeTeamName = escapeHtml(team.teamName);
+            const safeLeagueName = escapeHtml(team.leagueName);
+            const safePts = sanitizeNumber(team.fpts, 0, VALIDATION.MAX_POINTS).toFixed(1);
+            const avatarUrl = sanitizeAvatarUrl(team.avatar);
+
+            html += `
+                <div class="tier-team-card" title="${safeTeamName} - ${safePts} pts">
+                    <img src="${avatarUrl}" alt="" class="tier-team-avatar" loading="lazy" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
+                    <div class="tier-team-info">
+                        <span class="tier-team-name">${safeTeamName}</span>
+                        <span class="tier-team-league">${safeLeagueName}</span>
+                    </div>
+                    <span class="tier-team-pts">${safePts}</span>
+                </div>
+            `;
+        });
+
+        html += `
+                </div>
+            </div>
+        `;
+        tierIndex++;
     });
+
+    html += '</div>';
     container.innerHTML = html;
 }
 
@@ -642,27 +720,56 @@ function renderHallOfFame() {
     let html = '';
     let cardIndex = 0;
 
-    Object.keys(KHC_CONFIG).reverse().forEach(year => {
-        const champs = KHC_CONFIG[year].champions || [];
-        champs.forEach(c => {
-            const safeTeam = escapeHtml(sanitizeString(c.team, VALIDATION.MAX_TEAM_NAME_LENGTH, 'Campeão'));
-            const safeOwner = escapeHtml(sanitizeString(c.owner, VALIDATION.MAX_OWNER_NAME_LENGTH, 'Dono'));
-            const safeTier = escapeHtml(sanitizeString(c.tier, VALIDATION.MAX_LEAGUE_NAME_LENGTH, 'Liga'));
-            const safeYear = escapeHtml(year);
+    // Emojis e cores por posição
+    const positionConfig = {
+        1: { emoji: '🏆', label: 'Campeão', colorClass: 'hof-gold' },
+        2: { emoji: '🥈', label: 'Vice', colorClass: 'hof-silver' },
+        3: { emoji: '🥉', label: '3º Lugar', colorClass: 'hof-bronze' },
+        4: { emoji: '4️⃣', label: '4º Lugar', colorClass: 'hof-fourth' }
+    };
 
-            // ARIA label descritivo
-            const ariaLabel = `Campeão ${safeYear}: ${safeTeam}, dono ${safeOwner}, categoria ${safeTier}`;
+    Object.keys(KHC_CONFIG).reverse().forEach(year => {
+        const config = KHC_CONFIG[year];
+        const standings = config.standings || {};
+        const safeYear = escapeHtml(year);
+
+        // Processa cada liga
+        Object.keys(standings).forEach(leagueName => {
+            const leagueStandings = standings[leagueName] || [];
+            const safeLeagueName = escapeHtml(leagueName);
+
+            // Cria seção para a liga
+            html += `
+                <div class="hof-league-section stagger-item" style="animation-delay: ${cardIndex * STAGGER_DELAY_MS}ms">
+                    <div class="hof-league-header">
+                        <span class="hof-league-title">${safeLeagueName}</span>
+                        <span class="hof-league-year">${safeYear}</span>
+                    </div>
+                    <div class="hof-standings">
+            `;
+
+            leagueStandings.forEach(entry => {
+                const pos = entry.position;
+                const config = positionConfig[pos] || positionConfig[4];
+                const safeTeam = escapeHtml(sanitizeString(entry.team, VALIDATION.MAX_TEAM_NAME_LENGTH, 'Time'));
+                const safeOwner = escapeHtml(sanitizeString(entry.owner, VALIDATION.MAX_OWNER_NAME_LENGTH, 'Dono'));
+
+                const ariaLabel = `${config.label} ${safeYear} ${safeLeagueName}: ${safeTeam}, dono ${safeOwner}`;
+
+                html += `
+                    <div class="hof-entry ${config.colorClass}" role="listitem" aria-label="${ariaLabel}">
+                        <span class="hof-position" aria-hidden="true">${config.emoji}</span>
+                        <div class="hof-entry-info">
+                            <span class="hof-team-name">${safeTeam}</span>
+                            <span class="hof-owner-name">${safeOwner}</span>
+                        </div>
+                    </div>
+                `;
+            });
 
             html += `
-                <article class="hof-card stagger-item" aria-label="${ariaLabel}" style="animation-delay: ${cardIndex * STAGGER_DELAY_MS}ms">
-                    <div style="position:relative; z-index:2">
-                        <div style="font-size:3rem" aria-hidden="true">🏆</div>
-                        <div style="font-weight:bold; font-size:1.1rem; color:var(--khc-orange)">${safeTeam}</div>
-                        <div style="font-size:0.8rem; color:#888">${safeOwner}</div>
-                        <div style="margin-top:0.5rem; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; background:#333; display:inline-block; padding:2px 6px; border-radius:4px">${safeTier}</div>
                     </div>
-                    <div class="hof-year" aria-hidden="true">${safeYear}</div>
-                </article>
+                </div>
             `;
             cardIndex++;
         });
@@ -714,7 +821,7 @@ function switchTab(event, tabName) {
 function getTabLabel(tabName) {
     const labels = {
         'leagues': 'Ligas',
-        'global': 'Pontuador de Ouro',
+        'global': 'Top Scorers',
         'power': 'Power Ranking',
         'hof': 'Hall da Fama'
     };

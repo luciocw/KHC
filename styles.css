@@ -697,6 +697,223 @@ select:focus-visible {
     display: none !important;
 }
 
+/* --- TIER LIST (Power Rankings) --- */
+.power-container {
+    max-width: 100%;
+}
+
+.power-intro {
+    text-align: center;
+    padding: 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.power-intro-icon {
+    font-size: 1.2rem;
+}
+
+.tier-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.tier-row {
+    display: flex;
+    background: var(--bg-card);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+
+.tier-label {
+    min-width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border-right: 1px solid var(--border);
+}
+
+.tier-letter {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.tier-desc {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+/* Tier colors */
+.tier-s .tier-label { background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%); color: #000; }
+.tier-a .tier-label { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: #fff; }
+.tier-b .tier-label { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff; }
+.tier-c .tier-label { background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); color: #fff; }
+.tier-d .tier-label { background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: #fff; }
+
+.tier-teams {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    align-items: center;
+}
+
+.tier-team-card {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-hover);
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tier-team-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.tier-team-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #333;
+}
+
+.tier-team-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.tier-team-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tier-team-league {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+}
+
+.tier-team-pts {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--khc-orange);
+    margin-left: auto;
+}
+
+/* --- HALL OF FAME (Novo Layout) --- */
+.hof-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.hof-league-section {
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.hof-league-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(255,107,53,0.05) 100%);
+    border-bottom: 1px solid var(--border);
+}
+
+.hof-league-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--khc-orange);
+}
+
+.hof-league-year {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+.hof-standings {
+    display: flex;
+    flex-direction: column;
+}
+
+.hof-entry {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.2s;
+}
+
+.hof-entry:last-child {
+    border-bottom: none;
+}
+
+.hof-entry:hover {
+    background: var(--bg-hover);
+}
+
+.hof-position {
+    font-size: 1.5rem;
+    min-width: 36px;
+    text-align: center;
+}
+
+.hof-entry-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.hof-team-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.hof-owner-name {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Position-specific colors */
+.hof-gold .hof-team-name { color: #ffd700; }
+.hof-gold .hof-entry { background: rgba(255, 215, 0, 0.05); }
+
+.hof-silver .hof-team-name { color: #c0c0c0; }
+.hof-silver .hof-entry { background: rgba(192, 192, 192, 0.03); }
+
+.hof-bronze .hof-team-name { color: #cd7f32; }
+.hof-bronze .hof-entry { background: rgba(205, 127, 50, 0.03); }
+
+.hof-fourth .hof-team-name { color: var(--text-muted); }
+
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
     .global-header,
@@ -710,6 +927,46 @@ select:focus-visible {
     }
 
     .leagues-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tier List mobile */
+    .tier-row {
+        flex-direction: column;
+    }
+
+    .tier-label {
+        flex-direction: row;
+        gap: 0.75rem;
+        min-width: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 0.75rem 1rem;
+    }
+
+    .tier-letter {
+        font-size: 1.5rem;
+    }
+
+    .tier-desc {
+        margin-top: 0;
+    }
+
+    .tier-teams {
+        padding: 0.5rem;
+    }
+
+    .tier-team-card {
+        flex: 1 1 calc(50% - 0.5rem);
+        min-width: 140px;
+    }
+
+    .tier-team-name {
+        max-width: 80px;
+    }
+
+    /* Hall of Fame mobile */
+    .hof-grid {
         grid-template-columns: 1fr;
     }
 }

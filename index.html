@@ -49,7 +49,7 @@
                     aria-controls="tab-global"
                     tabindex="-1"
                     onclick="switchTab(event, 'global')">
-                    <span aria-hidden="true">🏆</span> Pontuador de Ouro
+                    <span aria-hidden="true">🎯</span> Top Scorers
                 </button>
                 <button
                     class="tab-btn"
@@ -93,7 +93,7 @@
                 aria-labelledby="tab-btn-global"
                 tabindex="0"
                 hidden>
-                <h2 class="sr-only">Ranking Global - Pontuador de Ouro</h2>
+                <h2 class="sr-only">Ranking Global - Top Scorers</h2>
                 <div class="global-table" role="table" aria-label="Ranking global de pontuação">
                     <div class="global-header" role="row">
                         <div role="columnheader" aria-label="Posição">#</div>
@@ -113,8 +113,12 @@
                 aria-labelledby="tab-btn-power"
                 tabindex="0"
                 hidden>
-                <h2 id="power-heading" style="text-align:center; margin-bottom:1.5rem; color:var(--text-muted)">Média de Pontos por Time (PF/G)</h2>
-                <div id="powerContainer" class="power-grid" aria-labelledby="power-heading" aria-live="polite">
+                <h2 id="power-heading" class="sr-only">Power Ranking - Tier List</h2>
+                <div class="power-intro">
+                    <span class="power-intro-icon" aria-hidden="true">📊</span>
+                    <span>Tier List baseada na pontuação total da temporada</span>
+                </div>
+                <div id="powerContainer" class="power-container" aria-labelledby="power-heading" aria-live="polite">
                 </div>
             </section>
 
