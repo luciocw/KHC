@@ -347,7 +347,8 @@ async function loadData() {
     if (validLeagues.length === 0) {
         container.innerHTML = '<div class="loading">IDs das ligas ainda não configurados para esta temporada.</div>';
         clearSecondaryContainers();
-        renderHallOfFame();
+        renderLegends();
+        renderSeasons();
         appState.isLoading = false;
         return;
     }
@@ -389,7 +390,8 @@ async function loadData() {
 
             renderGlobalStandings();
             renderPowerRankings();
-            renderHallOfFame();
+            renderLegends();
+            renderSeasons();
             appState.isLoading = false;
             return;
         }
@@ -401,7 +403,8 @@ async function loadData() {
 
         container.innerHTML = `<div class="error-message fade-in">${escapeHtml('❌ ' + errorMsg)}</div>`;
         clearSecondaryContainers();
-        renderHallOfFame();
+        renderLegends();
+        renderSeasons();
         appState.isLoading = false;
         return;
     }
@@ -428,7 +431,8 @@ async function loadData() {
 
     renderGlobalStandings();
     renderPowerRankings();
-    renderHallOfFame();
+    renderLegends();
+    renderSeasons();
     appState.isLoading = false;
 }
 
@@ -848,8 +852,115 @@ function renderPowerRankings() {
     container.innerHTML = html;
 }
 
-function renderHallOfFame() {
-    const container = document.getElementById('hofContainer');
+/**
+ * Calcula conquistas acumuladas de cada jogador
+ * Retorna array ordenado por: títulos > vices > 3º > 4º
+ */
+function calculatePlayerAchievements() {
+    const playerStats = {};
+
+    Object.keys(KHC_CONFIG).forEach(year => {
+        const config = KHC_CONFIG[year];
+        const standings = config.standings || {};
+
+        Object.keys(standings).forEach(leagueName => {
+            const leagueStandings = standings[leagueName] || [];
+
+            leagueStandings.forEach(entry => {
+                const owner = entry.owner;
+                if (!owner) return;
+
+                if (!playerStats[owner]) {
+                    playerStats[owner] = {
+                        name: owner,
+                        titles: 0,      // 1º lugar
+                        vices: 0,       // 2º lugar
+                        thirds: 0,      // 3º lugar
+                        fourths: 0      // 4º lugar
+                    };
+                }
+
+                switch (entry.position) {
+                    case 1: playerStats[owner].titles++; break;
+                    case 2: playerStats[owner].vices++; break;
+                    case 3: playerStats[owner].thirds++; break;
+                    case 4: playerStats[owner].fourths++; break;
+                }
+            });
+        });
+    });
+
+    // Converte para array e ordena
+    return Object.values(playerStats).sort((a, b) => {
+        // Ordena por: títulos > vices > 3º > 4º
+        if (b.titles !== a.titles) return b.titles - a.titles;
+        if (b.vices !== a.vices) return b.vices - a.vices;
+        if (b.thirds !== a.thirds) return b.thirds - a.thirds;
+        return b.fourths - a.fourths;
+    });
+}
+
+/**
+ * Renderiza a aba "Lendas KHC" - Ranking cumulativo de jogadores
+ */
+function renderLegends() {
+    const container = document.getElementById('legendsContainer');
+    const players = calculatePlayerAchievements();
+
+    if (players.length === 0) {
+        container.innerHTML = '<div class="legends-empty" role="status">As lendas serão reveladas ao fim das temporadas.</div>';
+        return;
+    }
+
+    let html = `
+        <div class="legends-intro">
+            <span class="legends-intro-icon" aria-hidden="true">🏛️</span>
+            <span>Ranking cumulativo de conquistas - todas as ligas valem igual</span>
+        </div>
+        <div class="legends-table" role="table" aria-label="Ranking de lendas por conquistas">
+            <div class="legends-header" role="row">
+                <div class="legends-col-rank" role="columnheader">#</div>
+                <div class="legends-col-name" role="columnheader">Jogador</div>
+                <div class="legends-col-trophy" role="columnheader" title="Títulos">🏆</div>
+                <div class="legends-col-trophy" role="columnheader" title="Vice-campeonatos">🥈</div>
+                <div class="legends-col-trophy" role="columnheader" title="Terceiros lugares">🥉</div>
+                <div class="legends-col-trophy" role="columnheader" title="Quartos lugares">4º</div>
+            </div>
+    `;
+
+    players.forEach((player, index) => {
+        const safeName = escapeHtml(sanitizeString(player.name, VALIDATION.MAX_OWNER_NAME_LENGTH, 'Jogador'));
+        const rank = index + 1;
+
+        // Classe especial para top 3
+        let rowClass = 'legends-row stagger-item';
+        if (rank === 1) rowClass += ' legends-gold';
+        else if (rank === 2) rowClass += ' legends-silver';
+        else if (rank === 3) rowClass += ' legends-bronze';
+
+        const ariaLabel = `${rank}º lugar: ${safeName}, ${player.titles} títulos, ${player.vices} vices, ${player.thirds} terceiros, ${player.fourths} quartos`;
+
+        html += `
+            <div class="${rowClass}" role="row" aria-label="${ariaLabel}" style="animation-delay: ${index * 50}ms">
+                <div class="legends-col-rank" role="cell">${rank}</div>
+                <div class="legends-col-name" role="cell">${safeName}</div>
+                <div class="legends-col-trophy legends-count-title" role="cell">${player.titles || '-'}</div>
+                <div class="legends-col-trophy legends-count-vice" role="cell">${player.vices || '-'}</div>
+                <div class="legends-col-trophy legends-count-third" role="cell">${player.thirds || '-'}</div>
+                <div class="legends-col-trophy legends-count-fourth" role="cell">${player.fourths || '-'}</div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+/**
+ * Renderiza a aba "Temporadas" - Resultados por temporada
+ */
+function renderSeasons() {
+    const container = document.getElementById('seasonsContainer');
     let html = '';
     let cardIndex = 0;
 
@@ -861,41 +972,67 @@ function renderHallOfFame() {
         4: { emoji: '4️⃣', label: '4º Lugar', colorClass: 'hof-fourth' }
     };
 
-    Object.keys(KHC_CONFIG).reverse().forEach(year => {
+    // Ordena anos do mais recente para o mais antigo
+    const years = Object.keys(KHC_CONFIG).sort((a, b) => parseInt(b) - parseInt(a));
+
+    years.forEach(year => {
         const config = KHC_CONFIG[year];
         const standings = config.standings || {};
         const safeYear = escapeHtml(year);
+        const hasStandings = Object.keys(standings).length > 0;
+
+        // Se for o ano atual (2026) sem standings, mostra mensagem especial
+        if (!hasStandings) {
+            html += `
+                <div class="season-section stagger-item" style="animation-delay: ${cardIndex * STAGGER_DELAY_MS}ms">
+                    <div class="season-header">
+                        <span class="season-year">${safeYear}</span>
+                        <span class="season-status season-ongoing">Em andamento</span>
+                    </div>
+                    <div class="season-content">
+                        <div class="season-pending">
+                            <span class="season-pending-icon" aria-hidden="true">⏳</span>
+                            <span>Temporada em andamento - resultados finais ao término dos playoffs</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            cardIndex++;
+            return;
+        }
+
+        // Seção da temporada
+        html += `
+            <div class="season-section stagger-item" style="animation-delay: ${cardIndex * STAGGER_DELAY_MS}ms">
+                <div class="season-header">
+                    <span class="season-year">${safeYear}</span>
+                    <span class="season-status season-completed">Finalizada</span>
+                </div>
+                <div class="season-leagues">
+        `;
 
         // Processa cada liga
         Object.keys(standings).forEach(leagueName => {
             const leagueStandings = standings[leagueName] || [];
             const safeLeagueName = escapeHtml(leagueName);
 
-            // Cria seção para a liga
             html += `
-                <div class="hof-league-section stagger-item" style="animation-delay: ${cardIndex * STAGGER_DELAY_MS}ms">
-                    <div class="hof-league-header">
-                        <span class="hof-league-title">${safeLeagueName}</span>
-                        <span class="hof-league-year">${safeYear}</span>
-                    </div>
-                    <div class="hof-standings">
+                <div class="season-league">
+                    <div class="season-league-title">${safeLeagueName}</div>
+                    <div class="season-standings">
             `;
 
             leagueStandings.forEach(entry => {
                 const pos = entry.position;
-                const config = positionConfig[pos] || positionConfig[4];
-                const safeTeam = escapeHtml(sanitizeString(entry.team, VALIDATION.MAX_TEAM_NAME_LENGTH, 'Time'));
+                const posConfig = positionConfig[pos] || positionConfig[4];
                 const safeOwner = escapeHtml(sanitizeString(entry.owner, VALIDATION.MAX_OWNER_NAME_LENGTH, 'Dono'));
 
-                const ariaLabel = `${config.label} ${safeYear} ${safeLeagueName}: ${safeTeam}, dono ${safeOwner}`;
+                const ariaLabel = `${posConfig.label}: ${safeOwner}`;
 
                 html += `
-                    <div class="hof-entry ${config.colorClass}" role="listitem" aria-label="${ariaLabel}">
-                        <span class="hof-position" aria-hidden="true">${config.emoji}</span>
-                        <div class="hof-entry-info">
-                            <span class="hof-team-name">${safeTeam}</span>
-                            <span class="hof-owner-name">${safeOwner}</span>
-                        </div>
+                    <div class="season-entry ${posConfig.colorClass}" role="listitem" aria-label="${ariaLabel}">
+                        <span class="season-position" aria-hidden="true">${posConfig.emoji}</span>
+                        <span class="season-owner">${safeOwner}</span>
                     </div>
                 `;
             });
@@ -904,19 +1041,25 @@ function renderHallOfFame() {
                     </div>
                 </div>
             `;
-            cardIndex++;
         });
+
+        html += `
+                </div>
+            </div>
+        `;
+        cardIndex++;
     });
 
     if (html === '') {
-        html = '<div style="padding:2rem; text-align:center; color:#666; width:100%" role="status">O Hall da Fama será atualizado ao fim da temporada.</div>';
+        html = '<div class="seasons-empty" role="status">Nenhuma temporada finalizada ainda.</div>';
     }
+
     container.innerHTML = html;
 }
 
 function switchTab(event, tabName) {
     // Valida tabName para evitar injeção
-    const validTabs = ['leagues', 'global', 'power', 'hof'];
+    const validTabs = ['leagues', 'global', 'power', 'legends', 'seasons'];
     if (!validTabs.includes(tabName)) {
         console.warn('Tab inválida:', tabName);
         return;
@@ -956,7 +1099,8 @@ function getTabLabel(tabName) {
         'leagues': 'Ligas',
         'global': 'Top Scorers',
         'power': 'Power Ranking',
-        'hof': 'Hall da Fama'
+        'legends': 'Lendas KHC',
+        'seasons': 'Temporadas'
     };
     return labels[tabName] || tabName;
 }

@@ -64,12 +64,22 @@
                 <button
                     class="tab-btn"
                     role="tab"
-                    id="tab-btn-hof"
+                    id="tab-btn-legends"
                     aria-selected="false"
-                    aria-controls="tab-hof"
+                    aria-controls="tab-legends"
                     tabindex="-1"
-                    onclick="switchTab(event, 'hof')">
-                    <span aria-hidden="true">🏛️</span> Hall da Fama
+                    onclick="switchTab(event, 'legends')">
+                    <span aria-hidden="true">🏛️</span> Lendas KHC
+                </button>
+                <button
+                    class="tab-btn"
+                    role="tab"
+                    id="tab-btn-seasons"
+                    aria-selected="false"
+                    aria-controls="tab-seasons"
+                    tabindex="-1"
+                    onclick="switchTab(event, 'seasons')">
+                    <span aria-hidden="true">📅</span> Temporadas
                 </button>
             </nav>
         </div>
@@ -123,14 +133,26 @@
             </section>
 
             <section
-                id="tab-hof"
+                id="tab-legends"
                 class="view-section"
                 role="tabpanel"
-                aria-labelledby="tab-btn-hof"
+                aria-labelledby="tab-btn-legends"
                 tabindex="0"
                 hidden>
-                <h2 class="sr-only">Hall da Fama - Campeões</h2>
-                <div id="hofContainer" class="hof-grid" aria-label="Hall da Fama dos campeões" aria-live="polite">
+                <h2 class="sr-only">Lendas KHC - Ranking de Conquistas</h2>
+                <div id="legendsContainer" class="legends-container" aria-label="Ranking de lendas por conquistas" aria-live="polite">
+                </div>
+            </section>
+
+            <section
+                id="tab-seasons"
+                class="view-section"
+                role="tabpanel"
+                aria-labelledby="tab-btn-seasons"
+                tabindex="0"
+                hidden>
+                <h2 class="sr-only">Temporadas - Resultados por Ano</h2>
+                <div id="seasonsContainer" class="seasons-container" aria-label="Resultados por temporada" aria-live="polite">
                 </div>
             </section>
         </main>
