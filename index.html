@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate League KHC - Hub Oficial</title>
+    <meta name="description" content="Hub oficial da Ultimate League KHC - Fantasy Football Brasil">
+    <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Skip link para acessibilidade -->
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+    <div class="watermark" aria-hidden="true"></div>
+
+    <div class="container">
+        <header role="banner">
+            <img src="assets/logo.jpg" alt="Logo da Ultimate League KHC" class="logo-img">
+            <h1>Ultimate KHC</h1>
+            <p class="subtitle">Serie A • Serie B • Serie C • Elite</p>
+        </header>
+
+        <div class="controls">
+            <div class="season-select">
+                <label for="seasonSelector" class="sr-only">Selecionar temporada</label>
+                <select id="seasonSelector" aria-label="Selecionar temporada">
+                    <option value="2025">Temporada 2025 (Arquivo)</option>
+                    <option value="2026" selected>Temporada 2026</option>
+                </select>
+            </div>
+
+            <nav class="nav-tabs" role="tablist" aria-label="Navegação principal">
+                <button
+                    class="tab-btn active"
+                    role="tab"
+                    id="tab-btn-leagues"
+                    aria-selected="true"
+                    aria-controls="tab-leagues"
+                    tabindex="0"
+                    onclick="switchTab(event, 'leagues')">
+                    Ligas
+                </button>
+                <button
+                    class="tab-btn"
+                    role="tab"
+                    id="tab-btn-global"
+                    aria-selected="false"
+                    aria-controls="tab-global"
+                    tabindex="-1"
+                    onclick="switchTab(event, 'global')">
+                    <span aria-hidden="true">🏆</span> Pontuador de Ouro
+                </button>
+                <button
+                    class="tab-btn"
+                    role="tab"
+                    id="tab-btn-power"
+                    aria-selected="false"
+                    aria-controls="tab-power"
+                    tabindex="-1"
+                    onclick="switchTab(event, 'power')">
+                    <span aria-hidden="true">📊</span> Power Ranking
+                </button>
+                <button
+                    class="tab-btn"
+                    role="tab"
+                    id="tab-btn-hof"
+                    aria-selected="false"
+                    aria-controls="tab-hof"
+                    tabindex="-1"
+                    onclick="switchTab(event, 'hof')">
+                    <span aria-hidden="true">🏛️</span> Hall da Fama
+                </button>
+            </nav>
+        </div>
+
+        <main id="main-content">
+            <section
+                id="tab-leagues"
+                class="view-section active"
+                role="tabpanel"
+                aria-labelledby="tab-btn-leagues"
+                tabindex="0">
+                <h2 class="sr-only">Classificação das Ligas</h2>
+                <div id="leaguesContainer" class="leagues-grid" aria-live="polite">
+                </div>
+            </section>
+
+            <section
+                id="tab-global"
+                class="view-section"
+                role="tabpanel"
+                aria-labelledby="tab-btn-global"
+                tabindex="0"
+                hidden>
+                <h2 class="sr-only">Ranking Global - Pontuador de Ouro</h2>
+                <div class="global-table" role="table" aria-label="Ranking global de pontuação">
+                    <div class="global-header" role="row">
+                        <div role="columnheader" aria-label="Posição">#</div>
+                        <div role="columnheader">Time</div>
+                        <div role="columnheader">Liga</div>
+                        <div role="columnheader" style="text-align:right">Pts</div>
+                    </div>
+                    <div id="globalContainer" role="rowgroup" aria-live="polite">
+                    </div>
+                </div>
+            </section>
+
+            <section
+                id="tab-power"
+                class="view-section"
+                role="tabpanel"
+                aria-labelledby="tab-btn-power"
+                tabindex="0"
+                hidden>
+                <h2 id="power-heading" style="text-align:center; margin-bottom:1.5rem; color:var(--text-muted)">Média de Pontos por Time (PF/G)</h2>
+                <div id="powerContainer" class="power-grid" aria-labelledby="power-heading" aria-live="polite">
+                </div>
+            </section>
+
+            <section
+                id="tab-hof"
+                class="view-section"
+                role="tabpanel"
+                aria-labelledby="tab-btn-hof"
+                tabindex="0"
+                hidden>
+                <h2 class="sr-only">Hall da Fama - Campeões</h2>
+                <div id="hofContainer" class="hof-grid" aria-label="Hall da Fama dos campeões" aria-live="polite">
+                </div>
+            </section>
+        </main>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
