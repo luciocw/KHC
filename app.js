@@ -48,6 +48,16 @@ const STAGGER_DELAY_MS = 80;
 const MAX_RETRIES = 3;
 const RETRY_BASE_MS = 1000; // 1s, 2s, 4s (exponential)
 
+// DOM element IDs (centralized for maintainability)
+const DOM_IDS = {
+    LEAGUES: 'leaguesContainer',
+    GLOBAL: 'globalContainer',
+    POWER: 'powerContainer',
+    LEGENDS: 'legendsContainer',
+    SEASONS: 'seasonsContainer',
+    SEASON_SELECTOR: 'seasonSelector'
+};
+
 // Limites de validação
 const VALIDATION = {
     MAX_TEAM_NAME_LENGTH: 50,
@@ -377,12 +387,12 @@ function createSkeletonGrid(count = SKELETON_COUNT) {
 }
 
 function showGlobalLoading() {
-    const container = document.getElementById('globalContainer');
+    const container = document.getElementById(DOM_IDS.GLOBAL);
     container.innerHTML = createLoadingState('Calculando ranking global...');
 }
 
 function showPowerLoading() {
-    const container = document.getElementById('powerContainer');
+    const container = document.getElementById(DOM_IDS.POWER);
     container.innerHTML = createLoadingState('Calculando power rankings...');
 }
 
@@ -392,7 +402,7 @@ async function init() {
     // Limpa caches de temporadas antigas na inicialização
     cleanOldCache();
 
-    const selector = document.getElementById('seasonSelector');
+    const selector = document.getElementById(DOM_IDS.SEASON_SELECTOR);
     appState.season = selector.value;
 
     const debouncedLoad = debounce(() => {
@@ -409,7 +419,7 @@ async function loadData() {
     if (appState.isLoading) return;
     appState.isLoading = true;
 
-    const container = document.getElementById('leaguesContainer');
+    const container = document.getElementById(DOM_IDS.LEAGUES);
 
     // Mostra skeleton loading
     container.innerHTML = createSkeletonGrid();
@@ -500,6 +510,11 @@ async function loadData() {
     // Sucesso: renderiza dados e salva no cache
     container.innerHTML = '';
 
+    // Popula rosterData a partir dos resultados (responsabilidade centralizada)
+    successfulResults.forEach(res => {
+        appState.rosterData.push(...res.teams);
+    });
+
     // Mostra aviso se algumas ligas falharam
     if (errors.length > 0) {
         const warningDiv = document.createElement('div');
@@ -525,8 +540,8 @@ async function loadData() {
 }
 
 function clearSecondaryContainers() {
-    document.getElementById('globalContainer').innerHTML = '<div style="padding:1rem; text-align:center">Sem dados</div>';
-    document.getElementById('powerContainer').innerHTML = '<div style="padding:1rem; text-align:center">Sem dados</div>';
+    document.getElementById(DOM_IDS.GLOBAL).innerHTML = '<div style="padding:1rem; text-align:center">Sem dados</div>';
+    document.getElementById(DOM_IDS.POWER).innerHTML = '<div style="padding:1rem; text-align:center">Sem dados</div>';
 }
 
 async function fetchLeagueData(leagueInfo) {
@@ -599,7 +614,6 @@ async function fetchLeagueData(leagueInfo) {
                 fpts: sanitizeNumber(points, 0, VALIDATION.MAX_POINTS, 0)
             };
 
-            appState.rosterData.push(teamObj);
             return teamObj;
         });
 
@@ -674,7 +688,7 @@ function renderLeagueCard(leagueData, container, staggerIndex = 0) {
 }
 
 function renderGlobalStandings() {
-    const container = document.getElementById('globalContainer');
+    const container = document.getElementById(DOM_IDS.GLOBAL);
     const allTeams = [...appState.rosterData].sort((a, b) => b.fpts - a.fpts);
 
     if (allTeams.length === 0) {
@@ -758,8 +772,12 @@ function getTierByStdDev(score, mean, stdDev) {
 
 /**
  * Gera badges especiais para um time
+ * @param {object} team - Time a avaliar
+ * @param {object} stats - Estatísticas pré-calculadas { maxPts, maxWins }
+ * @param {number} rank - Posição atual no ranking
+ * @returns {Array} - Array de badges
  */
-function generateBadges(team, allTeams, rank) {
+function generateBadges(team, stats, rank) {
     const badges = [];
 
     // Líder geral
@@ -768,14 +786,12 @@ function generateBadges(team, allTeams, rank) {
     }
 
     // Top scorer (maior pontuação)
-    const maxPts = Math.max(...allTeams.map(t => t.fpts));
-    if (team.fpts === maxPts) {
+    if (team.fpts === stats.maxPts) {
         badges.push({ icon: '🎯', label: 'Top Scorer', class: 'badge-scorer' });
     }
 
     // Melhor record (mais vitórias)
-    const maxWins = Math.max(...allTeams.map(t => t.wins));
-    if (team.wins === maxWins && team.wins > 0) {
+    if (team.wins === stats.maxWins && team.wins > 0) {
         badges.push({ icon: '🔥', label: 'Hot Streak', class: 'badge-streak' });
     }
 
@@ -803,7 +819,7 @@ function getMovementIndicator(rank, previousRank) {
 }
 
 function renderPowerRankings() {
-    const container = document.getElementById('powerContainer');
+    const container = document.getElementById(DOM_IDS.POWER);
 
     if (appState.rosterData.length === 0) {
         container.innerHTML = '<div style="padding:1rem; text-align:center" role="status">Sem dados</div>';
@@ -844,6 +860,12 @@ function renderPowerRankings() {
         tiers[tier].push(team);
     });
 
+    // Pré-calcula stats para badges (evita recálculo O(n) em cada iteração)
+    const badgeStats = {
+        maxPts: Math.max(...teamsWithScore.map(t => t.fpts)),
+        maxWins: Math.max(...teamsWithScore.map(t => t.wins))
+    };
+
     // Configuração visual de cada tier
     const tierConfig = {
         S: { label: 'S', color: 'tier-s', description: 'Elite', emoji: '🏆' },
@@ -882,8 +904,8 @@ function renderPowerRankings() {
             const avatarUrl = sanitizeAvatarUrl(team.avatar);
             const powerScore = team.powerScore.toFixed(1);
 
-            // Badges
-            const badges = generateBadges(team, teamsWithScore, team.currentRank);
+            // Badges (usa stats pré-calculados para performance O(1))
+            const badges = generateBadges(team, badgeStats, team.currentRank);
             const badgesHtml = badges.map(b =>
                 `<span class="team-badge ${b.class}" title="${b.label}">${b.icon}</span>`
             ).join('');
@@ -1006,7 +1028,7 @@ function calculatePlayerAchievements() {
  * Renderiza a aba "Lendas KHC" - Ranking cumulativo de jogadores
  */
 function renderLegends() {
-    const container = document.getElementById('legendsContainer');
+    const container = document.getElementById(DOM_IDS.LEGENDS);
     const players = calculatePlayerAchievements();
 
     if (players.length === 0) {
@@ -1062,7 +1084,7 @@ function renderLegends() {
  * Renderiza a aba "Temporadas" - Resultados por temporada
  */
 function renderSeasons() {
-    const container = document.getElementById('seasonsContainer');
+    const container = document.getElementById(DOM_IDS.SEASONS);
     let html = '';
     let cardIndex = 0;
 
