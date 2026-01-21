@@ -44,6 +44,10 @@ const DEBOUNCE_DELAY_MS = 300;
 const SKELETON_COUNT = 2;
 const STAGGER_DELAY_MS = 80;
 
+// Retry configuration
+const MAX_RETRIES = 3;
+const RETRY_BASE_MS = 1000; // 1s, 2s, 4s (exponential)
+
 // Limites de validação
 const VALIDATION = {
     MAX_TEAM_NAME_LENGTH: 50,
@@ -176,6 +180,56 @@ function isValidUser(user) {
 
 // --- UTILITY FUNCTIONS ---
 
+/**
+ * Aguarda um tempo em milissegundos
+ * @param {number} ms - Tempo em milissegundos
+ * @returns {Promise}
+ */
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Fetch com retry e exponential backoff
+ * Retenta em caso de falha de rede ou erro 429 (rate limit)
+ * @param {string} url - URL para fetch
+ * @param {number} maxRetries - Número máximo de tentativas
+ * @returns {Promise<Response>}
+ */
+async function fetchWithRetry(url, maxRetries = MAX_RETRIES) {
+    let lastError;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            const response = await fetch(url);
+
+            // Se rate limited, aguarda e tenta novamente
+            if (response.status === 429) {
+                const waitTime = RETRY_BASE_MS * Math.pow(2, attempt);
+                console.warn(`Rate limited. Aguardando ${waitTime}ms antes de retry ${attempt + 1}/${maxRetries}`);
+                await sleep(waitTime);
+                continue;
+            }
+
+            // Retorna resposta (mesmo se erro HTTP, para tratamento específico)
+            return response;
+
+        } catch (error) {
+            lastError = error;
+
+            // Erro de rede - tenta novamente com backoff
+            if (attempt < maxRetries - 1) {
+                const waitTime = RETRY_BASE_MS * Math.pow(2, attempt);
+                console.warn(`Erro de rede. Retry ${attempt + 1}/${maxRetries} em ${waitTime}ms`);
+                await sleep(waitTime);
+            }
+        }
+    }
+
+    // Todas tentativas falharam
+    throw lastError || new Error('Falha após múltiplas tentativas');
+}
+
 function debounce(fn, delay) {
     let timeoutId;
     return (...args) => {
@@ -216,6 +270,37 @@ function getFromCache(season) {
     } catch (e) {
         console.warn('Falha ao ler cache:', e);
         return null;
+    }
+}
+
+/**
+ * Remove caches de temporadas antigas que não existem mais na configuração
+ * Previne acúmulo indefinido no localStorage
+ */
+function cleanOldCache() {
+    try {
+        const validSeasons = Object.keys(KHC_CONFIG);
+        const validKeys = validSeasons.map(s => getCacheKey(s));
+
+        // Encontra e remove chaves de cache obsoletas
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith(CACHE_KEY) && !validKeys.includes(key)) {
+                keysToRemove.push(key);
+            }
+        }
+
+        keysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+            console.info(`Cache obsoleto removido: ${key}`);
+        });
+
+        if (keysToRemove.length > 0) {
+            console.info(`Limpeza de cache: ${keysToRemove.length} entrada(s) removida(s)`);
+        }
+    } catch (e) {
+        console.warn('Falha ao limpar cache antigo:', e);
     }
 }
 
@@ -304,6 +389,9 @@ function showPowerLoading() {
 // --- CORE FUNCTIONS ---
 
 async function init() {
+    // Limpa caches de temporadas antigas na inicialização
+    cleanOldCache();
+
     const selector = document.getElementById('seasonSelector');
     appState.season = selector.value;
 
@@ -445,8 +533,8 @@ async function fetchLeagueData(leagueInfo) {
     const baseUrl = 'https://api.sleeper.app/v1/league';
 
     const [rostersRes, usersRes] = await Promise.all([
-        fetch(`${baseUrl}/${leagueInfo.id}/rosters`),
-        fetch(`${baseUrl}/${leagueInfo.id}/users`)
+        fetchWithRetry(`${baseUrl}/${leagueInfo.id}/rosters`),
+        fetchWithRetry(`${baseUrl}/${leagueInfo.id}/users`)
     ]);
 
     // Trata erros HTTP específicos
