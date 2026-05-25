@@ -711,87 +711,149 @@ header[role="banner"] {
 
 /* === TOP SCORERS === */
 /* Tabela global achatada (todos os times de todas as séries). Tab "Top Scorers". */
-.global-table {
-    background: var(--bg-card);
-    border-radius: 12px;
+
+.global-caption {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 24px 0 14px;
+}
+
+.global-caption svg {
+    color: var(--orange);
+    flex-shrink: 0;
+}
+
+.top-scorers-card {
+    background: linear-gradient(180deg, var(--bg-card), var(--bg-card-2));
     border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
     overflow: hidden;
+    position: relative;
+}
+
+.top-scorers-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+    filter: blur(0.5px);
+}
+
+.global-header,
+.global-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 22px;
 }
 
 .global-header {
-    display: grid;
-    grid-template-columns: 40px 1fr 100px 80px;
-    padding: 1rem;
-    background: rgba(255,107,53,0.1);
-    font-weight: 600;
-    font-size: 0.85rem;
+    color: var(--orange);
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
-    color: var(--khc-orange);
+    letter-spacing: 0.12em;
+    border-bottom: 1px solid var(--border);
 }
 
 .global-row {
-    display: grid;
-    grid-template-columns: 40px 1fr 100px 80px;
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-bottom: 1px solid var(--border);
-    align-items: center;
-    min-height: var(--touch-target-min);
-    transition: background var(--transition-fast);
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    transition: background-color var(--transition-fast);
 }
 
-.global-row:hover {
-    background: var(--bg-hover);
+.global-row:last-child { border-bottom: none; }
+
+@media (hover: hover) {
+    .global-row:hover { background: rgba(255,107,53,0.05); }
 }
 
-/* Top 3 destacado */
 .global-row.top-1 {
-    background: rgba(255, 215, 0, 0.08);
-}
-
-.global-row.top-1:hover {
-    background: rgba(255, 215, 0, 0.12);
-}
-
-.global-row.top-2 {
-    background: rgba(192, 192, 192, 0.06);
-}
-
-.global-row.top-2:hover {
-    background: rgba(192, 192, 192, 0.10);
-}
-
-.global-row.top-3 {
-    background: rgba(205, 127, 50, 0.06);
-}
-
-.global-row.top-3:hover {
-    background: rgba(205, 127, 50, 0.10);
+    background: linear-gradient(90deg, rgba(245,180,0,0.10), transparent 60%);
 }
 
 .global-rank {
-    font-weight: bold;
-    color: var(--khc-orange);
-    font-size: 1rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-3);
+    font-weight: 700;
 }
 
-.global-row.top-1 .global-rank,
-.global-row.top-2 .global-rank,
-.global-row.top-3 .global-rank {
-    font-size: 1.1rem;
+.global-rank.medal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.global-team-name {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .global-league-tag {
-    font-size: 0.7rem;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background: #222;
-    color: #888;
     display: inline-block;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    border-radius: 99px;
+    padding: 3px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
 }
 
-.global-row.is-elite .global-league-tag {
-    color: var(--khc-gold);
-    border: 1px solid rgba(251, 191, 36, 0.3);
+.global-league-tag.is-elite {
+    background: rgba(255,107,53,0.15);
+    border-color: var(--orange-dim);
+    color: var(--orange-2);
+}
+
+.global-pts {
+    text-align: right;
+    font-weight: 700;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+.player-link {
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.player-link:hover,
+.player-link:focus-visible {
+    color: var(--orange-2);
+    outline: none;
+}
+
+/* ≤420px: esconde chip de liga, mantém só rank/time/pts */
+@media (max-width: 420px) {
+    .global-header,
+    .global-row {
+        grid-template-columns: 32px 1fr auto;
+        padding: 10px 14px;
+        gap: 10px;
+    }
+
+    .global-league-tag,
+    .global-header > :nth-child(3) {
+        display: none;
+    }
 }
 
 /* === POWER RANKING === */

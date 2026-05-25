@@ -1,10 +1,25 @@
 // =============================================================================
 // TAB / TOP SCORERS — Ranking global achatado: todos os times de todas as
-// séries da temporada, ordenados por pontos. Top 3 ganha medalha.
-// Lê: appState.rosterData (populado por loadData em js/app.js)
-// Depende de: js/config.js, js/sanitize.js
+// séries da temporada, ordenados por pontos. Top 3 ganha medalha quando a
+// temporada está finalizada.
+// Lê: appState.rosterData, appState.season, getFinalizedSeasons()
+// Depende de: js/config.js, js/sanitize.js, js/icons.js, js/data.js
 // =============================================================================
 
+/**
+ * Renderiza a tabela global de pontuação (tab Top Scorers).
+ *
+ * Layout:
+ *   - Caption acima do card (target/trophy + texto contextual).
+ *   - Card com header `# / TIME / LIGA / PTS` e body rows ordenados por pts desc.
+ *   - Finalizada → top 3 com medalhas SVG (gold/silver/bronze).
+ *   - Ativa → rank numérico simples para todas as linhas.
+ *   - #1 row recebe gradiente pódio.
+ *   - ≤420px esconde a coluna "Liga".
+ *
+ * Cada nome de time é embrulhado em `.player-link[data-user]` para o drawer
+ * de Phase 4 (handlers globais não são adicionados aqui).
+ */
 function renderGlobalStandings() {
     const container = document.getElementById(DOM_IDS.GLOBAL);
     const allTeams = [...appState.rosterData].sort((a, b) => b.fpts - a.fpts);
@@ -14,38 +29,72 @@ function renderGlobalStandings() {
         return;
     }
 
-    let html = '';
+    // Detecta se a temporada atual está finalizada
+    const finalizedIds = (typeof getFinalizedSeasons === 'function')
+        ? getFinalizedSeasons().map(s => String(s.id))
+        : [];
+    const isFinalized = finalizedIds.includes(String(appState.season));
+
+    // Caption contextual
+    const captionIcon = isFinalized
+        ? (IconRegistry.trophy ? IconRegistry.trophy({ size: 14 }) : '')
+        : (IconRegistry.target ? IconRegistry.target({ size: 14 }) : '');
+    const captionText = isFinalized
+        ? 'Pontuação total — todos os times de todas as séries'
+        : 'Pontuação parcial — Semana 8 de 14';
+
+    // Medal helper para top 3 em finalizadas
+    const medalFor = (i) => {
+        if (!isFinalized) return null;
+        if (i === 0) return IconRegistry.medalGold({ size: 18 });
+        if (i === 1) return IconRegistry.medalSilver({ size: 18 });
+        if (i === 2) return IconRegistry.medalBronze({ size: 18 });
+        return null;
+    };
+
+    let rowsHtml = '';
     allTeams.forEach((t, i) => {
-        const isElite = t.leagueTier === 'elite' ? 'is-elite' : '';
+        const isElite = t.leagueTier === 'elite';
+        const eliteClass = isElite ? 'is-elite' : '';
         const safeTeamName = escapeHtml(t.teamName);
         const safeLeagueName = escapeHtml(t.leagueName);
+        const safeUser = escapeHtml(t.ownerName || t.teamId || '');
         const safePts = sanitizeNumber(t.fpts, 0, VALIDATION.MAX_POINTS).toFixed(1);
 
-        // Classes e display para top 3
-        let topClass = '';
-        let rankDisplay = i + 1;
-        if (i === 0) {
-            topClass = 'top-1';
-            rankDisplay = '🥇';
-        } else if (i === 1) {
-            topClass = 'top-2';
-            rankDisplay = '🥈';
-        } else if (i === 2) {
-            topClass = 'top-3';
-            rankDisplay = '🥉';
-        }
+        const podiumClass = i === 0 ? 'top-1' : '';
+        const medal = medalFor(i);
+        const rankCell = medal
+            ? `<div role="cell" class="global-rank medal" aria-label="${i + 1}º lugar">${medal}</div>`
+            : `<div role="cell" class="global-rank">${i + 1}</div>`;
 
-        // ARIA label descritivo
         const ariaLabel = `${i + 1}º lugar: ${safeTeamName} da ${safeLeagueName} com ${safePts} pontos`;
+        const delay = i * STAGGER_DELAY_MS;
 
-        html += `
-            <div class="global-row ${isElite} ${topClass} stagger-item" role="row" aria-label="${ariaLabel}" style="animation-delay: ${i * 30}ms">
-                <div role="cell" class="global-rank">${rankDisplay}</div>
-                <div role="cell" class="team-name" title="${safeTeamName}">${safeTeamName}</div>
-                <div role="cell"><span class="global-league-tag">${safeLeagueName}</span></div>
-                <div role="cell" style="text-align:right; font-weight:700">${safePts}</div>
+        rowsHtml += `
+            <div class="global-row ${podiumClass} stagger-item" role="row" aria-label="${ariaLabel}" style="animation-delay: ${delay}ms">
+                ${rankCell}
+                <div role="cell" class="global-team-name" title="${safeTeamName}">
+                    <span class="player-link" data-user="${safeUser}" tabindex="0" role="button" aria-label="Abrir perfil de ${safeTeamName}">${safeTeamName}</span>
+                </div>
+                <div role="cell"><span class="global-league-tag ${eliteClass}">${safeLeagueName}</span></div>
+                <div role="cell" class="global-pts">${safePts}</div>
             </div>
         `;
     });
-    container.innerHTML = html;
+
+    container.innerHTML = `
+        <div class="global-caption" role="note">
+            ${captionIcon}
+            <span>${captionText}</span>
+        </div>
+        <div class="top-scorers-card" role="table" aria-label="Ranking global de pontuação">
+            <div class="global-header" role="row">
+                <div role="columnheader">#</div>
+                <div role="columnheader">Time</div>
+                <div role="columnheader">Liga</div>
+                <div role="columnheader" style="text-align:right">Pts</div>
+            </div>
+            ${rowsHtml}
+        </div>
+    `;
 }
