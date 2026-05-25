@@ -393,126 +393,320 @@ header[role="banner"] {
 }
 
 /* === LIGAS === */
-/* Cards de liga (grid 2×2) + standings interna. Tab "Ligas". */
+/* Cards de liga (grid 2×2) + standings internas. Tab "Ligas".
+   Container query: .leagues-grid (= #leaguesContainer) é o ancestral
+   `container-type: inline-size` para que .team-row possa esconder a
+   coluna de form-chips abaixo de 1280px de largura interna. */
+
 .leagues-grid {
+    container-type: inline-size;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-top: 24px;
 }
 
-.league-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
+/* Caption acima do grid (renderizada por renderLigasCaption em ligas.js) */
+.ligas-caption {
+    grid-column: 1 / -1;
     display: flex;
-    flex-direction: column;
-}
-
-.league-header {
-    padding: 1rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    background: linear-gradient(to right, rgba(255,255,255,0.03), transparent);
+    gap: 8px;
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.ligas-caption-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--orange);
+}
+
+/* --- LEAGUE CARD --- */
+.league-card {
+    position: relative;
+    background: linear-gradient(180deg, var(--bg-card), var(--bg-card-2));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.league-card:hover {
+    border-color: var(--border-strong);
+}
+
+/* Elite: glow ring extra */
+.league-card.elite {
+    box-shadow:
+        0 0 0 1px var(--orange-dim),
+        0 12px 40px rgba(255, 107, 53, 0.18),
+        var(--shadow-card);
+}
+
+/* Top accent line (linha laranja borrada) */
+.league-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+    filter: blur(0.5px);
+    pointer-events: none;
+}
+
+.league-card.elite::before {
+    background: linear-gradient(90deg, transparent, var(--gold), var(--orange), transparent);
+    filter: blur(0.4px);
+}
+
+/* --- HEADER --- */
+.league-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
 }
 
 .league-title {
+    font-family: var(--font-display);
+    color: var(--orange);
     font-weight: 700;
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    font-size: 16px;
+    letter-spacing: 0.01em;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.league-card.elite .league-title {
+    background: linear-gradient(90deg, var(--gold), var(--orange-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
 }
 
 .league-badge {
-    font-size: 0.7rem;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    background: #222;
-    color: #888;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(255, 107, 53, 0.08);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    white-space: nowrap;
 }
 
-/* Cores Específicas por Liga */
-.elite .league-title { color: var(--khc-gold); }
-.serie-a .league-title,
-.serie-b .league-title,
-.serie-c .league-title { color: var(--khc-orange); }
+/* Dot (status indicator) */
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 99px;
+    flex-shrink: 0;
+    display: inline-block;
+}
 
-.elite { border-top: 3px solid var(--khc-gold); }
-.serie-a { border-top: 3px solid var(--khc-orange); }
-.serie-b { border-top: 3px solid var(--khc-orange); }
-.serie-c { border-top: 3px solid var(--khc-orange); }
+.dot.active {
+    background: var(--green);
+    box-shadow: 0 0 0 0 var(--green);
+    animation: dotPulse 2s infinite;
+}
 
-/* --- STANDINGS TABLE --- */
+.dot.dim {
+    background: var(--text-3);
+    opacity: 0.5;
+}
+
+@keyframes dotPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(62, 179, 113, 0.6); }
+    70%  { box-shadow: 0 0 0 6px rgba(62, 179, 113, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(62, 179, 113, 0); }
+}
+
+/* --- STANDINGS LIST --- */
 .standings-list {
     display: flex;
     flex-direction: column;
 }
 
+/* 5-col grid: [rank 24px | avatar 36px | info 1fr | record auto | chips auto | pts auto] */
 .team-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 24px 36px 1fr auto auto auto;
+    gap: 12px;
     align-items: center;
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 0.9rem;
-    min-height: var(--touch-target-min);
+    padding: 8px 4px;
+    border-radius: 8px;
     transition: background var(--transition-fast);
 }
 
 .team-row:hover {
-    background: var(--bg-hover);
+    background: rgba(255, 107, 53, 0.05);
 }
 
-.team-row:last-child {
-    border-bottom: none;
+.team-row + .team-row {
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .rank-num {
-    width: 25px;
-    font-weight: bold;
-    color: var(--text-muted);
-    font-size: 0.8rem;
+    color: var(--text-3);
+    text-align: center;
+    font-weight: 700;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+.rank-medal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
 }
 
 .team-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    margin-right: 10px;
-    background: #333;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
     object-fit: cover;
+    background: rgba(255, 255, 255, 0.04);
+    transition: box-shadow var(--transition-fast);
+}
+
+.team-row:hover .team-avatar {
+    box-shadow: 0 0 0 2px var(--orange-dim);
 }
 
 .team-info {
-    flex: 1;
-    overflow: hidden;
+    min-width: 0;
+}
+
+.team-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .team-name {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-weight: 500;
+    max-width: 100%;
 }
 
 .team-owner {
-    font-size: 0.75rem;
-    color: var(--text-muted);
+    color: var(--text-3);
+    font-weight: 400;
+    font-size: 12px;
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .team-record {
-    font-family: monospace;
-    color: var(--text-muted);
-    margin-right: 1rem;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    min-width: 44px;
+    text-align: center;
 }
+
+.team-record .w    { color: var(--text); }
+.team-record .dash { color: var(--text-3); padding: 0 2px; }
+.team-record .l    { color: var(--text-3); }
 
 .team-fpts {
     font-weight: 700;
-    color: var(--text-main);
-    width: 60px;
+    font-size: 15px;
+    color: var(--text);
     text-align: right;
+    min-width: 64px;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+}
+
+/* Player link (Phase 4 drawer hooks here via data-user) */
+.player-link {
+    cursor: pointer;
+    transition: color var(--transition-fast);
+    border-radius: 4px;
+}
+
+.player-link:hover,
+.player-link:focus-visible {
+    color: var(--orange-2);
+    outline: none;
+}
+
+.player-link:focus-visible {
+    outline: 2px solid var(--orange-dim);
+    outline-offset: 2px;
+}
+
+/* Form-chips placeholder (deferida pra Phase 5). Mantemos a coluna no grid
+   ≥1280px de largura do container, mas escondemos o conteúdo. */
+.form-chips-placeholder {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+/* Container query: abaixo de 1280px container width, colapsa coluna chips */
+@container (max-width: 1280px) {
+    .team-row {
+        grid-template-columns: 24px 36px 1fr auto auto;
+    }
+    .form-chips-placeholder {
+        display: none;
+    }
+}
+
+/* Responsive fallback (viewport-based) */
+@media (max-width: 1180px) {
+    .leagues-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .league-card {
+        padding: 18px;
+        border-radius: 12px;
+    }
+    .team-row {
+        gap: 8px;
+        grid-template-columns: 22px 32px 1fr auto auto;
+    }
+    .team-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+    }
+    .team-name { font-size: 13px; }
+    .team-owner { font-size: 11px; }
+    .team-fpts { font-size: 14px; min-width: 52px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dot.active { animation: none; }
 }
 
 /* === TOP SCORERS === */
