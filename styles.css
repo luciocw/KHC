@@ -1,4 +1,41 @@
-/* --- CSS VARS & RESET --- */
+/* ============================================================================
+   ULTIMATE KHC — STYLESHEET
+   ============================================================================
+
+   ÍNDICE (busque por `=== NOME ===` para pular):
+
+     === TOKENS ===                    Variáveis CSS, reset, body
+     === WATERMARK ===                 Marca d'água do logo
+     === LAYOUT ===                    Container, main wrappers
+     === HEADER ===                    Logo, título, subtítulo
+     === CONTROLS ===                  Wrapper de season picker + nav
+     === SEASON SELECT ===             Dropdown de temporada
+     === NAV TABS ===                  Pills de navegação + bottom-nav mobile
+     === CONTENT AREAS ===             Tabpanels base
+     === LIGAS ===                     Cards de liga + standings (tab Ligas)
+     === TOP SCORERS ===               Tabela global achatada (tab Top Scorers)
+     === POWER RANKING ===             Parte 1: barras e classes base
+     === HALL OF FAME (LEGACY) ===     Estilos legados (a serem aposentados)
+     === UTILS ===                     Spinners, skeletons, animações genéricas
+     === ACCESSIBILITY ===             Skip link, focus, sr-only, reduced-motion
+     === POWER RANKING — TIER LIST === Parte 2: tier list S/A/B/C/D + cards
+     === HALL OF FAME (NOVO LAYOUT) === Layout HoF mais recente
+     === LENDAS ===                    Tabela de conquistas (tab Lendas KHC)
+     === TEMPORADAS ===                Histórico ano-a-ano (tab Temporadas)
+     === RESPONSIVE ===                Media queries e ajustes por breakpoint
+
+   NOTA: A ordem atual reflete a evolução incremental do site. POWER RANKING
+   está dividido em duas partes (separadas por UTILS/ACCESSIBILITY). Uma
+   reorganização total fica para a Fase 5 (polish), depois que o redesign
+   estabilizar.
+
+   CONVENÇÃO PARA AGENTES PARALELOS:
+   Cada agente edita SOMENTE dentro do seu bloco `=== NOME ===` ... fim.
+   O fim de um bloco é o início do próximo `=== ... ===` ou EOF.
+   Não mover regras entre seções sem aviso explícito.
+   ============================================================================ */
+
+/* === TOKENS === */
 :root {
     /* Cores */
     --bg: #050505;
@@ -44,7 +81,7 @@ body {
     min-height: 100vh;
 }
 
-/* --- WATERMARK --- */
+/* === WATERMARK === */
 .watermark {
     position: fixed;
     top: 50%;
@@ -59,7 +96,7 @@ body {
     filter: grayscale(100%);
 }
 
-/* --- LAYOUT --- */
+/* === LAYOUT === */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -68,7 +105,7 @@ body {
     z-index: 1;
 }
 
-/* --- HEADER --- */
+/* === HEADER === */
 header {
     text-align: center;
     margin-bottom: var(--spacing-lg);
@@ -124,7 +161,7 @@ h1 {
     }
 }
 
-/* --- CONTROLS --- */
+/* === CONTROLS === */
 .controls {
     display: flex;
     flex-direction: column;
@@ -133,7 +170,7 @@ h1 {
     margin-bottom: var(--spacing-lg);
 }
 
-/* --- SEASON SELECT --- */
+/* === SEASON SELECT === */
 .season-select {
     position: relative;
     display: inline-block;
@@ -179,7 +216,7 @@ h1 {
     border-top-color: var(--khc-orange);
 }
 
-/* --- NAV TABS --- */
+/* === NAV TABS === */
 .nav-tabs {
     display: flex;
     gap: var(--spacing-xs);
@@ -312,7 +349,7 @@ h1 {
     }
 }
 
-/* --- CONTENT AREAS --- */
+/* === CONTENT AREAS === */
 .view-section {
     display: none;
     animation: fadeIn 0.4s ease;
@@ -333,7 +370,8 @@ h1 {
     }
 }
 
-/* --- LEAGUE CARDS (GRID) --- */
+/* === LIGAS === */
+/* Cards de liga (grid 2×2) + standings interna. Tab "Ligas". */
 .leagues-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -455,7 +493,8 @@ h1 {
     text-align: right;
 }
 
-/* --- GLOBAL RANKING (CHUTEIRA DE OURO) --- */
+/* === TOP SCORERS === */
+/* Tabela global achatada (todos os times de todas as séries). Tab "Top Scorers". */
 .global-table {
     background: var(--bg-card);
     border-radius: 12px;
@@ -539,7 +578,8 @@ h1 {
     border: 1px solid rgba(251, 191, 36, 0.3);
 }
 
-/* --- POWER RANKINGS --- */
+/* === POWER RANKING === */
+/* Tier list S/A/B/C/D + cards de PWR. Tab "Power Ranking". */
 .power-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -566,7 +606,8 @@ h1 {
     text-transform: uppercase;
 }
 
-/* --- HALL OF FAME --- */
+/* === HALL OF FAME (LEGACY) === */
+/* Estilos legados. Lendas e Temporadas tem seções próprias abaixo. */
 .hof-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -599,7 +640,7 @@ h1 {
     filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.3));
 }
 
-/* --- UTILS --- */
+/* === UTILS === */
 .loading {
     text-align: center;
     padding: 3rem;
@@ -802,7 +843,7 @@ h1 {
     margin-bottom: 1.5rem;
 }
 
-/* --- ACCESSIBILITY --- */
+/* === ACCESSIBILITY === */
 
 /* Screen reader only - visually hidden but accessible */
 .sr-only {
@@ -940,7 +981,8 @@ select:focus-visible {
     opacity: 0.9;
 }
 
-/* --- TIER LIST (Power Rankings) --- */
+/* === POWER RANKING — TIER LIST === */
+/* Parte 2 da tab Power Ranking (cards e tiers). */
 .power-container {
     max-width: 100%;
 }
@@ -1237,7 +1279,8 @@ select:focus-visible {
     margin-left: auto;
 }
 
-/* --- HALL OF FAME (Novo Layout) --- */
+/* === HALL OF FAME (NOVO LAYOUT) === */
+/* Estilos do novo layout HoF — coexiste com LEGACY acima. */
 .hof-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -1329,7 +1372,8 @@ select:focus-visible {
 
 .hof-fourth .hof-team-name { color: var(--text-muted); }
 
-/* --- LENDAS KHC (Legends Tab) --- */
+/* === LENDAS === */
+/* Tabela de conquistas acumuladas. Tab "Lendas KHC". */
 .legends-container {
     max-width: 700px;
     margin: 0 auto;
@@ -1457,7 +1501,8 @@ select:focus-visible {
     font-size: 1rem;
 }
 
-/* --- TEMPORADAS (Seasons Tab) --- */
+/* === TEMPORADAS === */
+/* Histórico ano-a-ano. Tab "Temporadas". */
 .seasons-container {
     display: flex;
     flex-direction: column;
@@ -1618,7 +1663,7 @@ select:focus-visible {
     font-size: 1rem;
 }
 
-/* --- RESPONSIVE --- */
+/* === RESPONSIVE === */
 @media (max-width: 768px) {
     .global-header,
     .global-row {
