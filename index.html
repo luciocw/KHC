@@ -216,7 +216,17 @@
 
     </div>
 
-    <!-- DRAWER MOUNT — Fase 4.A injeta o player drawer aqui (fora do .container). -->
+    <aside id="player-drawer" class="drawer drawer--player" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden>
+        <div class="drawer-backdrop" data-close-drawer></div>
+        <div class="drawer-panel" role="document">
+            <button class="drawer-close" type="button" aria-label="Fechar perfil" data-close-drawer>
+                <!-- close icon will be rendered by drawer.js or via IconRegistry on open -->
+            </button>
+            <div class="drawer-content" id="drawer-content">
+                <!-- Populated by openPlayerDrawer() -->
+            </div>
+        </div>
+    </aside>
 
     <!-- MODAL MOUNT — Fase 4.B injeta o about modal aqui (fora do .container). -->
 

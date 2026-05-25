@@ -1914,7 +1914,372 @@ select:focus-visible {
 /* Footer fixo no fim da página (dentro do .container). Fase 4.B preenche. */
 
 /* === DRAWER === */
-/* Player drawer (side-sheet 500px). Fase 4.A preenche. */
+/* Player drawer (side-sheet 500px). */
+.drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+}
+
+.drawer[hidden] {
+    display: none;
+}
+
+.drawer-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: drawerFadeIn 0.2s ease;
+}
+
+.drawer-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: min(500px, 100vw);
+    background: linear-gradient(180deg, var(--bg-card), var(--bg-card-2));
+    border-left: 1px solid var(--border-strong);
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.6);
+    overflow-y: auto;
+    transform: translateX(100%);
+    animation: drawerSlideIn 0.3s cubic-bezier(.2, .7, .2, 1) forwards;
+    padding: 28px 24px;
+}
+
+@keyframes drawerSlideIn {
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes drawerFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.drawer-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast, 0.15s ease);
+    z-index: 2;
+}
+
+.drawer-close:hover {
+    background: rgba(255, 107, 53, 0.10);
+    color: var(--orange-2);
+    border-color: var(--border-strong);
+}
+
+.drawer-close:focus-visible {
+    outline: 2px solid var(--orange);
+    outline-offset: 2px;
+}
+
+/* Drawer header */
+.drawer-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-right: 48px; /* afasta do botão de fechar */
+}
+
+.drawer-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    object-fit: cover;
+    border: 1px solid var(--border-strong);
+    background: rgba(255, 255, 255, 0.04);
+    flex-shrink: 0;
+}
+
+.drawer-user-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.drawer-title {
+    font-family: var(--font-display, Inter, sans-serif);
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+    margin: 0 0 8px;
+    word-break: break-word;
+}
+
+.drawer-current {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.drawer-current-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.serie-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-2);
+    letter-spacing: 0.04em;
+}
+
+.serie-pill.elite {
+    background: rgba(255, 107, 53, 0.15);
+    border-color: var(--orange-dim);
+    color: var(--orange-2);
+}
+
+/* Sections */
+.drawer-section {
+    margin-bottom: 28px;
+}
+
+.drawer-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin: 0 0 12px;
+}
+
+/* Conquistas grid */
+.conquistas-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.conquista-cell {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+}
+
+.conquista-cell.gold {
+    background: rgba(245, 180, 0, 0.08);
+    border-color: rgba(245, 180, 0, 0.25);
+}
+
+.conquista-cell.silver {
+    background: rgba(201, 201, 211, 0.06);
+    border-color: rgba(201, 201, 211, 0.20);
+}
+
+.conquista-cell.bronze {
+    background: rgba(209, 128, 70, 0.08);
+    border-color: rgba(209, 128, 70, 0.25);
+}
+
+.conquista-cell.fourth {
+    background: rgba(106, 178, 224, 0.06);
+    border-color: rgba(106, 178, 224, 0.20);
+}
+
+.conquista-medal {
+    margin: 0 auto 4px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.conquista-count {
+    font-size: 18px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+.conquista-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+}
+
+.conquista-cell.gold .conquista-count {
+    color: var(--gold);
+}
+
+.conquista-cell.silver .conquista-count {
+    color: var(--silver);
+}
+
+.conquista-cell.bronze .conquista-count {
+    color: var(--bronze);
+}
+
+.conquista-cell.fourth .conquista-count {
+    color: #6ab2e0;
+}
+
+/* Stats grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.stat-tile {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.stat-tile.full {
+    grid-column: 1 / -1;
+}
+
+.stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-value.bestcampaign {
+    color: var(--orange-2);
+    font-size: 14px;
+}
+
+/* History */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.history-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.history-year {
+    font-family: var(--font-display, Inter, sans-serif);
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--orange);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.history-serie {
+    font-size: 10px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+}
+
+.history-team {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.history-stats {
+    color: var(--text-2);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+}
+
+.history-trophy {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.history-active-pill {
+    display: inline-flex;
+    padding: 3px 8px;
+    border-radius: 99px;
+    background: rgba(255, 107, 53, 0.15);
+    color: var(--orange-2);
+    border: 1px solid var(--orange-dim);
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+    .drawer-panel {
+        width: 100vw;
+        padding: 22px 16px;
+    }
+
+    .conquistas-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .drawer-panel {
+        animation: none;
+        transform: translateX(0);
+    }
+
+    .drawer-backdrop {
+        animation: none;
+    }
+}
 
 /* === MODAL === */
 /* About modal (centered, scale-in). Fase 4.B preenche. */
