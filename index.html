@@ -212,7 +212,15 @@
             </section>
         </main>
 
-        <!-- FOOTER MOUNT — Fase 4.B injeta o <footer> aqui (dentro do .container). -->
+        <footer class="site-footer" role="contentinfo">
+            <div class="footer-brand">
+                <span class="footer-brand-name">ULTIMATE KHC</span>
+                <span class="footer-brand-meta">Fundada em 2025 · <span class="footer-temporadas-count">1</span> temporadas</span>
+            </div>
+            <button class="footer-sobre" type="button" data-open-modal="about">
+                Sobre a Liga
+            </button>
+        </footer>
 
     </div>
 
@@ -228,7 +236,23 @@
         </div>
     </aside>
 
-    <!-- MODAL MOUNT — Fase 4.B injeta o about modal aqui (fora do .container). -->
+    <div id="about-modal" class="modal modal--about" role="dialog" aria-modal="true" aria-labelledby="about-modal-title" hidden>
+        <div class="modal-backdrop" data-close-modal></div>
+        <div class="modal-panel" role="document">
+            <header class="modal-header">
+                <h2 id="about-modal-title" class="modal-title">Sobre a Ultimate KHC</h2>
+                <button class="modal-close" type="button" aria-label="Fechar" data-close-modal>
+                    <!-- close icon by IconRegistry, rendered after open -->
+                </button>
+            </header>
+            <div class="modal-body" id="about-modal-body">
+                <!-- Populated by openAboutModal() -->
+            </div>
+            <footer class="modal-footer">
+                <p class="modal-footnote">Mais regras e história serão adicionadas aqui em breve.</p>
+            </footer>
+        </div>
+    </div>
 
     <!--
         Módulos JS carregados em ordem de dependência.
