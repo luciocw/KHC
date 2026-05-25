@@ -53,36 +53,13 @@
     // -------------------------------------------------------------------------
 
     /**
-     * Conta quantas temporadas estão "finalizadas" (têm campeões definidos).
-     * Fallback simples: se houver erro, devolve 1.
-     */
-    function countFinishedSeasons() {
-        try {
-            if (typeof KHC_CONFIG !== 'object' || !KHC_CONFIG) return 1;
-            return Object.values(KHC_CONFIG).filter((s) => {
-                return s && Array.isArray(s.champions) && s.champions.length > 0;
-            }).length || 1;
-        } catch (_) {
-            return 1;
-        }
-    }
-
-    /**
-     * Pluraliza "temporada(s) disputada(s)".
-     */
-    function temporadasLabel(n) {
-        return n === 1 ? '1 temporada disputada' : `${n} temporadas disputadas`;
-    }
-
-    /**
      * Constrói o HTML do corpo do modal a partir de KHC_CONFIG.
      */
     function buildBodyHTML() {
-        const seasonsN = countFinishedSeasons();
         return `
             <dl>
                 <dt>A Liga</dt>
-                <dd>Fundada em 2025. ${temporadasLabel(seasonsN)}.</dd>
+                <dd>Fundada em 2025.</dd>
 
                 <dt>Formato</dt>
                 <dd>
