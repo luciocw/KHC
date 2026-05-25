@@ -153,58 +153,76 @@ body::before {
 }
 
 /* === HEADER === */
-header {
+header[role="banner"] {
     text-align: center;
-    margin-bottom: var(--spacing-lg);
-    padding-top: var(--spacing-lg);
+    padding: 56px 0 0;
+    position: relative;
+    z-index: 1;
 }
 
-.logo-img {
-    width: 100px;
-    height: 100px;
-    border-radius: 15px;
-    box-shadow: 0 0 20px rgba(255, 107, 53, 0.2);
-    margin-bottom: var(--spacing-md);
-    transition: transform var(--transition-normal);
+.brand-logo {
+    display: inline-block;
+    width: 96px;
+    height: 110px;
+    filter: drop-shadow(0 0 28px rgba(255, 107, 53, 0.5));
+    margin-bottom: 18px;
 }
 
-h1 {
-    font-size: 2rem;
+.brand-logo svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.brand-title {
+    font-family: var(--font-display, 'Inter', system-ui, sans-serif);
+    font-weight: 900;
+    font-size: 56px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--orange, #ff6b35);
+    text-shadow: 0 0 30px rgba(255, 107, 53, 0.4);
+    margin: 0 0 14px;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    background: linear-gradient(45deg, var(--khc-orange), #ff9f7c);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 800;
 }
 
-.subtitle {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    letter-spacing: 1px;
+.brand-subtitle {
+    font-family: var(--font-body, 'Inter', system-ui, sans-serif);
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--text-2, rgba(244, 238, 232, 0.62));
+    margin: 0;
+}
+
+.brand-subtitle span {
+    display: inline-block;
+    margin: 0 8px;
+}
+
+.brand-subtitle span:not(:last-child)::after {
+    content: '•';
+    margin-left: 16px;
+    color: var(--text-3, rgba(244, 238, 232, 0.38));
 }
 
 /* Header mobile compacto */
-@media (max-width: 767px) {
-    header {
-        padding-top: var(--spacing-md);
-        margin-bottom: var(--spacing-md);
+@media (max-width: 760px) {
+    header[role="banner"] {
+        padding: 32px 0 0;
     }
-
-    .logo-img {
-        width: 64px;
-        height: 64px;
-        margin-bottom: var(--spacing-sm);
+    .brand-logo {
+        width: 72px;
+        height: 82px;
+        margin-bottom: 14px;
     }
-
-    h1 {
-        font-size: 1.5rem;
-        letter-spacing: 1px;
+    .brand-title {
+        font-size: 36px;
     }
+}
 
-    .subtitle {
-        font-size: 0.75rem;
+@media (max-width: 420px) {
+    .brand-title {
+        font-size: 30px;
     }
 }
 
@@ -223,44 +241,37 @@ h1 {
     display: inline-block;
 }
 
-.season-select select {
+.season-select select,
+#seasonSelector {
+    min-width: 240px;
+    padding: 11px 38px 11px 18px;
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border, rgba(255, 110, 50, 0.12));
+    border-radius: 10px;
+    color: var(--text, #f4eee8);
+    font-family: var(--font-body, 'Inter', system-ui, sans-serif);
+    font-size: 13px;
+    font-weight: 500;
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background: var(--bg-card);
-    color: var(--text-main);
-    border: 1px solid var(--border);
-    padding: var(--spacing-sm) var(--spacing-xl) var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--radius-sm);
-    font-size: 1rem;
-    font-family: var(--font-main);
-    outline: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f4eee8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 14px;
     cursor: pointer;
-    min-height: var(--touch-target-min);
-    transition: border-color var(--transition-normal);
+    outline: none;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
-.season-select select:hover {
-    border-color: var(--khc-orange);
+#seasonSelector:hover {
+    border-color: var(--border-strong, rgba(255, 110, 50, 0.28));
+    background-color: rgba(255, 255, 255, 0.06);
 }
 
-.season-select::after {
-    content: '';
-    position: absolute;
-    right: var(--spacing-md);
-    top: 50%;
-    transform: translateY(-50%);
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 6px solid var(--text-muted);
-    pointer-events: none;
-    transition: border-color var(--transition-normal);
-}
-
-.season-select:hover::after {
-    border-top-color: var(--khc-orange);
+#seasonSelector:focus-visible {
+    outline: 2px solid var(--orange, #ff6b35);
+    outline-offset: 2px;
 }
 
 /* === NAV TABS === */
