@@ -277,133 +277,97 @@ header[role="banner"] {
 /* === NAV TABS === */
 .nav-tabs {
     display: flex;
-    gap: var(--spacing-xs);
+    gap: 10px;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
-    max-width: 100%;
+    margin-top: 18px;
+    padding: 0;
+    list-style: none;
 }
 
 .tab-btn {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--radius-lg);
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 99px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 12px;
     text-transform: uppercase;
-    font-weight: 600;
-    min-height: var(--touch-target-min);
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background-color var(--transition-fast),
+                border-color var(--transition-fast),
+                color var(--transition-fast),
+                box-shadow var(--transition-fast);
+    user-select: none;
+}
+
+.tab-btn .tab-icon {
+    width: 14px;
+    height: 14px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-xs);
+    color: currentColor;
 }
 
-.tab-btn:hover {
-    border-color: var(--khc-orange);
-    color: var(--text-main);
+.tab-btn .tab-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    fill: none;
 }
 
-.tab-btn:active {
-    transform: scale(0.97);
-}
-
-.tab-btn.active {
-    background: var(--khc-orange);
-    color: #000;
-    border-color: var(--khc-orange);
-}
-
-/* Mobile - Bottom Navigation Bar */
-@media (max-width: 767px) {
-    .controls {
-        gap: var(--spacing-sm);
-        margin-bottom: var(--spacing-md);
-    }
-
-    /* Esconde nav-tabs do fluxo normal */
-    .nav-tabs {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: var(--bg-card);
-        border-top: 1px solid var(--border);
-        display: flex;
-        justify-content: space-around;
-        align-items: stretch;
-        padding: 6px 4px;
-        padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
-        z-index: 100;
-        gap: 0;
-        flex-wrap: nowrap;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
-    }
-
-    .tab-btn {
-        flex: 1;
-        flex-direction: column;
-        font-size: 0.6rem;
-        padding: 6px 4px;
-        gap: 2px;
-        border-radius: 0;
-        border: none;
-        background: transparent;
-        color: var(--text-muted);
-        min-height: 52px;
-        text-transform: none;
-        letter-spacing: 0;
-    }
-
-    /* Ícone maior no bottom nav */
-    .tab-btn span[aria-hidden="true"] {
-        font-size: 1.3rem;
-        line-height: 1;
-        transition: transform var(--transition-fast);
-    }
-
+/* Hover (apenas em devices com pointer fino) */
+@media (hover: hover) {
     .tab-btn:hover {
-        border-color: transparent;
-        background: transparent;
+        background-color: rgba(255, 107, 53, 0.08);
+        border-color: var(--border-strong);
+        color: var(--orange-2);
     }
+}
 
-    .tab-btn.active {
-        color: var(--khc-orange);
-        background: transparent;
-        border-color: transparent;
+/* Foco visível (keyboard) */
+.tab-btn:focus-visible {
+    outline: 2px solid var(--orange);
+    outline-offset: 3px;
+}
+
+/* Estado selecionado */
+.tab-btn.active,
+.tab-btn[aria-selected="true"] {
+    background-color: rgba(255, 107, 53, 0.18);
+    border-color: var(--orange);
+    color: var(--orange-2);
+    box-shadow: var(--glow-orange, 0 0 0 1px rgba(255, 107, 53, .35), 0 0 24px rgba(255, 107, 53, .35));
+}
+
+/* Mobile: tighter spacing */
+@media (max-width: 760px) {
+    .nav-tabs {
+        gap: 6px;
     }
-
-    .tab-btn.active span[aria-hidden="true"] {
-        transform: scale(1.15);
-    }
-
-    /* Indicador de tab ativa */
-    .tab-btn.active::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 32px;
-        height: 3px;
-        background: var(--khc-orange);
-        border-radius: 0 0 3px 3px;
-    }
-
     .tab-btn {
-        position: relative;
+        padding: 9px 14px;
+        font-size: 11px;
     }
-
-    /* Padding inferior no main para não cobrir conteúdo */
-    main {
-        padding-bottom: 70px;
+    .tab-btn .tab-icon {
+        width: 12px;
+        height: 12px;
     }
+}
 
-    /* Ajuste no container */
-    .container {
-        padding-bottom: 0;
+/* ≤420px: esconde ícones, mantém só o label */
+@media (max-width: 420px) {
+    .tab-btn .tab-icon {
+        display: none;
     }
 }
 
