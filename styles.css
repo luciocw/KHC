@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 /* ============================================================================
    ULTIMATE KHC — STYLESHEET
    ============================================================================
@@ -37,48 +39,93 @@
 
 /* === TOKENS === */
 :root {
-    /* Cores */
+    /* Backgrounds */
     --bg: #050505;
-    --bg-card: #111111;
-    --bg-hover: #1a1a1a;
-    --text-main: #ffffff;
-    --text-muted: #999999; /* Ajustado para melhor contraste */
-    --khc-orange: #ff6b35;
-    --khc-gold: #fbbf24;
-    --border: #222222;
+    --bg-2: #0a0a0a;
+    --bg-card: #0f0c0a;
+    --bg-card-2: #14110d;
 
-    /* Tipografia */
-    --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    /* Borders */
+    --border: rgba(255, 110, 50, 0.12);
+    --border-strong: rgba(255, 110, 50, 0.28);
 
-    /* Espaçamento */
-    --spacing-xs: 0.5rem;
-    --spacing-sm: 0.75rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2rem;
+    /* Text */
+    --text: #f4eee8;
+    --text-2: rgba(244, 238, 232, 0.62);
+    --text-3: rgba(244, 238, 232, 0.38);
 
-    /* Touch & Interação */
-    --touch-target-min: 48px;
+    /* Orange (brand accent) */
+    --orange: #ff6b35;
+    --orange-2: #ff8a4a;
+    --orange-dim: rgba(255, 107, 53, 0.55);
 
-    /* Bordas */
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
+    /* Medals / positions */
+    --gold: #f5b400;
+    --silver: #c9c9d3;
+    --bronze: #d18046;
+    --fourth: #6ab2e0;
 
-    /* Transições */
+    /* Status colors */
+    --green: #3eb371;
+    --red: #d6543a;
+
+    /* Typography */
+    --font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* Effects */
+    --shadow-card: 0 1px 0 rgba(255,255,255,0.02) inset, 0 12px 40px rgba(0,0,0,0.4);
+    --glow-orange: 0 0 0 1px rgba(255,107,53,.35), 0 0 24px rgba(255,107,53,.35);
+
+    /* Transitions */
     --transition-fast: 0.15s ease;
-    --transition-normal: 0.2s ease;
+    --transition-normal: 0.18s ease;
+    --transition-tab: 0.25s cubic-bezier(.2,.7,.2,1);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     background-color: var(--bg);
-    color: var(--text-main);
-    font-family: var(--font-main);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-feature-settings: 'cv11', 'ss01';
     line-height: 1.5;
     overflow-x: hidden;
     min-height: 100vh;
+    position: relative;
+}
+
+/* Field-line backdrop: faint horizontal lines + orange radial vignettes */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(0deg, transparent 0 79px, rgba(255,255,255,0.018) 79px 80px),
+        radial-gradient(ellipse at top, rgba(255,107,53,0.08), transparent 50%),
+        radial-gradient(ellipse at bottom, rgba(255,107,53,0.05), transparent 50%);
+}
+
+/* Legacy aliases — keep until Phase 3 ports all tabs to the new tokens. */
+:root {
+    --bg-hover: rgba(255,255,255,0.04);
+    --text-main: var(--text);
+    --text-muted: var(--text-2);
+    --khc-orange: var(--orange);
+    --khc-gold: var(--gold);
+    --font-main: var(--font-body);
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 0.75rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --touch-target-min: 48px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
 }
 
 /* === WATERMARK === */
