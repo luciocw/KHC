@@ -7,25 +7,47 @@
 
 // isSeasonFinalized() agora vive em data.js (fonte única).
 
+// -----------------------------------------------------------------------------
+// Trophy index — memoizado por temporada
+// -----------------------------------------------------------------------------
+//
+// Antes: findTeamTrophy() fazia 3 .find() lineares por chamada, chamado dentro
+// do forEach de times. Para 4 séries × 12 times = 48 chamadas, ~144 buscas
+// lineares por render. Agora indexamos uma vez ({seriesName → {teamName → trophy}})
+// e o lookup vira O(1). Cache invalida quando appState.season muda.
+// -----------------------------------------------------------------------------
+
+let _trophyIndexCache = null;
+let _trophyIndexCacheSeason = null;
+
 /**
- * Procura o trophy (gold/silver/bronze/fourth) de um time em temporadas
- * finalizadas. Casa por nome da série (seriesName) e nome do time (teamName).
- * @param {string} seriesName
- * @param {string} teamName
- * @returns {string|null} 'gold'|'silver'|'bronze'|'fourth'|null
+ * Retorna `{ seriesName: { teamName: trophy } }` para a temporada atual.
+ * Vazio se temporada não finalizada ou ausente do snapshot.
+ * @returns {Object<string, Object<string, string>>}
  */
-function findTeamTrophy(seriesName, teamName) {
+function getTrophyIndex() {
+    const currentSeason = appState.season;
+    if (_trophyIndexCacheSeason === currentSeason && _trophyIndexCache) {
+        return _trophyIndexCache;
+    }
+    const idx = {};
     try {
         const finals = (typeof getFinalizedSeasons === 'function' ? getFinalizedSeasons() : []) || [];
-        const season = finals.find(s => String(s.id) === String(appState.season));
-        if (!season) return null;
-        const series = (season.series || []).find(srs => srs.name === seriesName);
-        if (!series) return null;
-        const team = (series.teams || []).find(t => t.team === teamName);
-        return (team && team.trophy) ? team.trophy : null;
+        const season = finals.find(s => String(s.id) === String(currentSeason));
+        if (season && Array.isArray(season.series)) {
+            season.series.forEach(srs => {
+                idx[srs.name] = {};
+                (srs.teams || []).forEach(t => {
+                    if (t.trophy) idx[srs.name][t.team] = t.trophy;
+                });
+            });
+        }
     } catch (e) {
-        return null;
+        // mantém idx vazio
     }
+    _trophyIndexCache = idx;
+    _trophyIndexCacheSeason = currentSeason;
+    return idx;
 }
 
 /**
@@ -70,6 +92,79 @@ function renderLigasCaption(container) {
     container.insertBefore(caption, container.firstChild);
 }
 
+// -----------------------------------------------------------------------------
+// Builders de pedaços do card — pequenos, testáveis, retornam string HTML
+// -----------------------------------------------------------------------------
+
+/**
+ * Constrói o cell do rank: medalha SVG se houver trophy, número caso contrário.
+ * @param {string|null} trophy
+ * @param {number} rankNum
+ * @returns {string}
+ */
+function buildRankCell(trophy, rankNum) {
+    if (trophy) {
+        return `<div class="rank-medal" aria-hidden="true">${trophyToMedalSvg(trophy)}</div>`;
+    }
+    return `<div class="rank-num" aria-hidden="true">${rankNum}</div>`;
+}
+
+/**
+ * Constrói uma linha (.team-row) de standings.
+ * @param {object} t Team registro do rosterData (legacy shape)
+ * @param {number} index 0-based
+ * @param {{ trophyForTeam: function(string): string|null, leagueName: string }} ctx
+ * @returns {string} HTML
+ */
+function buildTeamRow(t, index, ctx) {
+    const avatarUrl = sanitizeAvatarUrl(t.avatar);
+    const safeTeamName = escapeHtml(t.teamName);
+    const safeOwnerName = escapeHtml(t.ownerName);
+    const wins = sanitizeNumber(t.wins, 0, VALIDATION.MAX_WINS);
+    const losses = sanitizeNumber(t.losses, 0, VALIDATION.MAX_LOSSES);
+    const safePts = sanitizeNumber(t.fpts, 0, VALIDATION.MAX_POINTS).toFixed(1);
+    const rankNum = index + 1;
+
+    const trophy = ctx.trophyForTeam(t.teamName);
+    const rankCell = buildRankCell(trophy, rankNum);
+    const ariaLabel = `${rankNum}º lugar: ${safeTeamName}, dono ${safeOwnerName}, ${wins} vitórias e ${losses} derrotas, ${safePts} pontos`;
+
+    return `
+        <div class="team-row" role="listitem" aria-label="${ariaLabel}">
+            ${rankCell}
+            <img src="${avatarUrl}" class="team-avatar" alt="" loading="lazy" aria-hidden="true" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
+            <div class="team-info">
+                <div class="team-name-row">
+                    ${playerLinkHTML({ user: t.ownerName, displayName: safeTeamName, ariaLabel: `Ver perfil de ${safeOwnerName}`, extraClass: 'team-name' })}
+                </div>
+                <div class="team-owner">${safeOwnerName}</div>
+            </div>
+            <div class="team-record" aria-label="${wins} vitórias, ${losses} derrotas"><span class="w">${wins}</span><span class="dash">–</span><span class="l">${losses}</span></div>
+            <div class="form-chips-placeholder" aria-hidden="true"></div>
+            <div class="team-fpts" aria-label="${safePts} pontos">${safePts}</div>
+        </div>
+    `;
+}
+
+/**
+ * Header do card (dot de status + título + badge de contagem).
+ * @param {string} leagueName  já escapado
+ * @param {number} teamCount   sanitizado
+ * @param {boolean} finalized
+ * @returns {string} HTML
+ */
+function buildLeagueHeader(leagueName, teamCount, finalized) {
+    const dotClass = finalized ? 'dot dim' : 'dot active';
+    const dotAriaLabel = finalized ? 'Temporada finalizada' : 'Temporada em andamento';
+    return `
+        <div class="league-header">
+            <span class="${dotClass}" role="img" aria-label="${dotAriaLabel}"></span>
+            <h3 class="league-title">${leagueName}</h3>
+            <div class="league-badge" aria-label="${teamCount} times na liga">${teamCount} Times</div>
+        </div>
+    `;
+}
+
 /**
  * Renderiza um card de standings para uma liga (uma série da temporada).
  * Cada chamada anexa um <article.league-card> ao container.
@@ -79,66 +174,31 @@ function renderLigasCaption(container) {
  * @param {number} [staggerIndex=0] - usado para calcular animation-delay
  */
 function renderLeagueCard(leagueData, container, staggerIndex = 0) {
-    // Garante caption na primeira chamada
     renderLigasCaption(container);
 
-    const card = document.createElement('article');
     const safeTier = sanitizeTier(leagueData.info.tier);
     const safeLeagueName = escapeHtml(leagueData.info.name);
     const finalized = isSeasonFinalized();
+    const teamCount = sanitizeNumber(leagueData.teams.length, 0, 100);
 
+    // Closure de lookup O(1) para trophy, com early-exit se temporada ativa
+    const trophyIdx = finalized ? getTrophyIndex() : null;
+    const trophyForTeam = (teamName) => {
+        if (!trophyIdx) return null;
+        const seriesIdx = trophyIdx[leagueData.info.name];
+        return seriesIdx ? (seriesIdx[teamName] || null) : null;
+    };
+
+    const rowsHtml = leagueData.teams
+        .map((t, i) => buildTeamRow(t, i, { trophyForTeam, leagueName: leagueData.info.name }))
+        .join('');
+
+    const card = document.createElement('article');
     card.className = `league-card ${safeTier} stagger-item`;
     card.style.animationDelay = `${staggerIndex * STAGGER_DELAY_MS}ms`;
     card.setAttribute('aria-label', `Classificação da ${safeLeagueName}`);
-
-    // --- Rows ---
-    let rowsHtml = '';
-    leagueData.teams.forEach((t, index) => {
-        const avatarUrl = sanitizeAvatarUrl(t.avatar);
-        const safeTeamName = escapeHtml(t.teamName);
-        const safeOwnerName = escapeHtml(t.ownerName);
-        const wins = sanitizeNumber(t.wins, 0, VALIDATION.MAX_WINS);
-        const losses = sanitizeNumber(t.losses, 0, VALIDATION.MAX_LOSSES);
-        const ptsNum = sanitizeNumber(t.fpts, 0, VALIDATION.MAX_POINTS);
-        const safePts = ptsNum.toFixed(1);
-        const rankNum = index + 1;
-
-        // Medalha apenas se temporada finalizada E houver trophy registrado.
-        const trophy = finalized ? findTeamTrophy(leagueData.info.name, t.teamName) : null;
-        const rankCell = trophy
-            ? `<div class="rank-medal" aria-hidden="true">${trophyToMedalSvg(trophy)}</div>`
-            : `<div class="rank-num" aria-hidden="true">${rankNum}</div>`;
-
-        // ARIA label completo
-        const ariaLabel = `${rankNum}º lugar: ${safeTeamName}, dono ${safeOwnerName}, ${wins} vitórias e ${losses} derrotas, ${safePts} pontos`;
-
-        rowsHtml += `
-            <div class="team-row" role="listitem" aria-label="${ariaLabel}">
-                ${rankCell}
-                <img src="${avatarUrl}" class="team-avatar" alt="" loading="lazy" aria-hidden="true" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
-                <div class="team-info">
-                    <div class="team-name-row">
-                        ${playerLinkHTML({ user: t.ownerName, displayName: safeTeamName, ariaLabel: `Ver perfil de ${safeOwnerName}`, extraClass: 'team-name' })}
-                    </div>
-                    <div class="team-owner">${safeOwnerName}</div>
-                </div>
-                <div class="team-record" aria-label="${wins} vitórias, ${losses} derrotas"><span class="w">${wins}</span><span class="dash">–</span><span class="l">${losses}</span></div>
-                <div class="form-chips-placeholder" aria-hidden="true"></div>
-                <div class="team-fpts" aria-label="${safePts} pontos">${safePts}</div>
-            </div>
-        `;
-    });
-
-    const teamCount = sanitizeNumber(leagueData.teams.length, 0, 100);
-    const dotClass = finalized ? 'dot dim' : 'dot active';
-    const dotAriaLabel = finalized ? 'Temporada finalizada' : 'Temporada em andamento';
-
     card.innerHTML = `
-        <div class="league-header">
-            <span class="${dotClass}" role="img" aria-label="${dotAriaLabel}"></span>
-            <h3 class="league-title">${safeLeagueName}</h3>
-            <div class="league-badge" aria-label="${teamCount} times na liga">${teamCount} Times</div>
-        </div>
+        ${buildLeagueHeader(safeLeagueName, teamCount, finalized)}
         <div class="standings-list" role="list" aria-label="Classificação dos times">
             ${rowsHtml}
         </div>
