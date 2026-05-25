@@ -150,19 +150,14 @@ function renderPowerRankings() {
     const grouped = { S: [], A: [], B: [], C: [], D: [] };
     rows.forEach(r => { grouped[r.tier].push(r); });
 
-    // 3. Caption (chart icon + texto contextual).
+    // 3. Caption (chart icon + texto contextual). Só renderiza pra finalizada
+    //    — ativa não tem week tracking ao vivo, então "parcial" mente.
     const finalized = isSeasonFinalized(appState.season);
-    const captionText = finalized
-        ? 'Tier List baseada na pontuação total da temporada'
-        : 'Tier List baseada na pontuação parcial (Semana 8 de 14)';
+    const captionHtml = finalized
+        ? `<div class="power-caption">${IconRegistry.chart({ size: 14 })}<span>Tier List baseada na pontuação total da temporada</span></div>`
+        : '';
 
-    let html = `
-        <div class="power-caption">
-            ${IconRegistry.chart({ size: 14 })}
-            <span>${captionText}</span>
-        </div>
-        <div class="tier-list">
-    `;
+    let html = captionHtml + `<div class="tier-list">`;
 
     // 4. Tier rows (não renderiza vazios).
     let tierIdx = 0;

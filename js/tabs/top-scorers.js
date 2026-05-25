@@ -35,13 +35,14 @@ function renderGlobalStandings() {
         : [];
     const isFinalized = finalizedIds.includes(String(appState.season));
 
-    // Caption contextual
+    // Caption contextual — só renderiza pra finalizada (ativa não tem week
+    // tracking ao vivo, então mostrar "parcial" é pouco informativo)
     const captionIcon = isFinalized
         ? (IconRegistry.trophy ? IconRegistry.trophy({ size: 14 }) : '')
-        : (IconRegistry.target ? IconRegistry.target({ size: 14 }) : '');
+        : '';
     const captionText = isFinalized
         ? 'Pontuação total — todos os times de todas as séries'
-        : 'Pontuação parcial — Semana 8 de 14';
+        : '';
 
     // Medal helper para top 3 em finalizadas
     const medalFor = (i) => {
@@ -82,11 +83,12 @@ function renderGlobalStandings() {
         `;
     });
 
+    const captionHtml = captionText
+        ? `<div class="global-caption" role="note">${captionIcon}<span>${captionText}</span></div>`
+        : '';
+
     container.innerHTML = `
-        <div class="global-caption" role="note">
-            ${captionIcon}
-            <span>${captionText}</span>
-        </div>
+        ${captionHtml}
         <div class="top-scorers-card" role="table" aria-label="Ranking global de pontuação">
             <div class="global-header" role="row">
                 <div role="columnheader">#</div>
