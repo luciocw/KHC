@@ -63,18 +63,7 @@ function movementFor(rank, originalRank) {
     return { symbol: '—', cls: 'move-same', aria: 'sem variação' };
 }
 
-/**
- * Determina se a temporada atual está finalizada consultando
- * `getFinalizedSeasons()`. Active = caption "parcial"; final = "total".
- *
- * @param {number|string} seasonId
- * @returns {boolean}
- */
-function isSeasonFinalized(seasonId) {
-    if (typeof getFinalizedSeasons !== 'function') return false;
-    const finalized = getFinalizedSeasons() || [];
-    return finalized.some(s => String(s.id) === String(seasonId));
-}
+// isSeasonFinalized() agora vive em data.js (fonte única).
 
 /**
  * Renderiza HTML de um único PWR card.
@@ -104,7 +93,7 @@ function renderPwrCard(row) {
                      onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
                 <div class="pwr-info">
                     <div class="pwr-team-name">
-                        <span class="player-link" data-user="${safeUser}" tabindex="0" role="button">${safeTeamName}</span>
+                        ${playerLinkHTML({ user: team.user, displayName: safeTeamName })}
                     </div>
                     <div class="pwr-series">${safeSeries}</div>
                     <div class="pwr-record">${record} <span class="pwr-pts">${pts} pts</span></div>
@@ -119,6 +108,67 @@ function renderPwrCard(row) {
     `;
 }
 
+/**
+ * Agrupa as rows por tier preservando a ordem S→A→B→C→D.
+ * @param {Array} rows
+ * @returns {Object<string, Array>}
+ */
+function groupRowsByTier(rows) {
+    const grouped = { S: [], A: [], B: [], C: [], D: [] };
+    rows.forEach(r => { grouped[r.tier].push(r); });
+    return grouped;
+}
+
+/**
+ * Caption acima do tier list. Apenas para temporada finalizada.
+ * @param {boolean} finalized
+ * @returns {string}
+ */
+function buildPowerCaption(finalized) {
+    if (!finalized) return '';
+    const icon = IconRegistry.chart({ size: 14 });
+    return `<div class="power-caption">${icon}<span>Tier List baseada na pontuação total da temporada</span></div>`;
+}
+
+/**
+ * Constrói uma `<section.tier-row>` para um tier não-vazio.
+ * @param {string} tierKey  'S'|'A'|'B'|'C'|'D'
+ * @param {Array}  list     Rows nesse tier
+ * @param {number} tierIdx  Posição visual (pra stagger delay)
+ * @returns {string}
+ */
+function buildTierSection(tierKey, list, tierIdx) {
+    const cfg = TIER_CONFIG[tierKey];
+    const aria = `Tier ${cfg.letter} — ${cfg.desc}: ${list.length} times`;
+    return `
+        <section class="tier-row stagger-item" role="region" aria-label="${aria}"
+                 style="animation-delay: ${tierIdx * STAGGER_DELAY_MS}ms">
+            <div class="tier-label ${cfg.cls}">
+                <span class="letter">${cfg.letter}</span>
+                <span class="desc">${cfg.desc}</span>
+            </div>
+            <div class="tier-teams">
+                ${list.map(renderPwrCard).join('')}
+            </div>
+        </section>
+    `;
+}
+
+/**
+ * Anima as barras (0% → pct) em rAF. As barras começam com width=0 e
+ * `data-pct` no DOM; este passe aplica a largura final via JS pra disparar
+ * a transition definida no CSS.
+ * @param {HTMLElement} container
+ */
+function animatePwrBars(container) {
+    requestAnimationFrame(() => {
+        container.querySelectorAll('.pwr-bar-fill').forEach(b => {
+            const pct = parseFloat(b.getAttribute('data-pct')) || 0;
+            b.style.width = pct + '%';
+        });
+    });
+}
+
 function renderPowerRankings() {
     const container = document.getElementById(DOM_IDS.POWER);
     if (!container) return;
@@ -128,69 +178,25 @@ function renderPowerRankings() {
         return;
     }
 
-    // 1. Mapeia para o data model novo e computa ranking.
+    // powerRanking() preserva a referência do objeto team, então
+    // _leagueName/_leagueTier anexados em mapRosterToTeams() ficam acessíveis
+    // via r.team dentro do card.
     const teams = mapRosterToTeams(appState.rosterData);
     const rows = powerRanking(teams);
-
-    // Reanexa os campos auxiliares (powerRanking só leva o Team, mas precisamos
-    // de _leagueName / _leagueTier no card). Lookup por (user + team) — único
-    // por temporada porque um username pode aparecer em duas séries (Elite).
-    const byKey = {};
-    teams.forEach(t => { byKey[t.user + '|' + t.team] = t; });
-    rows.forEach(r => {
-        const t = byKey[r.team.user + '|' + r.team.team];
-        if (t) {
-            r.team._leagueName = t._leagueName;
-            r.team._leagueTier = t._leagueTier;
-        }
-    });
-
-    // 2. Agrupa por tier.
-    /** @type {Object<string, Array>} */
-    const grouped = { S: [], A: [], B: [], C: [], D: [] };
-    rows.forEach(r => { grouped[r.tier].push(r); });
-
-    // 3. Caption (chart icon + texto contextual). Só renderiza pra finalizada
-    //    — ativa não tem week tracking ao vivo, então "parcial" mente.
+    const grouped = groupRowsByTier(rows);
     const finalized = isSeasonFinalized(appState.season);
-    const captionHtml = finalized
-        ? `<div class="power-caption">${IconRegistry.chart({ size: 14 })}<span>Tier List baseada na pontuação total da temporada</span></div>`
-        : '';
 
-    let html = captionHtml + `<div class="tier-list">`;
+    const sectionsHtml = Object.keys(TIER_CONFIG)
+        .filter(k => grouped[k].length > 0)
+        .map((k, i) => buildTierSection(k, grouped[k], i))
+        .join('');
 
-    // 4. Tier rows (não renderiza vazios).
-    let tierIdx = 0;
-    Object.keys(TIER_CONFIG).forEach(tierKey => {
-        const list = grouped[tierKey];
-        if (!list || list.length === 0) return;
-        const cfg = TIER_CONFIG[tierKey];
-        const aria = `Tier ${cfg.letter} — ${cfg.desc}: ${list.length} times`;
+    container.innerHTML = `
+        ${buildPowerCaption(finalized)}
+        <div class="tier-list">
+            ${sectionsHtml}
+        </div>
+    `;
 
-        html += `
-            <section class="tier-row stagger-item" role="region" aria-label="${aria}"
-                     style="animation-delay: ${tierIdx * STAGGER_DELAY_MS}ms">
-                <div class="tier-label ${cfg.cls}">
-                    <span class="letter">${cfg.letter}</span>
-                    <span class="desc">${cfg.desc}</span>
-                </div>
-                <div class="tier-teams">
-                    ${list.map(renderPwrCard).join('')}
-                </div>
-            </section>
-        `;
-        tierIdx++;
-    });
-
-    html += '</div>';
-    container.innerHTML = html;
-
-    // 5. Anima as barras (0% → pct) em rAF para garantir transição.
-    requestAnimationFrame(() => {
-        const bars = container.querySelectorAll('.pwr-bar-fill');
-        bars.forEach(b => {
-            const pct = parseFloat(b.getAttribute('data-pct')) || 0;
-            b.style.width = pct + '%';
-        });
-    });
+    animatePwrBars(container);
 }
