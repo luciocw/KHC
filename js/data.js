@@ -181,6 +181,18 @@ function getFinalizedSeasons() {
     return _finalizedSeasons;
 }
 
+/**
+ * Verifica se a temporada informada (default: appState.season) está entre as
+ * finalizadas. Fonte única — antes esta lógica era duplicada em 3 tabs.
+ *
+ * @param {number|string} [seasonId] default: appState.season
+ * @returns {boolean}
+ */
+function isSeasonFinalized(seasonId) {
+    const id = String(seasonId != null ? seasonId : (appState && appState.season));
+    return _finalizedSeasons.some(s => String(s.id) === id);
+}
+
 // --- Adapter para compatibilidade com tabs legacy ---
 
 /**
