@@ -1544,132 +1544,168 @@ select:focus-visible {
 .hof-fourth .hof-team-name { color: var(--text-muted); }
 
 /* === LENDAS === */
-/* Tabela de conquistas acumuladas. Tab "Lendas KHC". */
-.legends-container {
-    max-width: 700px;
-    margin: 0 auto;
-}
+/* Tabela de conquistas acumuladas. Tab "Lendas KHC".
+   Fase 3.D: card com gradiente laranja no top + chips outlined nos
+   cabeçalhos de medalha + contagens coloridas pelo metal. */
 
-.legends-intro {
-    text-align: center;
-    padding: 1rem;
-    color: var(--text-muted);
-    font-size: 0.9rem;
+.legends-caption {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: 8px;
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 24px 0 14px;
 }
 
-.legends-intro-icon {
-    font-size: 1.2rem;
+.legends-caption svg {
+    color: var(--orange);
 }
 
-.legends-table {
-    background: var(--bg-card);
-    border-radius: 12px;
+.legends-card {
+    background: linear-gradient(180deg, var(--bg-card), var(--bg-card-2));
     border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
     overflow: hidden;
+    position: relative;
+}
+
+.legends-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+    filter: blur(0.5px);
+    pointer-events: none;
+}
+
+.legends-header,
+.legends-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 44px 44px 44px 44px;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 22px;
 }
 
 .legends-header {
-    display: grid;
-    grid-template-columns: 50px 1fr 55px 55px 55px 55px;
-    padding: 1rem 1.25rem;
-    background: linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(255,107,53,0.05) 100%);
-    font-weight: 600;
-    font-size: 0.85rem;
+    background: linear-gradient(180deg, rgba(255,107,53,0.07), transparent);
+    color: var(--orange);
+    font-size: 10px;
+    font-weight: 700;
     text-transform: uppercase;
-    color: var(--khc-orange);
+    letter-spacing: 0.12em;
     border-bottom: 1px solid var(--border);
 }
 
-.legends-row {
-    display: grid;
-    grid-template-columns: 50px 1fr 55px 55px 55px 55px;
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+.legends-medal-chip {
+    display: inline-flex;
     align-items: center;
-    min-height: var(--touch-target-min);
-    transition: background var(--transition-fast);
+    justify-content: center;
+    height: 22px;
+    min-width: 28px;
+    padding: 0 6px;
+    border-radius: 6px;
+    border: 1px solid currentColor;
+    background: rgba(255, 255, 255, 0.02);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    gap: 3px;
+    line-height: 1;
+}
+
+.legends-medal-chip.gold   { color: var(--gold); }
+.legends-medal-chip.silver { color: var(--silver); }
+.legends-medal-chip.bronze { color: var(--bronze); }
+.legends-medal-chip.fourth { color: var(--fourth); }
+
+.legends-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    transition: background-color var(--transition-fast);
 }
 
 .legends-row:last-child {
     border-bottom: none;
 }
 
-.legends-row:hover {
-    background: var(--bg-hover);
+@media (hover: hover) {
+    .legends-row:hover {
+        background: rgba(255, 107, 53, 0.05);
+    }
 }
 
-.legends-col-rank {
-    font-weight: 700;
-    color: var(--khc-orange);
-    font-size: 0.9rem;
+.legends-row.is-leader {
+    background: linear-gradient(90deg, rgba(245, 180, 0, 0.10), transparent 60%);
 }
 
-.legends-col-name {
-    font-weight: 500;
-    font-size: 0.95rem;
-}
-
-.legends-col-trophy {
+.legends-rank {
     text-align: center;
-    font-size: 0.9rem;
+    color: var(--text-3);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.legends-row.is-leader .legends-rank {
+    color: var(--gold);
+}
+
+.legends-user {
+    color: var(--text);
     font-weight: 600;
+    font-size: 14px;
+    min-width: 0;
 }
 
-.legends-count-title {
-    color: #ffd700;
+.legends-count {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 14px;
 }
 
-.legends-count-vice {
-    color: #c0c0c0;
+/* Header cells use legends-count for grid alignment; reset numeric color. */
+.legends-header .legends-count {
+    color: var(--orange);
 }
 
-.legends-count-third {
-    color: #cd7f32;
-}
-
-.legends-count-fourth {
-    color: var(--text-muted);
-}
-
-/* Top 3 highlight */
-.legends-gold {
-    background: rgba(255, 215, 0, 0.08);
-}
-
-.legends-gold .legends-col-name {
-    color: #ffd700;
-}
-
-.legends-gold .legends-col-rank {
-    color: #ffd700;
-}
-
-.legends-silver {
-    background: rgba(192, 192, 192, 0.05);
-}
-
-.legends-silver .legends-col-name {
-    color: #c0c0c0;
-}
-
-.legends-bronze {
-    background: rgba(205, 127, 50, 0.05);
-}
-
-.legends-bronze .legends-col-name {
-    color: #cd7f32;
-}
+.legends-count.zero   { color: var(--text-3); }
+.legends-count.gold   { color: var(--gold); }
+.legends-count.silver { color: var(--silver); }
+.legends-count.bronze { color: var(--bronze); }
+.legends-count.fourth { color: var(--fourth); }
 
 .legends-empty {
-    padding: 3rem;
+    padding: 32px;
     text-align: center;
-    color: var(--text-muted);
-    font-size: 1rem;
+    color: var(--text-3);
+    font-size: 13px;
+}
+
+.player-link {
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.player-link:hover,
+.player-link:focus-visible {
+    color: var(--orange-2);
+    outline: none;
+}
+
+@media (max-width: 600px) {
+    .legends-header,
+    .legends-row {
+        padding: 10px 14px;
+        gap: 8px;
+        grid-template-columns: 32px 1fr 36px 36px 36px 36px;
+    }
+    .legends-user { font-size: 13px; }
+    .legends-count { font-size: 13px; }
 }
 
 /* === TEMPORADAS === */
