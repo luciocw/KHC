@@ -29,7 +29,6 @@
 
     const MODAL_ID = 'about-modal';
     const BODY_ID = 'about-modal-body';
-    const FOOTER_COUNT_SELECTOR = '.footer-temporadas-count';
 
     // Selector dos focáveis dentro do modal (focus trap)
     const FOCUSABLE_SELECTOR = [
@@ -73,16 +72,6 @@
      */
     function temporadasLabel(n) {
         return n === 1 ? '1 temporada disputada' : `${n} temporadas disputadas`;
-    }
-
-    /**
-     * Atualiza o contador no footer (se existir).
-     */
-    function updateFooterCount() {
-        const n = countFinishedSeasons();
-        document.querySelectorAll(FOOTER_COUNT_SELECTOR).forEach((el) => {
-            el.textContent = String(n);
-        });
     }
 
     /**
@@ -265,7 +254,6 @@
 
     function init() {
         ensureBuilt();
-        updateFooterCount();
         bindGlobalTriggers();
     }
 
