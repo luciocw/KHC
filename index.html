@@ -212,7 +212,13 @@
             </section>
         </main>
 
+        <!-- FOOTER MOUNT — Fase 4.B injeta o <footer> aqui (dentro do .container). -->
+
     </div>
+
+    <!-- DRAWER MOUNT — Fase 4.A injeta o player drawer aqui (fora do .container). -->
+
+    <!-- MODAL MOUNT — Fase 4.B injeta o about modal aqui (fora do .container). -->
 
     <!--
         Módulos JS carregados em ordem de dependência.
@@ -227,8 +233,10 @@
         6. icons        → SVG icon registry + renderIcons() (hidrata data-icon)
         7. ui/loading   → spinners, skeletons
         8. ui/tabs      → switchTab (usado inline), keyboard nav, SR
-        9. tabs/*       → renderers por aba
-       10. app          → init, loadData, DOMContentLoaded
+        9. ui/drawer    → player drawer (side-sheet)
+       10. ui/modal     → about modal
+       11. tabs/*       → renderers por aba
+       12. app          → init, loadData, DOMContentLoaded
     -->
     <script src="js/config.js"></script>
     <script src="js/sanitize.js"></script>
@@ -238,6 +246,8 @@
     <script src="js/icons.js"></script>
     <script src="js/ui/loading.js"></script>
     <script src="js/ui/tabs.js"></script>
+    <script src="js/ui/drawer.js"></script>
+    <script src="js/ui/modal.js"></script>
     <script src="js/tabs/ligas.js"></script>
     <script src="js/tabs/top-scorers.js"></script>
     <script src="js/tabs/power-ranking.js"></script>

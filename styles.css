@@ -24,6 +24,9 @@
      === HALL OF FAME (NOVO LAYOUT) === Layout HoF mais recente
      === LENDAS ===                    Tabela de conquistas (tab Lendas KHC)
      === TEMPORADAS ===                Histórico ano-a-ano (tab Temporadas)
+     === FOOTER ===                    Footer global (brand + sobre button)
+     === DRAWER ===                    Player drawer (side-sheet)
+     === MODAL ===                     About modal (centered scale-in)
      === RESPONSIVE ===                Media queries e ajustes por breakpoint
 
    NOTA: A ordem atual reflete a evolução incremental do site. POWER RANKING
@@ -1906,6 +1909,15 @@ select:focus-visible {
     .season-card { padding: 18px; }
     .season-year { font-size: 28px; }
 }
+
+/* === FOOTER === */
+/* Footer fixo no fim da página (dentro do .container). Fase 4.B preenche. */
+
+/* === DRAWER === */
+/* Player drawer (side-sheet 500px). Fase 4.A preenche. */
+
+/* === MODAL === */
+/* About modal (centered, scale-in). Fase 4.B preenche. */
 
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
