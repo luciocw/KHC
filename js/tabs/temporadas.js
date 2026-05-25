@@ -53,7 +53,7 @@ function _renderPodiumColumn(serie) {
             <div class="podium-row" role="listitem" aria-label="${ariaLabel}">
                 <span class="podium-icon" aria-hidden="true">${medal.icon}</span>
                 <span class="podium-name">
-                    <span class="player-link" data-user="${safeUser}" tabindex="0" role="button" aria-label="Ver perfil de ${safeUser}">${safeUser}</span>
+                    ${playerLinkHTML({ user: safeUser, displayName: safeUser, ariaLabel: `Ver perfil de ${safeUser}` })}
                     <span class="podium-team">${safeTeam}</span>
                 </span>
                 <span class="podium-pts">${safePts}</span>

@@ -179,7 +179,7 @@ function renderLegends() {
             <div class="${rowClass}" role="row" aria-label="${ariaLabel}" style="animation-delay: ${delay}ms">
                 <div class="legends-rank" role="cell">${rank}</div>
                 <div class="legends-user" role="cell">
-                    <span class="player-link" data-user="${safeName}" tabindex="0" role="button">${safeName}</span>
+                    ${playerLinkHTML({ user: safeName, displayName: safeName })}
                 </div>
                 ${cellHtml(p.gold,   'gold')}
                 ${cellHtml(p.silver, 'silver')}

@@ -5,18 +5,7 @@
 // Depende de: js/config.js, js/sanitize.js, js/icons.js, js/data.js
 // =============================================================================
 
-/**
- * Verifica se a temporada selecionada (appState.season) é finalizada.
- * @returns {boolean}
- */
-function isSeasonFinalized() {
-    try {
-        const finals = (typeof getFinalizedSeasons === 'function' ? getFinalizedSeasons() : []) || [];
-        return finals.some(s => String(s.id) === String(appState.season));
-    } catch (e) {
-        return false;
-    }
-}
+// isSeasonFinalized() agora vive em data.js (fonte única).
 
 /**
  * Procura o trophy (gold/silver/bronze/fourth) de um time em temporadas
@@ -129,7 +118,7 @@ function renderLeagueCard(leagueData, container, staggerIndex = 0) {
                 <img src="${avatarUrl}" class="team-avatar" alt="" loading="lazy" aria-hidden="true" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
                 <div class="team-info">
                     <div class="team-name-row">
-                        <span class="player-link team-name" data-user="${safeOwnerName}" tabindex="0" role="button" aria-label="Ver perfil de ${safeOwnerName}">${safeTeamName}</span>
+                        ${playerLinkHTML({ user: t.ownerName, displayName: safeTeamName, ariaLabel: `Ver perfil de ${safeOwnerName}`, extraClass: 'team-name' })}
                     </div>
                     <div class="team-owner">${safeOwnerName}</div>
                 </div>

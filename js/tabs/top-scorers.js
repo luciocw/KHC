@@ -29,11 +29,8 @@ function renderGlobalStandings() {
         return;
     }
 
-    // Detecta se a temporada atual está finalizada
-    const finalizedIds = (typeof getFinalizedSeasons === 'function')
-        ? getFinalizedSeasons().map(s => String(s.id))
-        : [];
-    const isFinalized = finalizedIds.includes(String(appState.season));
+    // Detecta se a temporada atual está finalizada (fonte: data.js)
+    const isFinalized = isSeasonFinalized(appState.season);
 
     // Caption contextual — só renderiza pra finalizada (ativa não tem week
     // tracking ao vivo, então mostrar "parcial" é pouco informativo)
@@ -75,7 +72,7 @@ function renderGlobalStandings() {
             <div class="global-row ${podiumClass} stagger-item" role="row" aria-label="${ariaLabel}" style="animation-delay: ${delay}ms">
                 ${rankCell}
                 <div role="cell" class="global-team-name" title="${safeTeamName}">
-                    <span class="player-link" data-user="${safeUser}" tabindex="0" role="button" aria-label="Abrir perfil de ${safeTeamName}">${safeTeamName}</span>
+                    ${playerLinkHTML({ user: t.ownerName || t.teamId || '', displayName: safeTeamName })}
                 </div>
                 <div role="cell"><span class="global-league-tag ${eliteClass}">${safeLeagueName}</span></div>
                 <div role="cell" class="global-pts">${safePts}</div>

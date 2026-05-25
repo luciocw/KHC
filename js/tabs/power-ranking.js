@@ -63,18 +63,7 @@ function movementFor(rank, originalRank) {
     return { symbol: '—', cls: 'move-same', aria: 'sem variação' };
 }
 
-/**
- * Determina se a temporada atual está finalizada consultando
- * `getFinalizedSeasons()`. Active = caption "parcial"; final = "total".
- *
- * @param {number|string} seasonId
- * @returns {boolean}
- */
-function isSeasonFinalized(seasonId) {
-    if (typeof getFinalizedSeasons !== 'function') return false;
-    const finalized = getFinalizedSeasons() || [];
-    return finalized.some(s => String(s.id) === String(seasonId));
-}
+// isSeasonFinalized() agora vive em data.js (fonte única).
 
 /**
  * Renderiza HTML de um único PWR card.
@@ -104,7 +93,7 @@ function renderPwrCard(row) {
                      onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
                 <div class="pwr-info">
                     <div class="pwr-team-name">
-                        <span class="player-link" data-user="${safeUser}" tabindex="0" role="button">${safeTeamName}</span>
+                        ${playerLinkHTML({ user: team.user, displayName: safeTeamName })}
                     </div>
                     <div class="pwr-series">${safeSeries}</div>
                     <div class="pwr-record">${record} <span class="pwr-pts">${pts} pts</span></div>
@@ -128,22 +117,11 @@ function renderPowerRankings() {
         return;
     }
 
-    // 1. Mapeia para o data model novo e computa ranking.
+    // 1. Mapeia para o data model novo e computa ranking. powerRanking()
+    //    preserva a referência do objeto team, então _leagueName/_leagueTier
+    //    anexados em mapRosterToTeams() ficam disponíveis em r.team.
     const teams = mapRosterToTeams(appState.rosterData);
     const rows = powerRanking(teams);
-
-    // Reanexa os campos auxiliares (powerRanking só leva o Team, mas precisamos
-    // de _leagueName / _leagueTier no card). Lookup por (user + team) — único
-    // por temporada porque um username pode aparecer em duas séries (Elite).
-    const byKey = {};
-    teams.forEach(t => { byKey[t.user + '|' + t.team] = t; });
-    rows.forEach(r => {
-        const t = byKey[r.team.user + '|' + r.team.team];
-        if (t) {
-            r.team._leagueName = t._leagueName;
-            r.team._leagueTier = t._leagueTier;
-        }
-    });
 
     // 2. Agrupa por tier.
     /** @type {Object<string, Array>} */
