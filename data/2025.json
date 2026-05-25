@@ -1,0 +1,268 @@
+{
+  "id": 2025,
+  "status": "final",
+  "series": [
+    {
+      "id": "A",
+      "name": "KHC Serie A",
+      "teams": [
+        {
+          "rank": 1,
+          "user": "Khrstxn",
+          "team": "Dark Side - Satanás!!",
+          "avatarId": "5df4aecbcc1c2efed40f757710a7416e",
+          "w": 11,
+          "l": 3,
+          "pts": 2197.98,
+          "ptsAgainst": 1902.44,
+          "ppts": 2489.24,
+          "trophy": "gold"
+        },
+        {
+          "rank": 2,
+          "user": "RobsonF90",
+          "team": "Gold and Run",
+          "avatarId": "7b5208c93f9ff90cb35e17acbfcf9322",
+          "w": 10,
+          "l": 4,
+          "pts": 2024.12,
+          "ptsAgainst": 1906.22,
+          "ppts": 2312,
+          "trophy": "silver"
+        },
+        {
+          "rank": 3,
+          "user": "markinhosfc11",
+          "team": "markinhosfc11",
+          "avatarId": "5980016e7e8cce56e88422d32e0b41db",
+          "w": 10,
+          "l": 4,
+          "pts": 2045.46,
+          "ptsAgainst": 1820.32,
+          "ppts": 2440.3,
+          "trophy": "bronze"
+        },
+        {
+          "rank": 4,
+          "user": "LucioWagner",
+          "team": "Los Pollos Hermanos",
+          "avatarId": "f783c2a006727310477604c4d064a495",
+          "w": 8,
+          "l": 6,
+          "pts": 1982.22,
+          "ptsAgainst": 1859.16,
+          "ppts": 2386.88,
+          "trophy": "fourth"
+        },
+        {
+          "rank": 5,
+          "user": "VoliBEARS",
+          "team": "VoliBEARS",
+          "avatarId": "febae4b21b231a9e4714ba454fd71b29",
+          "w": 7,
+          "l": 7,
+          "pts": 1971.5,
+          "ptsAgainst": 1993.68,
+          "ppts": 2293.38
+        },
+        {
+          "rank": 6,
+          "user": "ACosta13",
+          "team": "ACosta13",
+          "avatarId": "057b6b501c476f303eecac265ebc220b",
+          "w": 6,
+          "l": 8,
+          "pts": 1992.18,
+          "ptsAgainst": 1943.94,
+          "ppts": 2256.74
+        },
+        {
+          "rank": 7,
+          "user": "Gumagol971",
+          "team": "Gumagol971",
+          "avatarId": "a8215eb47314e0ce8391f0ae7ead0845",
+          "w": 6,
+          "l": 8,
+          "pts": 1807.16,
+          "ptsAgainst": 1876.4,
+          "ppts": 2151.44
+        },
+        {
+          "rank": 8,
+          "user": "BigFieldMS",
+          "team": "BigFieldMS",
+          "avatarId": "0f3d1443e519040cb9ec09b33642c4d7",
+          "w": 5,
+          "l": 9,
+          "pts": 1762.26,
+          "ptsAgainst": 2054.42,
+          "ppts": 2011.92
+        },
+        {
+          "rank": 9,
+          "user": "Caiocarbina",
+          "team": "Caipiracicaba",
+          "avatarId": "b3338675f635c2c1f42b469621d38ec6",
+          "w": 4,
+          "l": 10,
+          "pts": 1845.48,
+          "ptsAgainst": 2028.58,
+          "ppts": 2170.78
+        },
+        {
+          "rank": 10,
+          "user": "RiqueSantos",
+          "team": "FAITHFUL RIQUE",
+          "avatarId": "7e090e56b5f31aa1c467be6d057aa868",
+          "w": 3,
+          "l": 11,
+          "pts": 1763.04,
+          "ptsAgainst": 2006.24,
+          "ppts": 2118.74
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "KHC Serie B",
+      "teams": [
+        {
+          "rank": 1,
+          "user": "timbu2001",
+          "team": "timbu2001",
+          "avatarId": "482cc926e8edb35562aeb1ec88563b02",
+          "w": 9,
+          "l": 5,
+          "pts": 1939.98,
+          "ptsAgainst": 1696.84,
+          "ppts": 2207.56,
+          "trophy": "gold"
+        },
+        {
+          "rank": 2,
+          "user": "Diogoashura",
+          "team": "Diogoashura",
+          "avatarId": "dc6b61498b164e32ca51a913ee518824",
+          "w": 8,
+          "l": 6,
+          "pts": 1887.38,
+          "ptsAgainst": 1793.8,
+          "ppts": 2240.08,
+          "trophy": "silver"
+        },
+        {
+          "rank": 3,
+          "user": "Dedi",
+          "team": "GORDINHAS AJEITADAS",
+          "avatarId": "4cd377c306da19621012531d8c7b0066",
+          "w": 7,
+          "l": 7,
+          "pts": 1767.64,
+          "ptsAgainst": 1764.76,
+          "ppts": 2089.56,
+          "trophy": "bronze"
+        },
+        {
+          "rank": 4,
+          "user": "Caofarejador",
+          "team": "Cão Farejador",
+          "avatarId": "eb42ed91d0b69902a4ab76bd4eb3d193",
+          "w": 13,
+          "l": 1,
+          "pts": 2067.56,
+          "ptsAgainst": 1770.28,
+          "ppts": 2324.72,
+          "trophy": "fourth"
+        },
+        {
+          "rank": 5,
+          "user": "alb2106",
+          "team": "21 Saints",
+          "avatarId": "889698b8d789845c8f6c445c08a32d8c",
+          "w": 11,
+          "l": 3,
+          "pts": 2013.14,
+          "ptsAgainst": 1711.9,
+          "ppts": 2220.88
+        },
+        {
+          "rank": 6,
+          "user": "lucianooliveira21",
+          "team": "lucianooliveira21",
+          "avatarId": "605aeddc58667c51735fd1a2a9e9d59e",
+          "w": 8,
+          "l": 6,
+          "pts": 1868.28,
+          "ptsAgainst": 1837.16,
+          "ppts": 2176.44
+        },
+        {
+          "rank": 7,
+          "user": "wladspfc",
+          "team": "wladspfc",
+          "avatarId": "fb58e2c039aad8c1f4688085392e382b",
+          "w": 6,
+          "l": 8,
+          "pts": 2023.74,
+          "ptsAgainst": 2012,
+          "ppts": 2275.02
+        },
+        {
+          "rank": 8,
+          "user": "SiaraBigheads",
+          "team": "SiaraBigheads",
+          "avatarId": "d7470960d78d1f135eb11f64c61fcb82",
+          "w": 6,
+          "l": 8,
+          "pts": 1633.96,
+          "ptsAgainst": 1722.26,
+          "ppts": 1902.7
+        },
+        {
+          "rank": 9,
+          "user": "RegisCarrara",
+          "team": "RegisCarrara",
+          "avatarId": "15d7cf259bc30eab8f6120f45f652fb6",
+          "w": 5,
+          "l": 9,
+          "pts": 1770.42,
+          "ptsAgainst": 1852.42,
+          "ppts": 2097
+        },
+        {
+          "rank": 10,
+          "user": "renelutfi",
+          "team": "Lutfi Lycans",
+          "avatarId": "2809c2369386a6c1e07208b012d6eff6",
+          "w": 5,
+          "l": 9,
+          "pts": 1639.94,
+          "ptsAgainst": 1826.84,
+          "ppts": 1928.54
+        },
+        {
+          "rank": 11,
+          "user": "Genys",
+          "team": "Explosion Raiders",
+          "avatarId": "3a8c84bb071809d7c19ddda7dcc4593c",
+          "w": 3,
+          "l": 11,
+          "pts": 1768.94,
+          "ptsAgainst": 2018.6,
+          "ppts": 2002.7
+        },
+        {
+          "rank": 12,
+          "user": "LucasMotaTMA",
+          "team": "Amazonas Curupiras",
+          "avatarId": "7572250c2fb084c434fed0e82229e183",
+          "w": 3,
+          "l": 11,
+          "pts": 1481.84,
+          "ptsAgainst": 1855.96,
+          "ppts": 1940.04
+        }
+      ]
+    }
+  ]
+}
