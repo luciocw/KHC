@@ -6,13 +6,6 @@
 // =============================================================================
 
 /**
- * Total de semanas na temporada regular. Placeholder até live week tracking.
- * @type {number}
- */
-const LIGAS_WEEKS_TOTAL = 14;
-const LIGAS_WEEKS_CURRENT = 8;
-
-/**
  * Verifica se a temporada selecionada (appState.season) é finalizada.
  * @returns {boolean}
  */
@@ -69,23 +62,20 @@ function trophyToMedalSvg(trophy) {
  */
 function renderLigasCaption(container) {
     if (container.querySelector('.ligas-caption')) return;
-    const finalized = isSeasonFinalized();
+    // Só renderiza caption pra temporada finalizada — pra ativa, o dropdown
+    // já comunica o ano e adicionar mensagem só polui sem informação real
+    // até termos tracking de semana ao vivo.
+    if (!isSeasonFinalized()) return;
+
     const safeYear = escapeHtml(String(appState.season));
-
-    const iconSvg = finalized
-        ? (window.IconRegistry ? IconRegistry.trophy({ size: 14 }) : '')
-        : (window.IconRegistry ? IconRegistry.target({ size: 14 }) : '');
-
-    const text = finalized
-        ? `Classificação final da temporada ${safeYear}`
-        : `Temporada em andamento — Semana ${LIGAS_WEEKS_CURRENT} de ${LIGAS_WEEKS_TOTAL}`;
+    const iconSvg = window.IconRegistry ? IconRegistry.trophy({ size: 14 }) : '';
 
     const caption = document.createElement('div');
     caption.className = 'ligas-caption';
     caption.setAttribute('role', 'status');
     caption.innerHTML = `
         <span class="ligas-caption-icon" aria-hidden="true">${iconSvg}</span>
-        <span class="ligas-caption-text">${escapeHtml(text)}</span>
+        <span class="ligas-caption-text">${escapeHtml('Classificação final da temporada ' + safeYear)}</span>
     `;
     // Insere antes de qualquer card já presente
     container.insertBefore(caption, container.firstChild);
