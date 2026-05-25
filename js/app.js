@@ -19,6 +19,15 @@ async function init() {
 
     selector.addEventListener('change', debouncedLoad);
 
+    // Pré-carrega temporadas finalizadas (JSON estático). Não bloqueia o
+    // render se falhar — Lendas e Drawer só não terão dados históricos.
+    // Mantemos o await para que o primeiro render de Lendas já tenha o dado.
+    try {
+        await preloadFinalizedSeasons();
+    } catch (e) {
+        console.warn('Falha ao preload de temporadas finalizadas:', e);
+    }
+
     loadData();
 }
 

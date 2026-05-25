@@ -1,15 +1,39 @@
 // =============================================================================
 // TAB / LENDAS KHC — Ranking acumulado de conquistas (campeonatos, vices, 3º,
-// 4º) somando todas as temporadas finalizadas. Não depende de dados live.
-// Lê: KHC_CONFIG (standings)
-// Depende de: js/config.js, js/sanitize.js
+// 4º) somando todas as temporadas finalizadas.
+//
+// FASE 1: Migrado para ler do data layer (js/data.js + js/derivations.js).
+// Fonte primária: data/<year>.json carregado em preloadFinalizedSeasons().
+// Fallback: KHC_CONFIG.standings (caso o JSON não carregue, ex: file:// CORS).
+//
+// O fallback será removido na Fase 6 (cleanup), uma vez que todo deploy
+// passar por HTTP. A redação visual desta tab será reescrita na Fase 3.
+//
+// Depende de: js/config.js, js/sanitize.js, js/data.js, js/derivations.js
 // =============================================================================
 
 /**
- * Calcula conquistas acumuladas de cada jogador
- * Retorna array ordenado por: títulos > vices > 3º > 4º
+ * Adapta o output do legendsAggregator (data model novo) para o shape legacy
+ * usado por renderLegends. Mantém a UI desta fase intocada.
+ * @param {LegendEntry[]} entries
+ * @returns {Array<{name, titles, vices, thirds, fourths}>}
  */
-function calculatePlayerAchievements() {
+function _legendsToLegacyShape(entries) {
+    return entries.map(e => ({
+        name: e.user,
+        titles:  e.trophies.gold,
+        vices:   e.trophies.silver,
+        thirds:  e.trophies.bronze,
+        fourths: e.trophies.fourth
+    }));
+}
+
+/**
+ * Fallback: derivação legacy de KHC_CONFIG.standings (mesma lógica de antes
+ * da Fase 1). Usado quando data/<year>.json não está disponível.
+ * @returns {Array<{name, titles, vices, thirds, fourths}>}
+ */
+function _legendsFromConfig() {
     const playerStats = {};
 
     Object.keys(KHC_CONFIG).forEach(year => {
@@ -26,10 +50,7 @@ function calculatePlayerAchievements() {
                 if (!playerStats[owner]) {
                     playerStats[owner] = {
                         name: owner,
-                        titles: 0,      // 1º lugar
-                        vices: 0,       // 2º lugar
-                        thirds: 0,      // 3º lugar
-                        fourths: 0      // 4º lugar
+                        titles: 0, vices: 0, thirds: 0, fourths: 0
                     };
                 }
 
@@ -43,14 +64,27 @@ function calculatePlayerAchievements() {
         });
     });
 
-    // Converte para array e ordena
     return Object.values(playerStats).sort((a, b) => {
-        // Ordena por: títulos > vices > 3º > 4º
         if (b.titles !== a.titles) return b.titles - a.titles;
         if (b.vices !== a.vices) return b.vices - a.vices;
         if (b.thirds !== a.thirds) return b.thirds - a.thirds;
         return b.fourths - a.fourths;
     });
+}
+
+/**
+ * Calcula conquistas acumuladas de cada jogador.
+ * Prefere data layer (JSON); cai para KHC_CONFIG se data não carregou.
+ * @returns {Array<{name, titles, vices, thirds, fourths}>}
+ */
+function calculatePlayerAchievements() {
+    const finalizedSeasons = getFinalizedSeasons();
+    if (finalizedSeasons.length > 0) {
+        return _legendsToLegacyShape(legendsAggregator(finalizedSeasons));
+    }
+    // Fallback: nenhuma temporada finalizada carregou (ex: file://, fetch falhou)
+    console.info('Lendas: usando KHC_CONFIG.standings (data/*.json não disponível)');
+    return _legendsFromConfig();
 }
 
 /**
