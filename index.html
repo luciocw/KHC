@@ -116,15 +116,9 @@
                 tabindex="0"
                 hidden>
                 <h2 class="sr-only">Ranking Global - Top Scorers</h2>
-                <div class="global-table" role="table" aria-label="Ranking global de pontuação">
-                    <div class="global-header" role="row">
-                        <div role="columnheader" aria-label="Posição">#</div>
-                        <div role="columnheader">Time</div>
-                        <div role="columnheader">Liga</div>
-                        <div role="columnheader" style="text-align:right">Pts</div>
-                    </div>
-                    <div id="globalContainer" role="rowgroup" aria-live="polite">
-                    </div>
+                <div id="globalContainer" aria-live="polite">
+                    <!-- Populated by renderGlobalStandings(); inclui a própria
+                         estrutura .top-scorers-card[role=table] + header. -->
                 </div>
             </section>
 

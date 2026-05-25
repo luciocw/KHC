@@ -17,11 +17,10 @@
      === LIGAS ===                     Cards de liga + standings (tab Ligas)
      === TOP SCORERS ===               Tabela global achatada (tab Top Scorers)
      === POWER RANKING ===             Parte 1: barras e classes base
-     === HALL OF FAME (LEGACY) ===     Estilos legados (a serem aposentados)
      === UTILS ===                     Spinners, skeletons, animações genéricas
      === ACCESSIBILITY ===             Skip link, focus, sr-only, reduced-motion
      === POWER RANKING — TIER LIST === Parte 2: tier list S/A/B/C/D + cards
-     === HALL OF FAME (NOVO LAYOUT) === Layout HoF mais recente
+     === HALL OF FAME ===              Layout HoF (Lendas/Temporadas usam abaixo)
      === LENDAS ===                    Tabela de conquistas (tab Lendas KHC)
      === TEMPORADAS ===                Histórico ano-a-ano (tab Temporadas)
      === FOOTER ===                    Footer global (brand + sobre button)
@@ -835,16 +834,7 @@ header[role="banner"] {
     color: var(--text);
 }
 
-.player-link {
-    cursor: pointer;
-    transition: color var(--transition-fast);
-}
-
-.player-link:hover,
-.player-link:focus-visible {
-    color: var(--orange-2);
-    outline: none;
-}
+/* (.player-link declarado uma única vez em LIGAS — não redeclarar) */
 
 /* ≤420px: esconde chip de liga, mantém só rank/time/pts */
 @media (max-width: 420px) {
@@ -933,40 +923,6 @@ header[role="banner"] {
     .tier-label { padding: 14px 8px; }
     .tier-label .letter { font-size: 24px; }
     .tier-teams { grid-template-columns: 1fr; }
-}
-
-/* === HALL OF FAME (LEGACY) === */
-/* Estilos legados. Lendas e Temporadas tem seções próprias abaixo. */
-.hof-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
-.hof-card {
-    background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
-    border: 1px solid var(--border);
-    padding: 1.5rem;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    position: relative;
-}
-
-.hof-year {
-    font-size: 2rem;
-    font-weight: 800;
-    opacity: 0.2;
-    position: absolute;
-    right: 20px;
-    top: 10px;
-}
-
-.hof-trophy {
-    font-size: 2.5rem;
-    color: var(--khc-gold);
-    filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.3));
 }
 
 /* === UTILS === */
@@ -1252,9 +1208,8 @@ select:focus-visible {
     }
 
     .league-card,
-    .global-table,
-    .power-card,
-    .hof-card {
+    .top-scorers-card,
+    .power-card {
         border-width: 2px;
     }
 }
@@ -1440,23 +1395,14 @@ select:focus-visible {
     transition: width 0.6s cubic-bezier(.2, .6, .2, 1);
 }
 
-.player-link {
-    cursor: pointer;
-    transition: color var(--transition-fast);
-}
-
-.player-link:hover,
-.player-link:focus-visible {
-    color: var(--orange-2);
-    outline: none;
-}
+/* (.player-link declarado uma única vez em LIGAS — não redeclarar) */
 
 @media (prefers-reduced-motion: reduce) {
     .pwr-bar-fill { transition: none; }
 }
 
-/* === HALL OF FAME (NOVO LAYOUT) === */
-/* Estilos do novo layout HoF — coexiste com LEGACY acima. */
+/* === HALL OF FAME === */
+/* Layout HoF — referenciado por tabs Lendas e Temporadas. */
 .hof-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -1691,16 +1637,7 @@ select:focus-visible {
     font-size: 13px;
 }
 
-.player-link {
-    cursor: pointer;
-    transition: color var(--transition-fast);
-}
-
-.player-link:hover,
-.player-link:focus-visible {
-    color: var(--orange-2);
-    outline: none;
-}
+/* (.player-link declarado uma única vez em LIGAS — não redeclarar) */
 
 @media (max-width: 600px) {
     .legends-header,
@@ -1885,8 +1822,7 @@ select:focus-visible {
 
 .dot.live    { width: 8px; height: 8px; border-radius: 99px; background: var(--green); animation: dotPulse 2s infinite; flex-shrink: 0; }
 
-.player-link { cursor: pointer; transition: color var(--transition-fast); }
-.player-link:hover, .player-link:focus-visible { color: var(--orange-2); outline: none; }
+/* (.player-link declarado uma única vez em LIGAS — não redeclarar) */
 
 .seasons-empty {
     padding: 32px;
@@ -1897,11 +1833,7 @@ select:focus-visible {
     border-radius: 12px;
 }
 
-@keyframes dotPulse {
-    0% { box-shadow: 0 0 0 0 rgba(62, 179, 113, 0.5); }
-    70% { box-shadow: 0 0 0 6px rgba(62, 179, 113, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(62, 179, 113, 0); }
-}
+/* (dotPulse keyframes definidos uma única vez em LIGAS — não redeclarar) */
 
 @media (max-width: 920px) {
     .season-podium-grid { grid-template-columns: 1fr; }
