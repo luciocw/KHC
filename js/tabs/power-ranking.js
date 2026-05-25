@@ -1,251 +1,201 @@
 // =============================================================================
-// TAB / POWER RANKING — Tier list S/A/B/C/D usando Power Score = 60% pts + 40%
-// win rate, com tiers definidos por desvio padrão. Inclui badges e indicador
-// de movimento (rank por pontos vs rank por power score).
-// Lê: appState.rosterData
-// Depende de: js/config.js, js/sanitize.js
+// TAB / POWER RANKING — Tier list S/A/B/C/D usando Power Score (derivações).
+//
+// Visual port da Phase 3 do redesign:
+//   - Caption acima com ícone de gráfico + texto contextual (ativa vs final).
+//   - Tier rows com label panel 90px + grid de PWR cards.
+//   - PWR card: avatar + nome + série + W-L pts | score grande + barra 3px.
+//   - Top-left tab `#rank` com indicador de movimento (↑/↓/—).
+//
+// Lê: appState.season, appState.rosterData
+// Depende de: js/config.js, js/sanitize.js, js/derivations.js, js/data.js
 // =============================================================================
 
 /**
- * Calcula o Power Score combinando pontos e vitórias
- * Fórmula: (pontos normalizados * 0.6) + (win% * 0.4) * 100
+ * Mapeia o registro legacy `rosterData` para o formato Team esperado por
+ * `powerRanking()`. Carrega também campos auxiliares (`_leagueName`,
+ * `_leagueTier`) usados na linha "série" do card.
+ *
+ * @param {Array<object>} rosterData
+ * @returns {Array<object>}
  */
-function calculatePowerScore(team, maxPts, minPts, maxGames) {
-    const ptsNormalized = maxPts > minPts ? (team.fpts - minPts) / (maxPts - minPts) : 0;
-    const totalGames = team.wins + team.losses;
-    const winPct = totalGames > 0 ? team.wins / totalGames : 0;
-
-    // Power Score: 60% pontuação + 40% win rate
-    return (ptsNormalized * 0.6 + winPct * 0.4) * 100;
+function mapRosterToTeams(rosterData) {
+    return rosterData.map(r => ({
+        user: r.ownerName,
+        team: r.teamName,
+        avatarId: r.avatar,
+        w: r.wins,
+        l: r.losses,
+        pts: r.fpts,
+        _leagueName: r.leagueName,
+        _leagueTier: r.leagueTier,
+    }));
 }
 
 /**
- * Calcula média e desvio padrão de um array
+ * Configuração visual estática por tier (letra + descrição em PT-BR maiúscula).
+ * As classes CSS `.tier-label.s/.a/.b/.c/.d` carregam o gradiente.
  */
-function calculateStats(values) {
-    const n = values.length;
-    if (n === 0) return { mean: 0, stdDev: 0 };
+const TIER_CONFIG = {
+    S: { letter: 'S', desc: 'ELITE',       cls: 's' },
+    A: { letter: 'A', desc: 'CONTENDERS',  cls: 'a' },
+    B: { letter: 'B', desc: 'RISERS',      cls: 'b' },
+    C: { letter: 'C', desc: 'MID-PACK',    cls: 'c' },
+    D: { letter: 'D', desc: 'RELEGATION',  cls: 'd' },
+};
 
-    const mean = values.reduce((a, b) => a + b, 0) / n;
-    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / n;
-    const stdDev = Math.sqrt(variance);
-
-    return { mean, stdDev };
+/**
+ * Calcula movimento entre o rank novo (por PWR) e o original (por pts).
+ * Retorna `{ symbol, cls, aria }` para renderização do indicador.
+ *
+ * @param {number} rank
+ * @param {number} originalRank
+ * @returns {{symbol: string, cls: string, aria: string}}
+ */
+function movementFor(rank, originalRank) {
+    const diff = originalRank - rank; // positivo = subiu
+    if (diff > 0) {
+        return { symbol: `↑${diff}`, cls: 'move-up',   aria: `subiu ${diff}` };
+    }
+    if (diff < 0) {
+        return { symbol: `↓${-diff}`, cls: 'move-down', aria: `desceu ${-diff}` };
+    }
+    return { symbol: '—', cls: 'move-same', aria: 'sem variação' };
 }
 
 /**
- * Determina o tier baseado em desvio padrão
+ * Determina se a temporada atual está finalizada consultando
+ * `getFinalizedSeasons()`. Active = caption "parcial"; final = "total".
+ *
+ * @param {number|string} seasonId
+ * @returns {boolean}
  */
-function getTierByStdDev(score, mean, stdDev) {
-    if (score >= mean + 1.5 * stdDev) return 'S';      // Excepcional (+1.5σ)
-    if (score >= mean + 0.5 * stdDev) return 'A';      // Acima da média (+0.5σ)
-    if (score >= mean - 0.5 * stdDev) return 'B';      // Média (±0.5σ)
-    if (score >= mean - 1.5 * stdDev) return 'C';      // Abaixo da média (-0.5σ a -1.5σ)
-    return 'D';                                         // Reconstrução (<-1.5σ)
+function isSeasonFinalized(seasonId) {
+    if (typeof getFinalizedSeasons !== 'function') return false;
+    const finalized = getFinalizedSeasons() || [];
+    return finalized.some(s => String(s.id) === String(seasonId));
 }
 
 /**
- * Gera badges especiais para um time
- * @param {object} team - Time a avaliar
- * @param {object} stats - Estatísticas pré-calculadas { maxPts, maxWins }
- * @param {number} rank - Posição atual no ranking
- * @returns {Array} - Array de badges
+ * Renderiza HTML de um único PWR card.
+ * @param {object} row PowerRow + flags do mapRoster
+ * @returns {string}
  */
-function generateBadges(team, stats, rank) {
-    const badges = [];
+function renderPwrCard(row) {
+    const team = row.team;
+    const safeUser = escapeHtml(team.user || '');
+    const safeTeamName = escapeHtml(team.team || '');
+    const safeSeries = escapeHtml(team._leagueName || '');
+    const avatarUrl = sanitizeAvatarUrl(team.avatarId);
+    const pts = sanitizeNumber(team.pts, 0, VALIDATION.MAX_POINTS).toFixed(1);
+    const record = `${team.w}-${team.l}`;
+    const score = row.pwr.toFixed(1);
+    const pwrPct = Math.max(0, Math.min(100, row.pwr));
+    const mv = movementFor(row.rank, row.originalRank);
 
-    // Líder geral
-    if (rank === 1) {
-        badges.push({ icon: '👑', label: 'Líder', class: 'badge-leader' });
-    }
-
-    // Top scorer (maior pontuação)
-    if (team.fpts === stats.maxPts) {
-        badges.push({ icon: '🎯', label: 'Top Scorer', class: 'badge-scorer' });
-    }
-
-    // Melhor record (mais vitórias)
-    if (team.wins === stats.maxWins && team.wins > 0) {
-        badges.push({ icon: '🔥', label: 'Hot Streak', class: 'badge-streak' });
-    }
-
-    // Invicto ou quase (≤1 derrota)
-    if (team.losses <= 1 && team.wins > 5) {
-        badges.push({ icon: '🛡️', label: 'Invicto', class: 'badge-undefeated' });
-    }
-
-    return badges;
-}
-
-/**
- * Gera indicador de movimento (simulado para esta versão)
- * Em produção, compararia com ranking da semana anterior
- */
-function getMovementIndicator(rank, previousRank) {
-    // Simulação: baseado na diferença entre ranking por pontos vs power score
-    const diff = previousRank - rank;
-
-    if (diff > 2) return { icon: '⬆️', class: 'movement-up-big', label: `+${diff}` };
-    if (diff > 0) return { icon: '↗️', class: 'movement-up', label: `+${diff}` };
-    if (diff < -2) return { icon: '⬇️', class: 'movement-down-big', label: `${diff}` };
-    if (diff < 0) return { icon: '↘️', class: 'movement-down', label: `${diff}` };
-    return { icon: '➡️', class: 'movement-same', label: '=' };
+    return `
+        <article class="pwr-card" data-user="${safeUser}">
+            <div class="pwr-rank-tab" aria-label="Posição ${row.rank}, ${mv.aria}">
+                <span class="pwr-rank">#${row.rank}</span>
+                <span class="${mv.cls}">${mv.symbol}</span>
+            </div>
+            <div class="pwr-card-left">
+                <img src="${avatarUrl}" alt="" class="pwr-avatar" loading="lazy"
+                     onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
+                <div class="pwr-info">
+                    <div class="pwr-team-name">
+                        <span class="player-link" data-user="${safeUser}" tabindex="0" role="button">${safeTeamName}</span>
+                    </div>
+                    <div class="pwr-series">${safeSeries}</div>
+                    <div class="pwr-record">${record} <span class="pwr-pts">${pts} pts</span></div>
+                </div>
+            </div>
+            <div class="pwr-card-right">
+                <div class="pwr-score">${score}</div>
+                <div class="pwr-score-label">PWR</div>
+                <div class="pwr-bar"><div class="pwr-bar-fill" data-pct="${pwrPct}"></div></div>
+            </div>
+        </article>
+    `;
 }
 
 function renderPowerRankings() {
     const container = document.getElementById(DOM_IDS.POWER);
+    if (!container) return;
 
-    if (appState.rosterData.length === 0) {
+    if (!appState.rosterData || appState.rosterData.length === 0) {
         container.innerHTML = '<div style="padding:1rem; text-align:center" role="status">Sem dados</div>';
         return;
     }
 
-    // Estatísticas base
-    const allTeams = [...appState.rosterData];
-    const maxPts = Math.max(...allTeams.map(t => t.fpts));
-    const minPts = Math.min(...allTeams.map(t => t.fpts));
-    const maxGames = Math.max(...allTeams.map(t => t.wins + t.losses));
+    // 1. Mapeia para o data model novo e computa ranking.
+    const teams = mapRosterToTeams(appState.rosterData);
+    const rows = powerRanking(teams);
 
-    // Calcula Power Score para cada time
-    const teamsWithScore = allTeams.map((team, originalIndex) => ({
-        ...team,
-        powerScore: calculatePowerScore(team, maxPts, minPts, maxGames),
-        originalRank: originalIndex + 1 // Ranking original por pontos
-    }));
-
-    // Ordena por Power Score
-    teamsWithScore.sort((a, b) => b.powerScore - a.powerScore);
-
-    // Adiciona ranking atual
-    teamsWithScore.forEach((team, index) => {
-        team.currentRank = index + 1;
+    // Reanexa os campos auxiliares (powerRanking só leva o Team, mas precisamos
+    // de _leagueName / _leagueTier no card). Lookup por (user + team) — único
+    // por temporada porque um username pode aparecer em duas séries (Elite).
+    const byKey = {};
+    teams.forEach(t => { byKey[t.user + '|' + t.team] = t; });
+    rows.forEach(r => {
+        const t = byKey[r.team.user + '|' + r.team.team];
+        if (t) {
+            r.team._leagueName = t._leagueName;
+            r.team._leagueTier = t._leagueTier;
+        }
     });
 
-    // Calcula estatísticas para distribuição por desvio padrão
-    const scores = teamsWithScore.map(t => t.powerScore);
-    const { mean, stdDev } = calculateStats(scores);
+    // 2. Agrupa por tier.
+    /** @type {Object<string, Array>} */
+    const grouped = { S: [], A: [], B: [], C: [], D: [] };
+    rows.forEach(r => { grouped[r.tier].push(r); });
 
-    // Agrupa times por tier
-    const tiers = { S: [], A: [], B: [], C: [], D: [] };
+    // 3. Caption (chart icon + texto contextual).
+    const finalized = isSeasonFinalized(appState.season);
+    const captionText = finalized
+        ? 'Tier List baseada na pontuação total da temporada'
+        : 'Tier List baseada na pontuação parcial (Semana 8 de 14)';
 
-    teamsWithScore.forEach(team => {
-        const tier = getTierByStdDev(team.powerScore, mean, stdDev);
-        team.tier = tier;
-        tiers[tier].push(team);
-    });
+    let html = `
+        <div class="power-caption">
+            ${IconRegistry.chart({ size: 14 })}
+            <span>${captionText}</span>
+        </div>
+        <div class="tier-list">
+    `;
 
-    // Pré-calcula stats para badges (evita recálculo O(n) em cada iteração)
-    const badgeStats = {
-        maxPts: Math.max(...teamsWithScore.map(t => t.fpts)),
-        maxWins: Math.max(...teamsWithScore.map(t => t.wins))
-    };
-
-    // Configuração visual de cada tier
-    const tierConfig = {
-        S: { label: 'S', color: 'tier-s', description: 'Elite', emoji: '🏆' },
-        A: { label: 'A', color: 'tier-a', description: 'Contenders', emoji: '⭐' },
-        B: { label: 'B', color: 'tier-b', description: 'Playoff', emoji: '📈' },
-        C: { label: 'C', color: 'tier-c', description: 'Médio', emoji: '📊' },
-        D: { label: 'D', color: 'tier-d', description: 'Rebuild', emoji: '🔧' }
-    };
-
-    let html = '<div class="tier-list">';
-    let tierIndex = 0;
-
-    Object.keys(tiers).forEach(tierKey => {
-        const tierTeams = tiers[tierKey];
-        const config = tierConfig[tierKey];
-
-        // Só mostra tier se tiver times
-        if (tierTeams.length === 0) return;
-
-        const ariaLabel = `Tier ${config.label} - ${config.description}: ${tierTeams.length} times`;
+    // 4. Tier rows (não renderiza vazios).
+    let tierIdx = 0;
+    Object.keys(TIER_CONFIG).forEach(tierKey => {
+        const list = grouped[tierKey];
+        if (!list || list.length === 0) return;
+        const cfg = TIER_CONFIG[tierKey];
+        const aria = `Tier ${cfg.letter} — ${cfg.desc}: ${list.length} times`;
 
         html += `
-            <div class="tier-row stagger-item ${config.color}" role="region" aria-label="${ariaLabel}" style="animation-delay: ${tierIndex * STAGGER_DELAY_MS}ms">
-                <div class="tier-label">
-                    <span class="tier-emoji">${config.emoji}</span>
-                    <span class="tier-letter">${config.label}</span>
-                    <span class="tier-desc">${config.description}</span>
+            <section class="tier-row stagger-item" role="region" aria-label="${aria}"
+                     style="animation-delay: ${tierIdx * STAGGER_DELAY_MS}ms">
+                <div class="tier-label ${cfg.cls}">
+                    <span class="letter">${cfg.letter}</span>
+                    <span class="desc">${cfg.desc}</span>
                 </div>
                 <div class="tier-teams">
-        `;
-
-        tierTeams.forEach(team => {
-            const safeTeamName = escapeHtml(team.teamName);
-            const safeLeagueName = escapeHtml(team.leagueName);
-            const safePts = sanitizeNumber(team.fpts, 0, VALIDATION.MAX_POINTS).toFixed(1);
-            const avatarUrl = sanitizeAvatarUrl(team.avatar);
-            const powerScore = team.powerScore.toFixed(1);
-
-            // Badges (usa stats pré-calculados para performance O(1))
-            const badges = generateBadges(team, badgeStats, team.currentRank);
-            const badgesHtml = badges.map(b =>
-                `<span class="team-badge ${b.class}" title="${b.label}">${b.icon}</span>`
-            ).join('');
-
-            // Movimento
-            const movement = getMovementIndicator(team.currentRank, team.originalRank);
-
-            // Barra de progresso (percentual relativo ao máximo)
-            const progressPct = maxPts > 0 ? (team.fpts / maxPts * 100).toFixed(0) : 0;
-
-            // Record formatado
-            const record = `${team.wins}-${team.losses}`;
-
-            html += `
-                <div class="tier-team-card" title="${safeTeamName} - Power Score: ${powerScore}">
-                    <div class="tier-card-header">
-                        <span class="tier-rank">#${team.currentRank}</span>
-                        <span class="tier-movement ${movement.class}" title="Variação: ${movement.label}">${movement.icon}</span>
-                    </div>
-                    <img src="${avatarUrl}" alt="" class="tier-team-avatar" loading="lazy" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
-                    <div class="tier-team-info">
-                        <div class="tier-team-header">
-                            <span class="tier-team-name">${safeTeamName}</span>
-                            <div class="tier-badges">${badgesHtml}</div>
-                        </div>
-                        <span class="tier-team-league">${safeLeagueName}</span>
-                        <div class="tier-team-stats">
-                            <span class="tier-record" title="Record">${record}</span>
-                            <span class="tier-pts" title="Pontos totais">${safePts} pts</span>
-                        </div>
-                        <div class="tier-progress-container">
-                            <div class="tier-progress-bar" style="width: ${progressPct}%"></div>
-                        </div>
-                    </div>
-                    <div class="tier-power-score">
-                        <span class="power-value">${powerScore}</span>
-                        <span class="power-label">PWR</span>
-                    </div>
+                    ${list.map(renderPwrCard).join('')}
                 </div>
-            `;
-        });
-
-        html += `
-                </div>
-            </div>
+            </section>
         `;
-        tierIndex++;
+        tierIdx++;
     });
-
-    // Legenda
-    html += `
-        <div class="tier-legend stagger-item" style="animation-delay: ${tierIndex * STAGGER_DELAY_MS}ms">
-            <div class="legend-title">Como funciona o Power Score?</div>
-            <div class="legend-content">
-                <div class="legend-item">
-                    <span class="legend-formula">PWR = (Pontos × 60%) + (Win Rate × 40%)</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-badge badge-leader">👑</span> Líder geral
-                    <span class="legend-badge badge-scorer">🎯</span> Top Scorer
-                    <span class="legend-badge badge-streak">🔥</span> Mais vitórias
-                </div>
-            </div>
-        </div>
-    `;
 
     html += '</div>';
     container.innerHTML = html;
+
+    // 5. Anima as barras (0% → pct) em rAF para garantir transição.
+    requestAnimationFrame(() => {
+        const bars = container.querySelectorAll('.pwr-bar-fill');
+        bars.forEach(b => {
+            const pct = parseFloat(b.getAttribute('data-pct')) || 0;
+            b.style.width = pct + '%';
+        });
+    });
 }
