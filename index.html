@@ -224,16 +224,18 @@
         3. api          → fetch+retry, cache, fetchLeagueData
         4. data         → loader híbrido (JSON estático + Sleeper live)
         5. derivations  → pwr, tier, legends, career (puro, sem DOM)
-        6. ui/loading   → spinners, skeletons
-        7. ui/tabs      → switchTab (usado inline), keyboard nav, SR
-        8. tabs/*       → renderers por aba
-        9. app          → init, loadData, DOMContentLoaded
+        6. icons        → SVG icon registry + renderIcons() (hidrata data-icon)
+        7. ui/loading   → spinners, skeletons
+        8. ui/tabs      → switchTab (usado inline), keyboard nav, SR
+        9. tabs/*       → renderers por aba
+       10. app          → init, loadData, DOMContentLoaded
     -->
     <script src="js/config.js"></script>
     <script src="js/sanitize.js"></script>
     <script src="js/api.js"></script>
     <script src="js/data.js"></script>
     <script src="js/derivations.js"></script>
+    <script src="js/icons.js"></script>
     <script src="js/ui/loading.js"></script>
     <script src="js/ui/tabs.js"></script>
     <script src="js/tabs/ligas.js"></script>

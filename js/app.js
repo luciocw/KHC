@@ -162,6 +162,12 @@ function clearSecondaryContainers() {
 
 // Iniciar quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
+    // Hidrata <span data-icon="..."> com SVGs do IconRegistry (icons.js).
+    // Roda antes de init() para que os ícones já apareçam mesmo enquanto
+    // os dados estão sendo carregados.
+    if (typeof renderIcons === 'function') {
+        renderIcons();
+    }
     init();
     setupTabKeyboardNavigation();
 });
