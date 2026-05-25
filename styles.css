@@ -1710,164 +1710,201 @@ select:focus-visible {
 
 /* === TEMPORADAS === */
 /* Histórico ano-a-ano. Tab "Temporadas". */
+
+.seasons-caption {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 24px 0 18px;
+}
+
 .seasons-container {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 18px;
 }
 
-.season-section {
-    background: var(--bg-card);
-    border-radius: 12px;
+.season-card {
+    position: relative;
+    background: linear-gradient(180deg, var(--bg-card), var(--bg-card-2));
     border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: var(--shadow-card);
     overflow: hidden;
 }
 
-.season-header {
+.season-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+    filter: blur(0.5px);
+}
+
+.season-card-hd {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 1.25rem 1.5rem;
-    background: linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(255,107,53,0.05) 100%);
-    border-bottom: 1px solid var(--border);
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
 }
 
 .season-year {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--khc-orange);
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 36px;
+    color: var(--orange);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
 }
 
-.season-status {
-    font-size: 0.75rem;
-    padding: 0.35rem 0.75rem;
-    border-radius: 20px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.season-ongoing {
-    background: rgba(251, 191, 36, 0.2);
-    color: var(--khc-gold);
-    border: 1px solid rgba(251, 191, 36, 0.3);
-    animation: pulse-badge 2s ease-in-out infinite;
-}
-
-@keyframes pulse-badge {
-    0%, 100% {
-        opacity: 1;
-        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
-    }
-    50% {
-        opacity: 0.85;
-        box-shadow: 0 0 8px 2px rgba(251, 191, 36, 0.2);
-    }
-}
-
-.season-completed {
-    background: rgba(34, 197, 94, 0.2);
-    color: #22c55e;
-    border: 1px solid rgba(34, 197, 94, 0.3);
-}
-
-.season-content {
-    padding: 1.5rem;
-}
-
-.season-pending {
+.season-meta {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    color: var(--text-muted);
-    font-size: 0.95rem;
-    padding: 1rem;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
-.season-pending-icon {
-    font-size: 1.5rem;
-}
-
-.season-leagues {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1rem;
-    padding: 1.25rem;
-}
-
-.season-league {
-    background: var(--bg-hover);
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    overflow: hidden;
-}
-
-.season-league-title {
-    padding: 0.75rem 1rem;
+.season-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 10px;
     font-weight: 700;
-    font-size: 0.9rem;
-    color: var(--khc-orange);
-    background: rgba(255, 107, 53, 0.1);
-    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.03);
+    color: var(--text-2);
 }
 
-.season-standings {
+.season-chip.is-active {
+    color: var(--orange-2);
+    border-color: var(--orange-dim);
+    background: rgba(255,107,53,0.10);
+}
+
+.season-chip.is-final {
+    color: var(--green);
+    border-color: rgba(62,179,113,0.4);
+    background: rgba(62,179,113,0.08);
+}
+
+.season-active-msg {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-2);
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+
+.season-series-list {
     display: flex;
     flex-direction: column;
+    gap: 8px;
 }
 
-.season-entry {
+.season-serie-row {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    min-height: var(--touch-target-min);
-    transition: background var(--transition-fast);
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text);
 }
 
-.season-entry:last-child {
-    border-bottom: none;
+.season-serie-name { font-weight: 600; }
+.season-serie-meta { color: var(--text-3); font-size: 12px; }
+
+.season-podium-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
 }
 
-.season-entry:hover {
-    background: rgba(255,255,255,0.03);
+.podium-col {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
 }
 
-.season-position {
-    font-size: 1.2rem;
-    min-width: 28px;
+.podium-col-title {
+    color: var(--orange);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
     text-align: center;
 }
 
-.season-owner {
+.podium-row {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+
+.podium-row:last-child { border-bottom: none; }
+
+.podium-icon { display: flex; justify-content: center; }
+.podium-name {
+    color: var(--text);
+    font-size: 13px;
     font-weight: 500;
-    font-size: 0.9rem;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
 }
+.podium-team { color: var(--text-3); font-size: 11px; }
+.podium-pts  { color: var(--text-2); font-size: 12px; font-variant-numeric: tabular-nums; text-align: right; font-weight: 600; }
+.podium-empty { color: var(--text-3); font-size: 12px; text-align: center; padding: 8px 0; }
 
-/* Position-specific colors for seasons */
-.season-entry.hof-gold .season-owner {
-    color: #ffd700;
-}
+.dot.live    { width: 8px; height: 8px; border-radius: 99px; background: var(--green); animation: dotPulse 2s infinite; flex-shrink: 0; }
 
-.season-entry.hof-silver .season-owner {
-    color: #c0c0c0;
-}
-
-.season-entry.hof-bronze .season-owner {
-    color: #cd7f32;
-}
-
-.season-entry.hof-fourth .season-owner {
-    color: var(--text-muted);
-}
+.player-link { cursor: pointer; transition: color var(--transition-fast); }
+.player-link:hover, .player-link:focus-visible { color: var(--orange-2); outline: none; }
 
 .seasons-empty {
-    padding: 3rem;
+    padding: 32px;
     text-align: center;
-    color: var(--text-muted);
-    font-size: 1rem;
+    color: var(--text-2);
+    font-size: 14px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+}
+
+@keyframes dotPulse {
+    0% { box-shadow: 0 0 0 0 rgba(62, 179, 113, 0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(62, 179, 113, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(62, 179, 113, 0); }
+}
+
+@media (max-width: 920px) {
+    .season-podium-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
+    .season-card { padding: 18px; }
+    .season-year { font-size: 28px; }
 }
 
 /* === RESPONSIVE === */
