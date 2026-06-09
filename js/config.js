@@ -16,11 +16,11 @@ const KHC_CONFIG = {
     },
     '2026': {
         leagues: [
-            // Coloque os IDs REAIS aqui quando a liga for renovada
-            { id: 'placeholder_a', name: 'KHC Serie A', tier: 'serie-a' },
-            { id: 'placeholder_b', name: 'KHC Serie B', tier: 'serie-b' },
-            { id: 'placeholder_c', name: 'KHC Serie C', tier: 'serie-c' },
-            { id: 'placeholder_elite', name: 'KHC Elite', tier: 'elite' }
+            { id: '1370091532551487488', name: 'KHC Elite',   tier: 'elite' },
+            { id: '1370032392135274496', name: 'KHC Serie A', tier: 'serie-a' },
+            { id: '1370034537232355328', name: 'KHC Serie B', tier: 'serie-b' },
+            { id: '1370036025006505984', name: 'KHC Serie C', tier: 'serie-c' },
+            { id: '1370091129751474176', name: 'KHC Serie D', tier: 'serie-d' },
         ]
     }
 };
@@ -54,7 +54,7 @@ const VALIDATION = {
     MAX_POINTS: 99999,
     MAX_WINS: 50,
     MAX_LOSSES: 50,
-    VALID_TIERS: ['serie-a', 'serie-b', 'serie-c', 'elite'],
+    VALID_TIERS: ['serie-a', 'serie-b', 'serie-c', 'serie-d', 'elite'],
     AVATAR_PATTERN: /^[a-zA-Z0-9_-]+$/
 };
 

@@ -23,7 +23,7 @@
  */
 
 /**
- * @typedef {'A' | 'B' | 'C' | 'Elite'} SeriesId
+ * @typedef {'A' | 'B' | 'C' | 'D' | 'Elite'} SeriesId
  * Identificador curto da série. "Elite" é liga paralela.
  */
 
