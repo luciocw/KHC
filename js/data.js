@@ -40,6 +40,7 @@ function tierToSeriesId(tier) {
         case 'serie-a': return 'A';
         case 'serie-b': return 'B';
         case 'serie-c': return 'C';
+        case 'serie-d': return 'D';
         case 'elite':   return 'Elite';
         default:        return 'A';
     }
@@ -51,6 +52,7 @@ function seriesIdToTier(id) {
         case 'A':     return 'serie-a';
         case 'B':     return 'serie-b';
         case 'C':     return 'serie-c';
+        case 'D':     return 'serie-d';
         case 'Elite': return 'elite';
         default:      return 'serie-a';
     }
