@@ -8,27 +8,29 @@
 // isSeasonFinalized() agora vive em data.js (fonte única).
 
 // -----------------------------------------------------------------------------
-// Trophy index — memoizado por temporada
+// Índice da classificação final — memoizado por temporada
 // -----------------------------------------------------------------------------
 //
-// Antes: findTeamTrophy() fazia 3 .find() lineares por chamada, chamado dentro
-// do forEach de times. Para 4 séries × 12 times = 48 chamadas, ~144 buscas
-// lineares por render. Agora indexamos uma vez ({seriesName → {teamName → trophy}})
-// e o lookup vira O(1). Cache invalida quando appState.season muda.
+// Para temporada finalizada, data/<ano>.json guarda a posição final de cada
+// time (`rank`: 1º–4º pelos playoffs, 5º em diante pela temporada regular) e
+// o troféu do top 4. Indexamos uma vez por {seriesName → {user → {rank,
+// trophy}}} e o lookup vira O(1). Chave por usuário (display_name), que é o
+// mesmo no JSON e na Sleeper — o nome do time pode mudar.
+// Cache invalida quando appState.season muda.
 // -----------------------------------------------------------------------------
 
-let _trophyIndexCache = null;
-let _trophyIndexCacheSeason = null;
+let _finalIndexCache = null;
+let _finalIndexCacheSeason = null;
 
 /**
- * Retorna `{ seriesName: { teamName: trophy } }` para a temporada atual.
+ * Retorna `{ seriesName: { user: { rank, trophy } } }` para a temporada atual.
  * Vazio se temporada não finalizada ou ausente do snapshot.
- * @returns {Object<string, Object<string, string>>}
+ * @returns {Object<string, Object<string, {rank: number, trophy: (string|null)}>>}
  */
-function getTrophyIndex() {
+function getFinalStandingsIndex() {
     const currentSeason = appState.season;
-    if (_trophyIndexCacheSeason === currentSeason && _trophyIndexCache) {
-        return _trophyIndexCache;
+    if (_finalIndexCacheSeason === currentSeason && _finalIndexCache) {
+        return _finalIndexCache;
     }
     const idx = {};
     try {
@@ -38,16 +40,32 @@ function getTrophyIndex() {
             season.series.forEach(srs => {
                 idx[srs.name] = {};
                 (srs.teams || []).forEach(t => {
-                    if (t.trophy) idx[srs.name][t.team] = t.trophy;
+                    idx[srs.name][t.user] = { rank: t.rank, trophy: t.trophy || null };
                 });
             });
         }
     } catch (e) {
         // mantém idx vazio
     }
-    _trophyIndexCache = idx;
-    _trophyIndexCacheSeason = currentSeason;
+    _finalIndexCache = idx;
+    _finalIndexCacheSeason = currentSeason;
     return idx;
+}
+
+/**
+ * Ordena os times pela classificação final (playoffs) quando houver.
+ * Times sem entrada no snapshot vão para o fim, mantendo a ordem original.
+ * @param {Array} teams      rosterData da série (já ordenado por campanha)
+ * @param {Object<string, {rank: number}>|undefined} seriesIdx
+ * @returns {Array}
+ */
+function sortByFinalStandings(teams, seriesIdx) {
+    if (!seriesIdx) return teams;
+    const rankOf = t => (seriesIdx[t.ownerName] ? seriesIdx[t.ownerName].rank : Infinity);
+    return teams
+        .map((t, i) => ({ t, i }))
+        .sort((a, b) => (rankOf(a.t) - rankOf(b.t)) || (a.i - b.i))
+        .map(x => x.t);
 }
 
 /**
@@ -114,6 +132,7 @@ function buildRankCell(trophy, rankNum) {
  * @param {object} t Team registro do rosterData (legacy shape)
  * @param {number} index 0-based
  * @param {{ trophyForTeam: function(string): string|null, leagueName: string }} ctx
+ *        trophyForTeam recebe o ownerName (usuário).
  * @returns {string} HTML
  */
 function buildTeamRow(t, index, ctx) {
@@ -125,7 +144,7 @@ function buildTeamRow(t, index, ctx) {
     const safePts = sanitizeNumber(t.fpts, 0, VALIDATION.MAX_POINTS).toFixed(1);
     const rankNum = index + 1;
 
-    const trophy = ctx.trophyForTeam(t.teamName);
+    const trophy = ctx.trophyForTeam(t.ownerName);
     const rankCell = buildRankCell(trophy, rankNum);
     const ariaLabel = `${rankNum}º lugar: ${safeTeamName}, dono ${safeOwnerName}, ${wins} vitórias e ${losses} derrotas, ${safePts} pontos`;
 
@@ -181,15 +200,16 @@ function renderLeagueCard(leagueData, container, staggerIndex = 0) {
     const finalized = isSeasonFinalized();
     const teamCount = sanitizeNumber(leagueData.teams.length, 0, 100);
 
-    // Closure de lookup O(1) para trophy, com early-exit se temporada ativa
-    const trophyIdx = finalized ? getTrophyIndex() : null;
-    const trophyForTeam = (teamName) => {
-        if (!trophyIdx) return null;
-        const seriesIdx = trophyIdx[leagueData.info.name];
-        return seriesIdx ? (seriesIdx[teamName] || null) : null;
+    // Temporada finalizada: ordem e medalhas vêm da classificação final
+    // (playoffs). Ativa: mantém a ordem da Sleeper (vitórias → pontos).
+    const seriesIdx = finalized ? getFinalStandingsIndex()[leagueData.info.name] : undefined;
+    const trophyForTeam = (user) => {
+        const entry = seriesIdx && seriesIdx[user];
+        return entry ? entry.trophy : null;
     };
+    const teams = sortByFinalStandings(leagueData.teams, seriesIdx);
 
-    const rowsHtml = leagueData.teams
+    const rowsHtml = teams
         .map((t, i) => buildTeamRow(t, i, { trophyForTeam, leagueName: leagueData.info.name }))
         .join('');
 

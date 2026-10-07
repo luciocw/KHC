@@ -69,11 +69,12 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 - **Ordem das ligas**: Elite primeiro (paralela) mistura com a hierarquia A→D. Considerar Elite em destaque separado.
 - `team-name` e `team-owner` às vezes são iguais (usuário sem nome de time) → linha repetida.
 - `.league-badge` "10 TIMES" ocupa espaço nobre e pouco informa.
-- **Temporada finalizada: ordem não bate com as medalhas** (visível depois da correção do B1). A lista segue a
-  campanha da temporada regular (vitórias → pontos), mas as medalhas vêm dos playoffs — na Serie B 2025 o campeão
-  aparece em 3º e o 4º colocado no topo. Além disso, o top-4 perde o número da posição (a medalha substitui o número).
-  Decisão de produto: ordenar pelo resultado final (`rank` do JSON) ou deixar explícito "Temporada regular" +
-  uma coluna/selo "Playoffs". Ver `screens/desktop-2025-leagues.png`.
+- ~~**Temporada finalizada: ordem não bate com as medalhas**~~ — ✅ corrigido: temporadas finalizadas agora são
+  ordenadas pela classificação final do `data/<ano>.json` (1º–4º pelos playoffs, 5º em diante pela temporada
+  regular), cruzando por usuário. Temporada ativa continua por vitórias → pontos.
+  **Para o Claude Design:** como o top-4 vem dos playoffs, a coluna V–D deixa de ser decrescente (ex.: 4º da
+  Serie B 2025 com 13–1). Vale um selo/legenda "Playoffs" separando o top-4 do resto, e manter o número da
+  posição junto da medalha (hoje a medalha substitui o número). Ver `screens/desktop-2025-leagues.png`.
 - Nome do time é o link do perfil, mas o perfil é do **dono** — affordance pouco clara (sem sublinhado/ícone).
 
 ### 3.3 Top Scorers
@@ -338,7 +339,8 @@ Career = { user, currentSeries, trophies:{gold,silver,bronze,fourth}, totalSeaso
 | Prioridade | Item |
 |---|---|
 | ✅ Feito | B1–B10 (medalhas, troca de temporada, Serie D no drawer, setas falsas, semana fixa, tier mobile, stats do drawer, séries atuais em temporada arquivada, escape de nomes, scroll lock) |
-| Agora (conteúdo / produto) | Subtítulo e modal sem Serie D (confirmar regra da Elite) · ordem da classificação final vs medalhas |
+| ✅ Feito | Classificação de temporadas finalizadas ordenada pelo resultado final dos playoffs |
+| Agora (conteúdo / produto) | Subtítulo e modal sem Serie D (confirmar regra da Elite) |
 | Redesign (Claude Design) | Header/navegação mobile · zonas na classificação · Top Scorers · Power Ranking · Lendas · tokens/escala/contraste |
 | Depois | URL por aba/perfil · dados ao vivo (semana, matchups, bracket) · limpeza do CSS morto |
 
@@ -349,7 +351,7 @@ Career = { user, currentSeries, trophies:{gold,silver,bronze,fourth}, totalSeaso
 |---|---|
 | `desktop-first-viewport.png`, `mobile-first-viewport.png` | 1ª dobra — header ocupando a tela |
 | `desktop-2026-*.png`, `mobile-2026-*.png` | Todas as abas, temporada ativa |
-| `desktop-2025-leagues.png` | B1 corrigido (medalhas) — e a ordem regular vs playoffs |
+| `desktop-2025-leagues.png`, `mobile-2025-leagues.png` | Temporada finalizada: medalhas (B1) e ordem pelo resultado final |
 | `desktop-2025-global.png`, `desktop-2025-power.png` | Temporada finalizada |
 | `mobile-2026-power.png` | B6 corrigido — tier como faixa horizontal |
 | `*-drawer.png`, `*-modal.png` | Perfil do jogador (mobile já com B7 corrigido) e Sobre a Liga |
