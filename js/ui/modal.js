@@ -80,6 +80,8 @@
                         <li>Serie A ⇄ Serie B</li>
                         <li>Serie B ⇄ Serie C</li>
                         <li>Serie C ⇄ Serie D</li>
+                        <li><strong>Rebaixamento:</strong> classificação final da temporada regular (playoffs não contam)</li>
+                        <li><strong>Promoção:</strong> classificação ao final dos playoffs</li>
                     </ul>
                 </dd>
 
@@ -97,8 +99,12 @@
                 <dd>
                     Temporada inaugural, com regras diferentes:
                     <ul>
-                        <li>Promoção &amp; rebaixamento de 2 equipes entre séries vizinhas</li>
-                        <li>Elite 2026: top 4 da Serie A + top 4 da Serie B de 2025</li>
+                        <li>2 últimos da Serie A descem para Serie B</li>
+                        <li>2 primeiros da Serie B sobem para Serie A</li>
+                        <li>2 últimos da Serie B descem para Serie C</li>
+                        <li>2 primeiros da Serie C sobem para Serie B</li>
+                        <li>KHC Elite: top 4 da Serie A + top 4 da Serie B da temporada
+                            anterior se qualificam</li>
                     </ul>
                 </dd>
             </dl>

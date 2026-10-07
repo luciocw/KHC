@@ -109,7 +109,8 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 - ~~Regras desatualizadas~~ — ✅ corrigido com as regras confirmadas: séries A–D com 10 participantes, 6 no playoff
   (semanas 15–17, conferido na Sleeper — o texto antigo dizia "2 semanas"), 3 sobem/3 descem; Elite paralela com os
   melhores da temporada anterior (2027: campeão e vice de cada série, 8 participantes; playoff com 4). As regras de
-  2025 (2 sobem/2 descem; Elite 2026 = top 4 da A + top 4 da B) ficaram numa seção "Regras de 2025".
+  2025 foram mantidas como estavam no site, numa seção "Regras de 2025". Critério confirmado: **rebaixamento pela
+  classificação final da temporada regular** (playoffs não contam) e **promoção pela classificação ao final dos playoffs**.
 - Rodapé "Mais regras e história serão adicionadas aqui em breve" passa sensação de inacabado.
 - O conteúdo merece uma página/aba própria ("Regras") em vez de um botão discreto no rodapé.
 
@@ -150,7 +151,8 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 - **Quem usa:** os próprios membros, majoritariamente **no celular**, para checar classificação, provocar os amigos e ver histórico/troféus.
 - **Momentos-chave:** (1) durante a temporada — "como está minha liga essa semana?"; (2) fim de temporada — campeões, acesso/rebaixamento; (3) entre temporadas — lendas e histórico.
 - **Formato da temporada (2026+):** 4 séries (A–D) com 10 participantes, 14 semanas regulares, playoffs com 6 times nas
-  semanas 15–17, 3 sobem / 3 descem entre séries vizinhas, pontuação PPR, roster `QB · 2 RB · 2 WR · TE · FLEX · SF · K · D/ST`.
+  semanas 15–17, 3 sobem / 3 descem entre séries vizinhas (rebaixamento pela temporada regular; promoção pelo
+  resultado dos playoffs), pontuação PPR, roster `QB · 2 RB · 2 WR · TE · FLEX · SF · K · D/ST`.
   **Elite:** paralela, melhores da temporada anterior (2027: campeão e vice de cada série = 8), playoff com 4.
   **2025 (inaugural):** só Serie A (10) e B (12), 2 sobem / 2 descem.
 - **Tom:** competitivo, "resenha", orgulho de clube. Referências possíveis: apps de futebol (Sofascore, OneFootball), ESPN Fantasy.
@@ -329,7 +331,7 @@ Career = { user, currentSeries, trophies:{gold,silver,bronze,fourth}, totalSeaso
 
 1. **Header compacto + navegação fixa**: header pequeno (logo 32–40px + nome) e abas como barra fixa no topo (desktop) / **bottom nav** no mobile. Seletor de temporada como chip/segmented control junto ao título.
 2. **"Minha liga" primeiro**: deixar o usuário escolher sua série/jogador (localStorage) e abrir nela; ou abas internas por série em vez de 5 cards empilhados.
-3. **Zonas na classificação**: faixa lateral colorida para playoffs (top 6), promoção (3) e rebaixamento (últimos 3), com legenda. Cabeçalho de colunas (V–D, PF, PA). Atenção: em 2025 eram 2 sobem / 2 descem — as zonas precisam ser por temporada.
+3. **Zonas na classificação**: faixa lateral colorida para playoffs (top 6), promoção (3) e rebaixamento (últimos 3), com legenda. Cabeçalho de colunas (V–D, PF, PA). Atenção: em 2025 eram 2 sobem / 2 descem — as zonas precisam ser por temporada. E os critérios são diferentes: a zona de **rebaixamento** vale pela temporada regular (ordem vitórias → pontos), a de **promoção** pelo resultado dos playoffs — durante a temporada, a "zona de promoção" é uma projeção (top 3 da campanha), e só fica definida depois dos playoffs.
 4. **Status ao vivo**: "Semana 4 de 14 · atualizado há 2 min" + botão atualizar (a semana já é buscada da Sleeper em `appState.nflState`).
 5. **Top Scorers**: avatar + dono + série; toggle "Incluir Elite"; filtro por série; sem cascata longa de animação.
 6. **Power Ranking**: tiers como cabeçalhos horizontais também no desktop, nomes em PT-BR, explicação do cálculo num tooltip/“?”; variação semanal só com histórico real.
@@ -347,7 +349,6 @@ Career = { user, currentSeries, trophies:{gold,silver,bronze,fourth}, totalSeaso
 | ✅ Feito | B1–B10 (medalhas, troca de temporada, Serie D no drawer, setas falsas, semana fixa, tier mobile, stats do drawer, séries atuais em temporada arquivada, escape de nomes, scroll lock) |
 | ✅ Feito | Classificação de temporadas finalizadas ordenada pelo resultado final dos playoffs |
 | ✅ Feito | Subtítulo por temporada + modal "Sobre" com as regras atuais e as de 2025 |
-| A confirmar | Critério de quem sobe/desce: classificação final (com playoffs) ou temporada regular? |
 | Redesign (Claude Design) | Header/navegação mobile · zonas na classificação · Top Scorers · Power Ranking · Lendas · tokens/escala/contraste |
 | Depois | URL por aba/perfil · dados ao vivo (semana, matchups, bracket) · limpeza do CSS morto |
 
