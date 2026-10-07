@@ -2,7 +2,8 @@
 // UI / HELPERS — Pequenos geradores de HTML compartilhados entre tabs.
 //
 // Foco: eliminar repetição de markup que aparece em 3+ tabs. Nada aqui faz
-// fetch, manipula appState ou tem efeito colateral além de retornar string.
+// fetch ou manipula appState. Exceção: lockBodyScroll/unlockBodyScroll, que
+// alteram body.style.overflow (usados por drawer e modal).
 //
 // Depende de: js/sanitize.js
 // =============================================================================
@@ -29,5 +30,35 @@ function playerLinkHTML({ user, displayName, ariaLabel, extraClass } = {}) {
     return `<span class="${cls}" data-user="${safeUser}" tabindex="0" role="button" aria-label="${label}">${displayName}</span>`;
 }
 
+// -----------------------------------------------------------------------------
+// Scroll lock compartilhado (drawer + modal)
+// -----------------------------------------------------------------------------
+// Contador de overlays abertos: o scroll do body só é liberado quando o
+// último fecha. Antes, fechar o modal com o drawer aberto destravava a página.
+
+let _scrollLockCount = 0;
+let _scrollLockPrevOverflow = '';
+
+/** Trava o scroll do body (idempotente por overlay; chamar unlock ao fechar). */
+function lockBodyScroll() {
+    if (_scrollLockCount === 0) {
+        _scrollLockPrevOverflow = document.body.style.overflow || '';
+        document.body.style.overflow = 'hidden';
+    }
+    _scrollLockCount++;
+}
+
+/** Libera uma trava; restaura o overflow original quando não resta nenhuma. */
+function unlockBodyScroll() {
+    if (_scrollLockCount === 0) return;
+    _scrollLockCount--;
+    if (_scrollLockCount === 0) {
+        document.body.style.overflow = _scrollLockPrevOverflow;
+        _scrollLockPrevOverflow = '';
+    }
+}
+
 // Exporta no escopo global (padrão vanilla do projeto)
 window.playerLinkHTML = playerLinkHTML;
+window.lockBodyScroll = lockBodyScroll;
+window.unlockBodyScroll = unlockBodyScroll;

@@ -175,7 +175,7 @@
 
         modalEl.hidden = false;
         isOpen = true;
-        document.body.style.overflow = 'hidden';
+        lockBodyScroll();
 
         // foco inicial: botão de fechar
         requestAnimationFrame(() => {
@@ -187,7 +187,7 @@
         if (!isOpen || !modalEl) return;
         modalEl.hidden = true;
         isOpen = false;
-        document.body.style.overflow = '';
+        unlockBodyScroll();
 
         if (lastTrigger && typeof lastTrigger.focus === 'function') {
             lastTrigger.focus();

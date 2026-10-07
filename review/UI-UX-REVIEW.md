@@ -29,8 +29,7 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 
 ## 2. Bugs que afetam o que o usuário vê (confirmados)
 
-> **Status (atualizado):** B1–B6 **corrigidos** e validados no navegador (Playwright, dados reais).
-> B7–B10 continuam abertos.
+> **Status (atualizado):** B1–B10 **corrigidos** e validados no navegador (Playwright, dados reais).
 
 | # | Bug | Onde | Impacto | Status |
 |---|---|---|---|---|
@@ -40,10 +39,10 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 | B4 | **Setas de movimento do Power Ranking não significam nada.** `originalRank` = posição na lista concatenada das ligas (Elite, A, B…), não ranking por pontos. Resultado: "↑35", "↑26". | `js/derivations.js:75`, `power-ranking.js:83` | Indicador enganoso e chamativo (verde/vermelho). | ✅ Corrigido — setas removidas (e `originalRank` da derivação). Voltam quando houver histórico semanal. |
 | B5 | **"Semana 8 / 14" fixo** na aba Temporadas (hardcoded). | `js/tabs/temporadas.js:109-110` | Informação falsa. | ✅ Corrigido — semana real via Sleeper `/state/nfl` (`display_week`); "Playoffs" após a semana 14; chip some fora da temporada. |
 | B6 | **Tier label do Power Ranking quebrado no mobile.** Regra `@media (max-width:768px)` coloca letra e descrição lado a lado dentro de uma coluna de 64px. Os cards ficam estreitos e truncam os nomes. | `styles.css:2488-2495` vs `921-926` | Ver `screens/mobile-2026-power.png`. | ✅ Corrigido — ≤760px o label vira faixa horizontal acima dos cards; regras conflitantes do bloco RESPONSIVE removidas. |
-| B7 | **Drawer: estatísticas não batem com o histórico.** "Temporadas: 1 / V-D 10-4" só conta temporadas finalizadas, mas o histórico lista 2026 "em andamento". | `drawer.js` + `careerForUser` | Confuso. | Aberto |
-| B8 | Drawer em temporada arquivada: "Atualmente em: Serie A" usa o roster da temporada **selecionada** (2025), não a atual. | `drawer.js:135-143` | Informação errada. | Aberto |
-| B9 | Lendas/Temporadas escapam o username duas vezes antes de `data-user`. Usuário com `&`, `'`, `/` ou `=` no nome não abre o perfil certo. | `lendas.js:106,118`, `temporadas.js:47,56` | Baixo risco hoje, mas existe. | Aberto |
-| B10 | Modal e drawer resetam `body.style.overflow` sem coordenação (abrir modal com drawer aberto destrava o scroll). | `modal.js:178,190` | Menor. | Aberto |
+| B7 | **Drawer: estatísticas não batem com o histórico.** "Temporadas: 1 / V-D 10-4" só conta temporadas finalizadas, mas o histórico lista 2026 "em andamento". | `drawer.js` + `careerForUser` | Confuso. | ✅ Corrigido — totais calculados sobre o histórico exibido (finalizadas + em andamento). |
+| B8 | Drawer em temporada arquivada: "Atualmente em: Serie A" usa o roster da temporada **selecionada** (2025), não a atual. | `drawer.js:135-143` | Informação errada. | ✅ Corrigido — roster da temporada selecionada só é usado se ela não estiver finalizada. Limitação: vendo 2025, o perfil não mostra 2026 (não é carregado). |
+| B9 | Lendas/Temporadas escapam o username duas vezes antes de `data-user`. Usuário com `&`, `'`, `/` ou `=` no nome não abre o perfil certo. | `lendas.js:106,118`, `temporadas.js:47,56` | Baixo risco hoje, mas existe. | ✅ Corrigido — `data-user` recebe o nome cru (escapado uma vez só). Testado com `Zé & Cia/'=`. |
+| B10 | Modal e drawer resetam `body.style.overflow` sem coordenação (abrir modal com drawer aberto destrava o scroll). | `modal.js:178,190` | Menor. | ✅ Corrigido — trava de scroll compartilhada com contador (`lockBodyScroll`/`unlockBodyScroll` em `ui/helpers.js`). |
 
 > Esses bugs são de código; não precisam ir pro Claude Design, mas convém corrigir **antes** de aplicar o redesign
 > para não "desenhar em cima" de comportamento errado.
@@ -103,7 +102,7 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 - Container `.seasons-container` aninhado dentro de outro `.seasons-container` (classe repetida).
 
 ### 3.7 Drawer de jogador
-- Boa base (`screens/desktop-drawer.png`). Problemas: conquistas zeradas ocupam muito espaço com cor; estatísticas inconsistentes (B7); "Pontos totais 2045.46" com 2 casas enquanto o resto usa 1; sem link para o perfil Sleeper; sem gráfico/evolução.
+- Boa base (`screens/desktop-drawer.png`). Problemas: conquistas zeradas ocupam muito espaço com cor; ~~estatísticas inconsistentes (B7)~~ corrigido; "Pontos totais 2045.46" com 2 casas enquanto o resto usa 1; sem link para o perfil Sleeper; sem gráfico/evolução.
 
 ### 3.8 Modal "Sobre a Liga"
 - Regras desatualizadas: promoção/rebaixamento só cita A/B/C (falta D); critério da Elite cita "top 4 da A + top 4 da B" — **confirmar a regra atual**.
@@ -338,8 +337,8 @@ Career = { user, currentSeries, trophies:{gold,silver,bronze,fourth}, totalSeaso
 
 | Prioridade | Item |
 |---|---|
-| ✅ Feito | B1 medalhas · B2 troca de temporada · B3 Serie D no drawer · B4 setas falsas · B5 semana fixa · B6 tier mobile |
-| Agora (código / conteúdo) | B7–B10 · subtítulo e modal sem Serie D (confirmar regra da Elite) · ordem da classificação final vs medalhas |
+| ✅ Feito | B1–B10 (medalhas, troca de temporada, Serie D no drawer, setas falsas, semana fixa, tier mobile, stats do drawer, séries atuais em temporada arquivada, escape de nomes, scroll lock) |
+| Agora (conteúdo / produto) | Subtítulo e modal sem Serie D (confirmar regra da Elite) · ordem da classificação final vs medalhas |
 | Redesign (Claude Design) | Header/navegação mobile · zonas na classificação · Top Scorers · Power Ranking · Lendas · tokens/escala/contraste |
 | Depois | URL por aba/perfil · dados ao vivo (semana, matchups, bracket) · limpeza do CSS morto |
 
@@ -353,4 +352,4 @@ Career = { user, currentSeries, trophies:{gold,silver,bronze,fourth}, totalSeaso
 | `desktop-2025-leagues.png` | B1 corrigido (medalhas) — e a ordem regular vs playoffs |
 | `desktop-2025-global.png`, `desktop-2025-power.png` | Temporada finalizada |
 | `mobile-2026-power.png` | B6 corrigido — tier como faixa horizontal |
-| `*-drawer.png`, `*-modal.png` | Perfil do jogador e Sobre a Liga |
+| `*-drawer.png`, `*-modal.png` | Perfil do jogador (mobile já com B7 corrigido) e Sobre a Liga |

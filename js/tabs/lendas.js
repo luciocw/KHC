@@ -103,7 +103,8 @@ function renderLegends() {
     };
 
     const rowsHtml = players.map((p, index) => {
-        const safeName = escapeHtml(sanitizeString(p.user, VALIDATION.MAX_OWNER_NAME_LENGTH, 'Jogador'));
+        const rawName = sanitizeString(p.user, VALIDATION.MAX_OWNER_NAME_LENGTH, 'Jogador');
+        const safeName = escapeHtml(rawName);
         const rank = index + 1;
         const isLeader = rank === 1;
         const rowClass = `legends-row stagger-item${isLeader ? ' is-leader' : ''}`;
@@ -115,7 +116,7 @@ function renderLegends() {
             <div class="${rowClass}" role="row" aria-label="${ariaLabel}" style="animation-delay: ${delay}ms">
                 <div class="legends-rank" role="cell">${rank}</div>
                 <div class="legends-user" role="cell">
-                    ${playerLinkHTML({ user: safeName, displayName: safeName })}
+                    ${playerLinkHTML({ user: rawName, displayName: safeName })}
                 </div>
                 ${cellHtml(p.gold,   'gold')}
                 ${cellHtml(p.silver, 'silver')}

@@ -44,7 +44,8 @@ function _renderPodiumColumn(serie) {
     top4.forEach(team => {
         const medal = _medalFor(team.rank);
         if (!medal) return;
-        const safeUser = escapeHtml(sanitizeString(team.user, VALIDATION.MAX_OWNER_NAME_LENGTH, 'Jogador'));
+        const rawUser = sanitizeString(team.user, VALIDATION.MAX_OWNER_NAME_LENGTH, 'Jogador');
+        const safeUser = escapeHtml(rawUser);
         const safeTeam = escapeHtml(sanitizeString(team.team, VALIDATION.MAX_TEAM_NAME_LENGTH, 'Time'));
         const safePts  = (typeof team.pts === 'number') ? team.pts.toFixed(1) : '—';
         const ariaLabel = `${medal.label}: ${safeUser}, ${safeTeam}, ${safePts} pontos`;
@@ -53,7 +54,7 @@ function _renderPodiumColumn(serie) {
             <div class="podium-row" role="listitem" aria-label="${ariaLabel}">
                 <span class="podium-icon" aria-hidden="true">${medal.icon}</span>
                 <span class="podium-name">
-                    ${playerLinkHTML({ user: safeUser, displayName: safeUser, ariaLabel: `Ver perfil de ${safeUser}` })}
+                    ${playerLinkHTML({ user: rawUser, displayName: safeUser, ariaLabel: `Ver perfil de ${safeUser}` })}
                     <span class="podium-team">${safeTeam}</span>
                 </span>
                 <span class="podium-pts">${safePts}</span>
