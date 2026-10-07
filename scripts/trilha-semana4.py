@@ -210,8 +210,7 @@ G0 = 1.0  # todas as cenas compartilham a mesma grade de tempo
 def groove(a, b, theme="main", anchor=None, drums_style="std", tr=0, vel=1.0,
            duty=0.25, melody=True):
     """Toca o tema em [a, b) sobre a grade global, sem recomeçar o pulso nas
-    trocas de cena. `anchor` (início da cena) marca o compasso 1 do tema, então,
-    depois de uma parada, a música volta no tempo seguinte."""
+    trocas de cena. `anchor` (início da cena) marca o compasso 1 do tema."""
     anchor = a if anchor is None else anchor
     play_segments.append((a, b))
     th = THEMES[theme]
@@ -264,6 +263,12 @@ def hit(t, chord, ring=0.3, vel=1.0):
     arp_chord(t, chord, ring, vel=vel)
     lead_note(t, max(chord) + 12, ring, duty=0.5, vel=0.7 * vel)
     bass_note(t, min(chord) - 12, ring, vel)
+    kick(t, vel)
+
+
+def accent(t, midi, dur=0.3, vel=1.0):
+    """Acento por cima da música (nota de destaque + bumbo), sem parar a base."""
+    lead_note(t, midi, dur, duty=0.5, vel=0.8 * vel)
     kick(t, vel)
 
 
@@ -344,19 +349,20 @@ CH = {k: [note(n) for n in v] for k, v in {
     "Em": ("E4", "G4", "B4"), "Bb": ("Bb3", "D4", "F4"), "D": ("D4", "F#4", "A4"),
 }.items()}
 
+# A música é contínua de 1,0 s até o fade: os efeitos e acentos entram por
+# cima, sem paradas.
+
 # 0,0–3,5 · Abertura: "start" + logo + 4 linhas do título
 jingle(0.0, [note("C6"), note("G6")], 0.025, duty=0.125, vel=0.7)
 hit(0.05, CH["C"], ring=0.18)
 for i, (t, c) in enumerate(zip((0.25, 0.41, 0.57, 0.73), ("C", "F", "G", "C"))):
     hit(t, [x + (12 if i == 3 else 0) for x in CH[c]], ring=0.14)
-groove(1.0, 3.5, "main")
+groove(1.0, 8.5, "main")
 
 # 3,5–8,5 · Clube do 4–0
-groove(3.5, 6.9, "main", anchor=1.0)  # mesmo tema: continua a frase
 for i, t in enumerate(np.linspace(4.4, 5.05, 6)):
     tom(t, 55 - 2 * i, 0.6)
 glitch(6.9)
-groove(7.5, 8.5, "main", anchor=1.0)
 
 # 8,5–14,5 · Ladrão de Vitórias (vilão + solo)
 groove(8.5, 10.1, "villain", anchor=8.5, vel=0.9)
@@ -367,61 +373,57 @@ step = 1.3 / len(solo)
 for i, m in enumerate(solo):
     lead_note(10.1 + i * step, m, step, duty=0.125, vel=0.9)
 lead_note(11.4, note("A6"), 0.5, duty=0.125, vib=0.5, slide_from=note("G#6"))
-hit(11.9, CH["Am"], ring=0.45)
+groove(11.9, 14.5, "villain", anchor=8.5, vel=0.9)
+accent(11.9, note("A6"))
 stamp(11.9)
 coin(11.98)
 coin(12.2)
-groove(12.5, 14.5, "villain", anchor=8.5, vel=0.9)
 
 # 14,5–20,5 · Pé-frio do Ano (meio-tempo)
-groove(14.5, 16.0, "half", drums_style="half")
-hit(16.0, CH["Am"], ring=0.4)
-hit(16.6, [x - 12 for x in CH["E"]], ring=0.85)  # o segundo, mais grave
+groove(14.5, 20.5, "half", drums_style="half")
+accent(16.0, note("A5"))
+accent(16.6, note("E4"))  # o segundo, mais grave
 lose(17.5)
-groove(19.75, 20.5, "half", anchor=14.5, drums_style="half")
 
 # 20,5–26,0 · Dupla Personalidade
-groove(20.5, 21.3, "main", anchor=20.5)
-hit(21.3, [x + 12 for x in CH["C"]], ring=0.6)  # agudo
-hit(22.0, [x - 12 for x in CH["Am"]], ring=0.95)  # grave
+groove(20.5, 26.0, "main", anchor=20.5)
+accent(21.3, note("C7"))  # agudo
+accent(22.0, note("A4"))  # grave
 scribble(23.0)
-groove(24.0, 26.0, "main", anchor=20.5)
 
 # 26,0–30,5 · Demônio de Folga (mais grave e mais áspero)
-groove(26.0, 28.2, "villain", anchor=26.0, tr=-3, duty=0.5, vel=1.05)
+groove(26.0, 30.5, "villain", anchor=26.0, tr=-3, duty=0.5, vel=1.05)
 alarm(27.2, 1.0)
 glitch(28.2)
-groove(28.2 + 3 * E8, 30.5, "villain", anchor=26.0, tr=-3, duty=0.5, vel=1.05)
 
-# 30,5–36,0 · Bola Murcha (banda para)
+# 30,5–36,0 · Bola Murcha (base baixinha, sem melodia, para os efeitos aparecerem)
+groove(30.5, 36.0, "half", anchor=30.5, drums_style="half", vel=0.6, melody=False)
 deflate(31.7, 1.3)
-bass_note(33.1, note("E3"), 0.3, 1.3)
-bass_note(33.5, note("A2"), 0.45, 1.3)
-play_segments += [(33.1, 33.4), (33.5, 33.95)]
+bass_note(33.1, note("E3"), 0.3, 1.0)
+bass_note(33.5, note("A2"), 0.45, 1.0)
 lose(34.2, notes=("G4", "F#4", "F4"), step=0.28, last=0.55)
-play_segments.append((35.25, 36.0))
 for t in (35.3, 35.5, 35.7):  # contagem 3-2-1
     blip(t, note("C5"), 0.8)
 for i in range(4):
     snare(35.8 + i * 0.05, 0.5 + 0.15 * i)
 
 # 36,0–41,5 · Fila do Rebaixamento (meio-tempo arrastado)
-groove(36.0, 39.5, "half", drums_style="half", tr=-2)
+groove(36.0, 41.5, "half", drums_style="half", tr=-2)
 for t in np.linspace(36.75, 37.5, 7):
     kick(t, 0.9)
-hit(39.5, [x - 2 for x in CH["Am"]], ring=0.5)
+accent(39.5, note("G4"))
 stamp(39.5)
-groove(40.1, 41.5, "half", anchor=36.0, drums_style="half", tr=-2)
 
 # 41,5–47,5 · Corda Bamba (breakdown: bumbo + baixo pulsando, crescendo)
 play_segments.append((41.5, 44.5))
-n = int((44.5 - 41.5) / E8)
-for i in range(n):
-    t = 41.5 + i * E8
-    p = i / n
-    bass_note(t, note("E2") + (12 if i % 2 else 0), E8 * 0.6, 0.6 + 0.6 * p)
-    arp_chord(t, CH["Em"], E8 * 0.5, vel=0.15 + 0.6 * p)
-    if i % 2 == 0 or t > 42.3:
+k0 = int(np.ceil((41.5 - G0) / E8))
+k1 = int(np.ceil((44.5 - G0) / E8))
+for k in range(k0, k1):
+    t = G0 + k * E8
+    p = (k - k0) / (k1 - k0)
+    bass_note(t, note("E2") + (12 if k % 2 else 0), E8 * 0.9, 0.6 + 0.6 * p)
+    arp_chord(t, CH["Em"], E8, vel=0.25 + 0.55 * p)
+    if (k - k0) % 2 == 0 or t > 42.3:
         kick(t, 0.6 + 0.4 * p)
 for i, t in enumerate(np.linspace(42.3, 43.2, 5)):
     blip(t, note("E5") + 2 * i, 0.6)
@@ -431,23 +433,15 @@ power_up(44.5)
 groove(44.5, 47.5, "main", vel=1.05)
 
 # 47,5–52,5 · Vote no Grupo (segura a dominante)
-groove(47.5, 48.4, "hold", drums_style="drive")
+groove(47.5, 52.5, "hold", drums_style="drive")
 for i, t in enumerate((48.4, 48.7, 49.0)):  # opções 1, 2, 3: blips de menu subindo
     blip(t, note("G5") + 2 * i, 1.0)
-    hit(t, [x + 2 * i for x in CH["G"]], ring=0.2)
-groove(49.2, 49.7, "hold", anchor=47.5, drums_style="drive")
-play_segments.append((49.7, 50.3))
 for i in range(6):
     tom(49.7 + i * 0.09, 62 - 3 * i, 0.9)
-groove(50.3, 52.5, "hold", anchor=47.5, drums_style="drive")
 
 # 52,5–56,0 · Fim
-groove(52.5, 53.4, "main")
-play_segments.append((53.4, 54.3))
-arp_chord(53.4, [note(n) for n in ("C4", "E4", "G4", "C5")], 0.9, vel=1.1)
-lead_note(53.4, note("C6"), 0.9, duty=0.5, vib=0.3, vel=0.9)
-bass_note(53.4, note("C2"), 0.9, 1.1)
-play_segments.append((54.3, DUR))
+groove(52.5, DUR, "main")
+accent(53.4, note("C6"), dur=0.9)
 tom(54.3, 57, 1.0)  # ba-
 tom(54.45, 50, 1.0)  # -dum
 kick(54.45, 0.8)
