@@ -5,327 +5,78 @@
 // os SVGs como strings em JS evita N requests extras e permite que cor
 // (`currentColor`) e tamanho sejam controlados pelo CSS pai.
 //
+// Desenho: linha 2px, cantos arredondados, viewBox 24×24 — mesmo estilo do
+// set Lucide indicado no guia da marca (ISC). Medalhas e escudos NÃO vivem
+// aqui: medalha é CSS (`.medal`, número dentro) e escudo é imagem
+// (`assets/logo/png/ui/escudo-*.png`).
+//
 // Como usar:
-//   1. Diretamente:        elem.innerHTML = IconRegistry.trophy({ size: 14 });
-//   2. Via placeholders:   <span data-icon="trophy" data-size="14"></span>
-//                          então chame renderIcons() depois do DOMContentLoaded.
+//   1. Diretamente:        elem.innerHTML = IconRegistry.trophy({ size: 20 });
+//   2. Via placeholders:   <span data-icon="trophy" data-size="20"></span>
+//                          e chame renderIcons() depois de inserir o markup.
 //
-// Convenções:
-//   - Ícones de UI (line) são desenhados com `stroke="currentColor"` e
-//     `fill="none"` — herdam a cor do pai.
-//   - Medalhas são filled, com gradiente radial — cor fixa por variante.
-//   - Todos aceitam `opts.size` (px, número) e `opts.className` (string).
-//
-// Este arquivo é stand-alone (sem dependências) e expõe um único global:
-// `IconRegistry`. Adicionar a `index.html` é trabalho da Fase 2 wire-up.
+// Expõe dois globais: `IconRegistry` e `renderIcons`.
 // =============================================================================
 
 /**
  * Constrói atributos comuns para o elemento <svg> raiz.
- * @param {{size?: number, className?: string, viewBox?: string}} opts
+ * @param {{size?: number, className?: string}} opts
  * @returns {string} Atributos prontos para concatenar no template.
  */
 function svgAttrs(opts) {
-    const size = opts.size != null ? opts.size : 14;
+    const size = opts.size != null ? opts.size : 20;
     const cls = opts.className ? ` class="${opts.className}"` : '';
-    const vb = opts.viewBox || '0 0 24 24';
-    return `width="${size}" height="${size}" viewBox="${vb}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"${cls} aria-hidden="true"`;
+    return `width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"${cls} aria-hidden="true" focusable="false"`;
+}
+
+/**
+ * Fábrica de ícone: recebe o miolo do SVG e devolve a função `(opts) => svg`.
+ * @param {string} body
+ * @returns {function({size?: number, className?: string}=): string}
+ */
+function icon(body) {
+    return (opts = {}) => `<svg ${svgAttrs(opts)}>${body}</svg>`;
 }
 
 /* eslint-disable no-unused-vars */
 const IconRegistry = {
-    // ---------------------------------------------------------------------------
-    // Ícones de aba (line, 14px default, herdam currentColor)
-    // ---------------------------------------------------------------------------
+    // --- Navegação (abas) ---
+    trophy: icon('<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>'),
+    chart: icon('<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>'),
+    zap: icon('<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>'),
+    crown: icon('<path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/>'),
+    calendar: icon('<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>'),
+    bookOpen: icon('<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>'),
 
-    /**
-     * Troféu — aba LIGAS.
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    trophy: (opts = {}) => `<svg ${svgAttrs(opts)}>
-        <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/>
-        <path d="M17 5h3v3a3 3 0 0 1-3 3M7 5H4v3a3 3 0 0 0 3 3"/>
-    </svg>`,
+    // --- Regras ---
+    layers: icon('<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>'),
+    arrowUpDown: icon('<path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>'),
+    history: icon('<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>'),
 
-    /**
-     * Alvo — aba TOP SCORERS.
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    target: (opts = {}) => `<svg ${svgAttrs(opts)}>
-        <circle cx="12" cy="12" r="9"/>
-        <circle cx="12" cy="12" r="5"/>
-        <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>
-    </svg>`,
-
-    /**
-     * Gráfico de barras — aba POWER RANKING.
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    chart: (opts = {}) => `<svg ${svgAttrs(opts)}>
-        <path d="M3 21h18"/>
-        <rect x="5" y="12" width="3" height="8"/>
-        <rect x="10.5" y="7" width="3" height="13"/>
-        <rect x="16" y="3" width="3" height="17"/>
-    </svg>`,
-
-    /**
-     * Colunas / pódio — aba LENDAS KHC.
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    columns: (opts = {}) => `<svg ${svgAttrs(opts)}>
-        <path d="M3 21h18"/>
-        <rect x="4" y="10" width="5" height="11"/>
-        <rect x="9.5" y="4" width="5" height="17"/>
-        <rect x="15" y="13" width="5" height="8"/>
-    </svg>`,
-
-    /**
-     * Calendário — aba TEMPORADAS.
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    calendar: (opts = {}) => `<svg ${svgAttrs(opts)}>
-        <rect x="3" y="5" width="18" height="16" rx="2"/>
-        <path d="M16 3v4M8 3v4M3 10h18"/>
-    </svg>`,
-
-    // ---------------------------------------------------------------------------
-    // UI utilitários
-    // ---------------------------------------------------------------------------
-
-    /**
-     * Chevron — usado no botão de seleção de temporada. CSS gira 180° quando aberto.
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    chevron: (opts = {}) => `<svg ${svgAttrs(opts)}>
-        <polyline points="6 9 12 15 18 9"/>
-    </svg>`,
-
-    /**
-     * X — fecha drawer / modal.
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    close: (opts = {}) => `<svg ${svgAttrs(opts)}>
-        <line x1="18" y1="6" x2="6" y2="18"/>
-        <line x1="6" y1="6" x2="18" y2="18"/>
-    </svg>`,
-
-    /**
-     * Ampulheta — status "em andamento".
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    hourglass: (opts = {}) => `<svg ${svgAttrs(opts)}>
-        <path d="M6 2h12M6 22h12"/>
-        <path d="M6 2v3a6 6 0 0 0 6 6 6 6 0 0 0 6-6V2"/>
-        <path d="M6 22v-3a6 6 0 0 1 6-6 6 6 0 0 1 6 6v3"/>
-    </svg>`,
-
-    // ---------------------------------------------------------------------------
-    // Indicadores
-    // ---------------------------------------------------------------------------
-
-    /**
-     * Bolinha verde — indicador "live / temporada ativa". Útil quando CSS não
-     * é suficiente (ex.: dentro de templates HTML inline).
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    dotGreen: (opts = {}) => {
-        const size = opts.size != null ? opts.size : 10;
-        const cls = opts.className ? ` class="${opts.className}"` : '';
-        return `<svg width="${size}" height="${size}" viewBox="0 0 10 10"${cls} aria-hidden="true">
-            <circle cx="5" cy="5" r="4" fill="#3eb371"/>
-        </svg>`;
-    },
-
-    // ---------------------------------------------------------------------------
-    // Medalhas (filled, ~20px, gradiente radial por variante)
-    // ---------------------------------------------------------------------------
-
-    /**
-     * Medalha de ouro — 1º lugar.
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    medalGold: (opts = {}) => medalSvg(opts, 'gold', '#fce58a', '#f5b400', '#7a5400'),
-
-    /**
-     * Medalha de prata — 2º lugar.
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    medalSilver: (opts = {}) => medalSvg(opts, 'silver', '#f1f1f5', '#c9c9d3', '#646470'),
-
-    /**
-     * Medalha de bronze — 3º lugar.
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    medalBronze: (opts = {}) => medalSvg(opts, 'bronze', '#e9b18a', '#d18046', '#6e3c1a'),
-
-    /**
-     * Medalha "4º lugar" — azul claro.
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    medalFourth: (opts = {}) => medalSvg(opts, 'fourth', '#a8d0ec', '#6ab2e0', '#2a5a7a'),
-
-    // ---------------------------------------------------------------------------
-    // Brand
-    // ---------------------------------------------------------------------------
-
-    /**
-     * Escudo da Ultimate KHC — logo principal do site.
-     * Spec do design handoff:
-     *   - 96×110 viewBox, gradiente marrom escuro com stroke laranja 2px.
-     *   - Banner "LEAGUE" no topo (laranja, 9px, weight 900, fill escuro).
-     *   - Bola de futebol americano no centro (gradiente radial laranja, rotacionada -22°)
-     *     com laces brancas.
-     *   - Três estrelas laranjas pequenas embaixo.
-     *   - Texto "KHC" abaixo (laranja, 11px, weight 900, letter-spacing 2px).
-     * @param {{size?: number, className?: string}} [opts]
-     * @returns {string} SVG markup
-     */
-    logoShield: (opts = {}) => {
-        const size = opts.size != null ? opts.size : 96;
-        const height = Math.round(size * (110 / 96));
-        const cls = opts.className ? ` class="${opts.className}"` : '';
-        // Unique IDs per call to keep multiple instances in the same DOM safe.
-        const uid = 'khc-' + Math.random().toString(36).slice(2, 8);
-        return `<svg width="${size}" height="${height}" viewBox="0 0 96 110"${cls} role="img" aria-label="Ultimate KHC">
-            <defs>
-                <linearGradient id="${uid}-shield" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#1a0c06"/>
-                    <stop offset="100%" stop-color="#0a0503"/>
-                </linearGradient>
-                <radialGradient id="${uid}-ball" cx="50%" cy="40%" r="60%">
-                    <stop offset="0%" stop-color="#ff8a4a"/>
-                    <stop offset="100%" stop-color="#c84410"/>
-                </radialGradient>
-            </defs>
-            <!-- Outer shield -->
-            <path d="M48 4 L88 14 L88 58 C88 80 70 96 48 104 C26 96 8 80 8 58 L8 14 Z"
-                  fill="url(#${uid}-shield)" stroke="#ff6b35" stroke-width="2"/>
-            <!-- Inner shield outline (45% orange) -->
-            <path d="M48 11 L82 19 L82 57 C82 75 67 89 48 96 C29 89 14 75 14 57 L14 19 Z"
-                  fill="none" stroke="#ff6b35" stroke-opacity="0.45" stroke-width="1"/>
-            <!-- LEAGUE banner across top -->
-            <rect x="14" y="18" width="68" height="11" fill="#ff6b35"/>
-            <text x="48" y="26.5" text-anchor="middle"
-                  font-family="Inter, sans-serif" font-size="9" font-weight="900"
-                  letter-spacing="1.2" fill="#1a0c06">LEAGUE</text>
-            <!-- Football (rotated -22°) -->
-            <g transform="rotate(-22 48 56)">
-                <ellipse cx="48" cy="56" rx="20" ry="11" fill="url(#${uid}-ball)" stroke="#7a2a08" stroke-width="1"/>
-                <!-- White laces -->
-                <line x1="42" y1="56" x2="54" y2="56" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round"/>
-                <line x1="44" y1="53.5" x2="44" y2="58.5" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round"/>
-                <line x1="48" y1="53" x2="48" y2="59" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round"/>
-                <line x1="52" y1="53.5" x2="52" y2="58.5" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round"/>
-            </g>
-            <!-- Three small stars -->
-            ${starPath(34, 78)}
-            ${starPath(48, 80)}
-            ${starPath(62, 78)}
-            <!-- KHC text -->
-            <text x="48" y="96" text-anchor="middle"
-                  font-family="Inter, sans-serif" font-size="11" font-weight="900"
-                  letter-spacing="2" fill="#ff6b35">KHC</text>
-        </svg>`;
-    },
+    // --- UI ---
+    info: icon('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>'),
+    refresh: icon('<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>'),
+    close: icon('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'),
+    alert: icon('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>'),
 };
 /* eslint-enable no-unused-vars */
 
 /**
- * Helper interno: gera o SVG de uma medalha com gradiente radial.
- * Cada medalha tem ~20px, viewBox 24×24, com fita de baixo e centro de gradiente.
- * @param {{size?: number, className?: string}} opts
- * @param {string} variant - 'gold' | 'silver' | 'bronze' | 'fourth'
- * @param {string} light - Cor central (mais clara) do gradiente.
- * @param {string} mid - Cor de borda (mais escura) do gradiente.
- * @param {string} dark - Cor da fita / ringues.
- * @returns {string} SVG markup
- */
-function medalSvg(opts, variant, light, mid, dark) {
-    const size = opts.size != null ? opts.size : 20;
-    const cls = opts.className ? ` class="${opts.className}"` : '';
-    const uid = 'm-' + variant + '-' + Math.random().toString(36).slice(2, 8);
-    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24"${cls} role="img" aria-label="${variant} medal">
-        <defs>
-            <radialGradient id="${uid}" cx="50%" cy="40%" r="60%">
-                <stop offset="0%" stop-color="${light}"/>
-                <stop offset="100%" stop-color="${mid}"/>
-            </radialGradient>
-        </defs>
-        <!-- Ribbon -->
-        <path d="M8 2 L10 12 L8 14 L12 12 L16 14 L14 12 L16 2 Z" fill="${dark}" opacity="0.85"/>
-        <!-- Medal disc -->
-        <circle cx="12" cy="16" r="6.5" fill="url(#${uid})" stroke="${dark}" stroke-width="0.8"/>
-        <!-- Inner ring -->
-        <circle cx="12" cy="16" r="4" fill="none" stroke="${dark}" stroke-opacity="0.45" stroke-width="0.6"/>
-    </svg>`;
-}
-
-/**
- * Helper interno: gera o `<path>` de uma estrela laranja pequena para o logo.
- * Estrela de 5 pontas centrada em (cx, cy), ~6px de altura.
- * @param {number} cx
- * @param {number} cy
- * @returns {string} <path> markup
- */
-function starPath(cx, cy) {
-    // Pontos de uma estrela de 5 pontas (raio externo 3, interno 1.2)
-    const r1 = 3;
-    const r2 = 1.2;
-    const pts = [];
-    for (let i = 0; i < 10; i++) {
-        const angle = (Math.PI / 5) * i - Math.PI / 2;
-        const r = i % 2 === 0 ? r1 : r2;
-        pts.push(`${(cx + Math.cos(angle) * r).toFixed(2)},${(cy + Math.sin(angle) * r).toFixed(2)}`);
-    }
-    return `<polygon points="${pts.join(' ')}" fill="#ff6b35"/>`;
-}
-
-/**
- * Substitui placeholders `<span data-icon="NAME" [data-size="N"] [data-class="..."]>`
- * pelo SVG correspondente. Chame uma vez após DOMContentLoaded, e novamente
- * depois de qualquer render dinâmico de markup que contenha placeholders.
- *
- * Exemplo:
- *   <span data-icon="trophy" data-size="14"></span>
- *   document.addEventListener('DOMContentLoaded', () => renderIcons());
- *
- * @param {ParentNode} [root=document] - Subtree onde procurar placeholders.
+ * Substitui placeholders `<span data-icon="NAME" [data-size="N"]>` pelo SVG
+ * correspondente. Chame depois de qualquer render que contenha placeholders.
+ * @param {ParentNode} [root=document]
  * @returns {number} Quantidade de ícones renderizados.
  */
 function renderIcons(root) {
     const scope = root || document;
-    const nodes = scope.querySelectorAll('[data-icon]');
     let count = 0;
-    nodes.forEach((node) => {
-        const name = node.getAttribute('data-icon');
-        const builder = IconRegistry[name];
-        if (typeof builder !== 'function') {
-            console.warn(`[icons] unknown icon: "${name}"`);
-            return;
-        }
+    scope.querySelectorAll('[data-icon]').forEach((node) => {
+        const builder = IconRegistry[node.getAttribute('data-icon')];
+        if (typeof builder !== 'function') return;
         const size = parseInt(node.getAttribute('data-size'), 10);
-        const className = node.getAttribute('data-class') || '';
-        node.innerHTML = builder({
-            size: Number.isFinite(size) ? size : undefined,
-            className,
-        });
-        node.removeAttribute('data-icon'); // marca como renderizado
+        node.innerHTML = builder({ size: Number.isFinite(size) ? size : undefined });
+        node.removeAttribute('data-icon');
         count++;
     });
     return count;
 }
-
-console.info(`IconRegistry loaded — ${Object.keys(IconRegistry).length} icons`);

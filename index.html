@@ -2,225 +2,83 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate League KHC - Hub Oficial</title>
-    <meta name="description" content="Hub oficial da Ultimate League KHC - Fantasy Football Brasil">
-    <link rel="icon" type="image/png" href="assets/khc-logo.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Ultimate League KHC</title>
+    <meta name="description" content="Classificação, top scorers, power ranking e lendas da Ultimate League KHC — fantasy football com acesso e rebaixamento.">
+    <meta name="theme-color" content="#0E0C0B">
+
+    <!-- Compartilhamento (WhatsApp, redes): URL absoluta da imagem -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Ultimate League KHC">
+    <meta property="og:title" content="Ultimate League KHC">
+    <meta property="og:description" content="Sobe quem joga. Séries A a D, KHC Elite, acesso e rebaixamento — desde 2025.">
+    <meta property="og:url" content="https://luciocw.github.io/KHC/">
+    <meta property="og:image" content="https://luciocw.github.io/KHC/assets/banners/og-image-1200x630.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" type="image/png" href="assets/logo/png/ui/favicon-64.png">
+    <link rel="apple-touch-icon" href="assets/logo/png/ui/escudo-khc.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Skip link para acessibilidade -->
-    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+    <a href="#main" class="skip-link">Pular para o conteúdo</a>
 
-    <div class="watermark" aria-hidden="true"></div>
-
-    <div class="container">
-        <header role="banner">
-            <div class="brand-logo">
-                <img src="assets/khc-logo.png" alt="Ultimate League KHC" class="brand-logo-img">
-            </div>
-            <h1 class="brand-title">ULTIMATE KHC</h1>
-            <!-- Atualizado por renderSeriesSubtitle() (app.js) conforme a temporada -->
-            <p class="brand-subtitle" id="seriesSubtitle">
-                <span>Serie A</span>
-                <span>Serie B</span>
-                <span>Serie C</span>
-                <span>Serie D</span>
-                <span>Elite</span>
-            </p>
-        </header>
-
-        <div class="controls">
-            <div class="season-select">
-                <label for="seasonSelector" class="sr-only">Selecionar temporada</label>
-                <select id="seasonSelector" aria-label="Selecionar temporada">
-                    <option value="2025">Temporada 2025 (Arquivo)</option>
-                    <option value="2026" selected>Temporada 2026</option>
-                </select>
-            </div>
-
-            <nav class="nav-tabs" role="tablist" aria-label="Navegação principal">
-                <button
-                    class="tab-btn active"
-                    role="tab"
-                    id="tab-btn-leagues"
-                    aria-selected="true"
-                    aria-controls="tab-leagues"
-                    tabindex="0"
-                    onclick="switchTab(event, 'leagues')">
-                    <span class="tab-icon" data-icon="trophy" aria-hidden="true"></span>
-                    <span class="tab-label">LIGAS</span>
-                </button>
-                <button
-                    class="tab-btn"
-                    role="tab"
-                    id="tab-btn-global"
-                    aria-selected="false"
-                    aria-controls="tab-global"
-                    tabindex="-1"
-                    onclick="switchTab(event, 'global')">
-                    <span class="tab-icon" data-icon="target" aria-hidden="true"></span>
-                    <span class="tab-label">TOP SCORERS</span>
-                </button>
-                <button
-                    class="tab-btn"
-                    role="tab"
-                    id="tab-btn-power"
-                    aria-selected="false"
-                    aria-controls="tab-power"
-                    tabindex="-1"
-                    onclick="switchTab(event, 'power')">
-                    <span class="tab-icon" data-icon="chart" aria-hidden="true"></span>
-                    <span class="tab-label">POWER RANKING</span>
-                </button>
-                <button
-                    class="tab-btn"
-                    role="tab"
-                    id="tab-btn-legends"
-                    aria-selected="false"
-                    aria-controls="tab-legends"
-                    tabindex="-1"
-                    onclick="switchTab(event, 'legends')">
-                    <span class="tab-icon" data-icon="columns" aria-hidden="true"></span>
-                    <span class="tab-label">LENDAS KHC</span>
-                </button>
-                <button
-                    class="tab-btn"
-                    role="tab"
-                    id="tab-btn-seasons"
-                    aria-selected="false"
-                    aria-controls="tab-seasons"
-                    tabindex="-1"
-                    onclick="switchTab(event, 'seasons')">
-                    <span class="tab-icon" data-icon="calendar" aria-hidden="true"></span>
-                    <span class="tab-label">TEMPORADAS</span>
-                </button>
-            </nav>
+    <header class="site-header">
+        <div class="site-header__in">
+            <a class="brand" href="#/ligas" aria-label="Ultimate League KHC — início">
+                <img src="assets/logo/png/ui/escudo-khc.png" alt="" width="32" height="36">
+                <span><small>Ultimate League</small><b>KHC</b></span>
+            </a>
+            <!-- Abas (≥1024px). Geradas por renderShell() em js/app.js -->
+            <nav class="top-tabs" id="topTabs" aria-label="Seções"></nav>
+            <span class="spacer"></span>
+            <div class="season-select" id="seasonSelect" role="radiogroup" aria-label="Temporada"></div>
+            <a class="icon-btn only-mobile" id="rulesLink" href="#/regras" aria-label="Regras">
+                <span data-icon="bookOpen" data-size="20"></span>
+            </a>
         </div>
+    </header>
 
-        <main id="main-content">
-            <section
-                id="tab-leagues"
-                class="view-section active"
-                role="tabpanel"
-                aria-labelledby="tab-btn-leagues"
-                tabindex="0">
-                <h2 class="sr-only">Classificação das Ligas</h2>
-                <div id="leaguesContainer" class="leagues-grid" aria-live="polite">
-                </div>
-            </section>
-
-            <section
-                id="tab-global"
-                class="view-section"
-                role="tabpanel"
-                aria-labelledby="tab-btn-global"
-                tabindex="0"
-                hidden>
-                <h2 class="sr-only">Ranking Global - Top Scorers</h2>
-                <div id="globalContainer" aria-live="polite">
-                    <!-- Populated by renderGlobalStandings(); inclui a própria
-                         estrutura .top-scorers-card[role=table] + header. -->
-                </div>
-            </section>
-
-            <section
-                id="tab-power"
-                class="view-section"
-                role="tabpanel"
-                aria-labelledby="tab-btn-power"
-                tabindex="0"
-                hidden>
-                <h2 id="power-heading" class="sr-only">Power Ranking - Tier List</h2>
-                <div id="powerContainer" class="power-container" aria-labelledby="power-heading" aria-live="polite">
-                </div>
-            </section>
-
-            <section
-                id="tab-legends"
-                class="view-section"
-                role="tabpanel"
-                aria-labelledby="tab-btn-legends"
-                tabindex="0"
-                hidden>
-                <h2 class="sr-only">Lendas KHC - Ranking de Conquistas</h2>
-                <div id="legendsContainer" class="legends-container" aria-label="Ranking de lendas por conquistas" aria-live="polite">
-                </div>
-            </section>
-
-            <section
-                id="tab-seasons"
-                class="view-section"
-                role="tabpanel"
-                aria-labelledby="tab-btn-seasons"
-                tabindex="0"
-                hidden>
-                <h2 class="sr-only">Temporadas - Resultados por Ano</h2>
-                <div id="seasonsContainer" class="seasons-container" aria-label="Resultados por temporada" aria-live="polite">
-                </div>
-            </section>
-        </main>
-
-        <footer class="site-footer" role="contentinfo">
-            <div class="footer-brand">
-                <span class="footer-brand-name">ULTIMATE KHC</span>
-                <span class="footer-brand-meta">Fundada em 2025</span>
+    <main id="main" class="page" tabindex="-1">
+        <div class="page-head">
+            <div class="page-head__title">
+                <div class="eyebrow" id="pageEyebrow"></div>
+                <h1 class="display" id="pageTitle">Classificação</h1>
             </div>
-            <button class="footer-sobre" type="button" data-open-modal="about">
-                Sobre a Liga
-            </button>
-        </footer>
-
-    </div>
-
-    <aside id="player-drawer" class="drawer drawer--player" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden>
-        <div class="drawer-backdrop" data-close-drawer></div>
-        <div class="drawer-panel" role="document">
-            <button class="drawer-close" type="button" aria-label="Fechar perfil" data-close-drawer>
-                <!-- close icon will be rendered by drawer.js or via IconRegistry on open -->
-            </button>
-            <div class="drawer-content" id="drawer-content">
-                <!-- Populated by openPlayerDrawer() -->
-            </div>
+            <div class="status" id="status" role="status" aria-live="polite"></div>
         </div>
+        <div id="view"></div>
+    </main>
+
+    <!-- Navegação inferior (<1024px). Gerada por renderShell() -->
+    <nav class="bottom-nav" id="bottomNav" aria-label="Seções"></nav>
+
+    <!-- Perfil do jogador (lateral no desktop, bottom sheet no celular) -->
+    <div class="scrim" id="scrim" data-close-drawer hidden></div>
+    <aside id="player-drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden>
+        <div id="drawer-content"></div>
     </aside>
 
-    <div id="about-modal" class="modal modal--about" role="dialog" aria-modal="true" aria-labelledby="about-modal-title" hidden>
-        <div class="modal-backdrop" data-close-modal></div>
-        <div class="modal-panel" role="document">
-            <header class="modal-header">
-                <h2 id="about-modal-title" class="modal-title">Sobre a Ultimate KHC</h2>
-                <button class="modal-close" type="button" aria-label="Fechar" data-close-modal>
-                    <!-- close icon by IconRegistry, rendered after open -->
-                </button>
-            </header>
-            <div class="modal-body" id="about-modal-body">
-                <!-- Populated by openAboutModal() -->
-            </div>
-            <footer class="modal-footer">
-                <p class="modal-footnote">Mais regras e história serão adicionadas aqui em breve.</p>
-            </footer>
-        </div>
-    </div>
-
     <!--
-        Módulos JS carregados em ordem de dependência.
-        Padrão vanilla (sem type="module"): cada arquivo expõe funções no
-        escopo global; ordem de carregamento garante disponibilidade.
+        Módulos JS carregados em ordem de dependência (sem type="module";
+        cada arquivo expõe funções no escopo global).
 
-        1. config       → constantes, KHC_CONFIG, appState
+        1. config       → KHC_CONFIG, SERIES_META, constantes, appState
         2. sanitize     → escapeHtml, sanitize*
-        3. api          → fetch+retry, cache, fetchLeagueData
-        4. data         → loader híbrido (JSON estático + Sleeper live)
-        5. derivations  → pwr, tier, legends, career (puro, sem DOM)
-        6. icons        → SVG icon registry + renderIcons() (hidrata data-icon)
-        7. ui/loading   → spinners, skeletons
-        8. ui/helpers   → playerLinkHTML e outros geradores compartilhados
-        9. ui/tabs      → switchTab (usado inline), keyboard nav, SR
-       10. ui/drawer    → player drawer (side-sheet)
-       11. ui/modal     → about modal
-       12. tabs/*       → renderers por aba
-       13. app          → init, loadData, DOMContentLoaded
+        3. api          → fetch+retry, cache, fetchLeagueData, fetchNflState
+        4. data         → temporadas finalizadas (data/<ano>.json)
+        5. derivations  → pwr, tier, lendas, carreira (puro, sem DOM)
+        6. icons        → SVGs inline + renderIcons()
+        7. ui/helpers   → avatar, botão de time, escudo, medalha, scroll lock
+        8. ui/drawer    → perfil do jogador
+        9. tabs/*       → um render por aba (devolve HTML)
+       10. app          → roteamento por hash, loadData, render
     -->
     <script src="js/config.js"></script>
     <script src="js/sanitize.js"></script>
@@ -228,16 +86,14 @@
     <script src="js/data.js"></script>
     <script src="js/derivations.js"></script>
     <script src="js/icons.js"></script>
-    <script src="js/ui/loading.js"></script>
     <script src="js/ui/helpers.js"></script>
-    <script src="js/ui/tabs.js"></script>
     <script src="js/ui/drawer.js"></script>
-    <script src="js/ui/modal.js"></script>
     <script src="js/tabs/ligas.js"></script>
     <script src="js/tabs/top-scorers.js"></script>
     <script src="js/tabs/power-ranking.js"></script>
     <script src="js/tabs/lendas.js"></script>
     <script src="js/tabs/temporadas.js"></script>
+    <script src="js/tabs/regras.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

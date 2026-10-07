@@ -1,5 +1,9 @@
 # Ultimate KHC — Revisão de UI/UX + Brief para Claude Design
 
+> **Atualização:** o redesign do Claude Design (nova identidade, Archivo, escudos por série, zonas, abas por série,
+> navegação inferior, aba Regras, URL por tela) foi aplicado na branch `redesign/identidade-visual`.
+> Capturas do resultado em [`redesign/`](./redesign). As capturas em `screens/` são do site **antes** do redesign.
+
 > Revisão completa do código (HTML, 2.587 linhas de CSS, 17 arquivos JS) + screenshots reais
 > tiradas com dados ao vivo da Sleeper (out/2026). Screenshots em [`screens/`](./screens)
 > (as de Ligas 2025, Power mobile e Temporadas já mostram os bugs B1–B6 corrigidos).

@@ -57,14 +57,6 @@ async function fetchWithRetry(url, maxRetries = MAX_RETRIES) {
     throw lastError || new Error('Falha após múltiplas tentativas');
 }
 
-function debounce(fn, delay) {
-    let timeoutId;
-    return (...args) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => fn(...args), delay);
-    };
-}
-
 // --- CACHE ---
 
 function getCacheKey(season) {
@@ -134,12 +126,12 @@ function cleanOldCache() {
 }
 
 function formatTimeAgo(ms) {
-    const seconds = Math.floor(ms / 1000);
-    if (seconds < 60) return `${seconds}s atrás`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}min atrás`;
+    const minutes = Math.floor(ms / 60000);
+    if (minutes < 1) return 'agora';
+    if (minutes < 60) return `há ${minutes} min`;
     const hours = Math.floor(minutes / 60);
-    return `${hours}h atrás`;
+    if (hours < 24) return `há ${hours} h`;
+    return `há ${Math.floor(hours / 24)} d`;
 }
 
 function getErrorMessage(status) {
@@ -220,6 +212,9 @@ async function fetchLeagueData(leagueInfo) {
             const fpts = sanitizeNumber(settings.fpts, 0, VALIDATION.MAX_POINTS, 0);
             const fptsDecimal = sanitizeNumber(settings.fpts_decimal, 0, 99, 0);
             const points = fpts + (fptsDecimal / 100);
+            const pa = sanitizeNumber(settings.fpts_against, 0, VALIDATION.MAX_POINTS, 0);
+            const paDecimal = sanitizeNumber(settings.fpts_against_decimal, 0, 99, 0);
+            const pointsAgainst = pa + (paDecimal / 100);
 
             // Extrai e sanitiza nome do time
             const rawTeamName = user.metadata?.team_name || user.display_name || 'Time Sem Nome';
@@ -239,7 +234,8 @@ async function fetchLeagueData(leagueInfo) {
                 wins: sanitizeNumber(settings.wins, 0, VALIDATION.MAX_WINS, 0),
                 losses: sanitizeNumber(settings.losses, 0, VALIDATION.MAX_LOSSES, 0),
                 ties: sanitizeNumber(settings.ties, 0, VALIDATION.MAX_WINS, 0),
-                fpts: sanitizeNumber(points, 0, VALIDATION.MAX_POINTS, 0)
+                fpts: sanitizeNumber(points, 0, VALIDATION.MAX_POINTS, 0),
+                fptsAgainst: sanitizeNumber(pointsAgainst, 0, VALIDATION.MAX_POINTS, 0)
             };
 
             return teamObj;

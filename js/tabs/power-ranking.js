@@ -1,23 +1,27 @@
 // =============================================================================
-// TAB / POWER RANKING — Tier list S/A/B/C/D usando Power Score (derivações).
+// TAB / POWER RANKING — Tiers S/A/B/C/D pelo Power Score (derivations.js).
 //
-// Visual port da Phase 3 do redesign:
-//   - Caption acima com ícone de gráfico + texto contextual (ativa vs final).
-//   - Tier rows com label panel 90px + grid de PWR cards (≤760px: label vira
-//     faixa horizontal acima dos cards).
-//   - PWR card: avatar + nome + série + W-L pts | score grande + barra 3px.
-//   - Top-left tab `#rank`. (Sem indicador ↑/↓: não há histórico semanal
-//     para comparar posições.)
+//   - Só séries regulares: a Elite fica de fora para não contar o mesmo time
+//     duas vezes.
+//   - Tiers como cabeçalhos horizontais: badge + nome em PT-BR.
+//   - Card: #rank | avatar | time + série · V–D · pts | PWR + barra.
+//   - Sem setas de movimento: não há histórico semanal para comparar.
 //
-// Lê: appState.season, appState.rosterData
-// Depende de: js/config.js, js/sanitize.js, js/derivations.js, js/data.js
+// Lê: appState.rosterData
+// Depende de: config, sanitize, derivations, ui/helpers
 // =============================================================================
 
+/** Nome e classe de cada tier (limites em tierForPwr, derivations.js). */
+const TIER_CONFIG = {
+    S: { name: 'Favoritos',      cls: 's' },
+    A: { name: 'Candidatos',     cls: 'a' },
+    B: { name: 'Meio de tabela', cls: 'b' },
+    C: { name: 'Pressionados',   cls: 'c' },
+    D: { name: 'Lanternas',      cls: 'd' },
+};
+
 /**
- * Mapeia o registro legacy `rosterData` para o formato Team esperado por
- * `powerRanking()`. Carrega também campos auxiliares (`_leagueName`,
- * `_leagueTier`) usados na linha "série" do card.
- *
+ * rosterData → formato Team de powerRanking(), carregando tier e avatar.
  * @param {Array<object>} rosterData
  * @returns {Array<object>}
  */
@@ -29,155 +33,67 @@ function mapRosterToTeams(rosterData) {
         w: r.wins,
         l: r.losses,
         pts: r.fpts,
-        _leagueName: r.leagueName,
         _leagueTier: r.leagueTier,
     }));
 }
 
 /**
- * Configuração visual estática por tier (letra + descrição em PT-BR maiúscula).
- * As classes CSS `.tier-label.s/.a/.b/.c/.d` carregam o gradiente.
- */
-const TIER_CONFIG = {
-    S: { letter: 'S', desc: 'ELITE',       cls: 's' },
-    A: { letter: 'A', desc: 'CONTENDERS',  cls: 'a' },
-    B: { letter: 'B', desc: 'RISERS',      cls: 'b' },
-    C: { letter: 'C', desc: 'MID-PACK',    cls: 'c' },
-    D: { letter: 'D', desc: 'RELEGATION',  cls: 'd' },
-};
-
-// isSeasonFinalized() agora vive em data.js (fonte única).
-
-/**
- * Renderiza HTML de um único PWR card.
- * @param {object} row PowerRow + flags do mapRoster
+ * Card de um time no Power Ranking.
+ * @param {object} row PowerRow
+ * @param {string} tierCls
  * @returns {string}
  */
-function renderPwrCard(row) {
-    const team = row.team;
-    const safeUser = escapeHtml(team.user || '');
-    const safeTeamName = escapeHtml(team.team || '');
-    const safeSeries = escapeHtml(team._leagueName || '');
-    const avatarUrl = sanitizeAvatarUrl(team.avatarId);
-    const pts = sanitizeNumber(team.pts, 0, VALIDATION.MAX_POINTS).toFixed(1);
-    const record = `${team.w}-${team.l}`;
-    const score = row.pwr.toFixed(1);
-    const pwrPct = Math.max(0, Math.min(100, row.pwr));
-
-    return `
-        <article class="pwr-card" data-user="${safeUser}">
-            <div class="pwr-rank-tab" aria-label="Posição ${row.rank}">
-                <span class="pwr-rank">#${row.rank}</span>
-            </div>
-            <div class="pwr-card-left">
-                <img src="${avatarUrl}" alt="" class="pwr-avatar" loading="lazy"
-                     onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
-                <div class="pwr-info">
-                    <div class="pwr-team-name">
-                        ${playerLinkHTML({ user: team.user, displayName: safeTeamName })}
-                    </div>
-                    <div class="pwr-series">${safeSeries}</div>
-                    <div class="pwr-record">${record} <span class="pwr-pts">${pts} pts</span></div>
-                </div>
-            </div>
-            <div class="pwr-card-right">
-                <div class="pwr-score">${score}</div>
-                <div class="pwr-score-label">PWR</div>
-                <div class="pwr-bar"><div class="pwr-bar-fill" data-pct="${pwrPct}"></div></div>
-            </div>
-        </article>
-    `;
+function renderPwrCard(row, tierCls) {
+    const t = row.team;
+    const meta = SERIES_META[t._leagueTier];
+    const safeUser = escapeHtml(t.user || '');
+    const safeTeam = escapeHtml(t.team || '');
+    const pct = Math.max(0, Math.min(100, row.pwr)).toFixed(0);
+    return `<button type="button" class="pwr-card" data-user="${safeUser}" aria-label="#${row.rank} ${safeTeam}, PWR ${row.pwr.toFixed(1)}. Abrir perfil">
+        <span class="pos pwr-card__rank">#${row.rank}</span>
+        ${avatarHTML({ avatarId: t.avatarId, name: t.team })}
+        <span class="grow">
+            <span class="team__name" dir="auto">${safeTeam}</span>
+            <span class="team__owner"><b data-league="${meta ? meta.league : 'a'}" class="text-accent">${escapeHtml(meta ? meta.short : '')}</b> · ${t.w}–${t.l} · ${fmtPts(t.pts)} pts</span>
+        </span>
+        <span class="pwr-card__score">
+            <span class="num">${row.pwr.toFixed(1)}</span>
+            <span class="pwr-bar pwr-bar--${tierCls}"><i style="width:${pct}%"></i></span>
+        </span>
+    </button>`;
 }
 
 /**
- * Agrupa as rows por tier preservando a ordem S→A→B→C→D.
- * @param {Array} rows
- * @returns {Object<string, Array>}
+ * Renderiza a aba Power Ranking.
+ * @returns {string} HTML
  */
-function groupRowsByTier(rows) {
-    const grouped = { S: [], A: [], B: [], C: [], D: [] };
-    rows.forEach(r => { grouped[r.tier].push(r); });
-    return grouped;
-}
-
-/**
- * Caption acima do tier list. Apenas para temporada finalizada.
- * @param {boolean} finalized
- * @returns {string}
- */
-function buildPowerCaption(finalized) {
-    if (!finalized) return '';
-    const icon = IconRegistry.chart({ size: 14 });
-    return `<div class="power-caption">${icon}<span>Tier List baseada na pontuação total da temporada</span></div>`;
-}
-
-/**
- * Constrói uma `<section.tier-row>` para um tier não-vazio.
- * @param {string} tierKey  'S'|'A'|'B'|'C'|'D'
- * @param {Array}  list     Rows nesse tier
- * @param {number} tierIdx  Posição visual (pra stagger delay)
- * @returns {string}
- */
-function buildTierSection(tierKey, list, tierIdx) {
-    const cfg = TIER_CONFIG[tierKey];
-    const aria = `Tier ${cfg.letter} — ${cfg.desc}: ${list.length} times`;
-    return `
-        <section class="tier-row stagger-item" role="region" aria-label="${aria}"
-                 style="animation-delay: ${tierIdx * STAGGER_DELAY_MS}ms">
-            <div class="tier-label ${cfg.cls}">
-                <span class="letter">${cfg.letter}</span>
-                <span class="desc">${cfg.desc}</span>
-            </div>
-            <div class="tier-teams">
-                ${list.map(renderPwrCard).join('')}
-            </div>
-        </section>
-    `;
-}
-
-/**
- * Anima as barras (0% → pct) em rAF. As barras começam com width=0 e
- * `data-pct` no DOM; este passe aplica a largura final via JS pra disparar
- * a transition definida no CSS.
- * @param {HTMLElement} container
- */
-function animatePwrBars(container) {
-    requestAnimationFrame(() => {
-        container.querySelectorAll('.pwr-bar-fill').forEach(b => {
-            const pct = parseFloat(b.getAttribute('data-pct')) || 0;
-            b.style.width = pct + '%';
-        });
-    });
-}
-
 function renderPowerRankings() {
-    const container = document.getElementById(DOM_IDS.POWER);
-    if (!container) return;
-
-    if (!appState.rosterData || appState.rosterData.length === 0) {
-        container.innerHTML = '<div style="padding:1rem; text-align:center" role="status">Sem dados</div>';
-        return;
+    const regular = appState.rosterData.filter(r => r.leagueTier !== 'elite');
+    if (!regular.length) {
+        return stateHTML({ icon: 'zap', title: 'Nada por aqui ainda' });
     }
 
-    // powerRanking() preserva a referência do objeto team, então
-    // _leagueName/_leagueTier anexados em mapRosterToTeams() ficam acessíveis
-    // via r.team dentro do card.
-    const teams = mapRosterToTeams(appState.rosterData);
-    const rows = powerRanking(teams);
-    const grouped = groupRowsByTier(rows);
-    const finalized = isSeasonFinalized(appState.season);
+    const rows = powerRanking(mapRosterToTeams(regular));
+    const sections = Object.keys(TIER_CONFIG).map(key => {
+        const list = rows.filter(r => r.tier === key);
+        if (!list.length) return '';
+        const cfg = TIER_CONFIG[key];
+        return `<section aria-label="Tier ${key} — ${cfg.name}">
+            <div class="tier-hd">
+                <span class="tier-badge t-${cfg.cls}">${key}</span>
+                <h2 class="display tier-hd__name">${cfg.name}</h2>
+                <small class="eyebrow">${list.length} ${list.length === 1 ? 'time' : 'times'}</small>
+            </div>
+            <div class="pwr-grid">${list.map(r => renderPwrCard(r, cfg.cls)).join('')}</div>
+        </section>`;
+    }).join('');
 
-    const sectionsHtml = Object.keys(TIER_CONFIG)
-        .filter(k => grouped[k].length > 0)
-        .map((k, i) => buildTierSection(k, grouped[k], i))
-        .join('');
-
-    container.innerHTML = `
-        ${buildPowerCaption(finalized)}
-        <div class="tier-list">
-            ${sectionsHtml}
+    return `
+        ${partialWarningHTML()}
+        <div class="note">
+            <span data-icon="info" data-size="18"></span>
+            <span><b>Como calculamos:</b> PWR = 60% aproveitamento + 40% pontos normalizados (0–100).
+            Só séries regulares — a Elite não entra para não contar o mesmo time duas vezes.</span>
         </div>
-    `;
-
-    animatePwrBars(container);
+        <div class="tiers">${sections}</div>`;
 }

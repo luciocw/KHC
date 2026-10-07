@@ -1,108 +1,66 @@
 // =============================================================================
-// TAB / TOP SCORERS — Ranking global achatado: todos os times de todas as
-// séries da temporada, ordenados por pontos. Top 3 ganha medalha quando a
-// temporada está finalizada.
-// Lê: appState.rosterData, appState.season, getFinalizedSeasons()
-// Depende de: js/config.js, js/sanitize.js, js/icons.js, js/data.js
+// TAB / TOP SCORERS — Todos os times da temporada ordenados por pontos.
+//
+//   - Filtro por série (chips) + "Incluir Elite" desligado por padrão: quem
+//     joga a Elite também está numa série regular, então ligar a Elite
+//     duplica o time (com outra pontuação).
+//   - Linha: posição | avatar | time + pill da série + dono · V–D | pontos.
+//   - Sem animação em cascata.
+//
+// Lê: appState.rosterData, appState.topFilter, appState.includeElite
+// Depende de: config, sanitize, ui/helpers
 // =============================================================================
 
 /**
- * Top-3 medal SVG quando temporada finalizada, null caso contrário.
- * @param {number} index 0-based
- * @param {boolean} isFinalized
- * @returns {string|null}
+ * Linha do ranking (botão que abre o perfil do dono).
+ * @returns {string}
  */
-function topScorersMedalFor(index, isFinalized) {
-    if (!isFinalized) return null;
-    if (index === 0) return IconRegistry.medalGold({ size: 18 });
-    if (index === 1) return IconRegistry.medalSilver({ size: 18 });
-    if (index === 2) return IconRegistry.medalBronze({ size: 18 });
-    return null;
+function buildTopRow(t, i) {
+    const safeUser = escapeHtml(t.ownerName);
+    const safeTeam = escapeHtml(t.teamName);
+    return `<button type="button" class="list-row" data-user="${safeUser}" aria-label="${i + 1}º: ${safeTeam}, de ${safeUser}, ${fmtPts(t.fpts)} pontos. Abrir perfil">
+        <span class="pos list-row__pos">${i + 1}</span>
+        ${avatarHTML({ avatarId: t.avatar, name: t.teamName })}
+        <span class="grow">
+            <span class="team__name" dir="auto">${safeTeam}</span>
+            <span class="meta">${seriesPillHTML(t.leagueTier)}<span dir="auto">${safeUser}</span> · ${t.wins}–${t.losses}</span>
+        </span>
+        <span class="num list-row__num">${fmtPts(t.fpts)}</span>
+    </button>`;
 }
 
 /**
- * Constrói uma linha do ranking global.
- * @param {object} t   Team registro (legacy rosterData shape)
- * @param {number} i   0-based
- * @param {boolean} isFinalized
+ * Renderiza a aba Top Scorers.
  * @returns {string} HTML
  */
-function buildGlobalRow(t, i, isFinalized) {
-    const eliteClass = t.leagueTier === 'elite' ? 'is-elite' : '';
-    const safeTeamName = escapeHtml(t.teamName);
-    const safeLeagueName = escapeHtml(t.leagueName);
-    const safePts = sanitizeNumber(t.fpts, 0, VALIDATION.MAX_POINTS).toFixed(1);
+function renderTopScorers() {
+    const tiers = TIER_ORDER.filter(tier =>
+        appState.rosterData.some(t => t.leagueTier === tier) &&
+        (appState.includeElite || tier !== 'elite'));
+    const hasElite = appState.rosterData.some(t => t.leagueTier === 'elite');
 
-    const podiumClass = i === 0 ? 'top-1' : '';
-    const medal = topScorersMedalFor(i, isFinalized);
-    const rankCell = medal
-        ? `<div role="cell" class="global-rank medal" aria-label="${i + 1}º lugar">${medal}</div>`
-        : `<div role="cell" class="global-rank">${i + 1}</div>`;
+    if (!tiers.includes(appState.topFilter)) appState.topFilter = 'all';
 
-    const ariaLabel = `${i + 1}º lugar: ${safeTeamName} da ${safeLeagueName} com ${safePts} pontos`;
-    const delay = i * STAGGER_DELAY_MS;
+    const list = appState.rosterData
+        .filter(t => appState.includeElite || t.leagueTier !== 'elite')
+        .filter(t => appState.topFilter === 'all' || t.leagueTier === appState.topFilter)
+        .slice()
+        .sort((a, b) => b.fpts - a.fpts);
+
+    const chips = [['all', 'Todas'], ...tiers.map(t => [t, SERIES_META[t].short])]
+        .map(([k, label]) => `<button type="button" data-top-filter="${k}" aria-pressed="${appState.topFilter === k}">${escapeHtml(label)}</button>`)
+        .join('');
+
+    const toggle = hasElite
+        ? `<label class="toggle"><input type="checkbox" id="incElite"${appState.includeElite ? ' checked' : ''}> Incluir Elite</label>`
+        : '';
+
+    const body = list.length
+        ? `<div class="card">${list.map(buildTopRow).join('')}</div>`
+        : stateHTML({ icon: 'chart', title: 'Nada por aqui ainda' });
 
     return `
-        <div class="global-row ${podiumClass} stagger-item" role="row" aria-label="${ariaLabel}" style="animation-delay: ${delay}ms">
-            ${rankCell}
-            <div role="cell" class="global-team-name" title="${safeTeamName}">
-                ${playerLinkHTML({ user: t.ownerName || t.teamId || '', displayName: safeTeamName })}
-            </div>
-            <div role="cell"><span class="global-league-tag ${eliteClass}">${safeLeagueName}</span></div>
-            <div role="cell" class="global-pts">${safePts}</div>
-        </div>
-    `;
-}
-
-/**
- * Caption acima do card. Renderizada apenas para temporada finalizada — em
- * temporada ativa ainda não há tracking de semana ao vivo.
- * @param {boolean} isFinalized
- * @returns {string} HTML (pode ser vazio)
- */
-function buildTopScorersCaption(isFinalized) {
-    if (!isFinalized) return '';
-    const icon = IconRegistry.trophy ? IconRegistry.trophy({ size: 14 }) : '';
-    const text = 'Pontuação total — todos os times de todas as séries';
-    return `<div class="global-caption" role="note">${icon}<span>${text}</span></div>`;
-}
-
-/**
- * Renderiza a tabela global de pontuação (tab Top Scorers).
- *
- * Layout:
- *   - Caption acima do card (trophy + texto, apenas finalizada).
- *   - Card com header `# / TIME / LIGA / PTS` e body rows ordenados por pts desc.
- *   - Finalizada → top 3 com medalhas SVG (gold/silver/bronze).
- *   - Ativa → rank numérico simples para todas as linhas.
- *   - #1 row recebe gradiente pódio.
- *   - ≤420px esconde a coluna "Liga".
- *
- * Cada nome de time é embrulhado em `.player-link[data-user]` para o drawer.
- */
-function renderGlobalStandings() {
-    const container = document.getElementById(DOM_IDS.GLOBAL);
-    const allTeams = [...appState.rosterData].sort((a, b) => b.fpts - a.fpts);
-
-    if (allTeams.length === 0) {
-        container.innerHTML = '<div style="padding:1rem; text-align:center" role="status">Sem dados</div>';
-        return;
-    }
-
-    const isFinalized = isSeasonFinalized(appState.season);
-    const captionHtml = buildTopScorersCaption(isFinalized);
-    const rowsHtml = allTeams.map((t, i) => buildGlobalRow(t, i, isFinalized)).join('');
-
-    container.innerHTML = `
-        ${captionHtml}
-        <div class="top-scorers-card" role="table" aria-label="Ranking global de pontuação">
-            <div class="global-header" role="row">
-                <div role="columnheader">#</div>
-                <div role="columnheader">Time</div>
-                <div role="columnheader">Liga</div>
-                <div role="columnheader" style="text-align:right">Pts</div>
-            </div>
-            ${rowsHtml}
-        </div>
-    `;
+        ${partialWarningHTML()}
+        <div class="chips" role="group" aria-label="Filtrar por série">${chips}<span class="spacer"></span>${toggle}</div>
+        ${body}`;
 }
