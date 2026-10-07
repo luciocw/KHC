@@ -156,12 +156,6 @@ def hat(start, vel=1.0, open_=False):
     add(drums, start, eq(s, hp=6000), 0.35 * vel)
 
 
-def crash(start, vel=1.0, dur=0.9):
-    t = t_axis(dur)
-    s = chip_noise(dur, 30000) * env(len(t), dur / 3)
-    add(drums, start, eq(s, hp=3000), 0.4 * vel)
-
-
 def tom(start, midi=50, vel=1.0):
     t = t_axis(0.18)
     s = triangle(hz(midi + 14 * np.exp(-t / 0.03)), t) * env(len(t), 0.08)
@@ -210,33 +204,40 @@ for th in THEMES.values():
     th["roots"] = [note(r) for r in th["roots"]]
 
 
+G0 = 1.0  # todas as cenas compartilham a mesma grade de tempo
+
+
 def groove(a, b, theme="main", anchor=None, drums_style="std", tr=0, vel=1.0,
-           duty=0.25, crash_in=True, melody=True):
-    """Toca o tema em [a, b). A grade fica presa em `anchor` (início da cena),
-    então, depois de uma parada, a música volta no tempo seguinte."""
+           duty=0.25, melody=True):
+    """Toca o tema em [a, b) sobre a grade global, sem recomeçar o pulso nas
+    trocas de cena. `anchor` (início da cena) marca o compasso 1 do tema, então,
+    depois de uma parada, a música volta no tempo seguinte."""
     anchor = a if anchor is None else anchor
     play_segments.append((a, b))
     th = THEMES[theme]
     mel, nbars = th["mel"], len(th["chords"])
-    k0 = int(np.ceil((a - anchor) / E8 - 1e-6))
-    k1 = int(np.ceil((b - anchor) / E8 - 1e-6))
+    ak = int(round((anchor - G0) / E8))
+    k0 = int(np.ceil((a - G0) / E8 - 1e-6))
+    k1 = int(np.ceil((b - G0) / E8 - 1e-6))
+    end = G0 + k1 * E8  # notas emendam na próxima colcheia da grade
     for k in range(k0, k1):
-        t = anchor + k * E8
-        bar = (k // 8) % nbars
-        pos = k % 8
+        t = G0 + k * E8
+        rel = k - ak
+        bar = (rel // 8) % nbars
+        pos = rel % 8
         # melodia: soma as colcheias seguradas
-        m = mel[k % len(mel)]
+        m = mel[rel % len(mel)]
         if melody and m not in (None, "."):
             ln = 1
-            while ln < 8 and mel[(k + ln) % len(mel)] == ".":
+            while ln < 8 and mel[(rel + ln) % len(mel)] == ".":
                 ln += 1
-            lead_note(t, m + tr, min(ln * E8, b - t), duty=duty, vel=vel,
+            lead_note(t, m + tr, min(ln * E8, end - t), duty=duty, vel=vel,
                       vib=0.25 if ln >= 3 else 0)
         # arpejo em colcheias
-        arp_chord(t, [c + tr for c in th["chords"][bar]], min(E8, b - t), vel=0.8 * vel)
+        arp_chord(t, [c + tr for c in th["chords"][bar]], E8, vel=0.8 * vel)
         # baixo pulando oitava
         r = th["roots"][bar] + tr + (12 if pos % 2 else 0)
-        bass_note(t, r, min(E8 * 0.9, b - t), vel)
+        bass_note(t, r, E8 * 0.9, vel)
         if drums_style == "std":
             if pos in (0, 3, 4):
                 kick(t, vel)
@@ -254,20 +255,16 @@ def groove(a, b, theme="main", anchor=None, drums_style="std", tr=0, vel=1.0,
             kick(t, 0.8 * vel)
             if pos in (2, 6):
                 snare(t, 0.8 * vel)
-            hat(t, 0.6, open_=(pos == 7))
-    if crash_in:
-        crash(a, vel)
+            hat(t, 0.6)
 
 
-def hit(t, chord, ring=0.3, vel=1.0, cymbal=True):
+def hit(t, chord, ring=0.3, vel=1.0):
     """Acento da banda inteira."""
     play_segments.append((t, t + ring))
     arp_chord(t, chord, ring, vel=vel)
     lead_note(t, max(chord) + 12, ring, duty=0.5, vel=0.7 * vel)
     bass_note(t, min(chord) - 12, ring, vel)
     kick(t, vel)
-    if cymbal:
-        crash(t, 0.8 * vel, 0.6)
 
 
 # -------------------------------------------------------------------- SFX
@@ -364,7 +361,7 @@ CH = {k: [note(n) for n in v] for k, v in {
 jingle(0.0, [note("C6"), note("G6")], 0.025, duty=0.125, vel=0.7)
 hit(0.05, CH["C"], ring=0.18)
 for i, (t, c) in enumerate(zip((0.25, 0.41, 0.57, 0.73), ("C", "F", "G", "C"))):
-    hit(t, [x + (12 if i == 3 else 0) for x in CH[c]], ring=0.14, cymbal=(i == 3))
+    hit(t, [x + (12 if i == 3 else 0) for x in CH[c]], ring=0.14)
 groove(1.0, 3.5, "main")
 
 # 3,5–8,5 · Clube do 4–0
@@ -376,7 +373,7 @@ groove(7.5, 8.5, "main", anchor=3.5)
 
 # 8,5–14,5 · Ladrão de Vitórias (vilão + solo)
 groove(8.5, 10.1, "villain", anchor=8.5, vel=0.9)
-groove(10.1, 11.9, "villain", anchor=8.5, vel=0.8, melody=False, crash_in=False)
+groove(10.1, 11.9, "villain", anchor=8.5, vel=0.8, melody=False)
 scale = [note(n) for n in ("A5", "B5", "C6", "D6", "E6", "F6", "G#6", "A6")]
 solo = scale + scale[::-1][1:] + [note(n) for n in ("C6", "E6", "A6", "C7", "B6", "G#6", "E6", "B6", "C7")]
 step = 1.3 / len(solo)
@@ -387,7 +384,7 @@ hit(11.9, CH["Am"], ring=0.45)
 stamp(11.9)
 coin(11.98)
 coin(12.2)
-groove(12.5, 14.5, "villain", anchor=8.5, vel=0.9, crash_in=False)
+groove(12.5, 14.5, "villain", anchor=8.5, vel=0.9)
 
 # 14,5–20,5 · Pé-frio do Ano (meio-tempo)
 groove(14.5, 16.0, "half", drums_style="half")
@@ -427,7 +424,7 @@ for t in np.linspace(36.75, 37.5, 7):
     kick(t, 0.9)
 hit(39.5, [x - 2 for x in CH["Am"]], ring=0.5)
 stamp(39.5)
-groove(40.1, 41.5, "half", anchor=36.0, drums_style="half", tr=-2, crash_in=False)
+groove(40.1, 41.5, "half", anchor=36.0, drums_style="half", tr=-2)
 
 # 41,5–47,5 · Corda Bamba (breakdown: bumbo + baixo pulsando, crescendo)
 play_segments.append((41.5, 44.5))
@@ -450,8 +447,8 @@ groove(44.5, 47.5, "main", vel=1.05)
 groove(47.5, 48.4, "hold", drums_style="drive")
 for i, t in enumerate((48.4, 48.7, 49.0)):  # opções 1, 2, 3: blips de menu subindo
     blip(t, note("G5") + 2 * i, 1.0)
-    hit(t, [x + 2 * i for x in CH["G"]], ring=0.2, cymbal=(i == 2))
-groove(49.2, 49.7, "hold", anchor=47.5, drums_style="drive", crash_in=False)
+    hit(t, [x + 2 * i for x in CH["G"]], ring=0.2)
+groove(49.2, 49.7, "hold", anchor=47.5, drums_style="drive")
 play_segments.append((49.7, 50.3))
 for i in range(6):
     tom(49.7 + i * 0.09, 62 - 3 * i, 0.9)
@@ -463,13 +460,11 @@ play_segments.append((53.4, 54.3))
 arp_chord(53.4, [note(n) for n in ("C4", "E4", "G4", "C5")], 0.9, vel=1.1)
 lead_note(53.4, note("C6"), 0.9, duty=0.5, vib=0.3, vel=0.9)
 bass_note(53.4, note("C2"), 0.9, 1.1)
-crash(53.4, 1.0, 0.9)
 play_segments.append((54.3, DUR))
 tom(54.3, 57, 1.0)  # ba-
 tom(54.45, 50, 1.0)  # -dum
 kick(54.45, 0.8)
-hat(54.65, 2.5, open_=True)  # -tss
-crash(54.65, 0.8, 0.7)
+jingle(54.65, [note("E7"), note("B7")], 0.03, duty=0.125, vel=0.7)  # -tss
 jingle(54.9, [note(n) for n in ("E6", "G6", "E7", "C7", "D7", "G7")], 0.06, duty=0.25, vel=0.6)
 
 # Transições (pico nos tempos do README)
