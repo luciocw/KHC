@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Trilha sonora do vídeo "KHC Awards · Semana 4" em estilo 8-bit (chiptune).
+"""Trilha sonora do vídeo "KHC Awards · Semana 4" em estilo 8-bit de jogo de
+plataforma: swing saltitante, melodia picada, acordes no contratempo e baixo
+pulando. As melodias são originais.
 
-Canais no estilo de console 8-bit: dois pulsos (melodia e arpejo), triângulo
+Canais no estilo de console 8-bit: dois pulsos (melodia e acordes), triângulo
 (baixo) e ruído (bateria), mais efeitos de videogame nos tempos do briefing
 README-trilhaKHC. Gera um WAV estéreo 48 kHz com exatamente 56,0 s; a
 normalização para -14 LUFS é feita depois com ffmpeg.
@@ -16,8 +18,9 @@ import numpy as np
 SR = 48000
 DUR = 56.0
 N = int(SR * DUR)
-BPM = 140
+BPM = 168
 E8 = 60 / BPM / 2  # colcheia
+SWING = 0.12 * 2 * E8  # atraso das colcheias do contratempo
 BAR = 8 * E8
 rng = np.random.default_rng(8)
 
@@ -174,22 +177,22 @@ def seq(*bars):
 
 
 THEMES = {
-    # heroico, em Dó maior: C · G · Am · F
+    # alegre e saltitante, em Dó maior: C · F · G · C
     "main": dict(
-        mel=seq("C5 . E5 G5 . E5 G5 C6", "B5 . A5 G5 . D5 G5 B5",
-                "C6 . B5 A5 . E5 A5 C6", "D6 . C6 A5 F5 . G5 ."),
-        chords=[("C4", "E4", "G4"), ("B3", "D4", "G4"), ("C4", "E4", "A4"), ("C4", "F4", "A4")],
-        roots=["C3", "G2", "A2", "F2"]),
-    # vilão, Lá menor harmônico: Am · Bb · E · Am
+        mel=seq("G5 - E5 G5 - A5 G5 -", "F5 - A5 C6 - A5 F5 -",
+                "D5 F5 - G5 - B5 D6 -", "C6 - G5 - E5 C5 - -"),
+        chords=[("E4", "G4", "C5"), ("F4", "A4", "C5"), ("D4", "G4", "B4"), ("E4", "G4", "C5")],
+        roots=["C3", "F2", "G2", "C3"]),
+    # vilão sorrateiro, Dó menor: Cm · Ab · G · Cm
     "villain": dict(
-        mel=seq("A4 . C5 E5 . D#5 E5 .", "F5 . D5 Bb4 . A4 Bb4 .",
-                "G#4 . B4 E5 . F5 E5 D5", "C5 . B4 A4 . - E4 ."),
-        chords=[("A3", "C4", "E4"), ("Bb3", "D4", "F4"), ("G#3", "B3", "E4"), ("A3", "C4", "E4")],
-        roots=["A2", "Bb2", "E2", "A2"]),
+        mel=seq("C5 - Eb5 - D5 C5 - G4", "Ab4 - C5 Eb5 - D5 C5 -",
+                "B4 - D5 G5 - F5 D5 B4", "C5 - G4 - C4 - - -"),
+        chords=[("Eb4", "G4", "C5"), ("Eb4", "Ab4", "C5"), ("D4", "G4", "B4"), ("Eb4", "G4", "C5")],
+        roots=["C3", "Ab2", "G2", "C3"]),
     # meio-tempo triste: Am · F · Dm · E
     "half": dict(
-        mel=seq("A4 . . . C5 . B4 .", "A4 . . . F4 . . .",
-                "D5 . . . C5 . A4 .", "G#4 . . . B4 . . ."),
+        mel=seq("A4 . - C5 B4 . - -", "A4 . - F4 . . - -",
+                "D5 . - C5 A4 . - -", "G#4 . - B4 E5 . - -"),
         chords=[("A3", "C4", "E4"), ("A3", "C4", "F4"), ("A3", "D4", "F4"), ("G#3", "B3", "E4")],
         roots=["A2", "F2", "D2", "E2"]),
     # tensão segurando a dominante (Sol)
@@ -208,7 +211,7 @@ G0 = 1.0  # todas as cenas compartilham a mesma grade de tempo
 
 
 def groove(a, b, theme="main", anchor=None, drums_style="std", tr=0, vel=1.0,
-           duty=0.25, melody=True):
+           duty=0.5, melody=True):
     """Toca o tema em [a, b) sobre a grade global, sem recomeçar o pulso nas
     trocas de cena. `anchor` (início da cena) marca o compasso 1 do tema."""
     anchor = a if anchor is None else anchor
@@ -220,41 +223,46 @@ def groove(a, b, theme="main", anchor=None, drums_style="std", tr=0, vel=1.0,
     k1 = int(np.ceil((b - G0) / E8 - 1e-6))
     end = G0 + k1 * E8  # notas emendam na próxima colcheia da grade
     for k in range(k0, k1):
-        t = G0 + k * E8
+        t = G0 + k * E8 + (SWING if k % 2 else 0)
         rel = k - ak
         bar = (rel // 8) % nbars
         pos = rel % 8
-        # melodia: soma as colcheias seguradas
+        # melodia picada: notas curtas, só seguram quando o tema pede "."
         m = mel[rel % len(mel)]
         if melody and m not in (None, "."):
             ln = 1
             while ln < 8 and mel[(rel + ln) % len(mel)] == ".":
                 ln += 1
-            lead_note(t, m + tr, min(ln * E8, end - t), duty=duty, vel=vel,
+            d = ln * E8 if ln > 1 else 0.7 * E8
+            lead_note(t, m + tr, min(d, end - t), duty=duty, vel=vel,
                       vib=0.25 if ln >= 3 else 0)
-        # arpejo em colcheias
-        arp_chord(t, [c + tr for c in th["chords"][bar]], E8, vel=0.8 * vel)
-        # baixo pulando oitava
-        r = th["roots"][bar] + tr + (12 if pos % 2 else 0)
-        bass_note(t, r, E8 * 0.9, vel)
-        if drums_style == "std":
-            if pos in (0, 3, 4):
-                kick(t, vel)
-            if pos in (2, 6):
-                snare(t, vel)
-            hat(t, 1.0 if pos % 2 == 0 else 0.6)
-        elif drums_style == "half":
-            if pos in (0, 5):
-                kick(t, vel)
-            if pos == 4:
-                snare(t, vel)
+        # acordes no contratempo ("tchá")
+        if pos % 2:
+            arp_chord(t, [c + tr for c in th["chords"][bar]], 0.6 * E8, duty=0.25, vel=0.9 * vel)
+        # baixo pulando: tônica no tempo, quinta e oitava no contratempo
+        root = th["roots"][bar] + tr
+        if drums_style == "half":
             if pos % 2 == 0:
-                hat(t, 0.8)
-        elif drums_style == "drive":
-            kick(t, 0.8 * vel)
+                bass_note(t, root + (0, 0, 7, 0)[pos // 2], 1.6 * E8, vel)
+        else:
+            if pos % 2 == 0:
+                bass_note(t, root + (0, 7, 12, 7)[pos // 2], 0.75 * E8, vel)
+        if drums_style == "std":
+            if pos in (0, 4):
+                kick(t, 0.6 * vel)
             if pos in (2, 6):
-                snare(t, 0.8 * vel)
-            hat(t, 0.6)
+                snare(t, 0.45 * vel)
+            hat(t, 0.7 if pos % 2 == 0 else 0.35)
+        elif drums_style == "half":
+            if pos == 0:
+                kick(t, 0.6 * vel)
+            if pos == 4:
+                snare(t, 0.45 * vel)
+            if pos % 2 == 0:
+                hat(t, 0.5)
+        elif drums_style == "drive":
+            kick(t, 0.5 * vel)
+            hat(t, 0.6 if pos % 2 == 0 else 0.4)
 
 
 def hit(t, chord, ring=0.3, vel=1.0):
@@ -367,14 +375,14 @@ glitch(6.9)
 # 8,5–14,5 · Ladrão de Vitórias (vilão + solo)
 groove(8.5, 10.1, "villain", anchor=8.5, vel=0.9)
 groove(10.1, 11.9, "villain", anchor=8.5, vel=0.8, melody=False)
-scale = [note(n) for n in ("A5", "B5", "C6", "D6", "E6", "F6", "G#6", "A6")]
-solo = scale + scale[::-1][1:] + [note(n) for n in ("C6", "E6", "A6", "C7", "B6", "G#6", "E6", "B6", "C7")]
+scale = [note(n) for n in ("C6", "D6", "Eb6", "F6", "G6", "Ab6", "B6", "C7")]
+solo = scale + scale[::-1][1:] + [note(n) for n in ("Eb6", "G6", "C7", "Eb7", "D7", "B6", "G6", "D7", "Eb7")]
 step = 1.3 / len(solo)
 for i, m in enumerate(solo):
     lead_note(10.1 + i * step, m, step, duty=0.125, vel=0.9)
-lead_note(11.4, note("A6"), 0.5, duty=0.125, vib=0.5, slide_from=note("G#6"))
+lead_note(11.4, note("C7"), 0.5, duty=0.125, vib=0.5, slide_from=note("B6"))
 groove(11.9, 14.5, "villain", anchor=8.5, vel=0.9)
-accent(11.9, note("A6"))
+accent(11.9, note("C7"))
 stamp(11.9)
 coin(11.98)
 coin(12.2)
@@ -392,12 +400,12 @@ accent(22.0, note("A4"))  # grave
 scribble(23.0)
 
 # 26,0–30,5 · Demônio de Folga (mais grave e mais áspero)
-groove(26.0, 30.5, "villain", anchor=26.0, tr=-3, duty=0.5, vel=1.05)
+groove(26.0, 30.5, "villain", anchor=26.0, tr=-3, duty=0.125, vel=1.05)
 alarm(27.2, 1.0)
 glitch(28.2)
 
 # 30,5–36,0 · Bola Murcha (base baixinha, sem melodia, para os efeitos aparecerem)
-groove(30.5, 36.0, "half", anchor=30.5, drums_style="half", vel=0.6, melody=False)
+groove(30.5, 36.0, "half", anchor=30.5, drums_style="half", vel=0.75, melody=False)
 deflate(31.7, 1.3)
 bass_note(33.1, note("E3"), 0.3, 1.0)
 bass_note(33.5, note("A2"), 0.45, 1.0)
