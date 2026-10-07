@@ -33,6 +33,7 @@
         A: 'Serie A',
         B: 'Serie B',
         C: 'Serie C',
+        D: 'Serie D',
         Elite: 'KHC Elite'
     };
 
@@ -105,24 +106,15 @@
         if (!Number.isFinite(seasonId)) return [];
         return roster
             .filter(r => r.ownerName === username)
-            .map(r => {
-                // Reverte leagueName/tier para um id de série A/B/C/Elite quando possível.
-                const name = r.leagueName || '';
-                let serie = 'A';
-                if (/elite/i.test(name)) serie = 'Elite';
-                else if (/serie\s*b/i.test(name)) serie = 'B';
-                else if (/serie\s*c/i.test(name)) serie = 'C';
-                else if (/serie\s*a/i.test(name)) serie = 'A';
-                return {
-                    season: seasonId,
-                    serie,
-                    team: r.teamName,
-                    w: r.wins,
-                    l: r.losses,
-                    pts: r.fpts,
-                    active: true
-                };
-            });
+            .map(r => ({
+                season: seasonId,
+                serie: tierToSeriesId(r.leagueTier),
+                team: r.teamName,
+                w: r.wins,
+                l: r.losses,
+                pts: r.fpts,
+                active: true
+            }));
     }
 
     /**
@@ -130,7 +122,7 @@
      * usa career.currentSeries quando preenchida (temporada ativa carregada via JSON),
      * senão tenta inferir a partir de rosterData.
      * @param {Career} career
-     * @returns {string[]} array de ids de série (A/B/C/Elite)
+     * @returns {string[]} array de ids de série (A/B/C/D/Elite)
      */
     function resolveCurrentSeries(career) {
         if (career.currentSeries && career.currentSeries.length) {

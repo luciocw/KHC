@@ -31,6 +31,7 @@ const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutos
 const DEBOUNCE_DELAY_MS = 300;
 const SKELETON_COUNT = 2;
 const STAGGER_DELAY_MS = 80;
+const REGULAR_SEASON_WEEKS = 14; // temporada regular (ver modal "Sobre")
 
 // Retry configuration
 const MAX_RETRIES = 3;
@@ -64,5 +65,6 @@ const appState = {
     rosterData: [],
     lastError: null,
     isFromCache: false,
-    isLoading: false
+    isLoading: false,
+    nflState: null // { season, season_type, display_week } da Sleeper
 };

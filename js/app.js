@@ -17,6 +17,13 @@ async function init() {
         loadData();
     }, DEBOUNCE_DELAY_MS);
 
+    // Semana atual da NFL (Sleeper) — usada no card da temporada ativa.
+    // Não bloqueia o carregamento; re-renderiza Temporadas quando chega.
+    fetchNflState().then(state => {
+        appState.nflState = state;
+        renderSeasons();
+    });
+
     selector.addEventListener('change', debouncedLoad);
 
     // Pré-carrega temporadas finalizadas (JSON estático). Não bloqueia o
@@ -31,8 +38,13 @@ async function init() {
     loadData();
 }
 
+// Cada chamada de loadData() recebe um número; só a mais recente pode
+// renderizar. Evita que uma troca de temporada no meio do fetch seja
+// ignorada ou que dados da temporada anterior sobrescrevam os da nova.
+let _loadSeq = 0;
+
 async function loadData() {
-    if (appState.isLoading) return;
+    const seq = ++_loadSeq;
     appState.isLoading = true;
 
     const container = document.getElementById(DOM_IDS.LEAGUES);
@@ -70,6 +82,9 @@ async function loadData() {
     // Tenta buscar dados da API
     const fetchPromises = validLeagues.map(l => fetchLeagueData(l));
     const settledResults = await Promise.allSettled(fetchPromises);
+
+    // Outra loadData() começou enquanto esperávamos: descarta este resultado.
+    if (seq !== _loadSeq) return;
 
     // Processa resultados (fulfilled ou rejected)
     const successfulResults = [];

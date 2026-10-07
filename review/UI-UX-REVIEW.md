@@ -1,7 +1,8 @@
 # Ultimate KHC — Revisão de UI/UX + Brief para Claude Design
 
 > Revisão completa do código (HTML, 2.587 linhas de CSS, 17 arquivos JS) + screenshots reais
-> tiradas com dados ao vivo da Sleeper (out/2026). Screenshots em [`screens/`](./screens).
+> tiradas com dados ao vivo da Sleeper (out/2026). Screenshots em [`screens/`](./screens)
+> (as de Ligas 2025, Power mobile e Temporadas já mostram os bugs B1–B6 corrigidos).
 >
 > Estrutura: **1. Resumo** · **2. Bugs que afetam a UI** · **3. Problemas de UX/UI por tela** ·
 > **4. Dívida de CSS** · **5. Acessibilidade** · **6. Brief para o Claude Design (tokens, componentes,
@@ -15,7 +16,7 @@
 |---|---|---|
 | Identidade visual | Boa | Dark + laranja forte, coerente, cara de "esporte". Falta hierarquia e respiro. |
 | Arquitetura front | Boa | Vanilla, renderers pequenos, sanitização correta. Fácil de redesenhar. |
-| Mobile | Fraca | Header ocupa ~45% da 1ª tela; Power Ranking quebra; Top Scorers perde contexto. |
+| Mobile | Fraca | Header ocupa ~45% da 1ª tela; Top Scorers perde contexto. (Power Ranking quebrado: corrigido.) |
 | Clareza dos dados | Média | Tabelas sem cabeçalho, sem zonas de playoff/rebaixamento, indicadores enganosos. |
 | Consistência | Média | Dados novos (Serie D) não chegaram em header, drawer, modal. |
 | CSS | Média/fraca | Muito código morto e regras de breakpoint que se sobrescrevem. |
@@ -28,18 +29,21 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 
 ## 2. Bugs que afetam o que o usuário vê (confirmados)
 
-| # | Bug | Onde | Impacto |
-|---|---|---|---|
-| B1 | **Medalhas não aparecem na aba Ligas** (temporada finalizada). A célula de rank fica vazia nos top-4. `window.IconRegistry` é sempre `undefined` porque `IconRegistry` é `const` global (não vira propriedade de `window`). Também some o ícone da caption. | `js/tabs/ligas.js:59,82` | Ver `screens/desktop-2025-leagues.png` — posições 1-4 sem número nem medalha. |
-| B2 | **Trocar temporada durante o carregamento é ignorado.** `loadData()` sai cedo se `isLoading`; a UI fica com dados de 2026 rotulados como "Classificação final 2025". Reproduzido com Playwright. | `js/app.js:35` | Dados errados com legenda errada. |
-| B3 | **Serie D tratada como Serie A no drawer.** O regex de série não tem `D` e `SERIES_NAMES` não tem `D`; jogador da Serie D aparece com pill "Serie A". | `js/ui/drawer.js:32-37,110-115` | Informação errada no perfil. |
-| B4 | **Setas de movimento do Power Ranking não significam nada.** `originalRank` = posição na lista concatenada das ligas (Elite, A, B…), não ranking por pontos. Resultado: "↑35", "↑26". | `js/derivations.js:75`, `power-ranking.js:83` | Indicador enganoso e chamativo (verde/vermelho). |
-| B5 | **"Semana 8 / 14" fixo** na aba Temporadas (hardcoded). | `js/tabs/temporadas.js:109-110` | Informação falsa. |
-| B6 | **Tier label do Power Ranking quebrado no mobile.** Regra `@media (max-width:768px)` coloca letra e descrição lado a lado dentro de uma coluna de 64px. Os cards ficam estreitos e truncam os nomes. | `styles.css:2488-2495` vs `921-926` | Ver `screens/mobile-2026-power.png`. |
-| B7 | **Drawer: estatísticas não batem com o histórico.** "Temporadas: 1 / V-D 10-4" só conta temporadas finalizadas, mas o histórico lista 2026 "em andamento". | `drawer.js` + `careerForUser` | Confuso. |
-| B8 | Drawer em temporada arquivada: "Atualmente em: Serie A" usa o roster da temporada **selecionada** (2025), não a atual. | `drawer.js:135-143` | Informação errada. |
-| B9 | Lendas/Temporadas escapam o username duas vezes antes de `data-user`. Usuário com `&`, `'`, `/` ou `=` no nome não abre o perfil certo. | `lendas.js:106,118`, `temporadas.js:47,56` | Baixo risco hoje, mas existe. |
-| B10 | Modal e drawer resetam `body.style.overflow` sem coordenação (abrir modal com drawer aberto destrava o scroll). | `modal.js:178,190` | Menor. |
+> **Status (atualizado):** B1–B6 **corrigidos** e validados no navegador (Playwright, dados reais).
+> B7–B10 continuam abertos.
+
+| # | Bug | Onde | Impacto | Status |
+|---|---|---|---|---|
+| B1 | **Medalhas não aparecem na aba Ligas** (temporada finalizada). A célula de rank fica vazia nos top-4. `window.IconRegistry` é sempre `undefined` porque `IconRegistry` é `const` global (não vira propriedade de `window`). Também some o ícone da caption. | `js/tabs/ligas.js:59,82` | Ver `screens/desktop-2025-leagues.png` — posições 1-4 sem número nem medalha. | ✅ Corrigido — checa `typeof IconRegistry`. Medalhas e ícone da caption voltaram. |
+| B2 | **Trocar temporada durante o carregamento é ignorado.** `loadData()` sai cedo se `isLoading`; a UI fica com dados de 2026 rotulados como "Classificação final 2025". Reproduzido com Playwright. | `js/app.js:35` | Dados errados com legenda errada. | ✅ Corrigido — cada `loadData()` recebe um número de sequência; só a mais recente renderiza. |
+| B3 | **Serie D tratada como Serie A no drawer.** O regex de série não tem `D` e `SERIES_NAMES` não tem `D`; jogador da Serie D aparece com pill "Serie A". | `js/ui/drawer.js:32-37,110-115` | Informação errada no perfil. | ✅ Corrigido — série vem do `leagueTier` (`tierToSeriesId`), `SERIES_NAMES` ganhou `D`. |
+| B4 | **Setas de movimento do Power Ranking não significam nada.** `originalRank` = posição na lista concatenada das ligas (Elite, A, B…), não ranking por pontos. Resultado: "↑35", "↑26". | `js/derivations.js:75`, `power-ranking.js:83` | Indicador enganoso e chamativo (verde/vermelho). | ✅ Corrigido — setas removidas (e `originalRank` da derivação). Voltam quando houver histórico semanal. |
+| B5 | **"Semana 8 / 14" fixo** na aba Temporadas (hardcoded). | `js/tabs/temporadas.js:109-110` | Informação falsa. | ✅ Corrigido — semana real via Sleeper `/state/nfl` (`display_week`); "Playoffs" após a semana 14; chip some fora da temporada. |
+| B6 | **Tier label do Power Ranking quebrado no mobile.** Regra `@media (max-width:768px)` coloca letra e descrição lado a lado dentro de uma coluna de 64px. Os cards ficam estreitos e truncam os nomes. | `styles.css:2488-2495` vs `921-926` | Ver `screens/mobile-2026-power.png`. | ✅ Corrigido — ≤760px o label vira faixa horizontal acima dos cards; regras conflitantes do bloco RESPONSIVE removidas. |
+| B7 | **Drawer: estatísticas não batem com o histórico.** "Temporadas: 1 / V-D 10-4" só conta temporadas finalizadas, mas o histórico lista 2026 "em andamento". | `drawer.js` + `careerForUser` | Confuso. | Aberto |
+| B8 | Drawer em temporada arquivada: "Atualmente em: Serie A" usa o roster da temporada **selecionada** (2025), não a atual. | `drawer.js:135-143` | Informação errada. | Aberto |
+| B9 | Lendas/Temporadas escapam o username duas vezes antes de `data-user`. Usuário com `&`, `'`, `/` ou `=` no nome não abre o perfil certo. | `lendas.js:106,118`, `temporadas.js:47,56` | Baixo risco hoje, mas existe. | Aberto |
+| B10 | Modal e drawer resetam `body.style.overflow` sem coordenação (abrir modal com drawer aberto destrava o scroll). | `modal.js:178,190` | Menor. | Aberto |
 
 > Esses bugs são de código; não precisam ir pro Claude Design, mas convém corrigir **antes** de aplicar o redesign
 > para não "desenhar em cima" de comportamento errado.
@@ -66,6 +70,11 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 - **Ordem das ligas**: Elite primeiro (paralela) mistura com a hierarquia A→D. Considerar Elite em destaque separado.
 - `team-name` e `team-owner` às vezes são iguais (usuário sem nome de time) → linha repetida.
 - `.league-badge` "10 TIMES" ocupa espaço nobre e pouco informa.
+- **Temporada finalizada: ordem não bate com as medalhas** (visível depois da correção do B1). A lista segue a
+  campanha da temporada regular (vitórias → pontos), mas as medalhas vêm dos playoffs — na Serie B 2025 o campeão
+  aparece em 3º e o 4º colocado no topo. Além disso, o top-4 perde o número da posição (a medalha substitui o número).
+  Decisão de produto: ordenar pelo resultado final (`rank` do JSON) ou deixar explícito "Temporada regular" +
+  uma coluna/selo "Playoffs". Ver `screens/desktop-2025-leagues.png`.
 - Nome do time é o link do perfil, mas o perfil é do **dono** — affordance pouco clara (sem sublinhado/ícone).
 
 ### 3.3 Top Scorers
@@ -75,11 +84,11 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 - Sem filtro por série / toggle "incluir Elite".
 
 ### 3.4 Power Ranking
-- Setas de movimento erradas (B4). Precisa ou de histórico semanal real, ou remover.
+- ~~Setas de movimento erradas (B4)~~ — removidas. Um indicador de variação semanal real exigiria guardar o ranking de cada semana.
 - Tiers por limites absolutos (S ≥ 80…) → com poucas semanas, distribuição fica estranha (6 em S, 1 em D…).
 - Descrições em inglês ("CONTENDERS", "RISERS", "MID-PACK", "RELEGATION") num site PT-BR; "ELITE" colide com o nome da liga Elite.
 - Mesmo time aparece 2× (Elite + série regular).
-- No mobile: coluna de tier com ~64px x 1.000+px de altura colorida — muita área de cor saturada sem informação.
+- ~~No mobile: coluna de tier de 64px com 1.000+px de altura~~ — corrigido (B6): agora é uma faixa acima dos cards.
 - Barra de PWR de 3px: quase invisível.
 - Sem explicação de como o PWR é calculado (60% win rate + 40% pontos normalizados).
 
@@ -89,7 +98,7 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 - Texto vazio "As lendas serão reveladas…" bom, mas sem ilustração.
 
 ### 3.6 Temporadas
-- Card da temporada ativa só lista nomes das séries "— Em disputa" (+ semana falsa). Poderia mostrar líder atual de cada série.
+- Card da temporada ativa só lista nomes das séries "— Em disputa" (a semana agora é real). Poderia mostrar líder atual de cada série.
 - Pódios finalizados OK, mas os pontos ("2198.0") sem rótulo.
 - Container `.seasons-container` aninhado dentro de outro `.seasons-container` (classe repetida).
 
@@ -105,8 +114,8 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 
 ## 4. Dívida de CSS (relevante pro redesign)
 
-- **Código morto** (~300+ linhas): `.hof-*` inteiro, `.pulse-dot`, `.hover-lift`, `.touch-feedback`, `.text-gold/.text-orange`, `.power-card`, `.tier-letter`, `.tier-emoji`, `.tier-team-card`, `.tier-power-score`, `.power-value`, `.legend-content`, `.legends-col-*`, `.season-leagues`, `.form-chips-placeholder` + container query de 1280px (o container máximo é 1200px, nunca dispara).
-- **Bloco `=== RESPONSIVE ===` (fim do arquivo) sobrescreve regras melhores** declaradas antes: legends ≤600px, `.season-year` ≤760px, tier-label (causa do B6).
+- **Código morto** (~300+ linhas): `.hof-*` inteiro, `.pulse-dot`, `.hover-lift`, `.touch-feedback`, `.text-gold/.text-orange`, `.power-card`, `.legend-content`, `.legends-col-*`, `.season-leagues`, `.form-chips-placeholder` + container query de 1280px (o container máximo é 1200px, nunca dispara).
+- **Bloco `=== RESPONSIVE ===` (fim do arquivo) sobrescreve regras melhores** declaradas antes: legends ≤600px, `.season-year` ≤760px (a parte do tier-label, causa do B6, já foi removida).
 - **Tokens duplicados**: conjunto novo (`--orange`, `--text-2`…) + "legacy aliases" (`--khc-orange`, `--text-muted`, `--spacing-*`, `--radius-*`) usados misturados.
 - **Sem escala de espaçamento/tipografia de fato**: font-size em px soltos (9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 30, 36, 56) e paddings ad hoc.
 - **Cores hardcoded** fora dos tokens: tiers (`#9e6cd9`, `#6fcc94`…), erro (`#ff6b6b`), cache notice (`rgba(251,191,36,…)`, amarelo diferente do `--gold`), `#22c55e`.
@@ -257,7 +266,7 @@ Raio: cards 16px (12px mobile), linhas 8px, pílulas 99px. Container: `max-width
 <section class="tier-row"><div class="tier-label s"><span class="letter">S</span><span class="desc">ELITE</span></div>
   <div class="tier-teams">
     <article class="pwr-card">
-      <div class="pwr-rank-tab"><span class="pwr-rank">#1</span><span class="move-up">↑18</span></div>
+      <div class="pwr-rank-tab"><span class="pwr-rank">#1</span></div>
       <div class="pwr-card-left"><img class="pwr-avatar"><div class="pwr-info">
         <div class="pwr-team-name">{time}</div><div class="pwr-series">KHC Serie B</div>
         <div class="pwr-record">4-0 <span class="pwr-pts">757.1 pts</span></div></div></div>
@@ -315,9 +324,9 @@ Career = { user, currentSeries, trophies:{gold,silver,bronze,fourth}, totalSeaso
 1. **Header compacto + navegação fixa**: header pequeno (logo 32–40px + nome) e abas como barra fixa no topo (desktop) / **bottom nav** no mobile. Seletor de temporada como chip/segmented control junto ao título.
 2. **"Minha liga" primeiro**: deixar o usuário escolher sua série/jogador (localStorage) e abrir nela; ou abas internas por série em vez de 5 cards empilhados.
 3. **Zonas na classificação**: faixa lateral colorida para promoção (top 2), playoffs (top 6) e rebaixamento (últimos 2), com legenda. Cabeçalho de colunas (V–D, PF, PA).
-4. **Status ao vivo**: "Semana 5 de 14 · atualizado há 2 min" + botão atualizar.
+4. **Status ao vivo**: "Semana 4 de 14 · atualizado há 2 min" + botão atualizar (a semana já é buscada da Sleeper em `appState.nflState`).
 5. **Top Scorers**: avatar + dono + série; toggle "Incluir Elite"; filtro por série; sem cascata longa de animação.
-6. **Power Ranking**: tiers como cabeçalhos horizontais (não coluna lateral), nomes em PT-BR, explicação do cálculo num tooltip/“?”, remover setas até haver histórico semanal real.
+6. **Power Ranking**: tiers como cabeçalhos horizontais também no desktop, nomes em PT-BR, explicação do cálculo num tooltip/“?”; variação semanal só com histórico real.
 7. **Lendas como "Hall da Fama"**: pódio visual do top-3, avatares, linha do tempo de campeões por ano/série.
 8. **Perfil do jogador com URL própria** (`#/jogador/nome`) — compartilhável no grupo.
 9. **Página "Regras"** no lugar do modal escondido no rodapé, incluindo Serie D e a regra atual da Elite.
@@ -329,7 +338,8 @@ Career = { user, currentSeries, trophies:{gold,silver,bronze,fourth}, totalSeaso
 
 | Prioridade | Item |
 |---|---|
-| Agora (código, antes do redesign) | B1 medalhas · B2 troca de temporada · B3 Serie D no drawer · B4 setas falsas · B5 semana fixa · B6 tier mobile · subtítulo/modal sem Serie D |
+| ✅ Feito | B1 medalhas · B2 troca de temporada · B3 Serie D no drawer · B4 setas falsas · B5 semana fixa · B6 tier mobile |
+| Agora (código / conteúdo) | B7–B10 · subtítulo e modal sem Serie D (confirmar regra da Elite) · ordem da classificação final vs medalhas |
 | Redesign (Claude Design) | Header/navegação mobile · zonas na classificação · Top Scorers · Power Ranking · Lendas · tokens/escala/contraste |
 | Depois | URL por aba/perfil · dados ao vivo (semana, matchups, bracket) · limpeza do CSS morto |
 
@@ -340,7 +350,7 @@ Career = { user, currentSeries, trophies:{gold,silver,bronze,fourth}, totalSeaso
 |---|---|
 | `desktop-first-viewport.png`, `mobile-first-viewport.png` | 1ª dobra — header ocupando a tela |
 | `desktop-2026-*.png`, `mobile-2026-*.png` | Todas as abas, temporada ativa |
-| `desktop-2025-leagues.png` | **B1**: top-4 sem medalha/número |
+| `desktop-2025-leagues.png` | B1 corrigido (medalhas) — e a ordem regular vs playoffs |
 | `desktop-2025-global.png`, `desktop-2025-power.png` | Temporada finalizada |
-| `mobile-2026-power.png` | **B6**: tier label quebrado |
+| `mobile-2026-power.png` | B6 corrigido — tier como faixa horizontal |
 | `*-drawer.png`, `*-modal.png` | Perfil do jogador e Sobre a Liga |

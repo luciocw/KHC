@@ -67,12 +67,11 @@ function powerRanking(teams) {
         minPts: Math.min(...allPts)
     };
 
-    const scored = teams.map((team, originalIndex) => ({
+    const scored = teams.map(team => ({
         team,
         pwr: pwrScore(team, ctx),
         tier: /** @type {Tier} */ ('D'), // placeholder, sobrescrito abaixo
-        rank: 0,
-        originalRank: originalIndex + 1
+        rank: 0
     }));
 
     scored.sort((a, b) => b.pwr - a.pwr);

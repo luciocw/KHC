@@ -117,7 +117,6 @@
  * @property {number} pwr               Score 0-100
  * @property {Tier} tier
  * @property {number} rank              Posição no ranking power
- * @property {number} originalRank      Posição pelo ranking de pontos
  */
 
 // Arquivo só de documentação. Nada exportado em runtime.

@@ -56,7 +56,7 @@ function getTrophyIndex() {
  * @returns {string} SVG string
  */
 function trophyToMedalSvg(trophy) {
-    if (!window.IconRegistry) return '';
+    if (typeof IconRegistry === 'undefined') return '';
     switch (trophy) {
         case 'gold':   return IconRegistry.medalGold({ size: 20 });
         case 'silver': return IconRegistry.medalSilver({ size: 20 });
@@ -79,7 +79,7 @@ function renderLigasCaption(container) {
     if (!isSeasonFinalized()) return;
 
     const safeYear = escapeHtml(String(appState.season));
-    const iconSvg = window.IconRegistry ? IconRegistry.trophy({ size: 14 }) : '';
+    const iconSvg = typeof IconRegistry !== 'undefined' ? IconRegistry.trophy({ size: 14 }) : '';
 
     const caption = document.createElement('div');
     caption.className = 'ligas-caption';
