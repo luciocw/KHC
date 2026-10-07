@@ -21,7 +21,7 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 - Tokens (cores, ligas, zonas, medalhas, tiers, tipografia, espaço) no topo de `styles.css`, vindos do guia da marca
 - Fonte **Archivo** variável (eixo de largura: 125% títulos, 75% labels, 62% números)
 - `data-league="a|b|c|d|e|f|elite"` num container reaponta `--accent` para a cor da série
-- Escudos por série em `assets/logo/png/` (PNG 160px em `ui/` para a interface); banners em `assets/banners/` (`og-image` usada no compartilhamento)
+- Escudos por série em `assets/logo/png/` (PNG 160px em `ui/` para a interface) e vetores oficiais em `assets/logo/svg/` (KHC, Elite, Séries A–D; o cabeçalho e o favicon usam o SVG); banners em `assets/banners/` (`og-image` usada no compartilhamento)
 
 ## Stack
 
@@ -54,6 +54,7 @@ js/
     ligas.js · top-scorers.js · power-ranking.js · lendas.js · temporadas.js · regras.js
   app.js                    roteamento por hash, loadData, render
 assets/
+  logo/svg/                 escudos oficiais em vetor (KHC, Elite, Séries A–D)
   logo/png/                 escudos por série (+ ui/ 160px, favicon)
   banners/                  og-image 1200×630, hero, header
 ```
