@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Trilha sonora do vídeo "KHC Awards · Semana 4" (hard rock de arena, 105 BPM).
+"""Trilha sonora do vídeo "KHC Awards · Semana 4" em estilo 8-bit (chiptune).
 
-Tudo é sintetizado com numpy (guitarras, baixo, bateria e efeitos), seguindo
-os tempos do briefing README-trilhaKHC. Gera um WAV estéreo 48 kHz com
-exatamente 56,0 s; a normalização para -14 LUFS é feita depois com ffmpeg.
+Canais no estilo de console 8-bit: dois pulsos (melodia e arpejo), triângulo
+(baixo) e ruído (bateria), mais efeitos de videogame nos tempos do briefing
+README-trilhaKHC. Gera um WAV estéreo 48 kHz com exatamente 56,0 s; a
+normalização para -14 LUFS é feita depois com ffmpeg.
 
 Uso: python3 scripts/trilha-semana4.py saida.wav
 """
@@ -15,505 +16,495 @@ import numpy as np
 SR = 48000
 DUR = 56.0
 N = int(SR * DUR)
-BPM = 105
+BPM = 140
 E8 = 60 / BPM / 2  # colcheia
-rng = np.random.default_rng(4)
+BAR = 8 * E8
+rng = np.random.default_rng(8)
 
 
 # ---------------------------------------------------------------- utilidades
-def buf():
-    return np.zeros(N)
-
-
-def t_axis(dur):
-    return np.arange(int(dur * SR)) / SR
-
-
 def add(bus, start, sig, gain=1.0):
     i = int(round(start * SR))
-    if i >= N:
+    if i >= N or i + len(sig) <= 0:
         return
+    if i < 0:
+        sig, i = sig[-i:], 0
     j = min(N, i + len(sig))
     bus[i:j] += sig[: j - i] * gain
 
 
+def t_axis(dur):
+    return np.arange(max(1, int(dur * SR))) / SR
+
+
 def hz(midi):
-    return 440.0 * 2 ** ((midi - 69) / 12)
+    return 440.0 * 2 ** ((np.asarray(midi, dtype=float) - 69) / 12)
 
 
-def saw(freq, t, phase=0.0):
-    ph = np.cumsum(np.broadcast_to(freq, t.shape)) / SR + phase if np.ndim(freq) else freq * t + phase
-    return 2 * (ph % 1.0) - 1
+def note(name):
+    pcs = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
+    pc = pcs[name[0]]
+    rest = name[1:]
+    if rest[0] == "#":
+        pc, rest = pc + 1, rest[1:]
+    elif rest[0] == "b":
+        pc, rest = pc - 1, rest[1:]
+    return 12 * (int(rest) + 1) + pc
 
 
-def env_ad(n, attack, decay):
+def phase(freq, t):
+    f = np.broadcast_to(np.asarray(freq, dtype=float), t.shape)
+    return np.cumsum(f) / SR
+
+
+def pulse(freq, t, duty=0.25):
+    return np.where(phase(freq, t) % 1.0 < duty, 1.0, -1.0)
+
+
+def triangle(freq, t):
+    p = phase(freq, t) % 1.0
+    tri = 4 * np.abs(p - 0.5) - 1
+    return np.round(tri * 7.5) / 7.5  # 16 degraus, como no chip
+
+
+def chip_noise(dur, rate):
+    """Ruído "sample and hold": quanto maior a taxa, mais agudo."""
+    n = len(t_axis(dur))
+    rate = np.broadcast_to(np.asarray(rate, dtype=float), (n,))
+    idx = np.floor(np.cumsum(rate) / SR).astype(int)
+    vals = rng.choice([-1.0, 1.0], size=idx[-1] + 1)
+    return vals[idx]
+
+
+def env(n, decay, sustain=0.0, attack=0.002):
     t = np.arange(n) / SR
-    e = np.exp(-t / decay)
+    e = sustain + (1 - sustain) * np.exp(-t / decay)
     a = int(attack * SR)
-    if a > 0:
+    if a:
         e[:a] *= np.linspace(0, 1, a)
+    e = np.floor(e * 15) / 15  # volume em 16 níveis
+    k = min(n, int(0.004 * SR))
+    e[-k:] *= np.linspace(1, 0, k)
     return e
 
 
-def fade_tail(sig, ms=8):
-    k = min(len(sig), int(ms * SR / 1000))
-    sig[-k:] *= np.linspace(1, 0, k)
-    return sig
-
-
-def eq(sig, hp=None, lp=None, peaks=(), order=2):
-    """EQ de fase zero no domínio da frequência (passa-alta, passa-baixa, sinos)."""
+def eq(sig, hp=None, lp=None):
     spec = np.fft.rfft(sig)
     f = np.fft.rfftfreq(len(sig), 1 / SR) + 1e-9
     g = np.ones_like(f)
     if hp:
-        g *= 1 / np.sqrt(1 + (hp / f) ** (2 * order))
+        g /= np.sqrt(1 + (hp / f) ** 4)
     if lp:
-        g *= 1 / np.sqrt(1 + (f / lp) ** (2 * order))
-    for fc, db, q in peaks:
-        g *= 10 ** (db / 20 * np.exp(-((np.log2(f / fc)) ** 2) * q * 2))
+        g /= np.sqrt(1 + (f / lp) ** 4)
     return np.fft.irfft(spec * g, len(sig))
 
 
-def noise(dur):
-    return rng.standard_normal(int(dur * SR))
-
-
 # ------------------------------------------------------------------ buses
-gtr_open_L, gtr_open_R = buf(), buf()
-gtr_mute_L, gtr_mute_R = buf(), buf()
-lead = buf()
-bass = buf()
-drums = buf()
-sfx = buf()
+lead, arp, bass, drums, sfx = (np.zeros(N) for _ in range(5))
+play_segments = []  # (início, fim) em que a "banda" toca; usado pelo gate
 
 
-# --------------------------------------------------------------- guitarras
-def power_chord(root, dur, voice_detune):
-    t = t_axis(dur)
-    s = np.zeros_like(t)
-    for iv, amp in ((0, 1.0), (7, 0.8), (12, 0.6)):
-        f = hz(root + iv) * (1 + voice_detune)
-        s += amp * (saw(f, t) + saw(f * 1.004, t, 0.3)) * 0.5
-    return s
-
-
-def guitar(start, root, dur, kind="open", vel=1.0):
-    """kind: open (acorde soando), mute (palm mute curto)."""
-    if kind == "mute":
-        d = min(dur, 0.16)
-        for bus, det in ((gtr_mute_L, -0.002), (gtr_mute_R, 0.002)):
-            s = power_chord(root, d, det)[:]
-            s *= env_ad(len(s), 0.002, 0.055)
-            add(bus, start + (0.006 if bus is gtr_mute_R else 0), fade_tail(s), vel)
-    else:
-        for bus, det in ((gtr_open_L, -0.003), (gtr_open_R, 0.003)):
-            s = power_chord(root, dur, det)
-            e = env_ad(len(s), 0.003, 3.0) * 0.85 + 0.15
-            s *= e
-            add(bus, start + (0.008 if bus is gtr_open_R else 0), fade_tail(s, 15), vel)
-
-
-def bass_note(start, root, dur, vel=1.0):
-    t = t_axis(dur)
-    f = hz(root - 12)
-    s = 0.6 * saw(f, t) + 0.6 * np.sin(2 * np.pi * f * t)
-    s *= env_ad(len(s), 0.004, 0.9) * 0.7 + 0.3
-    add(bass, start, fade_tail(s, 10), vel)
-
-
-def lead_note(start, midi, dur, vib=0.0, bend_from=None, vel=1.0):
+# --------------------------------------------------------------- canais
+def lead_note(start, midi, dur, duty=0.25, vib=0.0, vel=1.0, slide_from=None):
     t = t_axis(dur)
     m = np.full_like(t, float(midi))
-    if bend_from is not None:
-        k = min(len(t), int(0.08 * SR))
-        m[:k] = np.linspace(bend_from, midi, k)
+    if slide_from is not None:
+        k = min(len(t), int(0.05 * SR))
+        m[:k] = np.linspace(slide_from, midi, k)
     if vib:
-        m += vib * np.sin(2 * np.pi * 6.0 * t) * np.clip(t / 0.15, 0, 1)
-    f = hz(m)
-    s = saw(f, t) + 0.5 * saw(f * 2.002, t)
-    s *= env_ad(len(s), 0.004, 2.0) * 0.6 + 0.4
-    add(lead, start, fade_tail(s, 10), vel)
+        m += vib * np.sin(2 * np.pi * 6 * t) * np.clip((t - 0.12) / 0.1, 0, 1)
+    s = pulse(hz(m), t, duty) * env(len(t), 0.35, 0.55)
+    add(lead, start, s, vel)
 
 
-# ---------------------------------------------------------------- bateria
+def arp_chord(start, chord, dur, duty=0.125, vel=1.0, speed=1 / 40):
+    """Acorde "de chip": as notas se alternam muito rápido."""
+    t = t_axis(dur)
+    idx = (np.floor(t / speed).astype(int)) % len(chord)
+    m = np.asarray(chord, dtype=float)[idx]
+    s = pulse(hz(m), t, duty) * env(len(t), 0.18, 0.25)
+    add(arp, start, s, vel)
+
+
+def bass_note(start, midi, dur, vel=1.0):
+    t = t_axis(dur)
+    s = triangle(hz(midi), t)
+    k = min(len(t), int(0.004 * SR))
+    s[-k:] *= np.linspace(1, 0, k)
+    add(bass, start, s, vel)
+
+
 def kick(start, vel=1.0):
-    t = t_axis(0.35)
-    f = 50 + 110 * np.exp(-t / 0.035)
-    s = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / 0.13)
-    s += 0.35 * eq(noise(0.35), hp=1500) * np.exp(-t / 0.004)
-    add(drums, start, s, 1.0 * vel)
+    t = t_axis(0.16)
+    m = 64 - 30 * np.clip(t / 0.06, 0, 1)
+    s = triangle(hz(m), t) * env(len(t), 0.07)
+    s += 0.4 * chip_noise(0.16, 9000) * env(len(t), 0.008)
+    add(drums, start, s, vel)
 
 
 def snare(start, vel=1.0):
-    t = t_axis(0.3)
-    body = np.sin(2 * np.pi * 190 * t) * np.exp(-t / 0.05)
-    nz = eq(noise(0.3), hp=1200, lp=9000, peaks=((4000, 4, 1),)) * np.exp(-t / 0.09)
-    add(drums, start, 0.55 * body + 0.6 * nz, 0.8 * vel)
+    t = t_axis(0.2)
+    s = chip_noise(0.2, 14000) * env(len(t), 0.06)
+    s += 0.5 * pulse(hz(57 - 12 * np.clip(t / 0.05, 0, 1)), t, 0.5) * env(len(t), 0.025)
+    add(drums, start, s, 0.6 * vel)
 
 
 def hat(start, vel=1.0, open_=False):
-    d = 0.3 if open_ else 0.06
+    d = 0.18 if open_ else 0.04
     t = t_axis(d)
-    s = eq(noise(d), hp=7000) * np.exp(-t / (0.12 if open_ else 0.018))
-    add(drums, start, s, 0.22 * vel)
+    s = chip_noise(d, 40000) * env(len(t), 0.06 if open_ else 0.012)
+    add(drums, start, eq(s, hp=6000), 0.35 * vel)
 
 
-def crash(start, vel=1.0, dur=2.2):
+def crash(start, vel=1.0, dur=0.9):
     t = t_axis(dur)
-    s = eq(noise(dur), hp=3500, peaks=((6000, 3, 1),)) * np.exp(-t / (dur / 3.5))
-    add(drums, start, fade_tail(s, 30), 0.38 * vel)
+    s = chip_noise(dur, 30000) * env(len(t), dur / 3)
+    add(drums, start, eq(s, hp=3000), 0.4 * vel)
 
 
-def tom(start, pitch=110, vel=1.0):
-    t = t_axis(0.35)
-    f = pitch * (1 + 0.6 * np.exp(-t / 0.03))
-    s = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / 0.15)
-    s += 0.15 * eq(noise(0.35), hp=800, lp=5000) * np.exp(-t / 0.02)
-    add(drums, start, s, 0.8 * vel)
+def tom(start, midi=50, vel=1.0):
+    t = t_axis(0.18)
+    s = triangle(hz(midi + 14 * np.exp(-t / 0.03)), t) * env(len(t), 0.08)
+    add(drums, start, s, 0.9 * vel)
 
 
-def stick(start):
-    t = t_axis(0.05)
-    s = eq(noise(0.05), hp=2000, lp=8000, peaks=((3200, 10, 3),)) * np.exp(-t / 0.008)
-    add(drums, start, s, 0.7)
+# ------------------------------------------------------------------ temas
+def seq(*bars):
+    """Cada compasso: 8 colcheias. "." segura a nota anterior, "-" é pausa."""
+    out = []
+    for b in bars:
+        toks = b.split()
+        assert len(toks) == 8, b
+        out += toks
+    return out
 
 
-# ------------------------------------------------------------------ riffs
-# Cada passo é uma colcheia: (nota MIDI, tipo, duração em colcheias) ou None.
-E, F, G, A, B, D, C, Bb = 40, 41, 43, 45, 47, 38, 48, 46
-RIFFS = {
-    "main": [(E, "mute", 1), (E, "mute", 1), (G, "open", 2), None, (E, "mute", 1),
-             (A, "open", 2), None, (E, "mute", 1), (E, "mute", 1), (D + 12, "open", 2),
-             None, (C, "open", 1), (B, "open", 1), (A, "open", 2), None],
-    "villain": [(E, "mute", 1), (E, "mute", 1), (F, "open", 2), None, (E, "mute", 1),
-                (E, "mute", 1), (Bb, "open", 2), None, (E, "mute", 1), (E, "mute", 1),
-                (F, "open", 1), (E, "open", 1), (D + 12, "open", 2), None, (F, "open", 1)],
-    "half": [(E, "open", 3), None, None, (E, "mute", 1), (G, "open", 2), None,
-             (A, "open", 3), None, None, (E, "mute", 1), (G, "open", 1), (F, "open", 1)],
-    "hold": [(B, "open", 8)] + [None] * 7,
-    "chorus": [(E, "open", 2), None, (C, "open", 2), None, (D + 12, "open", 2), None,
-               (B, "open", 1), (E, "mute", 1)],
+THEMES = {
+    # heroico, em Dó maior: C · G · Am · F
+    "main": dict(
+        mel=seq("C5 . E5 G5 . E5 G5 C6", "B5 . A5 G5 . D5 G5 B5",
+                "C6 . B5 A5 . E5 A5 C6", "D6 . C6 A5 F5 . G5 ."),
+        chords=[("C4", "E4", "G4"), ("B3", "D4", "G4"), ("C4", "E4", "A4"), ("C4", "F4", "A4")],
+        roots=["C3", "G2", "A2", "F2"]),
+    # vilão, Lá menor harmônico: Am · Bb · E · Am
+    "villain": dict(
+        mel=seq("A4 . C5 E5 . D#5 E5 .", "F5 . D5 Bb4 . A4 Bb4 .",
+                "G#4 . B4 E5 . F5 E5 D5", "C5 . B4 A4 . - E4 ."),
+        chords=[("A3", "C4", "E4"), ("Bb3", "D4", "F4"), ("G#3", "B3", "E4"), ("A3", "C4", "E4")],
+        roots=["A2", "Bb2", "E2", "A2"]),
+    # meio-tempo triste: Am · F · Dm · E
+    "half": dict(
+        mel=seq("A4 . . . C5 . B4 .", "A4 . . . F4 . . .",
+                "D5 . . . C5 . A4 .", "G#4 . . . B4 . . ."),
+        chords=[("A3", "C4", "E4"), ("A3", "C4", "F4"), ("A3", "D4", "F4"), ("G#3", "B3", "E4")],
+        roots=["A2", "F2", "D2", "E2"]),
+    # tensão segurando a dominante (Sol)
+    "hold": dict(
+        mel=seq("- - - - - - - -"),
+        chords=[("G3", "B3", "D4", "F4")],
+        roots=["G2"]),
 }
-for k in list(RIFFS):
-    steps = RIFFS[k]
-    RIFFS[k] = steps + [None] * (16 - len(steps)) if len(steps) < 16 else steps
+for th in THEMES.values():
+    th["mel"] = [None if x == "-" else ("." if x == "." else note(x)) for x in th["mel"]]
+    th["chords"] = [[note(n) for n in c] for c in th["chords"]]
+    th["roots"] = [note(r) for r in th["roots"]]
 
-play_segments = []  # (início, fim) em que a banda toca; usado pelo gate
 
-
-def groove(a, b, riff="main", drums_style="rock", transpose=0, vel=1.0, crash_in=True,
-           bass_on=True):
-    """Toca o riff + bateria em [a, b), com a grade ancorada em `a`."""
+def groove(a, b, theme="main", anchor=None, drums_style="std", tr=0, vel=1.0,
+           duty=0.25, crash_in=True, melody=True):
+    """Toca o tema em [a, b). A grade fica presa em `anchor` (início da cena),
+    então, depois de uma parada, a música volta no tempo seguinte."""
+    anchor = a if anchor is None else anchor
     play_segments.append((a, b))
-    steps = RIFFS[riff]
-    n = int(np.floor((b - a) / E8 + 1e-6))
-    for i in range(n):
-        t = a + i * E8
-        st = steps[i % len(steps)]
-        if st:
-            root, kind, ln = st
-            dur = min(ln * E8, b - t)
-            guitar(t, root + transpose, dur, kind, vel)
-            if bass_on:
-                bass_note(t, root + transpose, min(dur, E8 * (ln if kind == "open" else 1)), vel)
-        elif bass_on and riff == "hold":
-            bass_note(t, steps[0][0] + transpose, E8, 0.8 * vel)
-        beat = i % 8  # posição no compasso (8 colcheias)
-        if drums_style == "rock":
-            if beat in (0, 4, 5):
+    th = THEMES[theme]
+    mel, nbars = th["mel"], len(th["chords"])
+    k0 = int(np.ceil((a - anchor) / E8 - 1e-6))
+    k1 = int(np.ceil((b - anchor) / E8 - 1e-6))
+    for k in range(k0, k1):
+        t = anchor + k * E8
+        bar = (k // 8) % nbars
+        pos = k % 8
+        # melodia: soma as colcheias seguradas
+        m = mel[k % len(mel)]
+        if melody and m not in (None, "."):
+            ln = 1
+            while ln < 8 and mel[(k + ln) % len(mel)] == ".":
+                ln += 1
+            lead_note(t, m + tr, min(ln * E8, b - t), duty=duty, vel=vel,
+                      vib=0.25 if ln >= 3 else 0)
+        # arpejo em colcheias
+        arp_chord(t, [c + tr for c in th["chords"][bar]], min(E8, b - t), vel=0.8 * vel)
+        # baixo pulando oitava
+        r = th["roots"][bar] + tr + (12 if pos % 2 else 0)
+        bass_note(t, r, min(E8 * 0.9, b - t), vel)
+        if drums_style == "std":
+            if pos in (0, 3, 4):
                 kick(t, vel)
-            if beat in (2, 6):
+            if pos in (2, 6):
                 snare(t, vel)
-            hat(t, 1.0 if i % 2 == 0 else 0.6)
+            hat(t, 1.0 if pos % 2 == 0 else 0.6)
         elif drums_style == "half":
-            if beat in (0, 3):
+            if pos in (0, 5):
                 kick(t, vel)
-            if beat == 4:
+            if pos == 4:
                 snare(t, vel)
-            if i % 2 == 0:
-                hat(t, 0.9)
-        elif drums_style == "hold":
-            kick(t, 0.7 * vel)
-            if beat in (2, 6):
+            if pos % 2 == 0:
+                hat(t, 0.8)
+        elif drums_style == "drive":
+            kick(t, 0.8 * vel)
+            if pos in (2, 6):
                 snare(t, 0.8 * vel)
-            hat(t, 0.5, open_=(beat == 7))
+            hat(t, 0.6, open_=(pos == 7))
     if crash_in:
         crash(a, vel)
 
 
-def hit(t, root, vel=1.0, ring=0.45, cymbal=True):
-    """Acento de banda inteira (stop)."""
+def hit(t, chord, ring=0.3, vel=1.0, cymbal=True):
+    """Acento da banda inteira."""
     play_segments.append((t, t + ring))
-    guitar(t, root, ring, "open", vel)
-    bass_note(t, root, ring, vel)
+    arp_chord(t, chord, ring, vel=vel)
+    lead_note(t, max(chord) + 12, ring, duty=0.5, vel=0.7 * vel)
+    bass_note(t, min(chord) - 12, ring, vel)
     kick(t, vel)
     if cymbal:
-        crash(t, 0.8 * vel, 1.2)
+        crash(t, 0.8 * vel, 0.6)
 
 
 # -------------------------------------------------------------------- SFX
-def feedback(start, dur, f0=2350):
-    t = t_axis(dur)
-    f = f0 * (1 + 0.004 * np.sin(2 * np.pi * 5 * t))
-    s = np.sin(2 * np.pi * np.cumsum(f) / SR) + 0.3 * np.sin(2 * np.pi * np.cumsum(2 * f) / SR)
-    e = np.clip(t / (dur * 0.7), 0, 1) ** 2
-    add(sfx, start, fade_tail(s * e, 40), 0.28)
-
-
-def whoosh(peak):
-    """Whoosh + slide de guitarra, ~0,5 s com pico em `peak`."""
-    pre, post = 0.38, 0.14
-    d = pre + post
-    t = t_axis(d)
-    e = np.where(t < pre, (t / pre) ** 2, np.exp(-(t - pre) / 0.05))
-    nz = noise(d)
-    # varredura de filtro: mistura de bandas ponderada no tempo
-    lo = eq(nz, hp=300, lp=1500)
-    hi = eq(nz, hp=2500, lp=9000)
-    mix = np.clip(t / pre, 0, 1)
-    s = (lo * (1 - mix) + hi * mix) * e
-    add(sfx, peak - pre, s, 0.5)
-    # slide de guitarra descendo (pick slide)
-    m = np.linspace(64, 40, len(t))
-    f = hz(m)
-    g = np.tanh(4 * (saw(f, t) + saw(f * 1.5, t))) * e
-    add(sfx, peak - pre, eq(g, hp=200, lp=3500), 0.22)
-
-
-def record_scratch(start):
-    d = 0.42
-    t = t_axis(d)
-    # dois "puxões" de disco: ruído com ressonância de pitch varrendo
-    sweep = np.concatenate([np.linspace(0, 1, len(t) // 2), np.linspace(1, 0.2, len(t) - len(t) // 2)])
-    f = 300 + 2200 * sweep
-    tone = saw(f, t) * 0.4
-    nz = noise(d) * 0.6
-    s = eq(tone + nz, hp=400, lp=6000, peaks=((1500, 6, 1),))
-    e = np.exp(-((t - 0.12) / 0.09) ** 2) + 0.8 * np.exp(-((t - 0.3) / 0.07) ** 2)
-    add(sfx, start, s * e, 0.55)
-
-
-def sad_trombone(start, notes=(58, 57, 56, 55), step=0.38, last=0.9):
-    t0 = start
+def jingle(start, notes, step, duty=0.5, vel=1.0, last=None, vib=0.0):
     for i, m in enumerate(notes):
-        d = last if i == len(notes) - 1 else step
+        d = (last if (last and i == len(notes) - 1) else step)
         t = t_axis(d)
         mm = np.full_like(t, float(m))
-        if i == len(notes) - 1:
-            mm += 0.35 * np.sin(2 * np.pi * 5.5 * t) * np.clip(t / 0.2, 0, 1)
-            mm -= np.clip((t - d * 0.6) / (d * 0.4), 0, 1) * 1.5
-        f = hz(mm)
-        s = saw(f, t)
-        # wah: ganho da banda de formante abrindo e fechando
-        wah = 0.5 - 0.5 * np.cos(2 * np.pi * t / d)
-        bright = eq(s, hp=600, lp=2500)
-        dark = eq(s, lp=700)
-        s = dark * (1 - wah) + bright * wah * 1.4
-        e = np.clip(t / 0.03, 0, 1) * np.clip((d - t) / 0.05, 0, 1)
-        add(sfx, t0, s * e, 0.42)
-        t0 += d
+        if vib and i == len(notes) - 1:
+            mm += vib * np.sin(2 * np.pi * 7 * t)
+        add(sfx, start + i * step, pulse(hz(mm), t, duty) * env(len(t), d * 0.8, 0.4), 0.5 * vel)
 
 
-def cash_register(start):
-    d = 0.9
+def sweep(start, m0, m1, dur, duty=0.5, vel=1.0, wobble=0.0):
+    t = t_axis(dur)
+    m = np.linspace(m0, m1, len(t)) + wobble * np.sin(2 * np.pi * 12 * t)
+    add(sfx, start, pulse(hz(m), t, duty) * env(len(t), dur, 0.6), 0.45 * vel)
+
+
+def coin(start):
+    jingle(start, [note("B5"), note("E6")], 0.07, last=0.4)
+
+
+def power_up(start, base=note("C5"), vel=1.0):
+    seq_ = [base + x for x in (0, 4, 7, 12, 4, 7, 12, 16, 7, 12, 16, 19)]
+    jingle(start, seq_, 0.035, duty=0.25, vel=vel, last=0.15)
+
+
+def glitch(start):
+    """Equivalente 8-bit do arranhão de disco: o som "trava" e despenca."""
+    d = 0.35
     t = t_axis(d)
-    clunk = eq(noise(0.08), lp=1500) * np.exp(-t_axis(0.08) / 0.015)
-    add(sfx, start, clunk, 0.6)
-    bell = sum(a * np.sin(2 * np.pi * f * t) for f, a in ((2093, 1), (3136, 0.6), (4186, 0.4), (5274, 0.3)))
-    add(sfx, start + 0.09, bell * np.exp(-t / 0.3), 0.22)
+    m = 84 - 50 * (t / d) ** 0.6
+    s = pulse(hz(m), t, 0.5) * (np.floor(t * 40) % 2)
+    s += 0.6 * chip_noise(d, 20000 - 15000 * t / d)
+    add(sfx, start, s * env(len(t), 0.2), 0.45)
+
+
+def lose(start, notes=("B4", "A#4", "A4", "G#4"), step=0.3, last=0.8):
+    """O "wah-wah-wah-wahhh" de perder vida."""
+    jingle(start, [note(n) for n in notes], step, duty=0.5, last=last, vib=0.4)
 
 
 def stamp(start):
-    t = t_axis(0.3)
-    s = np.sin(2 * np.pi * np.cumsum(80 + 120 * np.exp(-t / 0.02)) / SR) * np.exp(-t / 0.07)
-    s += 0.5 * eq(noise(0.3), lp=2500) * np.exp(-t / 0.02)
-    add(sfx, start, s, 0.8)
+    t = t_axis(0.25)
+    s = triangle(hz(40 - 12 * np.clip(t / 0.08, 0, 1)), t) * env(len(t), 0.1)
+    s += 0.7 * chip_noise(0.25, 6000) * env(len(t), 0.03)
+    add(sfx, start, s, 0.9)
 
 
-def pen_scribble(start, dur=0.5):
+def scribble(start, dur=0.48):
     t = t_axis(dur)
-    s = eq(noise(dur), hp=2500, lp=8000)
-    am = 0.5 + 0.5 * np.sign(np.sin(2 * np.pi * 14 * t + 2 * np.sin(2 * np.pi * 3 * t)))
-    add(sfx, start, fade_tail(s * am * np.clip(t / 0.02, 0, 1), 20), 0.4)
+    s = chip_noise(dur, 9000 + 5000 * np.sin(2 * np.pi * 9 * t))
+    s *= (np.sin(2 * np.pi * 16 * t) > -0.2)
+    add(sfx, start, eq(s, hp=2000) * env(len(t), 1.0, 0.8), 0.45)
 
 
-def siren(start, dur=1.0):
+def alarm(start, dur=1.0):
     t = t_axis(dur)
-    f = 900 + 350 * np.sin(2 * np.pi * 2.0 * t)
-    s = np.sin(2 * np.pi * np.cumsum(f) / SR) + 0.3 * saw(f, t)
-    e = np.clip(t / 0.1, 0, 1) * np.clip((dur - t) / 0.15, 0, 1)
-    add(sfx, start, s * e, 0.22)
+    m = np.where((t * 4) % 1 < 0.5, note("A5"), note("E5"))
+    add(sfx, start, pulse(hz(m), t, 0.5) * env(len(t), 2, 0.9), 0.3)
 
 
-def balloon(start, dur):
+def deflate(start, dur):
     t = t_axis(dur)
-    f = 420 * (1 - 0.55 * t / dur) * (1 + 0.08 * np.sin(2 * np.pi * 9 * t))
-    buzz = np.tanh(3 * np.sin(2 * np.pi * np.cumsum(f) / SR))
-    hiss = eq(noise(dur), hp=1500, lp=7000) * 0.4
-    s = eq(buzz, hp=200, lp=3000) * 0.8 + hiss
-    e = np.clip(t / 0.05, 0, 1) * (1 - 0.5 * t / dur) * np.clip((dur - t) / 0.08, 0, 1)
-    add(sfx, start, s * e, 0.4)
+    m = 72 - 26 * (t / dur) + 1.5 * np.sin(2 * np.pi * 11 * t)
+    add(sfx, start, pulse(hz(m), t, 0.125) * env(len(t), dur, 0.7), 0.4)
+
+
+def blip(start, midi, vel=1.0):
+    jingle(start, [midi, midi + 12], 0.04, duty=0.25, vel=vel, last=0.12)
+
+
+def dash(peak):
+    """Transição: varredura de ruído + glissando subindo, pico em `peak`."""
+    pre, post = 0.36, 0.14
+    d = pre + post
+    t = t_axis(d)
+    shape = np.where(t < pre, (t / pre) ** 2, np.exp(-(t - pre) / 0.05))
+    nz = chip_noise(d, 3000 + 37000 * np.clip(t / pre, 0, 1)) * shape
+    m = np.where(t < pre, 55 + 36 * (t / pre), 91 - 30 * (t - pre) / post)
+    sq = pulse(hz(m), t, 0.125) * shape
+    add(sfx, peak - pre, 0.35 * nz + 0.25 * sq)
 
 
 # ================================================================ ARRANJO
-# 0,0–3,5 · Abertura
-feedback(0.0, 0.25, 2500)
-hit(0.05, E, 1.0, ring=0.18)
-for i, t in enumerate((0.25, 0.41, 0.57, 0.73)):
-    hit(t, (E, G, A, B)[i], 0.9, ring=0.13, cymbal=(i == 3))
+CH = {k: [note(n) for n in v] for k, v in {
+    "C": ("C4", "E4", "G4"), "G": ("G3", "B3", "D4"), "Am": ("A3", "C4", "E4"),
+    "E": ("G#3", "B3", "E4"), "F": ("F3", "A3", "C4"), "Dm": ("D4", "F4", "A4"),
+    "Em": ("E4", "G4", "B4"), "Bb": ("Bb3", "D4", "F4"), "D": ("D4", "F#4", "A4"),
+}.items()}
+
+# 0,0–3,5 · Abertura: "start" + logo + 4 linhas do título
+jingle(0.0, [note("C6"), note("G6")], 0.025, duty=0.125, vel=0.7)
+hit(0.05, CH["C"], ring=0.18)
+for i, (t, c) in enumerate(zip((0.25, 0.41, 0.57, 0.73), ("C", "F", "G", "C"))):
+    hit(t, [x + (12 if i == 3 else 0) for x in CH[c]], ring=0.14, cymbal=(i == 3))
 groove(1.0, 3.5, "main")
 
 # 3,5–8,5 · Clube do 4–0
-groove(3.5, 6.9, "main")
+groove(3.5, 6.9, "main", anchor=3.5)
 for i, t in enumerate(np.linspace(4.4, 5.05, 6)):
-    tom(t, 160 - i * 15, 0.7)
-record_scratch(6.9)
-groove(6.9 + 3 * E8, 8.5, "main", crash_in=True)
+    tom(t, 55 - 2 * i, 0.6)
+glitch(6.9)
+groove(7.5, 8.5, "main", anchor=3.5)
 
 # 8,5–14,5 · Ladrão de Vitórias (vilão + solo)
-groove(8.5, 11.9, "villain", vel=0.9)
-solo = [76, 79, 81, 83, 84, 83, 81, 79, 81, 83, 86, 88, 86, 84, 83, 81,
-        83, 84, 86, 88, 91, 88, 86, 88]
-step = (11.4 - 10.1) / len(solo)
+groove(8.5, 10.1, "villain", anchor=8.5, vel=0.9)
+groove(10.1, 11.9, "villain", anchor=8.5, vel=0.8, melody=False, crash_in=False)
+scale = [note(n) for n in ("A5", "B5", "C6", "D6", "E6", "F6", "G#6", "A6")]
+solo = scale + scale[::-1][1:] + [note(n) for n in ("C6", "E6", "A6", "C7", "B6", "G#6", "E6", "B6", "C7")]
+step = 1.3 / len(solo)
 for i, m in enumerate(solo):
-    lead_note(10.1 + i * step, m, step * 1.05, vel=0.9)
-lead_note(11.4, 88, 0.5, vib=0.6, bend_from=86)
-hit(11.9, E, 1.0, ring=0.6)
+    lead_note(10.1 + i * step, m, step, duty=0.125, vel=0.9)
+lead_note(11.4, note("A6"), 0.5, duty=0.125, vib=0.5, slide_from=note("G#6"))
+hit(11.9, CH["Am"], ring=0.45)
 stamp(11.9)
-cash_register(11.95)
-groove(12.5, 14.5, "villain", vel=0.9, crash_in=False)
+coin(11.98)
+coin(12.2)
+groove(12.5, 14.5, "villain", anchor=8.5, vel=0.9, crash_in=False)
 
 # 14,5–20,5 · Pé-frio do Ano (meio-tempo)
 groove(14.5, 16.0, "half", drums_style="half")
-hit(16.0, G, 0.9, ring=0.5)
-hit(16.6, E - 5, 1.0, ring=0.8)  # segundo acento mais grave
-sad_trombone(17.5)
-groove(17.5 + 0.38 * 3 + 0.9 + 0.05, 20.5, "half", drums_style="half")
-play_segments.append((16.6, 17.5))
+hit(16.0, CH["Am"], ring=0.4)
+hit(16.6, [x - 12 for x in CH["E"]], ring=0.85)  # o segundo, mais grave
+lose(17.5)
+groove(19.75, 20.5, "half", anchor=14.5, drums_style="half")
 
 # 20,5–26,0 · Dupla Personalidade
-groove(20.5, 21.3, "main")
-hit(21.3, E + 12, 0.9, ring=0.6)  # agudo
-hit(22.0, E - 5, 1.0, ring=0.95)  # grave
-pen_scribble(23.0, 0.48)
-groove(24.0, 26.0, "main")
+groove(20.5, 21.3, "main", anchor=20.5)
+hit(21.3, [x + 12 for x in CH["C"]], ring=0.6)  # agudo
+hit(22.0, [x - 12 for x in CH["Am"]], ring=0.95)  # grave
+scribble(23.0)
+groove(24.0, 26.0, "main", anchor=20.5)
 
-# 26,0–30,5 · Demônio de Folga (afinação mais grave, mais sujo)
-groove(26.0, 28.2, "main", transpose=-2, vel=1.05)
-siren(27.2, 1.0)
-record_scratch(28.2)
-groove(28.2 + 2 * E8, 30.5, "main", transpose=-2, vel=1.05, crash_in=True)
+# 26,0–30,5 · Demônio de Folga (mais grave e mais áspero)
+groove(26.0, 28.2, "villain", anchor=26.0, tr=-3, duty=0.5, vel=1.05)
+alarm(27.2, 1.0)
+glitch(28.2)
+groove(28.2 + 3 * E8, 30.5, "villain", anchor=26.0, tr=-3, duty=0.5, vel=1.05)
 
 # 30,5–36,0 · Bola Murcha (banda para)
-balloon(31.7, 1.3)
-bass_note(33.1, E + 12, 0.35, 1.2)
-bass_note(33.5, E + 7, 0.5, 1.2)
-play_segments += [(33.1, 33.45), (33.5, 34.0)]
-sad_trombone(34.2, notes=(55, 54, 53), step=0.3, last=0.6)
-play_segments.append((35.4, 36.0))
-stick(35.43)
-stick(35.71)
+deflate(31.7, 1.3)
+bass_note(33.1, note("E3"), 0.3, 1.3)
+bass_note(33.5, note("A2"), 0.45, 1.3)
+play_segments += [(33.1, 33.4), (33.5, 33.95)]
+lose(34.2, notes=("G4", "F#4", "F4"), step=0.28, last=0.55)
+play_segments.append((35.25, 36.0))
+for t in (35.3, 35.5, 35.7):  # contagem 3-2-1
+    blip(t, note("C5"), 0.8)
 for i in range(4):
-    snare(35.71 + i * E8 / 4 * 2, 0.6 + 0.1 * i)
+    snare(35.8 + i * 0.05, 0.5 + 0.15 * i)
 
 # 36,0–41,5 · Fila do Rebaixamento (meio-tempo arrastado)
-groove(36.0, 39.5, "half", drums_style="half", transpose=-2)
+groove(36.0, 39.5, "half", drums_style="half", tr=-2)
 for t in np.linspace(36.75, 37.5, 7):
-    kick(t, 0.8)
-hit(39.5, D, 1.0, ring=0.55)
+    kick(t, 0.9)
+hit(39.5, [x - 2 for x in CH["Am"]], ring=0.5)
 stamp(39.5)
-groove(40.1, 41.5, "half", drums_style="half", transpose=-2, crash_in=False)
+groove(40.1, 41.5, "half", anchor=36.0, drums_style="half", tr=-2, crash_in=False)
 
-# 41,5–47,5 · Corda Bamba (breakdown)
+# 41,5–47,5 · Corda Bamba (breakdown: bumbo + baixo pulsando, crescendo)
 play_segments.append((41.5, 44.5))
 n = int((44.5 - 41.5) / E8)
 for i in range(n):
     t = 41.5 + i * E8
-    prog = i / n
-    guitar(t, E, E8, "mute", 0.35 + 0.75 * prog)
+    p = i / n
+    bass_note(t, note("E2") + (12 if i % 2 else 0), E8 * 0.6, 0.6 + 0.6 * p)
+    arp_chord(t, CH["Em"], E8 * 0.5, vel=0.15 + 0.6 * p)
     if i % 2 == 0 or t > 42.3:
-        kick(t, 0.6 + 0.4 * prog)
-for t in np.linspace(42.3, 43.2, 5):
-    guitar(t, E, 0.1, "mute", 1.1)
-    tom(t, 90, 0.5)
-for i in range(8):  # rufo de caixa crescendo até o selo
-    snare(43.95 + i * 0.07, 0.4 + 0.08 * i)
+        kick(t, 0.6 + 0.4 * p)
+for i, t in enumerate(np.linspace(42.3, 43.2, 5)):
+    blip(t, note("E5") + 2 * i, 0.6)
+for i in range(10):  # rufo crescendo até o selo
+    snare(43.8 + i * 0.07, 0.4 + 0.07 * i)
+power_up(44.5)
 groove(44.5, 47.5, "main", vel=1.05)
 
-# 47,5–52,5 · Vote no Grupo (segura um acorde)
-groove(47.5, 48.4, "hold", drums_style="hold")
-for i, (t, m) in enumerate(((48.4, B), (48.7, B + 2), (49.0, B + 4))):
-    hit(t, m, 0.9 + 0.05 * i, ring=0.28, cymbal=(i == 2))
-groove(49.3, 49.7, "hold", drums_style="hold", transpose=4, crash_in=False)
-play_segments.append((49.7, 50.25))
+# 47,5–52,5 · Vote no Grupo (segura a dominante)
+groove(47.5, 48.4, "hold", drums_style="drive")
+for i, t in enumerate((48.4, 48.7, 49.0)):  # opções 1, 2, 3: blips de menu subindo
+    blip(t, note("G5") + 2 * i, 1.0)
+    hit(t, [x + 2 * i for x in CH["G"]], ring=0.2, cymbal=(i == 2))
+groove(49.2, 49.7, "hold", anchor=47.5, drums_style="drive", crash_in=False)
+play_segments.append((49.7, 50.3))
 for i in range(6):
-    tom(49.7 + i * 0.085, 180 - i * 22, 0.8)
-groove(50.25, 52.5, "hold", drums_style="hold", vel=1.0)
+    tom(49.7 + i * 0.09, 62 - 3 * i, 0.9)
+groove(50.3, 52.5, "hold", anchor=47.5, drums_style="drive")
 
 # 52,5–56,0 · Fim
-groove(52.5, 53.4, "chorus")
-hit(53.4, E, 1.1, ring=0.9)
+groove(52.5, 53.4, "main")
 play_segments.append((53.4, 54.3))
+arp_chord(53.4, [note(n) for n in ("C4", "E4", "G4", "C5")], 0.9, vel=1.1)
+lead_note(53.4, note("C6"), 0.9, duty=0.5, vib=0.3, vel=0.9)
+bass_note(53.4, note("C2"), 0.9, 1.1)
+crash(53.4, 1.0, 0.9)
 play_segments.append((54.3, DUR))
-tom(54.3, 140, 0.9)
-tom(54.42, 95, 1.0)
-kick(54.42, 0.7)
-crash(54.62, 0.9, 1.0)
-hat(54.62, 2.0, open_=True)
-feedback(54.9, 0.6, 2600)
+tom(54.3, 57, 1.0)  # ba-
+tom(54.45, 50, 1.0)  # -dum
+kick(54.45, 0.8)
+hat(54.65, 2.5, open_=True)  # -tss
+crash(54.65, 0.8, 0.7)
+jingle(54.9, [note(n) for n in ("E6", "G6", "E7", "C7", "D7", "G7")], 0.06, duty=0.25, vel=0.6)
 
-# Transições
+# Transições (pico nos tempos do README)
 for p in (3.5, 8.5, 14.5, 20.5, 26.0, 30.5, 36.0, 41.5, 47.5, 52.5):
-    whoosh(p)
+    dash(p)
 
 
 # ===================================================================== MIX
 def gate():
-    """1 onde a banda toca, 0 nas paradas secas (corte de 3 ms)."""
     g = np.zeros(N)
     for a, b in play_segments:
         g[int(a * SR): int(min(b, DUR) * SR)] = 1
     k = int(0.003 * SR)
-    ramp = np.ones(k) / k
-    return np.convolve(g, ramp, mode="same")
-
-
-def amp_sim(x, drive):
-    x = eq(x, hp=110, peaks=((800, 3, 1),))
-    x = np.tanh(drive * x)
-    return eq(x, hp=90, lp=4800, peaks=((1800, 3, 1.2), (350, -3, 1)), order=3)
+    return np.convolve(g, np.ones(k) / k, mode="same")
 
 
 g = gate()
-gOL = amp_sim(gtr_open_L, 6) * g
-gOR = amp_sim(gtr_open_R, 6) * g
-gML = eq(amp_sim(gtr_mute_L, 7), lp=2500) * g
-gMR = eq(amp_sim(gtr_mute_R, 7), lp=2500) * g
-ld = eq(np.tanh(5 * eq(lead, hp=300)), hp=400, lp=6000, peaks=((2500, 3, 1),))
-ld_echo = np.zeros_like(ld)
-dl = int(0.214 * SR)
-ld_echo[dl:] = ld[:-dl] * 0.35
-bs = eq(np.tanh(2.0 * bass), hp=55, lp=1400, peaks=((110, 2, 1), (700, 3, 1))) * g
-dr = eq(drums, hp=45) * g
+ld, ar, bs, dr = lead * g, arp * g, bass * g, drums * g
+# eco curto no lead (ping-pong) para dar largura
+dl = int(E8 * 1.5 * SR)
+echo = np.zeros(N)
+echo[dl:] = ld[:-dl]
 
-L = 0.55 * gOL + 0.35 * gML + 0.5 * bs + 0.7 * dr + 0.4 * (ld * 0.8 + ld_echo * 0.3) + 0.9 * sfx
-R = 0.55 * gOR + 0.35 * gMR + 0.5 * bs + 0.7 * dr + 0.4 * (ld * 0.8 + ld_echo * 1.0) + 0.9 * sfx
+L = 0.34 * ld + 0.12 * echo + 0.22 * ar * 1.2 + 0.5 * bs + 0.55 * dr + 0.6 * sfx
+R = 0.34 * ld + 0.04 * echo + 0.22 * ar * 0.8 + 0.5 * bs + 0.55 * dr + 0.6 * sfx
+# celular: tira subgrave e suaviza o chiado das ondas quadradas
+L, R = (eq(x, hp=70, lp=11000) for x in (L, R))
 
-# celular: corta subgrave e tira o excesso de graves
-L = eq(L, hp=75, peaks=((150, -2, 1), (3000, 1.5, 1)), order=3)
-R = eq(R, hp=75, peaks=((150, -2, 1), (3000, 1.5, 1)), order=3)
-
-# fade para preto 55,55–56,0
 fade = np.ones(N)
 a = int(55.55 * SR)
 fade[a:] = np.linspace(1, 0, N - a) ** 2
-L *= fade
-R *= fade
+L, R = L * fade, R * fade
 
 peak = max(np.abs(L).max(), np.abs(R).max())
-L, R = L / peak * 0.7, R / peak * 0.7
-out = np.stack([L, R], axis=1)
+out = np.stack([L, R], axis=1) / peak * 0.7
 pcm = (np.clip(out, -1, 1) * 32767).astype("<i2")
 
 path = sys.argv[1] if len(sys.argv) > 1 else "trilha.wav"
