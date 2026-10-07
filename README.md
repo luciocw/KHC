@@ -5,19 +5,27 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 
 ## Funcionalidades
 
-- **5 abas:** Ligas, Top Scorers, Power Ranking, Lendas KHC, Temporadas
+- **6 abas:** Ligas, Top Scorers, Power Ranking, Lendas KHC, Temporadas, Regras
+- **Endereço por tela** (compartilhável): `#/ligas/2026/a`, `#/top/2026`, `#/jogador/<usuario>`
+- **Ligas:** uma série por vez, com zonas de acesso / playoffs / rebaixamento por temporada e medalhas (número dentro) na classificação final
+- **Top Scorers:** filtro por série e "Incluir Elite" (desligado por padrão, evita time duplicado)
+- **Power Ranking:** tiers S Favoritos · A Candidatos · B Meio de tabela · C Pressionados · D Lanternas (60% aproveitamento + 40% pontos normalizados; sem Elite)
+- **Lendas:** Hall da Fama ordenado por títulos (ouro → prata → bronze → 4º)
+- **Perfil do jogador:** lateral no desktop, bottom sheet no celular
 - **Modelo de dados híbrido:** temporadas finalizadas vêm de JSON estático (`data/<ano>.json`); temporada ativa vem da Sleeper API em tempo real
-- **Player Drawer:** clique em qualquer username pra ver perfil, conquistas e histórico
-- **Modal "Sobre a Liga":** regras, formato, promoção/rebaixamento, Elite
-- **Lendas KHC:** ranking acumulado de conquistas cross-season
-- **Power Ranking** com tiers S/A/B/C/D (60% win rate + 40% pts normalizado)
-- **Mobile-first** com container queries e breakpoints específicos
-- **Acessibilidade:** WAI-ARIA tabs pattern, focus trap em drawer/modal, skip link, reduced-motion support
+- **Estados:** carregando (skeleton), erro com "Tentar de novo", cache, falha parcial, vazio
+- **Mobile-first:** navegação inferior fixa < 1024px; contraste AA; alvos ≥ 44px
+
+## Identidade visual
+
+- Tokens (cores, ligas, zonas, medalhas, tiers, tipografia, espaço) no topo de `styles.css`, vindos do guia da marca
+- Fonte **Archivo** variável (eixo de largura: 125% títulos, 75% labels, 62% números)
+- `data-league="a|b|c|d|e|f|elite"` num container reaponta `--accent` para a cor da série
+- Escudos por série em `assets/logo/png/` (PNG 160px em `ui/` para a interface); banners em `assets/banners/` (`og-image` usada no compartilhamento)
 
 ## Stack
 
 - HTML semântico + CSS variables + JS vanilla (sem `type="module"` — script tags em ordem)
-- Inter via Google Fonts
 - SVG icons inline (registry em `js/icons.js`)
 - Sleeper API pública (sem auth)
 - Sem dependências runtime de terceiros
@@ -25,43 +33,39 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 ## Estrutura
 
 ```
-index.html                  ~250 linhas (header, 5 tabpanels, drawer/modal mounts)
-styles.css                  ~2000 linhas (organizado por === seções ===)
+index.html                  shell (header, page head, #view, bottom nav, drawer)
+styles.css                  tokens + componentes (organizado por === seções ===)
 data/
-  2025.json                 snapshot da temporada 2025 (22 times, trofeus, métricas completas)
+  2025.json                 snapshot da temporada 2025 (classificação final + troféus)
 scripts/
   derive-season.mjs         derivador de JSON a partir da Sleeper API
 js/
-  config.js                 KHC_CONFIG (league IDs por ano) + constantes + appState
+  config.js                 KHC_CONFIG (ligas + regras por ano), SERIES_META, appState
   sanitize.js               escapeHtml, sanitizeAvatarUrl, sanitizeNumber, etc.
-  api.js                    fetch+retry, cache (5min localStorage), fetchLeagueData
-  data.js                   loader híbrido: data/*.json para finalizadas, Sleeper para ativa
+  api.js                    fetch+retry, cache (localStorage), fetchLeagueData, fetchNflState
+  data.js                   temporadas finalizadas (data/*.json)
   derivations.js            pwrScore, tierForPwr, legendsAggregator, careerForUser
-  icons.js                  IconRegistry com 14 SVGs + renderIcons() (hidrata data-icon)
-  types.js                  JSDoc typedefs (Season, Team, Career, Trophy, Tier, etc.)
+  icons.js                  IconRegistry (SVG line 24px) + renderIcons()
+  types.js                  JSDoc typedefs
   ui/
-    loading.js              spinners, skeletons
-    tabs.js                 switchTab, keyboard nav (WAI-ARIA), screen reader announce
-    drawer.js               player drawer (side-sheet, focus trap, ESC, scroll lock)
-    modal.js                about modal (centered, scale-in, focus trap)
+    helpers.js              avatar, botão de time, escudo, medalha, pílula, scroll lock
+    drawer.js               perfil do jogador (focus trap, Esc, URL #/jogador/…)
   tabs/
-    ligas.js                renderLeagueCard
-    top-scorers.js          renderGlobalStandings
-    power-ranking.js        renderPowerRankings
-    lendas.js               renderLegends
-    temporadas.js           renderSeasons
-  app.js                    bootstrap (init, loadData, DOMContentLoaded)
+    ligas.js · top-scorers.js · power-ranking.js · lendas.js · temporadas.js · regras.js
+  app.js                    roteamento por hash, loadData, render
 assets/
-  logo.jpg                  fallback/watermark do logo
+  logo/png/                 escudos por série (+ ui/ 160px, favicon)
+  banners/                  og-image 1200×630, hero, header
 ```
 
 ## Como atualizar quando a Sleeper renovar as ligas
 
 A cada ano, novos league IDs são gerados. Pra adicionar um novo ano:
 
-1. **Configurar a temporada nova** em `js/config.js`:
+1. **Configurar a temporada nova** em `js/config.js` (ligas + regras):
    ```js
    '2027': {
+     rules: { promote: 3, relegate: 3, playoffTeams: 6, elitePlayoffTeams: 4 },
      leagues: [
        { id: '123...', name: 'KHC Serie A', tier: 'serie-a' },
        { id: '456...', name: 'KHC Serie B', tier: 'serie-b' },
@@ -70,10 +74,7 @@ A cada ano, novos league IDs são gerados. Pra adicionar um novo ano:
      ],
    }
    ```
-2. **Adicionar a opção no dropdown** em `index.html`:
-   ```html
-   <option value="2027">Temporada 2027</option>
-   ```
+2. O seletor de temporada, as abas de série e as zonas saem da config automaticamente. Séries novas (E, F) já têm cor e escudo em `SERIES_META` — use `tier: 'serie-e'` / `'serie-f'`.
 3. Durante a temporada, o site puxa tudo da Sleeper API automaticamente.
 
 ## Como "fechar" uma temporada (snapshot final)

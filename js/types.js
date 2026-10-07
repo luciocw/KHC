@@ -23,7 +23,7 @@
  */
 
 /**
- * @typedef {'A' | 'B' | 'C' | 'D' | 'Elite'} SeriesId
+ * @typedef {'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'Elite'} SeriesId
  * Identificador curto da série. "Elite" é liga paralela.
  */
 
@@ -79,8 +79,9 @@
  * @typedef {Object} LegendEntry
  * Linha agregada na tabela Lendas KHC.
  * @property {string} user             Username
+ * @property {string|null} avatarId
  * @property {TrophyCount} trophies    Contagem por tipo
- * @property {number} weighted         Score ponderado (gold*10 + silver*5 + bronze*3 + fourth)
+ * @property {{trophy: Trophy, seriesId: SeriesId, season: number}|null} best  Melhor resultado
  */
 
 /**
@@ -89,6 +90,7 @@
  * @property {number} season           Ano
  * @property {SeriesId} serie
  * @property {string} team             Nome do time naquela temporada
+ * @property {number} [rank]           Posição final (temporada finalizada)
  * @property {number} w
  * @property {number} l
  * @property {number} pts

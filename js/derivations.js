@@ -40,16 +40,17 @@ function pwrScore(team, ctx) {
 }
 
 /**
- * Mapa de tier por score. Limites do handoff:
- *   S ≥ 80, A ≥ 60, B ≥ 45, C ≥ 30, D < 30
+ * Mapa de tier por score (handoff do redesign):
+ *   S Favoritos ≥ 80 · A Candidatos 65–79 · B Meio de tabela 50–64 ·
+ *   C Pressionados 35–49 · D Lanternas < 35
  * @param {number} score
  * @returns {Tier}
  */
 function tierForPwr(score) {
     if (score >= 80) return 'S';
-    if (score >= 60) return 'A';
-    if (score >= 45) return 'B';
-    if (score >= 30) return 'C';
+    if (score >= 65) return 'A';
+    if (score >= 50) return 'B';
+    if (score >= 35) return 'C';
     return 'D';
 }
 
@@ -85,23 +86,20 @@ function powerRanking(teams) {
 
 // --- LENDAS (cross-season trophy aggregation) ---
 
-/**
- * Pesos pra ordenar a tabela de Lendas. Gold tem peso máximo, fourth o menor.
- * Resultado é meramente ordenação — display continua mostrando contagens cruas.
- */
-const TROPHY_WEIGHTS = Object.freeze({
-    gold: 10,
-    silver: 5,
-    bronze: 3,
-    fourth: 1
-});
+const TROPHY_ORDER = ['gold', 'silver', 'bronze', 'fourth'];
 
 /**
- * Agrega trofeus de todas as temporadas finalizadas. Temporadas ativas
+ * Agrega troféus de todas as temporadas finalizadas. Temporadas ativas
  * são ignoradas (ainda sem campeão definido).
  *
+ * Ordenação: títulos sempre na frente — mais ouros; empate → mais pratas;
+ * depois bronzes; depois 4ºs (decisão da liga).
+ *
+ * `best` guarda o melhor resultado do jogador (maior troféu; empate → mais
+ * recente), usado no rótulo "Campeão Série A 2025".
+ *
  * @param {Season[]} seasons
- * @returns {LegendEntry[]} Ordenado por score ponderado desc
+ * @returns {LegendEntry[]}
  */
 function legendsAggregator(seasons) {
     /** @type {Object<string, LegendEntry>} */
@@ -112,39 +110,34 @@ function legendsAggregator(seasons) {
         season.series.forEach(s => {
             s.teams.forEach(t => {
                 if (!t.trophy) return;
-
                 if (!byUser[t.user]) {
                     byUser[t.user] = {
                         user: t.user,
+                        avatarId: t.avatarId || null,
                         trophies: { gold: 0, silver: 0, bronze: 0, fourth: 0 },
-                        weighted: 0
+                        best: null
                     };
                 }
-                byUser[t.user].trophies[t.trophy]++;
+                const entry = byUser[t.user];
+                entry.trophies[t.trophy]++;
+                const cand = { trophy: t.trophy, seriesId: s.id, season: season.id };
+                const rank = TROPHY_ORDER.indexOf(t.trophy);
+                if (!entry.best ||
+                    rank < TROPHY_ORDER.indexOf(entry.best.trophy) ||
+                    (rank === TROPHY_ORDER.indexOf(entry.best.trophy) && cand.season > entry.best.season)) {
+                    entry.best = cand;
+                }
             });
         });
     });
 
-    // Calcula score ponderado
     const list = Object.values(byUser);
-    list.forEach(entry => {
-        const t = entry.trophies;
-        entry.weighted =
-            t.gold   * TROPHY_WEIGHTS.gold +
-            t.silver * TROPHY_WEIGHTS.silver +
-            t.bronze * TROPHY_WEIGHTS.bronze +
-            t.fourth * TROPHY_WEIGHTS.fourth;
-    });
-
-    // Ordena: weighted desc, com tiebreakers em gold/silver/bronze/fourth
     list.sort((a, b) => {
-        if (b.weighted !== a.weighted) return b.weighted - a.weighted;
-        if (b.trophies.gold   !== a.trophies.gold)   return b.trophies.gold   - a.trophies.gold;
-        if (b.trophies.silver !== a.trophies.silver) return b.trophies.silver - a.trophies.silver;
-        if (b.trophies.bronze !== a.trophies.bronze) return b.trophies.bronze - a.trophies.bronze;
-        return b.trophies.fourth - a.trophies.fourth;
+        for (const k of TROPHY_ORDER) {
+            if (b.trophies[k] !== a.trophies[k]) return b.trophies[k] - a.trophies[k];
+        }
+        return a.user.localeCompare(b.user);
     });
-
     return list;
 }
 
@@ -184,6 +177,7 @@ function careerForUser(username, seasons) {
                 season: season.id,
                 serie: s.id,
                 team: row.team,
+                rank: row.rank,
                 w: row.w,
                 l: row.l,
                 pts: row.pts

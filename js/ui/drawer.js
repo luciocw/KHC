@@ -1,481 +1,283 @@
 // =============================================================================
-// UI / DRAWER — Player profile side-sheet.
+// UI / DRAWER — Perfil do jogador.
 //
-// Comportamento (handoff "Player Profile Drawer"):
-//   • Slide-in da direita (300ms cubic-bezier(.2,.7,.2,1)).
-//   • Backdrop semi-transparente + blur; click fecha.
-//   • ESC fecha; foco volta para o player-link que abriu.
-//   • Body scroll lock enquanto aberto.
-//   • Focus trap (Tab / Shift+Tab ciclam dentro do drawer).
+//   - Desktop: lateral direita 420px. Celular: bottom sheet a partir de 8vh.
+//   - Fecha com o botão, Esc ou clique no fundo; foco volta para quem abriu.
+//   - Trava de scroll compartilhada (lockBodyScroll) + focus trap.
+//   - URL: #/jogador/<usuario> (compartilhável). Ao fechar, volta à URL
+//     anterior via history.replaceState.
 //
-// Conteúdo (gerado por `careerForUser(username, getFinalizedSeasons())`):
-//   1. Header: avatar 64px + username + pills da temporada atual.
-//   2. Conquistas: grid 4-col (ouro/prata/bronze/4º).
-//   3. Estatísticas de carreira: 2-col (Temporadas, V/D, %, Pts) + best campaign.
-//   4. Histórico: lista de temporadas (year+serie · team+stats · trophy).
+// Conteúdo: avatar + nome + séries atuais · Conquistas (4 tiles; zeradas
+// apagadas) · Carreira (totais sobre o histórico exibido, 1 casa decimal) ·
+// Histórico (escudo + ano · série + time · V–D · pts + medalha/posição ou
+// "Em andamento").
 //
-// Self-bootstrap: instala delegação no body que abre o drawer ao clicar
-// (ou pressionar Enter / Space) em qualquer `.player-link[data-user]`.
-//
-// Helpers consumidos (globais): escapeHtml, sanitizeAvatarUrl, sanitizeString,
-// IconRegistry, careerForUser, getFinalizedSeasons, appState.
+// Abre a partir de qualquer elemento [data-user] (delegação no document).
+// Depende de: config, sanitize, data, derivations, icons, ui/helpers
 // =============================================================================
-
-/* eslint-disable no-unused-vars */
 
 (function () {
     'use strict';
 
-    // ---------- Constantes ----------
-
-    /** Mapa de id de série → nome legível. Mantemos local para evitar cross-file coupling. */
-    const SERIES_NAMES = {
-        A: 'Serie A',
-        B: 'Serie B',
-        C: 'Serie C',
-        D: 'Serie D',
-        Elite: 'KHC Elite'
-    };
-
-    const MEDAL_ICONS = {
-        gold: 'medalGold',
-        silver: 'medalSilver',
-        bronze: 'medalBronze',
-        fourth: 'medalFourth'
-    };
-
-    const MEDAL_LABELS = {
-        gold: 'Ouro',
-        silver: 'Prata',
-        bronze: 'Bronze',
-        fourth: '4º Lugar'
-    };
-
-    // ---------- Estado interno ----------
-
-    /** @type {HTMLElement|null} Elemento que tinha o foco antes do drawer abrir. */
     let _lastFocusedTrigger = null;
+    let _hashBeforeOpen = null;
+    let _isOpen = false;
 
-    /** @type {(e: KeyboardEvent) => void | null} */
-    let _keydownHandler = null;
+    const getDrawer = () => document.getElementById('player-drawer');
+    const getScrim = () => document.getElementById('scrim');
 
-
-    // ---------- Helpers ----------
-
-    /** @returns {HTMLElement|null} */
-    function getDrawer() {
-        return document.getElementById('player-drawer');
+    /**
+     * Anos em andamento já carregados nesta sessão (não finalizados).
+     * @returns {string[]}
+     */
+    function activeYearsLoaded() {
+        return Object.keys(appState.leaguesBySeason).filter(y => !isSeasonFinalized(y));
     }
 
     /**
-     * Tenta encontrar um avatarId para um usuário, primeiro no histórico finalizado,
-     * depois em appState.rosterData (temporada ativa).
+     * Linhas do histórico vindas das temporadas em andamento já carregadas.
      * @param {string} username
-     * @param {Season[]} seasons
-     * @returns {string|undefined}
+     * @returns {Array<{season:number, serie:string, team:string, w:number, l:number, pts:number, active:true, avatar:string}>}
      */
-    function findAvatarId(username, seasons) {
-        // Histórico finalizado: ordem mais recente primeiro
-        for (let i = 0; i < seasons.length; i++) {
-            const season = seasons[i];
-            for (let j = 0; j < season.series.length; j++) {
-                const t = season.series[j].teams.find(x => x.user === username);
-                if (t && t.avatarId) return t.avatarId;
-            }
-        }
-        // Temporada ativa via rosterData (legacy adapter)
-        const roster = (typeof appState !== 'undefined' && Array.isArray(appState.rosterData))
-            ? appState.rosterData : [];
-        const hit = roster.find(r => r.ownerName === username && r.avatar);
-        return hit ? hit.avatar : undefined;
-    }
-
-    /**
-     * Procura no rosterData entries da temporada ativa para o usuário.
-     * Retorna linhas no mesmo formato de Career.history (active: true).
-     * @param {string} username
-     * @returns {Array<{season:number, serie:string, team:string, w:number, l:number, pts:number, active:true}>}
-     */
-    function activeRosterRowsFor(username) {
-        const roster = (typeof appState !== 'undefined' && Array.isArray(appState.rosterData))
-            ? appState.rosterData : [];
-        const seasonId = (typeof appState !== 'undefined' && appState.season)
-            ? parseInt(appState.season, 10) : NaN;
-        if (!Number.isFinite(seasonId)) return [];
-        // rosterData é da temporada SELECIONADA. Se ela já está finalizada, os
-        // dados vêm do JSON (career.history) e não representam a série atual.
-        if (typeof isSeasonFinalized === 'function' && isSeasonFinalized(seasonId)) return [];
-        return roster
-            .filter(r => r.ownerName === username)
-            .map(r => ({
-                season: seasonId,
-                serie: tierToSeriesId(r.leagueTier),
-                team: r.teamName,
-                w: r.wins,
-                l: r.losses,
-                pts: r.fpts,
-                active: true
-            }));
-    }
-
-    /**
-     * Compõe a lista de currentSeries pills a exibir no header:
-     * usa career.currentSeries quando preenchida (temporada ativa carregada via JSON),
-     * senão tenta inferir a partir de rosterData.
-     * @param {Career} career
-     * @returns {string[]} array de ids de série (A/B/C/D/Elite)
-     */
-    function resolveCurrentSeries(career) {
-        if (career.currentSeries && career.currentSeries.length) {
-            return career.currentSeries.slice();
-        }
-        const rows = activeRosterRowsFor(career.user);
-        const set = new Set();
-        rows.forEach(r => set.add(r.serie));
-        return Array.from(set);
-    }
-
-    /**
-     * Constrói lista combinada de histórico (finalized + active rosterData),
-     * evitando duplicar entradas já presentes no career.history.
-     * @param {Career} career
-     * @returns {Array} linhas de history, mais recente primeiro
-     */
-    function buildHistory(career) {
-        const out = career.history ? career.history.slice() : [];
-        // Adiciona linhas da temporada ativa (rosterData) que não estejam no history.
-        const activeRows = activeRosterRowsFor(career.user);
-        activeRows.forEach(r => {
-            const dup = out.find(h => h.season === r.season && h.serie === r.serie);
-            if (!dup) out.push(r);
+    function activeRowsFor(username) {
+        const out = [];
+        activeYearsLoaded().forEach(year => {
+            (appState.leaguesBySeason[year] || []).forEach(league => {
+                league.teams.filter(t => t.ownerName === username).forEach(t => {
+                    out.push({
+                        season: Number(year),
+                        serie: tierToSeriesId(league.info.tier),
+                        team: t.teamName,
+                        w: t.wins,
+                        l: t.losses,
+                        pts: t.fpts,
+                        active: true,
+                        avatar: t.avatar
+                    });
+                });
+            });
         });
-        out.sort((a, b) => b.season - a.season || (a.serie === 'Elite' ? -1 : 1));
         return out;
     }
 
     /**
-     * Totais de carreira a partir das linhas de histórico (inclui a temporada
-     * em andamento). Elite + série regular na mesma temporada somam jogos,
-     * mas contam como uma temporada só — mesmo critério de careerForUser().
-     * @param {Array<{season:number, w:number, l:number, pts:number}>} history
+     * Histórico combinado (finalizadas + em andamento), mais recente primeiro;
+     * na mesma temporada, segue TIER_ORDER (Elite primeiro).
+     * @param {Career} career
+     * @param {Array} activeRows
+     * @returns {Array}
+     */
+    function buildHistory(career, activeRows) {
+        const out = career.history.slice();
+        activeRows.forEach(r => {
+            if (!out.some(h => h.season === r.season && h.serie === r.serie)) out.push(r);
+        });
+        const order = id => TIER_ORDER.indexOf(seriesIdToTier(id));
+        out.sort((a, b) => (b.season - a.season) || (order(a.serie) - order(b.serie)));
+        return out;
+    }
+
+    /**
+     * Totais de carreira sobre o histórico exibido. Elite + série regular na
+     * mesma temporada somam jogos, mas contam como uma temporada.
+     * @param {Array} history
      * @returns {{seasons:number, wins:number, losses:number, pts:number}}
      */
     function statsFromHistory(history) {
-        let wins = 0;
-        let losses = 0;
-        let pts = 0;
+        let wins = 0, losses = 0, pts = 0;
         history.forEach(h => {
             wins += Number(h.w) || 0;
             losses += Number(h.l) || 0;
             pts += Number(h.pts) || 0;
         });
-        return {
-            seasons: new Set(history.map(h => h.season)).size,
-            wins,
-            losses,
-            pts: Math.round(pts * 100) / 100
-        };
+        return { seasons: new Set(history.map(h => h.season)).size, wins, losses, pts };
     }
 
-    // ---------- Renderização ----------
-
     /**
-     * @param {Career} career
-     * @returns {string} HTML do conteúdo do drawer
+     * Avatar mais recente conhecido do jogador.
+     * @returns {string|undefined}
      */
-    function renderDrawerContent(career) {
-        const username = sanitizeString(career.user, 64, 'Jogador');
-        const avatarId = findAvatarId(career.user,
-            typeof getFinalizedSeasons === 'function' ? getFinalizedSeasons() : []);
-        const avatarUrl = sanitizeAvatarUrl(avatarId);
-
-        const currentSeries = resolveCurrentSeries(career);
-        const history = buildHistory(career);
-
-        // Estatísticas calculadas sobre o histórico exibido (finalizadas +
-        // temporada em andamento), para os números baterem com a lista abaixo.
-        const stats = statsFromHistory(history);
-        const totalGames = stats.wins + stats.losses;
-        const winRate = totalGames > 0
-            ? ((stats.wins / totalGames) * 100).toFixed(1) + '%'
-            : '—';
-
-        return `
-            <div class="drawer-header">
-                <img class="drawer-avatar" src="${avatarUrl}" alt=""
-                     onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
-                <div class="drawer-user-info">
-                    <h2 class="drawer-title" id="drawer-title">${escapeHtml(username)}</h2>
-                    ${currentSeries.length ? `
-                        <div class="drawer-current">
-                            <span>Atualmente em:</span>
-                            <div class="drawer-current-pills">
-                                ${currentSeries.map(id => `
-                                    <span class="serie-pill${id === 'Elite' ? ' elite' : ''}">${escapeHtml(SERIES_NAMES[id] || id)}</span>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-
-            <section class="drawer-section" aria-labelledby="drawer-conq-title">
-                <h3 class="drawer-section-title" id="drawer-conq-title">Conquistas</h3>
-                <div class="conquistas-grid">
-                    ${['gold', 'silver', 'bronze', 'fourth'].map(k => `
-                        <div class="conquista-cell ${k}">
-                            <div class="conquista-medal">${IconRegistry[MEDAL_ICONS[k]]({ size: 22 })}</div>
-                            <div class="conquista-count">${career.trophies[k] || 0}</div>
-                            <div class="conquista-label">${MEDAL_LABELS[k]}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            </section>
-
-            <section class="drawer-section" aria-labelledby="drawer-stats-title">
-                <h3 class="drawer-section-title" id="drawer-stats-title">Estatísticas de Carreira</h3>
-                <div class="stats-grid">
-                    <div class="stat-tile">
-                        <div class="stat-label">Temporadas</div>
-                        <div class="stat-value">${stats.seasons}</div>
-                    </div>
-                    <div class="stat-tile">
-                        <div class="stat-label">Vitórias / Derrotas</div>
-                        <div class="stat-value">${stats.wins}–${stats.losses}</div>
-                    </div>
-                    <div class="stat-tile">
-                        <div class="stat-label">Aproveitamento</div>
-                        <div class="stat-value">${winRate}</div>
-                    </div>
-                    <div class="stat-tile">
-                        <div class="stat-label">Pontos totais</div>
-                        <div class="stat-value">${stats.pts.toFixed(2)}</div>
-                    </div>
-                    ${career.bestCampaign ? `
-                        <div class="stat-tile full">
-                            <div class="stat-label">Melhor campanha</div>
-                            <div class="stat-value bestcampaign">${escapeHtml(career.bestCampaign)}</div>
-                        </div>
-                    ` : ''}
-                </div>
-            </section>
-
-            ${history.length ? `
-                <section class="drawer-section" aria-labelledby="drawer-hist-title">
-                    <h3 class="drawer-section-title" id="drawer-hist-title">Histórico</h3>
-                    <div class="history-list">
-                        ${history.map(h => renderHistoryRow(h)).join('')}
-                    </div>
-                </section>
-            ` : ''}
-        `;
+    function findAvatarId(username, activeRows) {
+        const live = activeRows.find(r => r.avatar);
+        if (live) return live.avatar;
+        for (const season of getFinalizedSeasons()) {
+            for (const s of season.series) {
+                const t = s.teams.find(x => x.user === username && x.avatarId);
+                if (t) return t.avatarId;
+            }
+        }
+        return undefined;
     }
 
     /**
-     * Renderiza uma linha do histórico (3 colunas: year+serie · team+stats · trophy/active).
-     * @param {{season:number, serie:string, team:string, w:number, l:number, pts:number, trophy?:string, active?:boolean}} row
+     * Linha do histórico.
      * @returns {string}
      */
-    function renderHistoryRow(row) {
-        const serieName = SERIES_NAMES[row.serie] || row.serie;
-        const trophyBadge = row.trophy
-            ? `<span class="history-trophy" aria-label="${MEDAL_LABELS[row.trophy]}">${IconRegistry[MEDAL_ICONS[row.trophy]]({ size: 22 })}</span>`
-            : '';
-        const activePill = row.active
-            ? '<span class="history-active-pill">Em andamento</span>'
-            : '';
+    function renderHistoryRow(h) {
+        const tier = seriesIdToTier(h.serie);
+        let badge;
+        if (h.active) badge = '<span class="chip chip--live-soft">Em andamento</span>';
+        else if (h.rank >= 1 && h.rank <= 4) badge = medalHTML(h.rank);
+        else if (h.rank) badge = `<span class="chip chip--final">${h.rank}º</span>`;
+        else badge = '';
+        return `<div class="history-row">
+            ${crestHTML(tier, 34)}
+            <span class="grow">
+                <b>${h.season} · ${escapeHtml(seriesNameById(h.serie))}</b>
+                <span class="team__name history-row__team" dir="auto">${escapeHtml(h.team)} · ${h.w}–${h.l} · ${fmtPts(h.pts)} pts</span>
+            </span>
+            ${badge}
+        </div>`;
+    }
+
+    /**
+     * HTML do perfil.
+     * @param {string} username
+     * @returns {string}
+     */
+    function renderDrawerContent(username) {
+        const career = careerForUser(username, getFinalizedSeasons());
+        const activeRows = activeRowsFor(username);
+        const history = buildHistory(career, activeRows);
+        const stats = statsFromHistory(history);
+        const games = stats.wins + stats.losses;
+        const winRate = games > 0 ? Math.round((stats.wins / games) * 100) + '%' : '—';
+        const current = TIER_ORDER.filter(t => activeRows.some(r => r.serie === SERIES_META[t].id));
+
+        const trophyTiles = MEDAL_KEYS.map((k, i) => {
+            const v = career.trophies[k] || 0;
+            return `<div class="tile tile--medal${v ? '' : ' is-zero'}">
+                ${v ? medalHTML(i + 1) : `<span class="medal medal--off">${i + 1}</span>`}
+                <span class="num">${v}</span>
+                <small>${MEDAL_LABELS[k]}</small>
+            </div>`;
+        }).join('');
+
+        const statTiles = [
+            ['Temporadas', stats.seasons],
+            ['V–D', `${stats.wins}–${stats.losses}`],
+            ['Aproveitamento', winRate],
+            ['Pontos totais', fmtPts(stats.pts)],
+        ].map(([k, v]) => `<div class="tile"><div class="eyebrow">${k}</div><div class="num">${v}</div></div>`).join('');
 
         return `
-            <div class="history-row">
-                <div>
-                    <div class="history-year">${row.season}</div>
-                    <div class="history-serie">${escapeHtml(serieName)}</div>
+            <header class="drawer__hd">
+                ${avatarHTML({ avatarId: findAvatarId(username, activeRows), name: username, size: 'lg' })}
+                <div class="grow">
+                    <h2 class="display drawer__title" id="drawer-title" dir="auto">${escapeHtml(sanitizeString(username, 64, 'Jogador'))}</h2>
+                    ${current.length ? `<div class="drawer__pills">${current.map(seriesPillHTML).join('')}</div>` : ''}
                 </div>
-                <div>
-                    <div class="history-team">${escapeHtml(sanitizeString(row.team, 60, '—'))}</div>
-                    <div class="history-stats">${row.w}–${row.l} · ${row.pts.toFixed(1)} pts</div>
-                </div>
-                <div>${activePill || trophyBadge}</div>
-            </div>
-        `;
+                <button type="button" class="icon-btn drawer__close" data-close-drawer aria-label="Fechar perfil">${IconRegistry.close({ size: 20 })}</button>
+            </header>
+            <div class="drawer__body">
+                <section aria-labelledby="drawer-conq"><h3 class="eyebrow" id="drawer-conq">Conquistas</h3>
+                    <div class="tiles tiles--4">${trophyTiles}</div></section>
+                <section aria-labelledby="drawer-car"><h3 class="eyebrow" id="drawer-car">Carreira</h3>
+                    <div class="tiles">${statTiles}</div></section>
+                ${history.length ? `<section aria-labelledby="drawer-hist"><h3 class="eyebrow" id="drawer-hist">Histórico</h3>
+                    <div class="history">${history.map(renderHistoryRow).join('')}</div></section>` : ''}
+            </div>`;
     }
 
     // ---------- Focus trap ----------
 
-    /**
-     * Retorna todos os elementos focáveis dentro do drawer.
-     * @param {HTMLElement} root
-     * @returns {HTMLElement[]}
-     */
     function getFocusable(root) {
-        const sel = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-        return Array.from(root.querySelectorAll(sel)).filter(el => !el.hasAttribute('hidden'));
+        const sel = 'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+        return Array.from(root.querySelectorAll(sel));
     }
 
-    /**
-     * @param {KeyboardEvent} e
-     */
     function handleKeydown(e) {
-        const drawer = getDrawer();
-        if (!drawer || drawer.hasAttribute('hidden')) return;
-
+        if (!_isOpen) return;
         if (e.key === 'Escape') {
             e.preventDefault();
             closePlayerDrawer();
             return;
         }
-
-        if (e.key === 'Tab') {
-            const focusable = getFocusable(drawer);
-            if (focusable.length === 0) {
-                e.preventDefault();
-                return;
-            }
-            const first = focusable[0];
-            const last = focusable[focusable.length - 1];
-            const active = document.activeElement;
-            if (e.shiftKey && (active === first || !drawer.contains(active))) {
-                e.preventDefault();
-                last.focus();
-            } else if (!e.shiftKey && active === last) {
-                e.preventDefault();
-                first.focus();
-            }
+        if (e.key !== 'Tab') return;
+        const focusable = getFocusable(getDrawer());
+        if (!focusable.length) { e.preventDefault(); return; }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && (document.activeElement === first || !getDrawer().contains(document.activeElement))) {
+            e.preventDefault(); last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault(); first.focus();
         }
     }
 
     // ---------- API pública ----------
 
     /**
-     * Abre o player drawer para um determinado username.
+     * Abre o perfil de um jogador.
      * @param {string} username
+     * @param {{fromHash?: boolean}} [opts] fromHash: a URL já é #/jogador/…
      */
-    function openPlayerDrawer(username) {
+    function openPlayerDrawer(username, opts = {}) {
         const drawer = getDrawer();
-        if (!drawer) {
-            console.warn('[drawer] #player-drawer não encontrado no DOM');
-            return;
+        if (!drawer || !username) return;
+
+        if (!_isOpen) {
+            _lastFocusedTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+            _hashBeforeOpen = opts.fromHash ? null : location.hash;
+            lockBodyScroll();
+            document.addEventListener('keydown', handleKeydown);
         }
-        if (typeof careerForUser !== 'function') {
-            console.warn('[drawer] careerForUser indisponível');
-            return;
-        }
 
-        const seasons = typeof getFinalizedSeasons === 'function' ? getFinalizedSeasons() : [];
-        const career = careerForUser(username, seasons);
+        document.getElementById('drawer-content').innerHTML = renderDrawerContent(username);
+        drawer.hidden = false;
+        getScrim().hidden = false;
+        _isOpen = true;
 
-        // Guarda o elemento focado para devolver o foco depois
-        _lastFocusedTrigger = document.activeElement instanceof HTMLElement
-            ? document.activeElement
-            : null;
+        const target = '#/jogador/' + encodeURIComponent(username);
+        if (location.hash !== target) history.replaceState(null, '', target);
 
-        // Render conteúdo
-        const content = drawer.querySelector('#drawer-content');
-        if (content) content.innerHTML = renderDrawerContent(career);
-
-        // Botão de fechar — renderiza ícone X
-        const closeBtn = drawer.querySelector('.drawer-close');
-        if (closeBtn) closeBtn.innerHTML = IconRegistry.close({ size: 20 });
-
-        // Mostra o drawer
-        drawer.removeAttribute('hidden');
-
-        // Lock body scroll
-        lockBodyScroll();
-
-        // Listener global de teclado (ESC + focus trap)
-        _keydownHandler = handleKeydown;
-        document.addEventListener('keydown', _keydownHandler);
-
-        // Foca o primeiro focável (geralmente o botão de fechar)
         requestAnimationFrame(() => {
-            const focusable = getFocusable(drawer);
-            if (focusable.length > 0) focusable[0].focus();
+            const btn = drawer.querySelector('.drawer__close');
+            if (btn) btn.focus();
         });
     }
 
-    /** Fecha o drawer e restaura foco. */
+    /** Fecha o perfil, restaura foco e URL. */
     function closePlayerDrawer() {
-        const drawer = getDrawer();
-        if (!drawer) return;
-        if (drawer.hasAttribute('hidden')) return;
-
-        drawer.setAttribute('hidden', '');
-
-        // Restaura scroll do body
+        if (!_isOpen) return;
+        getDrawer().hidden = true;
+        getScrim().hidden = true;
+        _isOpen = false;
         unlockBodyScroll();
+        document.removeEventListener('keydown', handleKeydown);
 
-        // Remove listener
-        if (_keydownHandler) {
-            document.removeEventListener('keydown', _keydownHandler);
-            _keydownHandler = null;
-        }
+        const back = _hashBeforeOpen || hashFor(appState.tab, appState.season, appState.series);
+        history.replaceState(null, '', back);
+        _hashBeforeOpen = null;
 
-        // Limpa conteúdo (evita ficar com dados desatualizados)
-        const content = drawer.querySelector('#drawer-content');
-        if (content) content.innerHTML = '';
-
-        // Devolve foco ao trigger
-        if (_lastFocusedTrigger && typeof _lastFocusedTrigger.focus === 'function') {
-            try { _lastFocusedTrigger.focus(); } catch (_) { /* ignore */ }
+        if (_lastFocusedTrigger && document.contains(_lastFocusedTrigger)) {
+            _lastFocusedTrigger.focus();
         }
         _lastFocusedTrigger = null;
     }
 
-    // ---------- Delegação de eventos ----------
-
-    /**
-     * Trata click ou Enter/Space em um .player-link → abre drawer.
-     * @param {Event} e
-     */
-    function handlePlayerLinkActivation(e) {
-        const target = e.target;
-        if (!(target instanceof Element)) return;
-        const link = target.closest('.player-link[data-user]');
-        if (!link) return;
-
-        // Para teclado, aceitamos apenas Enter/Space.
-        if (e.type === 'keydown') {
-            const key = /** @type {KeyboardEvent} */ (e).key;
-            if (key !== 'Enter' && key !== ' ') return;
-            e.preventDefault();
-        }
-
-        const user = link.getAttribute('data-user');
-        if (user) openPlayerDrawer(user);
+    /** @returns {boolean} */
+    function isPlayerDrawerOpen() {
+        return _isOpen;
     }
 
-    /**
-     * Trata clicks em elementos com data-close-drawer (backdrop + botão X).
-     * @param {Event} e
-     */
-    function handleDrawerCloseClick(e) {
-        const target = e.target;
-        if (!(target instanceof Element)) return;
+    // ---------- Delegação ----------
+
+    document.addEventListener('click', (e) => {
+        const target = e.target instanceof Element ? e.target : null;
+        if (!target) return;
         if (target.closest('[data-close-drawer]')) {
             closePlayerDrawer();
+            return;
         }
-    }
-
-    function bootstrap() {
-        document.body.addEventListener('click', handlePlayerLinkActivation);
-        document.body.addEventListener('keydown', handlePlayerLinkActivation);
-
-        const drawer = getDrawer();
-        if (drawer) {
-            drawer.addEventListener('click', handleDrawerCloseClick);
+        const trigger = target.closest('[data-user]');
+        if (trigger && !getDrawer().contains(trigger)) {
+            const user = trigger.getAttribute('data-user');
+            if (user) openPlayerDrawer(user);
         }
-    }
+    });
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', bootstrap);
-    } else {
-        bootstrap();
-    }
-
-    // Expor API global
     window.openPlayerDrawer = openPlayerDrawer;
     window.closePlayerDrawer = closePlayerDrawer;
+    window.isPlayerDrawerOpen = isPlayerDrawerOpen;
 })();
-
-/* eslint-enable no-unused-vars */

@@ -1,30 +1,27 @@
 // =============================================================================
-// TAB / LIGAS — Renderiza um card por liga com standings dos times.
-// É a aba default. Os outros tabs leem de appState.rosterData, que esta aba
-// indiretamente alimenta via loadData (em js/app.js).
-// Depende de: js/config.js, js/sanitize.js, js/icons.js, js/data.js
-// =============================================================================
-
-// isSeasonFinalized() agora vive em data.js (fonte única).
-
-// -----------------------------------------------------------------------------
-// Índice da classificação final — memoizado por temporada
-// -----------------------------------------------------------------------------
+// TAB / LIGAS — Classificação de uma série por vez.
 //
-// Para temporada finalizada, data/<ano>.json guarda a posição final de cada
-// time (`rank`: 1º–4º pelos playoffs, 5º em diante pela temporada regular) e
-// o troféu do top 4. Indexamos uma vez por {seriesName → {user → {rank,
-// trophy}}} e o lookup vira O(1). Chave por usuário (display_name), que é o
-// mesmo no JSON e na Sleeper — o nome do time pode mudar.
-// Cache invalida quando appState.season muda.
-// -----------------------------------------------------------------------------
+//   - Abas por série (escudo + nome, borda na cor da liga).
+//   - Tabela # · Time · V–D · PF · PC (PC some < 1024px).
+//   - Zonas por temporada (KHC_CONFIG[ano].rules): acesso, playoffs,
+//     rebaixamento. A série mais alta não tem acesso; a mais baixa não tem
+//     rebaixamento; a Elite é paralela (só playoffs).
+//   - Temporada finalizada: ordem e medalhas pela classificação final
+//     (data/<ano>.json — 1º–4º pelos playoffs, 5º+ pela temporada regular).
+//   - Lateral: líderes (ou campeões) das outras séries.
+//
+// Lê: appState.leagues, appState.season, appState.series, appState.failedLeagues
+// Depende de: config, sanitize, data, ui/helpers
+// =============================================================================
 
 let _finalIndexCache = null;
 let _finalIndexCacheSeason = null;
 
 /**
- * Retorna `{ seriesName: { user: { rank, trophy } } }` para a temporada atual.
- * Vazio se temporada não finalizada ou ausente do snapshot.
+ * Índice da classificação final da temporada selecionada:
+ * `{ seriesName: { user: { rank, trophy } } }`. Vazio se não finalizada.
+ * Chave por usuário (display_name), igual no JSON e na Sleeper — o nome do
+ * time pode mudar. Memoizado por temporada.
  * @returns {Object<string, Object<string, {rank: number, trophy: (string|null)}>>}
  */
 function getFinalStandingsIndex() {
@@ -33,19 +30,14 @@ function getFinalStandingsIndex() {
         return _finalIndexCache;
     }
     const idx = {};
-    try {
-        const finals = (typeof getFinalizedSeasons === 'function' ? getFinalizedSeasons() : []) || [];
-        const season = finals.find(s => String(s.id) === String(currentSeason));
-        if (season && Array.isArray(season.series)) {
-            season.series.forEach(srs => {
-                idx[srs.name] = {};
-                (srs.teams || []).forEach(t => {
-                    idx[srs.name][t.user] = { rank: t.rank, trophy: t.trophy || null };
-                });
+    const season = getFinalizedSeason(currentSeason);
+    if (season) {
+        season.series.forEach(srs => {
+            idx[srs.name] = {};
+            (srs.teams || []).forEach(t => {
+                idx[srs.name][t.user] = { rank: t.rank, trophy: t.trophy || null };
             });
-        }
-    } catch (e) {
-        // mantém idx vazio
+        });
     }
     _finalIndexCache = idx;
     _finalIndexCacheSeason = currentSeason;
@@ -53,9 +45,9 @@ function getFinalStandingsIndex() {
 }
 
 /**
- * Ordena os times pela classificação final (playoffs) quando houver.
- * Times sem entrada no snapshot vão para o fim, mantendo a ordem original.
- * @param {Array} teams      rosterData da série (já ordenado por campanha)
+ * Ordena os times pela classificação final quando houver. Times sem
+ * entrada no snapshot vão para o fim, mantendo a ordem original.
+ * @param {Array} teams
  * @param {Object<string, {rank: number}>|undefined} seriesIdx
  * @returns {Array}
  */
@@ -69,159 +61,199 @@ function sortByFinalStandings(teams, seriesIdx) {
 }
 
 /**
- * Mapeia trophy id → SVG do IconRegistry.
- * @param {string} trophy
- * @returns {string} SVG string
+ * Ligas da temporada ordenadas por TIER_ORDER (Elite, A, B, …).
+ * @param {Array} leagues
+ * @returns {Array}
  */
-function trophyToMedalSvg(trophy) {
-    if (typeof IconRegistry === 'undefined') return '';
-    switch (trophy) {
-        case 'gold':   return IconRegistry.medalGold({ size: 20 });
-        case 'silver': return IconRegistry.medalSilver({ size: 20 });
-        case 'bronze': return IconRegistry.medalBronze({ size: 20 });
-        case 'fourth': return IconRegistry.medalFourth({ size: 20 });
-        default: return '';
+function sortLeagues(leagues) {
+    return leagues.slice().sort((a, b) =>
+        TIER_ORDER.indexOf(a.info.tier) - TIER_ORDER.indexOf(b.info.tier));
+}
+
+/**
+ * Tier efetivo da aba Ligas: o selecionado, ou Série A, ou a primeira.
+ * @param {Array} leagues já ordenadas
+ * @returns {string|null}
+ */
+function resolveSeriesTier(leagues) {
+    if (!leagues.length) return null;
+    if (leagues.some(l => l.info.tier === appState.series)) return appState.series;
+    return leagues.some(l => l.info.tier === 'serie-a') ? 'serie-a' : leagues[0].info.tier;
+}
+
+/**
+ * Quantos sobem / descem / vão aos playoffs nesta série.
+ * As séries regulares da temporada vêm da config (não só das que
+ * carregaram), para a mais baixa ser identificada corretamente.
+ * @param {string} tier
+ * @returns {{up: number, down: number, playoff: number, isElite: boolean}}
+ */
+function zonesFor(tier) {
+    const cfg = KHC_CONFIG[appState.season] || {};
+    const rules = cfg.rules || { promote: 0, relegate: 0, playoffTeams: 6, elitePlayoffTeams: 4 };
+    if (tier === 'elite') {
+        return { up: 0, down: 0, playoff: rules.elitePlayoffTeams, isElite: true };
     }
+    const regular = (cfg.leagues || [])
+        .map(l => l.tier)
+        .filter(t => t !== 'elite')
+        .sort((a, b) => TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b));
+    const isTop = regular[0] === tier;
+    const isLowest = regular[regular.length - 1] === tier;
+    return {
+        up: isTop ? 0 : rules.promote,
+        down: isLowest ? 0 : rules.relegate,
+        playoff: rules.playoffTeams,
+        isElite: false
+    };
 }
 
 /**
- * Renderiza a caption (status da temporada) acima dos cards, dentro do
- * container. Só roda uma vez: se já existir, retorna early.
- * @param {HTMLElement} container
- */
-function renderLigasCaption(container) {
-    if (container.querySelector('.ligas-caption')) return;
-    // Só renderiza caption pra temporada finalizada — pra ativa, o dropdown
-    // já comunica o ano e adicionar mensagem só polui sem informação real
-    // até termos tracking de semana ao vivo.
-    if (!isSeasonFinalized()) return;
-
-    const safeYear = escapeHtml(String(appState.season));
-    const iconSvg = typeof IconRegistry !== 'undefined' ? IconRegistry.trophy({ size: 14 }) : '';
-
-    const caption = document.createElement('div');
-    caption.className = 'ligas-caption';
-    caption.setAttribute('role', 'status');
-    caption.innerHTML = `
-        <span class="ligas-caption-icon" aria-hidden="true">${iconSvg}</span>
-        <span class="ligas-caption-text">${escapeHtml('Classificação final da temporada ' + safeYear)}</span>
-    `;
-    // Insere antes de qualquer card já presente
-    container.insertBefore(caption, container.firstChild);
-}
-
-// -----------------------------------------------------------------------------
-// Builders de pedaços do card — pequenos, testáveis, retornam string HTML
-// -----------------------------------------------------------------------------
-
-/**
- * Constrói o cell do rank: medalha SVG se houver trophy, número caso contrário.
- * @param {string|null} trophy
- * @param {number} rankNum
+ * Linha da tabela de classificação.
  * @returns {string}
  */
-function buildRankCell(trophy, rankNum) {
-    if (trophy) {
-        return `<div class="rank-medal" aria-hidden="true">${trophyToMedalSvg(trophy)}</div>`;
-    }
-    return `<div class="rank-num" aria-hidden="true">${rankNum}</div>`;
-}
+function buildStandingsRow(t, i, n, z, finalEntry) {
+    const pos = i + 1;
+    let zone = '';
+    if (i < z.up) zone = 'z-promo';
+    else if (z.down && i >= n - z.down) zone = 'z-releg';
+    else if (i < z.playoff) zone = 'z-playoff';
 
-/**
- * Constrói uma linha (.team-row) de standings.
- * @param {object} t Team registro do rosterData (legacy shape)
- * @param {number} index 0-based
- * @param {{ trophyForTeam: function(string): string|null, leagueName: string }} ctx
- *        trophyForTeam recebe o ownerName (usuário).
- * @returns {string} HTML
- */
-function buildTeamRow(t, index, ctx) {
-    const avatarUrl = sanitizeAvatarUrl(t.avatar);
-    const safeTeamName = escapeHtml(t.teamName);
-    const safeOwnerName = escapeHtml(t.ownerName);
+    let cut = '';
+    if (z.up && i === z.up - 1) cut = 'cut-promo';
+    else if (z.down && i === n - z.down - 1) cut = 'cut-releg';
+    else if (i === z.playoff - 1 && z.playoff < n) cut = 'cut-playoff';
+
+    const trophy = finalEntry && finalEntry.trophy;
+    const posCell = trophy ? medalHTML(pos) : `<span class="pos">${pos}</span>`;
     const wins = sanitizeNumber(t.wins, 0, VALIDATION.MAX_WINS);
     const losses = sanitizeNumber(t.losses, 0, VALIDATION.MAX_LOSSES);
-    const safePts = sanitizeNumber(t.fpts, 0, VALIDATION.MAX_POINTS).toFixed(1);
-    const rankNum = index + 1;
 
-    const trophy = ctx.trophyForTeam(t.ownerName);
-    const rankCell = buildRankCell(trophy, rankNum);
-    const ariaLabel = `${rankNum}º lugar: ${safeTeamName}, dono ${safeOwnerName}, ${wins} vitórias e ${losses} derrotas, ${safePts} pontos`;
-
-    return `
-        <div class="team-row" role="listitem" aria-label="${ariaLabel}">
-            ${rankCell}
-            <img src="${avatarUrl}" class="team-avatar" alt="" loading="lazy" aria-hidden="true" onerror="this.src='https://sleepercdn.com/images/v2/icons/player_default.webp'">
-            <div class="team-info">
-                <div class="team-name-row">
-                    ${playerLinkHTML({ user: t.ownerName, displayName: safeTeamName, ariaLabel: `Ver perfil de ${safeOwnerName}`, extraClass: 'team-name' })}
-                </div>
-                <div class="team-owner">${safeOwnerName}</div>
-            </div>
-            <div class="team-record" aria-label="${wins} vitórias, ${losses} derrotas"><span class="w">${wins}</span><span class="dash">–</span><span class="l">${losses}</span></div>
-            <div class="form-chips-placeholder" aria-hidden="true"></div>
-            <div class="team-fpts" aria-label="${safePts} pontos">${safePts}</div>
-        </div>
-    `;
+    return `<tr class="${zone} ${cut}">
+        <td>${posCell}</td>
+        <td class="cell-team">${teamButtonHTML({ user: t.ownerName, team: t.teamName, avatarId: t.avatar })}</td>
+        <td class="rec">${wins}–${losses}</td>
+        <td>${fmtPts(t.fpts)}</td>
+        <td class="hide-mobile">${fmtPts(t.fptsAgainst)}</td>
+    </tr>`;
 }
 
 /**
- * Header do card (dot de status + título + badge de contagem).
- * @param {string} leagueName  já escapado
- * @param {number} teamCount   sanitizado
- * @param {boolean} finalized
+ * Legenda das zonas.
+ * @returns {string}
+ */
+function buildZoneLegend(z, finalized) {
+    const items = [];
+    if (finalized) items.push('<span><i class="legend__medal"></i>Top 4 pelos playoffs</span>');
+    if (z.up) items.push(`<span><i style="background:var(--zone-promo)"></i>${finalized ? 'Subiram' : 'Zona de acesso (projeção)'} · ${z.up}</span>`);
+    items.push(`<span><i style="background:var(--zone-playoff)"></i>Playoffs · top ${z.playoff}</span>`);
+    if (z.down) items.push(`<span><i style="background:var(--zone-releg)"></i>${finalized ? 'Caíram' : 'Rebaixamento'} · ${z.down}</span>`);
+    if (z.isElite) items.push('<span>Liga paralela: não rebaixa</span>');
+    return `<div class="legend">${items.join('')}</div>`;
+}
+
+/**
+ * Card lateral "líder / campeão" de outra série (link para a série).
+ * @returns {string}
+ */
+function buildLeaderLink(league, finalized, finalIdx) {
+    const meta = SERIES_META[league.info.tier];
+    const seriesIdx = finalized ? finalIdx[league.info.name] : undefined;
+    const first = sortByFinalStandings(league.teams, seriesIdx)[0];
+    if (!meta || !first) return '';
+    return `<a class="leader card" data-league="${meta.league}" href="${hashFor('ligas', appState.season, league.info.tier)}">
+        ${crestHTML(league.info.tier, 40)}
+        <span class="grow">
+            <span class="eyebrow eyebrow--accent">${escapeHtml(meta.name)}</span>
+            <span class="team__name" dir="auto">${escapeHtml(first.teamName)}</span>
+        </span>
+        <span class="num leader__rec">${first.wins}–${first.losses}</span>
+    </a>`;
+}
+
+/**
+ * Renderiza a aba Ligas.
  * @returns {string} HTML
  */
-function buildLeagueHeader(leagueName, teamCount, finalized) {
-    const dotClass = finalized ? 'dot dim' : 'dot active';
-    const dotAriaLabel = finalized ? 'Temporada finalizada' : 'Temporada em andamento';
+function renderLigas() {
+    const leagues = sortLeagues(appState.leagues);
+    const tier = resolveSeriesTier(leagues);
+    if (!tier) {
+        return stateHTML({ icon: 'trophy', title: 'Nada por aqui ainda', text: 'Nenhuma série desta temporada carregou.' });
+    }
+    appState.series = tier;
+
+    const league = leagues.find(l => l.info.tier === tier);
+    const meta = SERIES_META[tier];
+    const finalized = isSeasonFinalized();
+    const finalIdx = finalized ? getFinalStandingsIndex() : {};
+    const seriesIdx = finalized ? finalIdx[league.info.name] : undefined;
+    const teams = sortByFinalStandings(league.teams, seriesIdx);
+    const z = zonesFor(tier);
+    const n = teams.length;
+
+    const tabs = leagues.map(l => {
+        const m = SERIES_META[l.info.tier];
+        const current = l.info.tier === tier;
+        return `<a href="${hashFor('ligas', appState.season, l.info.tier)}" data-league="${m.league}"${current ? ' aria-current="page"' : ''}>
+            ${crestHTML(l.info.tier, 28)}<span>${escapeHtml(m.short)}</span></a>`;
+    }).join('');
+
+    const rows = teams.map((t, i) =>
+        buildStandingsRow(t, i, n, z, seriesIdx ? seriesIdx[t.ownerName] : null)).join('');
+
+    const subtitle = finalized
+        ? `${n} times · classificação final ${escapeHtml(appState.season)}`
+        : `${n} times · ${escapeHtml(weekLabel() || 'Temporada em andamento')} · PPR`;
+
+    const others = leagues.filter(l => l.info.tier !== tier)
+        .map(l => buildLeaderLink(l, finalized, finalIdx)).join('');
+
     return `
-        <div class="league-header">
-            <span class="${dotClass}" role="img" aria-label="${dotAriaLabel}"></span>
-            <h3 class="league-title">${leagueName}</h3>
-            <div class="league-badge" aria-label="${teamCount} times na liga">${teamCount} Times</div>
-        </div>
-    `;
+        ${partialWarningHTML()}
+        <nav class="series-tabs" aria-label="Séries">${tabs}</nav>
+        <div class="grid-2">
+            <section class="card" data-league="${meta.league}" aria-labelledby="series-title">
+                <header class="card__hd">
+                    ${crestHTML(tier, 56)}
+                    <div>
+                        <h2 class="display" id="series-title">${escapeHtml(meta.name)}</h2>
+                        <p>${subtitle}</p>
+                    </div>
+                </header>
+                <div class="table-wrap">
+                    <table class="standings">
+                        <caption class="sr-only">Classificação da ${escapeHtml(meta.name)}</caption>
+                        <thead><tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Time</th>
+                            <th scope="col"><abbr title="Vitórias e derrotas">V–D</abbr></th>
+                            <th scope="col"><abbr title="Pontos feitos">PF</abbr></th>
+                            <th scope="col" class="hide-mobile"><abbr title="Pontos contra">PC</abbr></th>
+                        </tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+                ${buildZoneLegend(z, finalized)}
+            </section>
+            ${others ? `<aside class="leaders" aria-label="Outras séries">
+                <div class="eyebrow">${finalized ? 'Campeões das outras séries' : 'Líderes das outras séries'}</div>
+                ${others}
+            </aside>` : ''}
+        </div>`;
 }
 
 /**
- * Renderiza um card de standings para uma liga (uma série da temporada).
- * Cada chamada anexa um <article.league-card> ao container.
- *
- * @param {{ info: {name: string, tier: string, id: string}, teams: Array }} leagueData
- * @param {HTMLElement} container - #leaguesContainer (.leagues-grid)
- * @param {number} [staggerIndex=0] - usado para calcular animation-delay
+ * Aviso de falha parcial ("Algumas ligas não carregaram · Série C").
+ * @returns {string}
  */
-function renderLeagueCard(leagueData, container, staggerIndex = 0) {
-    renderLigasCaption(container);
-
-    const safeTier = sanitizeTier(leagueData.info.tier);
-    const safeLeagueName = escapeHtml(leagueData.info.name);
-    const finalized = isSeasonFinalized();
-    const teamCount = sanitizeNumber(leagueData.teams.length, 0, 100);
-
-    // Temporada finalizada: ordem e medalhas vêm da classificação final
-    // (playoffs). Ativa: mantém a ordem da Sleeper (vitórias → pontos).
-    const seriesIdx = finalized ? getFinalStandingsIndex()[leagueData.info.name] : undefined;
-    const trophyForTeam = (user) => {
-        const entry = seriesIdx && seriesIdx[user];
-        return entry ? entry.trophy : null;
-    };
-    const teams = sortByFinalStandings(leagueData.teams, seriesIdx);
-
-    const rowsHtml = teams
-        .map((t, i) => buildTeamRow(t, i, { trophyForTeam, leagueName: leagueData.info.name }))
-        .join('');
-
-    const card = document.createElement('article');
-    card.className = `league-card ${safeTier} stagger-item`;
-    card.style.animationDelay = `${staggerIndex * STAGGER_DELAY_MS}ms`;
-    card.setAttribute('aria-label', `Classificação da ${safeLeagueName}`);
-    card.innerHTML = `
-        ${buildLeagueHeader(safeLeagueName, teamCount, finalized)}
-        <div class="standings-list" role="list" aria-label="Classificação dos times">
-            ${rowsHtml}
-        </div>
-    `;
-    container.appendChild(card);
+function partialWarningHTML() {
+    if (!appState.failedLeagues.length) return '';
+    const names = appState.failedLeagues
+        .map(tier => (SERIES_META[tier] ? SERIES_META[tier].short : tier))
+        .map(escapeHtml).join(' e ');
+    return `<div class="state-inline" role="status">
+        <span data-icon="alert" data-size="18"></span>
+        <span>Algumas ligas não carregaram · ${names}</span>
+    </div>`;
 }
