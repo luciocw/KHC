@@ -17,6 +17,13 @@ async function init() {
         loadData();
     }, DEBOUNCE_DELAY_MS);
 
+    // Semana atual da NFL (Sleeper) — usada no card da temporada ativa.
+    // Não bloqueia o carregamento; re-renderiza Temporadas quando chega.
+    fetchNflState().then(state => {
+        appState.nflState = state;
+        renderSeasons();
+    });
+
     selector.addEventListener('change', debouncedLoad);
 
     // Pré-carrega temporadas finalizadas (JSON estático). Não bloqueia o
@@ -31,8 +38,13 @@ async function init() {
     loadData();
 }
 
+// Cada chamada de loadData() recebe um número; só a mais recente pode
+// renderizar. Evita que uma troca de temporada no meio do fetch seja
+// ignorada ou que dados da temporada anterior sobrescrevam os da nova.
+let _loadSeq = 0;
+
 async function loadData() {
-    if (appState.isLoading) return;
+    const seq = ++_loadSeq;
     appState.isLoading = true;
 
     const container = document.getElementById(DOM_IDS.LEAGUES);
@@ -47,6 +59,7 @@ async function loadData() {
     appState.isFromCache = false;
 
     const config = KHC_CONFIG[appState.season];
+    renderSeriesSubtitle(config);
 
     if (!config || !config.leagues.length) {
         container.innerHTML = '<div class="loading">Dados desta temporada ainda não configurados.</div>';
@@ -70,6 +83,9 @@ async function loadData() {
     // Tenta buscar dados da API
     const fetchPromises = validLeagues.map(l => fetchLeagueData(l));
     const settledResults = await Promise.allSettled(fetchPromises);
+
+    // Outra loadData() começou enquanto esperávamos: descarta este resultado.
+    if (seq !== _loadSeq) return;
 
     // Processa resultados (fulfilled ou rejected)
     const successfulResults = [];
@@ -153,6 +169,22 @@ async function loadData() {
     renderLegends();
     renderSeasons();
     appState.isLoading = false;
+}
+
+/**
+ * Subtítulo do header com as séries da temporada selecionada
+ * (Serie A → D, Elite por último). Mantém o HTML estático se não houver config.
+ * @param {{leagues: Array<{name: string, tier: string}>}|undefined} config
+ */
+function renderSeriesSubtitle(config) {
+    const el = document.getElementById('seriesSubtitle');
+    if (!el || !config || !config.leagues.length) return;
+    const order = VALIDATION.VALID_TIERS; // serie-a … serie-d, elite
+    const names = config.leagues
+        .slice()
+        .sort((a, b) => order.indexOf(a.tier) - order.indexOf(b.tier))
+        .map(l => escapeHtml(l.name.replace(/^KHC\s+/i, '')));
+    el.innerHTML = names.map(n => `<span>${n}</span>`).join('');
 }
 
 function clearSecondaryContainers() {

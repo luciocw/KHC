@@ -44,7 +44,8 @@ function _renderPodiumColumn(serie) {
     top4.forEach(team => {
         const medal = _medalFor(team.rank);
         if (!medal) return;
-        const safeUser = escapeHtml(sanitizeString(team.user, VALIDATION.MAX_OWNER_NAME_LENGTH, 'Jogador'));
+        const rawUser = sanitizeString(team.user, VALIDATION.MAX_OWNER_NAME_LENGTH, 'Jogador');
+        const safeUser = escapeHtml(rawUser);
         const safeTeam = escapeHtml(sanitizeString(team.team, VALIDATION.MAX_TEAM_NAME_LENGTH, 'Time'));
         const safePts  = (typeof team.pts === 'number') ? team.pts.toFixed(1) : '—';
         const ariaLabel = `${medal.label}: ${safeUser}, ${safeTeam}, ${safePts} pontos`;
@@ -53,7 +54,7 @@ function _renderPodiumColumn(serie) {
             <div class="podium-row" role="listitem" aria-label="${ariaLabel}">
                 <span class="podium-icon" aria-hidden="true">${medal.icon}</span>
                 <span class="podium-name">
-                    ${playerLinkHTML({ user: safeUser, displayName: safeUser, ariaLabel: `Ver perfil de ${safeUser}` })}
+                    ${playerLinkHTML({ user: rawUser, displayName: safeUser, ariaLabel: `Ver perfil de ${safeUser}` })}
                     <span class="podium-team">${safeTeam}</span>
                 </span>
                 <span class="podium-pts">${safePts}</span>
@@ -95,6 +96,25 @@ function _renderFinalizedSeason(season, cardIndex) {
 }
 
 /**
+ * Chip "Semana X / 14" (ou "Playoffs") a partir do estado da NFL na Sleeper
+ * (appState.nflState). Vazio se o estado não carregou, é de outra temporada
+ * ou fora da temporada regular/playoffs.
+ * @param {string} year
+ * @returns {string}
+ */
+function _weekChipFor(year) {
+    const state = appState.nflState;
+    if (!state || String(state.season) !== String(year)) return '';
+    if (state.season_type !== 'regular') return '';
+    const week = sanitizeNumber(state.display_week, 0, 30, 0);
+    if (week < 1) return '';
+    if (week > REGULAR_SEASON_WEEKS) {
+        return '<span class="season-chip" aria-label="Fase atual">Playoffs</span>';
+    }
+    return `<span class="season-chip" aria-label="Semana atual">Semana ${week} / ${REGULAR_SEASON_WEEKS}</span>`;
+}
+
+/**
  * HTML de uma season card ativa (em andamento). Usa KHC_CONFIG para listar séries.
  * @param {string} year
  * @param {object} config
@@ -104,12 +124,7 @@ function _renderFinalizedSeason(season, cardIndex) {
 function _renderActiveSeason(year, config, cardIndex) {
     const safeYear = escapeHtml(year);
 
-    // Heurística leve: se week / weeksTotal não estão no data, hardcoda 8 / 14
-    // conforme nota do handoff. Isso é cosmético até a Sleeper API ser ligada.
-    const week = (config && typeof config.week === 'number') ? config.week : 8;
-    const weeksTotal = (config && typeof config.weeksTotal === 'number') ? config.weeksTotal : 14;
-    const safeWeek = escapeHtml(String(week));
-    const safeTotal = escapeHtml(String(weeksTotal));
+    const weekChip = _weekChipFor(year);
 
     const allLeagues = (config && Array.isArray(config.leagues)) ? config.leagues : [];
     const realLeagues = allLeagues.filter(l => !String(l.id || '').includes('placeholder'));
@@ -138,7 +153,7 @@ function _renderActiveSeason(year, config, cardIndex) {
             <header class="season-card-hd">
                 <span class="season-year">${safeYear}</span>
                 <span class="season-meta">
-                    <span class="season-chip" aria-label="Semana atual">Semana ${safeWeek} / ${safeTotal}</span>
+                    ${weekChip}
                     <span class="season-chip is-active" aria-label="Status: em andamento">EM ANDAMENTO</span>
                 </span>
             </header>

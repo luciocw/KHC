@@ -3,9 +3,11 @@
 //
 // Visual port da Phase 3 do redesign:
 //   - Caption acima com ícone de gráfico + texto contextual (ativa vs final).
-//   - Tier rows com label panel 90px + grid de PWR cards.
+//   - Tier rows com label panel 90px + grid de PWR cards (≤760px: label vira
+//     faixa horizontal acima dos cards).
 //   - PWR card: avatar + nome + série + W-L pts | score grande + barra 3px.
-//   - Top-left tab `#rank` com indicador de movimento (↑/↓/—).
+//   - Top-left tab `#rank`. (Sem indicador ↑/↓: não há histórico semanal
+//     para comparar posições.)
 //
 // Lê: appState.season, appState.rosterData
 // Depende de: js/config.js, js/sanitize.js, js/derivations.js, js/data.js
@@ -44,25 +46,6 @@ const TIER_CONFIG = {
     D: { letter: 'D', desc: 'RELEGATION',  cls: 'd' },
 };
 
-/**
- * Calcula movimento entre o rank novo (por PWR) e o original (por pts).
- * Retorna `{ symbol, cls, aria }` para renderização do indicador.
- *
- * @param {number} rank
- * @param {number} originalRank
- * @returns {{symbol: string, cls: string, aria: string}}
- */
-function movementFor(rank, originalRank) {
-    const diff = originalRank - rank; // positivo = subiu
-    if (diff > 0) {
-        return { symbol: `↑${diff}`, cls: 'move-up',   aria: `subiu ${diff}` };
-    }
-    if (diff < 0) {
-        return { symbol: `↓${-diff}`, cls: 'move-down', aria: `desceu ${-diff}` };
-    }
-    return { symbol: '—', cls: 'move-same', aria: 'sem variação' };
-}
-
 // isSeasonFinalized() agora vive em data.js (fonte única).
 
 /**
@@ -80,13 +63,11 @@ function renderPwrCard(row) {
     const record = `${team.w}-${team.l}`;
     const score = row.pwr.toFixed(1);
     const pwrPct = Math.max(0, Math.min(100, row.pwr));
-    const mv = movementFor(row.rank, row.originalRank);
 
     return `
         <article class="pwr-card" data-user="${safeUser}">
-            <div class="pwr-rank-tab" aria-label="Posição ${row.rank}, ${mv.aria}">
+            <div class="pwr-rank-tab" aria-label="Posição ${row.rank}">
                 <span class="pwr-rank">#${row.rank}</span>
-                <span class="${mv.cls}">${mv.symbol}</span>
             </div>
             <div class="pwr-card-left">
                 <img src="${avatarUrl}" alt="" class="pwr-avatar" loading="lazy"

@@ -918,10 +918,19 @@ header[role="banner"] {
     gap: 10px;
 }
 
+/* Mobile: o label vira uma faixa horizontal acima dos cards, liberando a
+   largura toda para os nomes dos times. */
 @media (max-width: 760px) {
-    .tier-row { grid-template-columns: 64px 1fr; gap: 10px; }
-    .tier-label { padding: 14px 8px; }
-    .tier-label .letter { font-size: 24px; }
+    .tier-row { grid-template-columns: 1fr; gap: 8px; }
+    .tier-label {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 10px;
+        padding: 8px 14px;
+        border-radius: 10px;
+    }
+    .tier-label .letter { font-size: 22px; }
+    .tier-label .desc { margin-top: 0; }
     .tier-teams { grid-template-columns: 1fr; }
 }
 
@@ -1302,10 +1311,6 @@ select:focus-visible {
     align-items: center;
     gap: 4px;
 }
-
-.pwr-rank-tab .move-up   { color: var(--green); }
-.pwr-rank-tab .move-down { color: var(--red); }
-.pwr-rank-tab .move-same { color: var(--text-3); }
 
 .pwr-card-left {
     display: flex;
@@ -2480,53 +2485,7 @@ select:focus-visible {
         grid-template-columns: 1fr;
     }
 
-    /* Tier List mobile */
-    .tier-row {
-        flex-direction: column;
-    }
-
-    .tier-label {
-        flex-direction: row;
-        gap: 0.75rem;
-        min-width: auto;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-        padding: 0.75rem 1rem;
-    }
-
-    .tier-letter {
-        font-size: 1.5rem;
-    }
-
-    .tier-desc {
-        margin-top: 0;
-    }
-
-    .tier-emoji {
-        font-size: 1rem;
-    }
-
-    .tier-teams {
-        padding: 0.75rem;
-    }
-
-    .tier-team-card {
-        flex: 1 1 100%;
-        min-width: 100%;
-        max-width: 100%;
-    }
-
-    .tier-team-name {
-        max-width: none; /* Removido limite - usa espaço disponível */
-    }
-
-    .tier-power-score {
-        min-width: 45px;
-    }
-
-    .power-value {
-        font-size: 1rem;
-    }
+    /* Tier List mobile: ver bloco POWER RANKING (≤760px). */
 
     .legend-content {
         flex-direction: column;

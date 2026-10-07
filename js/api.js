@@ -155,6 +155,23 @@ function getErrorMessage(status) {
 
 // --- SLEEPER FETCHERS ---
 
+/**
+ * Estado atual da NFL na Sleeper (temporada, tipo e semana em exibição).
+ * Falha silenciosa: retorna null e a UI simplesmente omite a semana.
+ * @returns {Promise<{season: string, season_type: string, display_week: number}|null>}
+ */
+async function fetchNflState() {
+    try {
+        const res = await fetchWithRetry('https://api.sleeper.app/v1/state/nfl');
+        if (!res.ok) return null;
+        const state = await res.json();
+        return state && typeof state === 'object' ? state : null;
+    } catch (e) {
+        console.warn('Falha ao buscar estado da NFL:', e);
+        return null;
+    }
+}
+
 async function fetchLeagueData(leagueInfo) {
     const baseUrl = 'https://api.sleeper.app/v1/league';
 

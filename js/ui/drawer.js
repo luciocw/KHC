@@ -33,6 +33,7 @@
         A: 'Serie A',
         B: 'Serie B',
         C: 'Serie C',
+        D: 'Serie D',
         Elite: 'KHC Elite'
     };
 
@@ -58,8 +59,6 @@
     /** @type {(e: KeyboardEvent) => void | null} */
     let _keydownHandler = null;
 
-    /** @type {string} Valor original de body.style.overflow para restaurar ao fechar. */
-    let _prevBodyOverflow = '';
 
     // ---------- Helpers ----------
 
@@ -103,26 +102,20 @@
         const seasonId = (typeof appState !== 'undefined' && appState.season)
             ? parseInt(appState.season, 10) : NaN;
         if (!Number.isFinite(seasonId)) return [];
+        // rosterData é da temporada SELECIONADA. Se ela já está finalizada, os
+        // dados vêm do JSON (career.history) e não representam a série atual.
+        if (typeof isSeasonFinalized === 'function' && isSeasonFinalized(seasonId)) return [];
         return roster
             .filter(r => r.ownerName === username)
-            .map(r => {
-                // Reverte leagueName/tier para um id de série A/B/C/Elite quando possível.
-                const name = r.leagueName || '';
-                let serie = 'A';
-                if (/elite/i.test(name)) serie = 'Elite';
-                else if (/serie\s*b/i.test(name)) serie = 'B';
-                else if (/serie\s*c/i.test(name)) serie = 'C';
-                else if (/serie\s*a/i.test(name)) serie = 'A';
-                return {
-                    season: seasonId,
-                    serie,
-                    team: r.teamName,
-                    w: r.wins,
-                    l: r.losses,
-                    pts: r.fpts,
-                    active: true
-                };
-            });
+            .map(r => ({
+                season: seasonId,
+                serie: tierToSeriesId(r.leagueTier),
+                team: r.teamName,
+                w: r.wins,
+                l: r.losses,
+                pts: r.fpts,
+                active: true
+            }));
     }
 
     /**
@@ -130,7 +123,7 @@
      * usa career.currentSeries quando preenchida (temporada ativa carregada via JSON),
      * senão tenta inferir a partir de rosterData.
      * @param {Career} career
-     * @returns {string[]} array de ids de série (A/B/C/Elite)
+     * @returns {string[]} array de ids de série (A/B/C/D/Elite)
      */
     function resolveCurrentSeries(career) {
         if (career.currentSeries && career.currentSeries.length) {
@@ -160,6 +153,30 @@
         return out;
     }
 
+    /**
+     * Totais de carreira a partir das linhas de histórico (inclui a temporada
+     * em andamento). Elite + série regular na mesma temporada somam jogos,
+     * mas contam como uma temporada só — mesmo critério de careerForUser().
+     * @param {Array<{season:number, w:number, l:number, pts:number}>} history
+     * @returns {{seasons:number, wins:number, losses:number, pts:number}}
+     */
+    function statsFromHistory(history) {
+        let wins = 0;
+        let losses = 0;
+        let pts = 0;
+        history.forEach(h => {
+            wins += Number(h.w) || 0;
+            losses += Number(h.l) || 0;
+            pts += Number(h.pts) || 0;
+        });
+        return {
+            seasons: new Set(history.map(h => h.season)).size,
+            wins,
+            losses,
+            pts: Math.round(pts * 100) / 100
+        };
+    }
+
     // ---------- Renderização ----------
 
     /**
@@ -175,10 +192,12 @@
         const currentSeries = resolveCurrentSeries(career);
         const history = buildHistory(career);
 
-        // Aproveitamento (%) — só faz sentido com jogos.
-        const totalGames = career.totalWins + career.totalLosses;
+        // Estatísticas calculadas sobre o histórico exibido (finalizadas +
+        // temporada em andamento), para os números baterem com a lista abaixo.
+        const stats = statsFromHistory(history);
+        const totalGames = stats.wins + stats.losses;
         const winRate = totalGames > 0
-            ? ((career.totalWins / totalGames) * 100).toFixed(1) + '%'
+            ? ((stats.wins / totalGames) * 100).toFixed(1) + '%'
             : '—';
 
         return `
@@ -218,11 +237,11 @@
                 <div class="stats-grid">
                     <div class="stat-tile">
                         <div class="stat-label">Temporadas</div>
-                        <div class="stat-value">${career.totalSeasons}</div>
+                        <div class="stat-value">${stats.seasons}</div>
                     </div>
                     <div class="stat-tile">
                         <div class="stat-label">Vitórias / Derrotas</div>
-                        <div class="stat-value">${career.totalWins}–${career.totalLosses}</div>
+                        <div class="stat-value">${stats.wins}–${stats.losses}</div>
                     </div>
                     <div class="stat-tile">
                         <div class="stat-label">Aproveitamento</div>
@@ -230,7 +249,7 @@
                     </div>
                     <div class="stat-tile">
                         <div class="stat-label">Pontos totais</div>
-                        <div class="stat-value">${career.totalPts.toFixed(2)}</div>
+                        <div class="stat-value">${stats.pts.toFixed(2)}</div>
                     </div>
                     ${career.bestCampaign ? `
                         <div class="stat-tile full">
@@ -362,8 +381,7 @@
         drawer.removeAttribute('hidden');
 
         // Lock body scroll
-        _prevBodyOverflow = document.body.style.overflow || '';
-        document.body.style.overflow = 'hidden';
+        lockBodyScroll();
 
         // Listener global de teclado (ESC + focus trap)
         _keydownHandler = handleKeydown;
@@ -385,8 +403,7 @@
         drawer.setAttribute('hidden', '');
 
         // Restaura scroll do body
-        document.body.style.overflow = _prevBodyOverflow;
-        _prevBodyOverflow = '';
+        unlockBodyScroll();
 
         // Remove listener
         if (_keydownHandler) {
