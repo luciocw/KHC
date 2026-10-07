@@ -299,7 +299,6 @@ def glitch(start):
     t = t_axis(d)
     m = 84 - 50 * (t / d) ** 0.6
     s = pulse(hz(m), t, 0.5) * (np.floor(t * 40) % 2)
-    s += 0.6 * chip_noise(d, 20000 - 15000 * t / d)
     add(sfx, start, s * env(len(t), 0.2), 0.45)
 
 
@@ -311,15 +310,15 @@ def lose(start, notes=("B4", "A#4", "A4", "G#4"), step=0.3, last=0.8):
 def stamp(start):
     t = t_axis(0.25)
     s = triangle(hz(40 - 12 * np.clip(t / 0.08, 0, 1)), t) * env(len(t), 0.1)
-    s += 0.7 * chip_noise(0.25, 6000) * env(len(t), 0.03)
+    s += 0.5 * pulse(hz(52), t, 0.5) * env(len(t), 0.02)
     add(sfx, start, s, 0.9)
 
 
 def scribble(start, dur=0.48):
     t = t_axis(dur)
-    s = chip_noise(dur, 9000 + 5000 * np.sin(2 * np.pi * 9 * t))
-    s *= (np.sin(2 * np.pi * 16 * t) > -0.2)
-    add(sfx, start, eq(s, hp=2000) * env(len(t), 1.0, 0.8), 0.45)
+    m = 86 + 6 * np.sin(2 * np.pi * 9 * t)  # "zigue-zague" da caneta
+    s = pulse(hz(m), t, 0.125) * (np.sin(2 * np.pi * 16 * t) > -0.2)
+    add(sfx, start, s * env(len(t), 1.0, 0.8), 0.3)
 
 
 def alarm(start, dur=1.0):
@@ -338,18 +337,6 @@ def blip(start, midi, vel=1.0):
     jingle(start, [midi, midi + 12], 0.04, duty=0.25, vel=vel, last=0.12)
 
 
-def dash(peak):
-    """Transição: varredura de ruído + glissando subindo, pico em `peak`."""
-    pre, post = 0.36, 0.14
-    d = pre + post
-    t = t_axis(d)
-    shape = np.where(t < pre, (t / pre) ** 2, np.exp(-(t - pre) / 0.05))
-    nz = chip_noise(d, 3000 + 37000 * np.clip(t / pre, 0, 1)) * shape
-    m = np.where(t < pre, 55 + 36 * (t / pre), 91 - 30 * (t - pre) / post)
-    sq = pulse(hz(m), t, 0.125) * shape
-    add(sfx, peak - pre, 0.35 * nz + 0.25 * sq)
-
-
 # ================================================================ ARRANJO
 CH = {k: [note(n) for n in v] for k, v in {
     "C": ("C4", "E4", "G4"), "G": ("G3", "B3", "D4"), "Am": ("A3", "C4", "E4"),
@@ -365,11 +352,11 @@ for i, (t, c) in enumerate(zip((0.25, 0.41, 0.57, 0.73), ("C", "F", "G", "C"))):
 groove(1.0, 3.5, "main")
 
 # 3,5–8,5 · Clube do 4–0
-groove(3.5, 6.9, "main", anchor=3.5)
+groove(3.5, 6.9, "main", anchor=1.0)  # mesmo tema: continua a frase
 for i, t in enumerate(np.linspace(4.4, 5.05, 6)):
     tom(t, 55 - 2 * i, 0.6)
 glitch(6.9)
-groove(7.5, 8.5, "main", anchor=3.5)
+groove(7.5, 8.5, "main", anchor=1.0)
 
 # 8,5–14,5 · Ladrão de Vitórias (vilão + solo)
 groove(8.5, 10.1, "villain", anchor=8.5, vel=0.9)
@@ -466,11 +453,6 @@ tom(54.45, 50, 1.0)  # -dum
 kick(54.45, 0.8)
 jingle(54.65, [note("E7"), note("B7")], 0.03, duty=0.125, vel=0.7)  # -tss
 jingle(54.9, [note(n) for n in ("E6", "G6", "E7", "C7", "D7", "G7")], 0.06, duty=0.25, vel=0.6)
-
-# Transições (pico nos tempos do README)
-for p in (3.5, 8.5, 14.5, 20.5, 26.0, 30.5, 36.0, 41.5, 47.5, 52.5):
-    dash(p)
-
 
 # ===================================================================== MIX
 def gate():
