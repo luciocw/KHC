@@ -22,7 +22,7 @@ const RULES = [
         items: [
             '3 equipes sobem e 3 descem entre séries vizinhas: A ⇄ B, B ⇄ C, C ⇄ D.',
             '<b>Rebaixamento:</b> classificação final da temporada regular (playoffs não contam).',
-            '<b>Promoção:</b> classificação ao final dos playoffs — antes disso, a zona de acesso é projeção.',
+            '<b>Promoção:</b> campeão, vice e 3º colocado dos playoffs (não da temporada regular).',
         ]
     },
     {

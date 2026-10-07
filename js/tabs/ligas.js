@@ -85,14 +85,24 @@ function resolveSeriesTier(leagues) {
  * Quantos sobem / descem / vão aos playoffs nesta série.
  * As séries regulares da temporada vêm da config (não só das que
  * carregaram), para a mais baixa ser identificada corretamente.
+ *
+ * Critérios diferentes (regra da liga):
+ *   - rebaixamento: classificação da temporada regular → dá para marcar
+ *     os últimos já durante a temporada;
+ *   - promoção: campeão, vice e 3º DOS PLAYOFFS → só é marcada na
+ *     temporada finalizada (a ordem final já vem dos playoffs). Durante a
+ *     temporada não há "zona de acesso": qualquer time dos playoffs pode subir.
+ *
  * @param {string} tier
- * @returns {{up: number, down: number, playoff: number, isElite: boolean}}
+ * @param {boolean} finalized
+ * @returns {{up: number, promote: number, down: number, playoff: number, isElite: boolean}}
+ *          up: linhas marcadas como acesso · promote: quantos sobem pela regra
  */
-function zonesFor(tier) {
+function zonesFor(tier, finalized) {
     const cfg = KHC_CONFIG[appState.season] || {};
     const rules = cfg.rules || { promote: 0, relegate: 0, playoffTeams: 6, elitePlayoffTeams: 4 };
     if (tier === 'elite') {
-        return { up: 0, down: 0, playoff: rules.elitePlayoffTeams, isElite: true };
+        return { up: 0, promote: 0, down: 0, playoff: rules.elitePlayoffTeams, isElite: true };
     }
     const regular = (cfg.leagues || [])
         .map(l => l.tier)
@@ -100,8 +110,10 @@ function zonesFor(tier) {
         .sort((a, b) => TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b));
     const isTop = regular[0] === tier;
     const isLowest = regular[regular.length - 1] === tier;
+    const promote = isTop ? 0 : rules.promote;
     return {
-        up: isTop ? 0 : rules.promote,
+        up: finalized ? promote : 0,
+        promote,
         down: isLowest ? 0 : rules.relegate,
         playoff: rules.playoffTeams,
         isElite: false
@@ -139,14 +151,26 @@ function buildStandingsRow(t, i, n, z, finalEntry) {
 }
 
 /**
+ * "campeão, vice e 3º" para N promovidos pelos playoffs.
+ * @param {number} n
+ * @returns {string}
+ */
+function promotedLabel(n) {
+    const names = ['campeão', 'vice', '3º', '4º'].slice(0, n);
+    if (names.length <= 1) return names.join('');
+    return names.slice(0, -1).join(', ') + ' e ' + names[names.length - 1];
+}
+
+/**
  * Legenda das zonas.
  * @returns {string}
  */
 function buildZoneLegend(z, finalized) {
     const items = [];
     if (finalized) items.push('<span><i class="legend__medal"></i>Top 4 pelos playoffs</span>');
-    if (z.up) items.push(`<span><i style="background:var(--zone-promo)"></i>${finalized ? 'Subiram' : 'Zona de acesso (projeção)'} · ${z.up}</span>`);
-    items.push(`<span><i style="background:var(--zone-playoff)"></i>Playoffs · top ${z.playoff}</span>`);
+    if (z.up) items.push(`<span><i style="background:var(--zone-promo)"></i>Subiram · ${z.up}</span>`);
+    const sobem = !finalized && z.promote ? ` · ${promotedLabel(z.promote)} sobem` : '';
+    items.push(`<span><i style="background:var(--zone-playoff)"></i>Playoffs · top ${z.playoff}${sobem}</span>`);
     if (z.down) items.push(`<span><i style="background:var(--zone-releg)"></i>${finalized ? 'Caíram' : 'Rebaixamento'} · ${z.down}</span>`);
     if (z.isElite) items.push('<span>Liga paralela: não rebaixa</span>');
     return `<div class="legend">${items.join('')}</div>`;
@@ -189,7 +213,7 @@ function renderLigas() {
     const finalIdx = finalized ? getFinalStandingsIndex() : {};
     const seriesIdx = finalized ? finalIdx[league.info.name] : undefined;
     const teams = sortByFinalStandings(league.teams, seriesIdx);
-    const z = zonesFor(tier);
+    const z = zonesFor(tier, finalized);
     const n = teams.length;
 
     const tabs = leagues.map(l => {
