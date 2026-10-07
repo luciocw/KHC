@@ -53,7 +53,7 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 
 ### 3.1 Global (header, controles, fundo)
 - **Header grande demais no mobile**: logo 82px + título 36px + subtítulo + select + 2 linhas de abas. O conteúdo começa só em ~45% da 1ª tela (`screens/mobile-first-viewport.png`).
-- **Subtítulo desatualizado**: "Serie A • Serie B • Serie C • Elite" — falta **Serie D** (já existe em 2026). Melhor gerar a partir de `KHC_CONFIG`.
+- ~~**Subtítulo desatualizado** (faltava Serie D)~~ — ✅ corrigido: agora é gerado a partir de `KHC_CONFIG` conforme a temporada selecionada (2026: A, B, C, D, Elite · 2025: A, B).
 - **Logo é um JPEG quadrado com fundo preto** (`khc-logo.png` é na verdade JPEG). Fica um "quadrado" visível sobre o fundo; precisa de PNG/SVG transparente. `logo.jpg` e `khc-logo.png` são o mesmo arquivo.
 - **Ruído de fundo**: linhas horizontais + 2 vinhetas laranja + marca d'água do logo atrás do conteúdo. A marca d'água aparece atrás das abas e cards (visível nas screenshots).
 - **Seletor de temporada isolado** acima das abas, sem relação visual com o conteúdo; "Temporada 2025 (Arquivo)" é texto longo.
@@ -106,7 +106,10 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 - Boa base (`screens/desktop-drawer.png`). Problemas: conquistas zeradas ocupam muito espaço com cor; ~~estatísticas inconsistentes (B7)~~ corrigido; "Pontos totais 2045.46" com 2 casas enquanto o resto usa 1; sem link para o perfil Sleeper; sem gráfico/evolução.
 
 ### 3.8 Modal "Sobre a Liga"
-- Regras desatualizadas: promoção/rebaixamento só cita A/B/C (falta D); critério da Elite cita "top 4 da A + top 4 da B" — **confirmar a regra atual**.
+- ~~Regras desatualizadas~~ — ✅ corrigido com as regras confirmadas: séries A–D com 10 participantes, 6 no playoff
+  (semanas 15–17, conferido na Sleeper — o texto antigo dizia "2 semanas"), 3 sobem/3 descem; Elite paralela com os
+  melhores da temporada anterior (2027: campeão e vice de cada série, 8 participantes; playoff com 4). As regras de
+  2025 (2 sobem/2 descem; Elite 2026 = top 4 da A + top 4 da B) ficaram numa seção "Regras de 2025".
 - Rodapé "Mais regras e história serão adicionadas aqui em breve" passa sensação de inacabado.
 - O conteúdo merece uma página/aba própria ("Regras") em vez de um botão discreto no rodapé.
 
@@ -143,10 +146,13 @@ Qualquer proposta do Claude Design precisa ser implementável como **HTML/CSS es
 ## 6. Brief para o Claude Design
 
 ### 6.1 Contexto do produto
-- **O que é:** hub de uma comunidade brasileira de Fantasy Football (NFL) na Sleeper. ~50 jogadores, 4 divisões com acesso/descenso (Serie A, B, C, D) + **KHC Elite** (liga paralela de convidados — top da temporada anterior; um jogador pode estar em 2 ligas).
+- **O que é:** hub de uma comunidade brasileira de Fantasy Football (NFL) na Sleeper. ~40 jogadores, 4 divisões com acesso/descenso (Serie A, B, C, D) + **KHC Elite** (liga paralela — melhores da temporada anterior; um jogador pode estar em 2 ligas).
 - **Quem usa:** os próprios membros, majoritariamente **no celular**, para checar classificação, provocar os amigos e ver histórico/troféus.
 - **Momentos-chave:** (1) durante a temporada — "como está minha liga essa semana?"; (2) fim de temporada — campeões, acesso/rebaixamento; (3) entre temporadas — lendas e histórico.
-- **Formato da temporada:** 14 semanas regulares, playoffs top 6 em 2 semanas, pontuação PPR, roster `QB · 2 RB · 2 WR · TE · FLEX · SF · K · D/ST`.
+- **Formato da temporada (2026+):** 4 séries (A–D) com 10 participantes, 14 semanas regulares, playoffs com 6 times nas
+  semanas 15–17, 3 sobem / 3 descem entre séries vizinhas, pontuação PPR, roster `QB · 2 RB · 2 WR · TE · FLEX · SF · K · D/ST`.
+  **Elite:** paralela, melhores da temporada anterior (2027: campeão e vice de cada série = 8), playoff com 4.
+  **2025 (inaugural):** só Serie A (10) e B (12), 2 sobem / 2 descem.
 - **Tom:** competitivo, "resenha", orgulho de clube. Referências possíveis: apps de futebol (Sofascore, OneFootball), ESPN Fantasy.
 
 ### 6.2 Telas e conteúdo (inventário)
@@ -323,13 +329,13 @@ Career = { user, currentSeries, trophies:{gold,silver,bronze,fourth}, totalSeaso
 
 1. **Header compacto + navegação fixa**: header pequeno (logo 32–40px + nome) e abas como barra fixa no topo (desktop) / **bottom nav** no mobile. Seletor de temporada como chip/segmented control junto ao título.
 2. **"Minha liga" primeiro**: deixar o usuário escolher sua série/jogador (localStorage) e abrir nela; ou abas internas por série em vez de 5 cards empilhados.
-3. **Zonas na classificação**: faixa lateral colorida para promoção (top 2), playoffs (top 6) e rebaixamento (últimos 2), com legenda. Cabeçalho de colunas (V–D, PF, PA).
+3. **Zonas na classificação**: faixa lateral colorida para playoffs (top 6), promoção (3) e rebaixamento (últimos 3), com legenda. Cabeçalho de colunas (V–D, PF, PA). Atenção: em 2025 eram 2 sobem / 2 descem — as zonas precisam ser por temporada.
 4. **Status ao vivo**: "Semana 4 de 14 · atualizado há 2 min" + botão atualizar (a semana já é buscada da Sleeper em `appState.nflState`).
 5. **Top Scorers**: avatar + dono + série; toggle "Incluir Elite"; filtro por série; sem cascata longa de animação.
 6. **Power Ranking**: tiers como cabeçalhos horizontais também no desktop, nomes em PT-BR, explicação do cálculo num tooltip/“?”; variação semanal só com histórico real.
 7. **Lendas como "Hall da Fama"**: pódio visual do top-3, avatares, linha do tempo de campeões por ano/série.
 8. **Perfil do jogador com URL própria** (`#/jogador/nome`) — compartilhável no grupo.
-9. **Página "Regras"** no lugar do modal escondido no rodapé, incluindo Serie D e a regra atual da Elite.
+9. **Página "Regras"** no lugar do modal escondido no rodapé (o conteúdo já está atualizado, incluindo o histórico de 2025).
 10. **Fundo mais limpo**: remover marca d'água atrás do conteúdo; usar o laranja como acento, não como cor de todo título.
 
 ---
@@ -340,7 +346,8 @@ Career = { user, currentSeries, trophies:{gold,silver,bronze,fourth}, totalSeaso
 |---|---|
 | ✅ Feito | B1–B10 (medalhas, troca de temporada, Serie D no drawer, setas falsas, semana fixa, tier mobile, stats do drawer, séries atuais em temporada arquivada, escape de nomes, scroll lock) |
 | ✅ Feito | Classificação de temporadas finalizadas ordenada pelo resultado final dos playoffs |
-| Agora (conteúdo / produto) | Subtítulo e modal sem Serie D (confirmar regra da Elite) |
+| ✅ Feito | Subtítulo por temporada + modal "Sobre" com as regras atuais e as de 2025 |
+| A confirmar | Critério de quem sobe/desce: classificação final (com playoffs) ou temporada regular? |
 | Redesign (Claude Design) | Header/navegação mobile · zonas na classificação · Top Scorers · Power Ranking · Lendas · tokens/escala/contraste |
 | Depois | URL por aba/perfil · dados ao vivo (semana, matchups, bracket) · limpeza do CSS morto |
 
@@ -354,4 +361,4 @@ Career = { user, currentSeries, trophies:{gold,silver,bronze,fourth}, totalSeaso
 | `desktop-2025-leagues.png`, `mobile-2025-leagues.png` | Temporada finalizada: medalhas (B1) e ordem pelo resultado final |
 | `desktop-2025-global.png`, `desktop-2025-power.png` | Temporada finalizada |
 | `mobile-2026-power.png` | B6 corrigido — tier como faixa horizontal |
-| `*-drawer.png`, `*-modal.png` | Perfil do jogador (mobile já com B7 corrigido) e Sobre a Liga |
+| `*-drawer.png`, `*-modal.png` | Perfil do jogador (mobile já com B7 corrigido) e Sobre a Liga (regras atualizadas) |

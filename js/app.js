@@ -59,6 +59,7 @@ async function loadData() {
     appState.isFromCache = false;
 
     const config = KHC_CONFIG[appState.season];
+    renderSeriesSubtitle(config);
 
     if (!config || !config.leagues.length) {
         container.innerHTML = '<div class="loading">Dados desta temporada ainda não configurados.</div>';
@@ -168,6 +169,22 @@ async function loadData() {
     renderLegends();
     renderSeasons();
     appState.isLoading = false;
+}
+
+/**
+ * Subtítulo do header com as séries da temporada selecionada
+ * (Serie A → D, Elite por último). Mantém o HTML estático se não houver config.
+ * @param {{leagues: Array<{name: string, tier: string}>}|undefined} config
+ */
+function renderSeriesSubtitle(config) {
+    const el = document.getElementById('seriesSubtitle');
+    if (!el || !config || !config.leagues.length) return;
+    const order = VALIDATION.VALID_TIERS; // serie-a … serie-d, elite
+    const names = config.leagues
+        .slice()
+        .sort((a, b) => order.indexOf(a.tier) - order.indexOf(b.tier))
+        .map(l => escapeHtml(l.name.replace(/^KHC\s+/i, '')));
+    el.innerHTML = names.map(n => `<span>${n}</span>`).join('');
 }
 
 function clearSecondaryContainers() {

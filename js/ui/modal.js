@@ -2,7 +2,6 @@
 // UI / MODAL — About modal (Fase 4.B).
 // Vanilla module, sem dependências externas além das globais do projeto:
 //   - IconRegistry.close (icons.js)
-//   - KHC_CONFIG (config.js) para computar nº de temporadas finalizadas
 //   - escapeHtml (sanitize.js) — não usado aqui pois copy é estática controlada,
 //     mas mantido como dependência opcional para futuras extensões.
 //
@@ -53,7 +52,9 @@
     // -------------------------------------------------------------------------
 
     /**
-     * Constrói o HTML do corpo do modal a partir de KHC_CONFIG.
+     * Constrói o HTML do corpo do modal. Copy estática: regras atuais
+     * (a partir de 2026) + regras da temporada inaugural (2025), que eram
+     * diferentes. Playoffs conferidos nas configurações das ligas na Sleeper.
      */
     function buildBodyHTML() {
         return `
@@ -64,29 +65,41 @@
                 <dt>Formato</dt>
                 <dd>
                     <ul>
+                        <li>Séries A, B, C e D com 10 participantes cada</li>
                         <li>Pontuação: PPR padrão</li>
                         <li>Roster: <code>QB · 2 RB · 2 WR · TE · FLEX · SF · K · D/ST</code></li>
                         <li>Temporada regular: 14 semanas</li>
-                        <li>Playoffs: Top 6, 2 semanas de mata-mata</li>
+                        <li>Playoffs: 6 classificados, semanas 15 a 17</li>
                     </ul>
                 </dd>
 
                 <dt>Promoção &amp; Rebaixamento</dt>
                 <dd>
                     <ul>
-                        <li>2 últimos da Serie A descem para Serie B</li>
-                        <li>2 primeiros da Serie B sobem para Serie A</li>
-                        <li>2 últimos da Serie B descem para Serie C</li>
-                        <li>2 primeiros da Serie C sobem para Serie B</li>
+                        <li>3 equipes sobem e 3 descem entre séries vizinhas:</li>
+                        <li>Serie A ⇄ Serie B</li>
+                        <li>Serie B ⇄ Serie C</li>
+                        <li>Serie C ⇄ Serie D</li>
                     </ul>
                 </dd>
 
                 <dt>KHC Elite</dt>
                 <dd>
-                    Liga <strong>PARALELA</strong>, não um tier. Top 4 da Serie A + top 4
-                    da Serie B da temporada anterior se qualificam. Esses jogadores
-                    competem em duas ligas ao mesmo tempo. Critérios podem mudar
-                    ano a ano.
+                    Liga <strong>PARALELA</strong>, não um tier: premia os melhores da
+                    temporada anterior, que competem em duas ligas ao mesmo tempo.
+                    <ul>
+                        <li>2027: campeão e vice de cada série (A, B, C e D) — 8 participantes</li>
+                        <li>Playoffs: 4 classificados</li>
+                    </ul>
+                </dd>
+
+                <dt>Regras de 2025</dt>
+                <dd>
+                    Temporada inaugural, com regras diferentes:
+                    <ul>
+                        <li>Promoção &amp; rebaixamento de 2 equipes entre séries vizinhas</li>
+                        <li>Elite 2026: top 4 da Serie A + top 4 da Serie B de 2025</li>
+                    </ul>
                 </dd>
             </dl>
         `;
