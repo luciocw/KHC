@@ -88,10 +88,11 @@ const VALIDATION = {
 
 // --- ESTADO DA APLICAÇÃO ---
 const appState = {
-    // Navegação (espelhada na URL: #/<aba>/<ano>[/<série>])
+    // Navegação (espelhada na URL: #/<aba>/<ano>[/<série>[/<semana>]])
     tab: 'ligas',
     season: '2026',
-    series: 'serie-a',        // tier selecionado na aba Ligas
+    series: 'serie-a',        // tier selecionado nas abas Ligas e Rodada
+    matchWeek: null,          // semana na aba Rodada (null = atual da liga)
     topFilter: 'all',         // tier ou 'all' na aba Top Scorers
     includeElite: false,      // Top Scorers: Elite desligada evita time duplicado
 

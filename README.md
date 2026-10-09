@@ -5,9 +5,10 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 
 ## Funcionalidades
 
-- **6 abas:** Ligas, Top Scorers, Power Ranking, Lendas KHC, Temporadas, Regras
+- **7 abas:** Ligas, Rodada, Top Scorers, Power Ranking, Lendas KHC, Temporadas, Regras
 - **Endereço por tela** (compartilhável): `#/ligas/2026/a`, `#/top/2026`, `#/jogador/<usuario>`
-- **Ligas:** uma série por vez, com zonas de acesso / playoffs / rebaixamento por temporada e medalhas (número dentro) na classificação final
+- **Ligas:** uma série por vez, com zonas de acesso / playoffs / rebaixamento por temporada e medalhas (número dentro) na classificação final; botões Baixar / Compartilhar geram PNG da tabela
+- **Rodada:** confrontos e placar da semana por série (‹ semana ›), rótulos de playoff (Final, 3º lugar, Semifinal…) e exportação em PNG
 - **Top Scorers:** filtro por série e "Incluir Elite" (desligado por padrão, evita time duplicado)
 - **Power Ranking:** tiers S Favoritos · A Candidatos · B Meio de tabela · C Pressionados · D Lanternas (60% aproveitamento + 40% pontos normalizados; sem Elite)
 - **Lendas:** Hall da Fama ordenado por títulos (ouro → prata → bronze → 4º)
@@ -42,7 +43,7 @@ scripts/
 js/
   config.js                 KHC_CONFIG (ligas + regras por ano), SERIES_META, appState
   sanitize.js               escapeHtml, sanitizeAvatarUrl, sanitizeNumber, etc.
-  api.js                    fetch+retry, cache (localStorage), fetchLeagueData, fetchNflState
+  api.js                    fetch+retry, cache (localStorage), fetchLeagueData, fetchNflState, confrontos
   data.js                   temporadas finalizadas (data/*.json)
   derivations.js            pwrScore, tierForPwr, legendsAggregator, careerForUser
   icons.js                  IconRegistry (SVG line 24px) + renderIcons()
@@ -50,8 +51,9 @@ js/
   ui/
     helpers.js              avatar, botão de time, escudo, medalha, pílula, scroll lock
     drawer.js               perfil do jogador (focus trap, Esc, URL #/jogador/…)
+    export.js               classificação / confrontos em PNG (canvas), baixar e compartilhar
   tabs/
-    ligas.js · top-scorers.js · power-ranking.js · lendas.js · temporadas.js · regras.js
+    ligas.js · rodada.js · top-scorers.js · power-ranking.js · lendas.js · temporadas.js · regras.js
   app.js                    roteamento por hash, loadData, render
 assets/
   logo/svg/                 escudos oficiais em vetor (KHC, Elite, Séries A–F, Copa)

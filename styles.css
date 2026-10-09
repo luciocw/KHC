@@ -11,6 +11,7 @@
      === BOTTOM NAV ===   navegação fixa inferior (mobile)
      === PAGE ===         page head, pílula de status, card
      === LIGAS ===        abas de série, tabela, zonas, legenda, líderes
+     === RODADA ===       navegação de semana, confrontos
      === TOP SCORERS ===  chips, lista
      === POWER ===        nota, tiers, cards PWR
      === LENDAS ===       pódio, tabela de medalhas
@@ -784,6 +785,87 @@ abbr[title] { text-decoration: none; cursor: help; }
 .leader .crest { height: 40px; }
 .leader .eyebrow { display: block; margin-bottom: 2px; }
 .leader__rec { font-size: 24px; }
+
+/* === RODADA === */
+.week-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-8);
+    padding: var(--s-8) var(--s-12);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+.week-nav .icon-btn.is-disabled { opacity: .3; cursor: default; }
+.week-nav .icon-btn.is-disabled:hover { background: none; color: var(--text-2); }
+.week-nav__select select {
+    height: var(--tap);
+    padding: 0 36px 0 14px;
+    border: 1px solid var(--border-2);
+    border-radius: var(--r-md);
+    background: var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23C9BEB4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
+    color: var(--text);
+    font: inherit;
+    font-weight: 800;
+    font-stretch: 75%;
+    font-size: var(--fs-14);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+}
+.week-nav__select select:hover { border-color: var(--accent); }
+
+.matches {
+    list-style: none;
+    margin: 0;
+    padding: var(--s-12);
+    display: grid;
+    gap: var(--s-12);
+}
+@media (min-width: 1024px) {
+    .matches { grid-template-columns: 1fr 1fr; padding: var(--s-16); }
+}
+.match {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+}
+.match__label {
+    padding: var(--s-8) 14px 0;
+}
+.match__side {
+    display: flex;
+    align-items: center;
+    gap: var(--s-12);
+    padding: 6px 14px;
+    box-shadow: inset var(--zone-bar) 0 0 transparent;
+}
+.match__side + .match__side { border-top: 1px solid var(--border); }
+.match__side .team { flex: 1; min-width: 0; }
+.match__pts {
+    flex-shrink: 0;
+    font-weight: 900;
+    font-stretch: 75%;
+    font-size: var(--fs-20);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-2);
+}
+.match__side.is-win { box-shadow: inset var(--zone-bar) 0 0 var(--accent); }
+.match__side.is-win .match__pts { color: var(--text); }
+.match__side.is-lose .match__pts { color: var(--text-3); }
+.match__side.is-lose .team__name { color: var(--text-2); }
+.match-byes {
+    margin: 0;
+    padding: var(--s-12) 14px;
+    border-top: 1px solid var(--border);
+    font-size: var(--fs-12);
+    color: var(--text-2);
+}
+.match-byes b { color: var(--text); font-weight: 700; }
+.round .state { padding: var(--s-32) var(--s-16); }
 
 /* === TOP SCORERS === */
 .chips {
