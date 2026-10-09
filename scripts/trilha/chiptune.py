@@ -121,6 +121,17 @@ PHASES = {
 }
 
 
+def remap(holds):
+    """Pausas de leitura do vídeo ([instante, duração], no tempo da timeline)
+    → função que converte um tempo da timeline no tempo do vídeo. Use durações
+    múltiplas da colcheia para a música continuar na grade."""
+    holds = sorted(holds)
+
+    def R(t):
+        return t + sum(d for at, d in holds if at < t)
+    return R
+
+
 class Track:
     """Uma trilha de duração fixa sobre uma grade de colcheias.
 
@@ -526,6 +537,7 @@ def run(track, argv=None):
             lufs = float(next(it))
         else:
             out = os.path.splitext(a)[0]
+    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
         raw = os.path.join(tmp, "raw.wav")
         _write_wav(raw, track.mixdown(cuts=cuts))
