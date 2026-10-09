@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>KHC Confrontos · Semana 5 (TNF)</title>
+<link rel="stylesheet" href="../engine.css">
+<style>
+/* --- específicos da semana 5 --- */
+.boot { position: absolute; inset: 0; background: #fff; transform-origin: center; }
+.big-logo { position: absolute; left: 50%; top: 250px; width: 400px; height: 400px; margin-left: -200px; object-fit: contain;
+    filter: drop-shadow(0 30px 60px rgba(0,0,0,.6)); }
+.press { position: absolute; left: 0; right: 0; top: 690px; text-align: center; font-family: Pixel; font-size: 34px; color: var(--text); }
+.open-kicker { position: absolute; left: 60px; top: 800px; font-weight: 800; font-size: 34px; letter-spacing: 6px; color: var(--orange); }
+.open-title { position: absolute; left: 60px; right: 60px; top: 850px; font-weight: 900; font-size: 100px; line-height: 1; letter-spacing: -1px; }
+.counter { position: absolute; left: 60px; top: 1010px; display: flex; align-items: baseline; gap: 18px; }
+.counter .n { font-family: Mono; font-size: 220px; line-height: 1; color: var(--orange); }
+.counter .of { font-family: Mono; font-size: 80px; color: var(--text-3); }
+.counter-txt { position: absolute; left: 60px; right: 60px; top: 1270px; font-weight: 800; font-size: 64px; line-height: 1.08; }
+.counter-txt span { color: var(--orange); }
+.open-sub { position: absolute; left: 60px; right: 60px; top: 1450px; font-weight: 600; font-size: 54px; line-height: 1.15; color: var(--text-2); }
+
+.boss-tag { position: absolute; right: 60px; top: 240px; font-family: Pixel; font-size: 30px; color: #fff; background: var(--danger);
+    padding: 14px 18px; border-radius: 6px; }
+.fighter { position: absolute; left: 60px; right: 60px; height: 330px; background: rgba(22,19,17,.94); border: 2px solid var(--border);
+    border-radius: 26px; padding: 34px; display: flex; gap: 34px; align-items: center; }
+.fighter .fav { width: 230px; height: 230px; border-radius: 28px; overflow: hidden; flex: none; background: #2a2420; }
+.fighter .fav img { width: 100%; height: 100%; object-fit: cover; }
+.fighter .fname { font-weight: 900; font-size: 58px; line-height: 1.02; }
+.fighter .chip { display: inline-block; margin-top: 14px; font-weight: 900; font-size: 30px; letter-spacing: 2px; color: var(--orange);
+    background: #2b1a12; padding: 8px 16px; border-radius: 6px; }
+.fighter .info { flex: 1; min-width: 0; }
+.fighter .meter { display: flex; align-items: center; gap: 24px; margin-top: 18px; }
+.fighter .hp { flex: 1; height: 34px; border-radius: 6px; background: #2a2420; overflow: hidden; border: 3px solid #000; }
+.fighter .hp i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #3DD68C, #F2B705); }
+.fighter .fpts { font-family: Mono; font-size: 84px; line-height: 1; min-width: 230px; text-align: right; color: var(--orange); }
+.fighter.loser .fpts { color: #6b5f56; }
+.vs { position: absolute; left: 0; right: 0; top: 832px; text-align: center; font-family: Pixel; font-size: 80px; color: var(--orange);
+    text-shadow: 6px 6px 0 #000; }
+.ko { position: absolute; left: 0; right: 0; top: 960px; text-align: center; font-family: Pixel; font-size: 150px; color: var(--danger);
+    text-shadow: 8px 8px 0 #000; opacity: 0; }
+.coin { position: absolute; width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe680, #F2B705 55%, #9A7000);
+    border: 4px solid #6b4d00; opacity: 0; }
+.tnf-cap { position: absolute; left: 60px; right: 60px; top: 1370px; }
+.tnf-cap .l1 { font-weight: 800; font-size: 58px; line-height: 1.05; }
+.tnf-cap .l2 { font-weight: 900; font-size: 74px; line-height: 1.02; color: var(--orange); margin-top: 14px; }
+.tnf-cap .l3 { font-weight: 600; font-size: 46px; color: var(--text-2); margin-top: 18px; }
+
+.dim { position: absolute; inset: -400px; background: rgba(0,0,0,.72); z-index: 10; opacity: 0; }
+.pause { position: absolute; left: 0; right: 0; top: 860px; text-align: center; font-family: Pixel; font-size: 92px; color: #fff;
+    text-shadow: 8px 8px 0 #000; z-index: 30; opacity: 0; }
+.bricks { position: absolute; inset: 0; opacity: .5; background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.55) 0 4px, transparent 4px 70px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.55) 0 4px, transparent 4px 140px),
+    linear-gradient(180deg, rgba(229,56,59,.10), rgba(0,0,0,.6)); }
+.cricket { position: absolute; font-size: 64px; z-index: 6; opacity: 0; }
+.water { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(59,130,246,.05), rgba(59,130,246,.28)); }
+.bubble { position: absolute; border-radius: 50%; border: 4px solid rgba(160,200,255,.75); background: rgba(160,200,255,.12); }
+.vignette { position: absolute; inset: 0; box-shadow: inset 0 0 260px 90px rgba(235,64,52,.9); opacity: 0; z-index: 8; }
+.hearts { position: absolute; left: 380px; top: 404px; font-family: Pixel; font-size: 40px; color: var(--danger); opacity: 0; }
+.cd { position: absolute; left: 0; right: 0; top: 760px; text-align: center; font-family: Pixel; font-size: 260px; color: #fff;
+    text-shadow: 12px 12px 0 #000; z-index: 30; opacity: 0; }
+.oneup { position: absolute; font-family: Pixel; font-size: 48px; color: var(--success); text-shadow: 4px 4px 0 #000; z-index: 6; opacity: 0; }
+
+.clear { position: absolute; left: 0; right: 0; top: 330px; text-align: center; font-family: Pixel; font-size: 64px; color: #F2B705;
+    text-shadow: 6px 6px 0 #000; }
+.decide { position: absolute; left: 60px; right: 60px; top: 520px; font-weight: 900; font-size: 150px; line-height: .95; letter-spacing: -2px; }
+.gameover { position: absolute; left: 0; right: 0; top: 960px; text-align: center; font-family: Pixel; font-size: 96px; color: var(--danger);
+    text-shadow: 8px 8px 0 #000; }
+.piora { position: absolute; left: 60px; right: 60px; top: 1110px; text-align: center; font-weight: 900; font-size: 150px; color: var(--orange); letter-spacing: -2px; }
+.save { position: absolute; left: 0; right: 0; top: 1420px; display: flex; flex-direction: column; align-items: center; gap: 26px; }
+.save img { width: 200px; height: 200px; object-fit: contain; }
+.save .st { font-family: Pixel; font-size: 34px; color: var(--text); }
+.save .k { font-weight: 800; font-size: 36px; letter-spacing: 6px; color: var(--text-3); }
+.glitch { position: absolute; inset: 0; z-index: 40; opacity: 0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 3px, transparent 3px 7px); mix-blend-mode: screen; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="fx"></div>
+<script src="../engine.js"></script>
+<script>
+(async () => {
+const data = await (await fetch('data.json')).json();
+const { el, set, prog, lerp, ease, enter, blink, shake, fmt, LEAGUE } = KHC;
+const L = Object.fromEntries(data.leagues.map(l => [l.tier, l]));
+const TIERS = ['elite', 'serie-a', 'serie-b', 'serie-c', 'serie-d'];
+const team = (tier, name) => L[tier].matchups.flat().find(t => t.name === name);
+
+// ------------------------------------------------------------ helpers locais
+function hudFor(root, tier) {
+    const h = KHC.hud(root, 'SEMANA 5 · TNF', TIERS);
+    const i = TIERS.indexOf(tier);
+    h.segs.forEach((s, k) => { if (k < i) s.classList.add('on'); if (k === i) s.classList.add('now'); });
+    return h;
+}
+function head(root, tier, kicker, world) {
+    const hd = el('div', 'phase-head', root);
+    hd.style.setProperty('--c', LEAGUE[tier].color);
+    el('div', 'kicker', hd, kicker);
+    el('div', 'league-name', hd, L[tier] ? L[tier].label : '');
+    const w = el('div', 'world', hd, world);
+    const c = el('img', 'crest', hd); c.src = LEAGUE[tier].crest;
+    return { hd, w, c };
+}
+function drawHead(h, lt) {
+    const p = enter(lt, .05, .45, ease.back);
+    set(h.c, { s: p, r: (1 - p) * -30 });
+    set(h.w, { o: blink(lt, .3) || lt > 1.2 ? 1 : .3 });
+}
+function cardsFor(root, tier) {
+    const box = el('div', 'cards', root);
+    const cards = L[tier].matchups.map(m => KHC.matchCard(box, m, LEAGUE[tier].color));
+    return { box, cards };
+}
+/** Entradas: slide | zoom | drop | float | side */
+function drawCards(c, lt, a, b, style) {
+    const n = c.cards.length;
+    c.cards.forEach((cd, i) => {
+        const t0 = lerp(a, b, n > 1 ? i / (n - 1) : 0);
+        const p = enter(lt, t0, .35, style === 'drop' ? ease.back : ease.out);
+        let o = { o: Math.min(1, p * 1.6) };
+        if (style === 'slide') o.x = (1 - p) * 1100;
+        if (style === 'zoom') o.s = lerp(.4, 1, ease.back(Math.min(1, p)));
+        if (style === 'drop') o.y = (1 - p) * -900;
+        if (style === 'side') o.x = (1 - p) * (i % 2 ? 1100 : -1100);
+        if (style === 'float') { o.y = (1 - p) * 120 + Math.sin(lt * 2.2 + i * 1.3) * 10; o.r = Math.sin(lt * 1.7 + i) * .7; }
+        set(cd.card, o);
+    });
+}
+function countAll(c, lt, a, b) { c.cards.forEach(cd => KHC.countPoints(cd, lt, a, b)); }
+const cardOf = (c, name) => c.cards.find(cd => cd.rows.some(r => r.team.name === name));
+const rowOf = (c, name) => cardOf(c, name).rows.find(r => r.team.name === name);
+
+// ================================================================ CENAS
+// 0,0–3,0 · Abertura: console ligando
+KHC.scene(0, 3, root => {
+    const s = root.s = {};
+    s.logo = el('img', 'big-logo', root); s.logo.src = LEAGUE.khc.crest;
+    s.press = el('div', 'press', root, 'PRESS START');
+    s.k = el('div', 'open-kicker', root, 'CONFRONTOS · SEMANA 5');
+    s.title = el('div', 'open-title', root, 'O TNF já rolou.');
+    s.counter = el('div', 'counter', root, '<span class="n">0</span><span class="of">/48</span>');
+    s.ctxt = el('div', 'counter-txt', root, 'times seguem no <span>0.0</span>.');
+    s.sub = el('div', 'open-sub', root, 'Uns por estratégia.<br>Outros por talento.');
+    s.boot = el('div', 'boot', root);
+}, (lt, t, root) => {
+    const s = root.s;
+    const b = prog(lt, 0, .16);
+    set(s.boot, { o: 1 - b, sy: lerp(.004, 1, ease.out(b)) });
+    const lp = enter(lt, .05, .6, ease.elastic);
+    set(s.logo, { s: lp, r: (1 - lp) * 20 });
+    s.press.textContent = lt < 1.1 ? 'PRESS START' : '▶ START!';
+    set(s.press, { o: lt < 1.1 ? blink(lt, .2) : 1, s: lt >= 1.1 ? 1 + (1 - prog(lt, 1.1, 1.3)) * .2 : 1 });
+    const k = enter(lt, .25, .35), ti = enter(lt, .43, .4, ease.back);
+    set(s.k, { o: k, y: (1 - k) * 50 });
+    set(s.title, { o: Math.min(1, ti * 2), y: (1 - ti) * 80 });
+    const c = enter(lt, 1.2, .25);
+    set(s.counter, { o: c, s: lerp(.6, 1, ease.back(c)) });
+    s.counter.querySelector('.n').textContent = Math.round(19 * ease.out(prog(lt, 1.2, 1.9)));
+    const ct = enter(lt, 1.5, .35);
+    set(s.ctxt, { o: ct, y: (1 - ct) * 40 });
+    const sb = enter(lt, 2.05, .4);
+    set(s.sub, { o: sb, y: (1 - sb) * 40 });
+});
+
+// 3,0–7,0 · Destaque do TNF: luta de chefão
+KHC.scene(3, 7, root => {
+    const s = root.s = {};
+    hudFor(root, 'none');
+    const hd = head(root, 'khc', 'DESTAQUE DO TNF', '');
+    hd.c.remove(); hd.hd.querySelector('.league-name').textContent = 'ATROPELO';
+    hd.hd.querySelector('.league-name').style.color = 'var(--orange)';
+    s.hd = hd;
+    s.tag = el('div', 'boss-tag', root, 'BOSS FIGHT!');
+    const fighter = (tm, top, cls) => {
+        const f = el('div', 'fighter ' + cls, root); f.style.top = top + 'px';
+        const av = el('div', 'fav', f); el('img', '', av).src = tm.avatar;
+        const info = el('div', 'info', f);
+        el('div', 'fname', info, KHC.esc(tm.name));
+        el('div', 'chip', info, 'SÉRIE A');
+        const meter = el('div', 'meter', info);
+        const hp = el('div', 'hp', meter); const bar = el('i', '', hp);
+        const pts = el('div', 'fpts', meter, '0.0');
+        return { f, av, bar, pts };
+    };
+    s.a = fighter(team('serie-a', 'Public Enemy #1'), 470, 'winner');
+    s.vs = el('div', 'vs', root, 'VS');
+    s.b = fighter(team('serie-a', 'Los Pollos Hermanos'), 940, 'loser');
+    s.b.bar.style.width = '100%';
+    s.b.bar.style.background = 'linear-gradient(90deg,#EB4034,#F26A1B)';
+    s.ko = el('div', 'ko', root, 'K.O.');
+    s.coins = Array.from({ length: 10 }, () => el('div', 'coin', root));
+    const cap = el('div', 'tnf-cap', root);
+    s.l1 = el('div', 'l1', cap, 'Maior pontuação da KHC no TNF.');
+    s.l2 = el('div', 'l2', cap, 'Contra 0.0 do Los Pollos Hermanos.');
+    s.l3 = el('div', 'l3', cap, 'Do outro lado: 0.0. Nas duas ligas.');
+}, (lt, t, root) => {
+    const s = root.s;
+    set(s.tag, { o: lt < 1.2 ? blink(lt, .15) : 1, s: 1 });
+    const fa = enter(lt, .15, .4), fb = enter(lt, .3, .4);
+    set(s.a.f, { o: fa, x: (1 - fa) * -1100 });
+    // Pollos: entra, "morre" em 5,2 (cai, gira, fica cinza)
+    const die = prog(t, 5.2, 5.75);
+    const [sx, sy] = KHC.shake(t, 5.2, .35, 22);
+    set(s.b.f, { o: fb, x: (1 - fb) * 1100 + sx, y: sy, f: die > 0 ? `grayscale(${die})` : 'none' });
+    set(s.b.av, { r: ease.out(die) * 180, y: ease.out(die) * 30, s: 1 - die * .15 });
+    s.b.bar.style.width = (100 * (1 - prog(t, 5.2, 5.5))) + '%';
+    const v = enter(lt, .5, .3, ease.back), [vx, vy] = KHC.shake(t, 3.5, .4, 14);
+    set(s.vs, { o: v, s: lerp(3, 1, v), x: vx, y: vy });
+    // contador + barra de vida de 3,8 a 5,1
+    const cp = ease.out(prog(t, 3.8, 5.1));
+    s.a.pts.textContent = fmt(79.2 * cp);
+    s.a.bar.style.width = (100 * cp) + '%';
+    // power-up em 5,1
+    const pu = prog(t, 5.1, 5.6);
+    s.a.f.style.boxShadow = pu > 0 && pu < 1 ? `0 0 ${80 * Math.sin(pu * Math.PI)}px ${30 * Math.sin(pu * Math.PI)}px rgba(242,183,5,.8)` : 'none';
+    s.a.f.style.borderColor = t >= 5.1 ? 'var(--orange)' : '';
+    // moedas saindo do contador
+    s.coins.forEach((c, i) => {
+        const t0 = 3.8 + i * .13, p = prog(t, t0, t0 + .55);
+        if (p <= 0 || p >= 1) { c.style.opacity = 0; return; }
+        set(c, { o: 1 - p, x: 880 + Math.sin(i * 2.1) * 60, y: 540 - ease.out(p) * 220, sx: Math.abs(Math.cos(p * 12)) });
+    });
+    const ko = prog(t, 5.25, 5.5);
+    set(s.ko, { o: ko > 0 ? 1 : 0, s: lerp(3, 1, ease.back(ko)), r: -6 });
+    const c1 = enter(t, 4.1, .4), c2 = enter(t, 5.45, .4, ease.back), c3 = enter(t, 6.2, .35);
+    set(s.l1, { o: c1, y: (1 - c1) * 30 });
+    set(s.l2, { o: Math.min(1, c2 * 2), s: lerp(.7, 1, c2) });
+    set(s.l3, { o: c3, y: (1 - c3) * 30 });
+});
+
+// Fases das ligas -----------------------------------------------------------
+function leagueScene(a, b, tier, cfg) {
+    KHC.scene(a, b, root => {
+        const s = root.s = {};
+        if (cfg.bg) s.bg = el('div', cfg.bg, root);
+        s.hud = hudFor(root, tier);
+        s.head = head(root, tier, 'PARCIAL DO TNF', cfg.world);
+        s.c = cardsFor(root, tier);
+        s.stamps = cfg.stamps.map(st => {
+            const cd = cardOf(s.c, st.on);
+            cd.card.classList.add('hot');
+            return { el: KHC.stamp(cd.card, st.text, { top: -62, rot: st.rot ?? -2.5 }), at: st.at };
+        });
+        s.cap = KHC.caption(root, cfg.caption[0], cfg.caption[1]);
+        if (cfg.build) cfg.build(s, root);
+    }, (lt, t, root) => {
+        const s = root.s;
+        drawHead(s.head, lt);
+        drawCards(s.c, t, cfg.enter[0], cfg.enter[1], cfg.style);
+        countAll(s.c, t, cfg.count[0], cfg.count[1]);
+        s.stamps.forEach(st => KHC.drawStamp(st.el, t, st.at));
+        KHC.drawCaption(s.cap, t, cfg.capAt);
+        if (cfg.draw) cfg.draw(s, lt, t);
+    });
+}
+
+// 7,0–12,0 · Elite: castelo
+leagueScene(7, 12, 'elite', {
+    world: 'FASE 1 · O CASTELO', style: 'slide', enter: [7.6, 8.1], count: [7.85, 8.8],
+    stamps: [{ on: 'Diogoashura', text: '34 aqui. 0 na Série A', at: 9.4 }],
+    caption: ['Los Pollos Hermanos: 0.0.', 'Na Série A também. Consistência.'], capAt: 10.2,
+    draw(s, lt, t) {
+        const [x, y] = KHC.shake(t, 9.4, .35, 20);
+        s.c.box.style.translate = `${x}px ${y}px`;
+        const d = cardOf(s.c, 'Diogoashura').card;
+        d.style.background = t >= 9.4 && t < 9.7 && blink(t, .06) ? 'rgba(235,64,52,.35)' : '';
+        const lp = rowOf(s.c, 'Los Pollos Hermanos');
+        const g = prog(t, 10.2, 10.6);
+        lp.row.style.filter = g > 0 ? `grayscale(${g}) brightness(${1 - g * .35})` : '';
+        set(lp.av, { r: g * -12, y: g * 6 });
+    },
+});
+
+// 12,0–17,0 · Série A: fase rápida
+leagueScene(12, 17, 'serie-a', {
+    world: 'FASE 2 · TURBO', style: 'zoom', enter: [12.6, 13.25], count: [12.85, 13.9],
+    stamps: [{ on: 'Public Enemy #1', text: 'Maior placar do TNF', at: 14.2, rot: -2.5 }],
+    caption: ['79.2 × 0.0 na quinta.', 'Domingo é só protocolo.'], capAt: 15.4,
+    build(s, root) { s.up = el('div', 'oneup', root, '1UP'); },
+    draw(s, lt, t) {
+        const pe = rowOf(s.c, 'Public Enemy #1');
+        const on = t >= 14.2;
+        pe.row.style.filter = on ? `hue-rotate(${(t - 14.2) * 540}deg) saturate(1.6)` : '';
+        cardOf(s.c, 'Public Enemy #1').card.style.borderColor = on ? `hsl(${(t * 400) % 360} 90% 60%)` : '';
+        const u = prog(t, 15.2, 15.95);
+        set(s.up, { o: u > 0 && u < 1 ? 1 - u * .6 : 0, x: 110, y: 520 + 84 - ease.out(u) * 150, s: 1 + (1 - u) * .3 });
+    },
+});
+
+// 17,0–22,0 · Série B: subterrânea
+leagueScene(17, 22, 'serie-b', {
+    bg: 'bricks', world: 'FASE 3 · SUBSOLO', style: 'drop', enter: [17.6, 18.25], count: [17.9, 18.7],
+    stamps: [{ on: 'Ceará Dolphins', text: 'TNF? Nunca nem vi', at: 19.5, rot: -2.5 },
+             { on: 'Gumagol971', text: '0–4 na frente do 4–0', at: 19.8, rot: -2 }],
+    caption: ['O lanterna na frente do líder.', 'Aproveita, que domingo chega.'], capAt: 20.35,
+    build(s, root) {
+        s.dim = el('div', 'dim', s.c.box);
+        s.pause = el('div', 'pause', root, '❚❚ PAUSE');
+        s.cr = el('div', 'cricket', cardOf(s.c, 'Ceará Dolphins').card, '🦗');
+        s.gum = cardOf(s.c, 'Gumagol971').card;
+    },
+    draw(s, lt, t) {
+        const p = t >= 19.8 && t < 20.2;
+        s.dim.style.opacity = p ? 1 : 0;
+        s.gum.style.zIndex = p ? 20 : '';
+        set(s.pause, { o: p ? blink(t, .12) : 0 });
+        const c = prog(t, 19.5, 20.6);
+        const hop = Math.abs(Math.sin(c * Math.PI * 4)) * 40;
+        set(s.cr, { o: c > 0 && c < 1 ? 1 : 0, x: 300 + c * 260, y: 60 - hop });
+        s.cr.style.left = '0px'; s.cr.style.top = '0px';
+    },
+});
+
+// 22,0–27,0 · Série C: aquática
+leagueScene(22, 27, 'serie-c', {
+    bg: 'water', world: 'FASE 4 · AQUÁTICA', style: 'float', enter: [22.3, 22.8], count: [22.9, 23.8],
+    stamps: [{ on: 'Kelce Gremista', text: 'A Bola Murcha defende o título', at: 24.5, rot: -2.5 }],
+    caption: ['Kelce Gremista zerado.', 'Ninguém se surpreendeu.'], capAt: 25.3,
+    build(s, root) {
+        s.bub = Array.from({ length: 18 }, (_, i) => {
+            const b = el('div', 'bubble', root);
+            const d = 20 + (i * 37) % 50; b.style.width = b.style.height = d + 'px';
+            return { b, x: (i * 263) % 1000 + 30, sp: 180 + (i * 53) % 160, off: (i * .37) % 3 };
+        });
+    },
+    draw(s, lt, t) {
+        s.bub.forEach((o, i) => {
+            const burst = i < 8 ? prog(t, 22.6 + i * .08, 23.6 + i * .08) : ((lt + o.off) % 3) / 3;
+            const y = 1950 - burst * (1950 + 100);
+            set(o.b, { o: burst > 0 && burst < 1 ? .9 : 0, x: o.x + Math.sin(t * 3 + i) * 20, y });
+        });
+        const k = rowOf(s.c, 'Kelce Gremista'), card = cardOf(s.c, 'Kelce Gremista');
+        const d = prog(t, 24.5, 25.15);
+        const wob = d > 0 && d < 1 ? Math.sin(d * 30) * .05 * (1 - d) : 0;
+        set(k.av, { s: lerp(1, .55, ease.out(d)) + wob, sy: lerp(1, .4, ease.out(d)) + wob, y: d * 14 });
+        const g = prog(t, 25.2, 25.8);
+        k.row.style.filter = g > 0 ? `grayscale(${g}) brightness(${1 - g * .3})` : '';
+        card.card.style.translate = `0 ${Math.sin(t * 2.2) * 6}px`;
+    },
+});
+
+// 27,0–32,0 · Série D: fase final
+leagueScene(27, 32, 'serie-d', {
+    world: 'FASE FINAL', style: 'side', enter: [28.3, 28.8], count: [28.5, 29.2],
+    stamps: [{ on: 'Elieser', text: 'Pé-frio na frente. Por enquanto', at: 29.4, rot: -2.5 }],
+    caption: ['Elieser ganhando no TNF.', 'Já vimos esse filme. Termina mal.'], capAt: 30.3,
+    build(s, root) {
+        s.cd = el('div', 'cd', root);
+        s.vig = el('div', 'vignette', root);
+        s.hearts = el('div', 'hearts', root, '♥♡♡');
+        s.el = cardOf(s.c, 'Elieser').card;
+    },
+    draw(s, lt, t) {
+        const steps = [27.6, 27.817, 28.033, 28.25], labels = ['3', '2', '1', 'GO!'];
+        let shown = -1; steps.forEach((x, i) => { if (t >= x) shown = i; });
+        const sp = shown >= 0 ? prog(t, steps[shown], steps[shown] + (shown === 3 ? .4 : .2)) : 0;
+        s.cd.textContent = shown >= 0 ? labels[shown] : '';
+        set(s.cd, { o: shown >= 0 && sp < 1 ? 1 - sp * .5 : 0, s: lerp(1.6, 1, ease.out(sp)) });
+        const low = t >= 29.4 && t < 30.2;
+        s.vig.style.opacity = low ? .35 + .65 * Math.abs(Math.sin((t - 29.4) * Math.PI * 5)) : 0;
+        s.el.style.borderColor = low ? (blink(t, .1) ? '#EB4034' : '#3A322C') : '';
+        set(s.hearts, { o: low ? blink(t, .1) : 0 });
+    },
+});
+
+// 32,0–35,5 · Fim: fase concluída, GAME OVER e jogo salvo
+KHC.scene(32, 35.5, root => {
+    const s = root.s = {};
+    hudFor(root, 'none');
+    s.clear = el('div', 'clear', root, 'STAGE CLEAR!');
+    s.decide = el('div', 'decide', root, 'Domingo<br>decide.');
+    s.go = el('div', 'gameover', root, 'GAME OVER');
+    s.piora = el('div', 'piora', root, 'Ou piora.');
+    const sv = el('div', 'save', root);
+    const im = el('img', '', sv); im.src = LEAGUE.khc.crest;
+    s.st = el('div', 'st', sv, '');
+    el('div', 'k', sv, 'SEMANA 5 · CONTINUA');
+    s.sv = sv;
+    s.gl = el('div', 'glitch', root);
+}, (lt, t, root) => {
+    const s = root.s;
+    const c = enter(t, 32.0, .3, ease.back);
+    set(s.clear, { o: c, s: lerp(2, 1, c) });
+    const d = enter(t, 32.3, .45, ease.back);
+    set(s.decide, { o: Math.min(1, d * 2), y: (1 - d) * 120 });
+    const g = t >= 33.1 && t < 33.4;
+    s.gl.style.opacity = g ? 1 : 0;
+    const jx = g ? Math.sin(t * 211) * 26 : 0;
+    s.decide.style.textShadow = g ? `${jx}px 0 #EB4034, ${-jx}px 0 #3B82F6` : 'none';
+    s.decide.style.translate = g ? `${jx}px 0` : '0 0';
+    const go = enter(t, 33.15, .3, ease.back);
+    set(s.go, { o: go > 0 ? 1 : 0, s: lerp(2.5, 1, go) });
+    const p = enter(t, 33.35, .35, ease.back);
+    set(s.piora, { o: Math.min(1, p * 2), s: lerp(.6, 1, p) });
+    const sv = enter(t, 33.8, .35);
+    set(s.sv, { o: sv, y: (1 - sv) * 60 });
+    s.st.textContent = t < 34.5 ? 'SALVANDO' + '.'.repeat(1 + Math.floor(Math.max(0, t - 33.8) / .2) % 3) : 'JOGO SALVO ✓';
+});
+
+// Transições e fade -----------------------------------------------------------
+[[3, 'khc'], [7, 'elite'], [12, 'serie-a'], [17, 'serie-b'], [22, 'serie-c'], [27, 'serie-d'], [32, 'khc']]
+    .forEach(([p, lg]) => KHC.wipe(p, lg));
+KHC.fadeOut(35.05, 35.5);
+
+KHC.start(35.5);
+await window.ready();
+window.loaded = true;
+})();
+</script>
+</body>
+</html>

@@ -21,3 +21,5 @@ Use o template em `scripts/trilha/` (leia `scripts/trilha/README.md`). Não escr
    - nenhum buraco de volume além do fade.
    Entregue o MP4, o MP3 e o WAV com SendUserFile.
 5. Faça commit do arranjo novo na branch de trabalho.
+
+Para montar o vídeo em si (cenas animadas com os dados da Sleeper), veja `video/README.md`.
