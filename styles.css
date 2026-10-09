@@ -489,6 +489,39 @@ abbr[title] { text-decoration: none; cursor: help; }
 .card__hd h2 { font-size: var(--fs-20); color: var(--accent); }
 .card__hd p { margin: 6px 0 0; font-size: 13px; color: var(--text-2); }
 
+/* Exportar tabela (PNG): só ícone no celular, ícone + texto no desktop */
+.export-actions { display: flex; gap: var(--s-8); flex-shrink: 0; }
+.export-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-8);
+    flex-shrink: 0;
+    min-width: var(--tap);
+    height: var(--tap);
+    padding: 0 var(--s-12);
+    border: 1px solid var(--border-2);
+    border-radius: var(--r-md);
+    background: none;
+    color: var(--text-2);
+    font-weight: 800;
+    font-stretch: 75%;
+    font-size: var(--fs-12);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+.export-btn:hover { color: var(--text); border-color: var(--accent); }
+.export-btn[aria-busy="true"] { opacity: .6; cursor: progress; }
+.export-btn.is-ready { color: var(--text); border-color: var(--accent); }
+.export-btn > span:first-child { display: inline-flex; }
+@media (max-width: 1023px) {
+    .export-btn { padding: 0; }
+    .export-btn__label { display: none; }
+    .export-btn.is-ready { padding: 0 var(--s-12); }
+    .export-btn.is-ready .export-btn__label { display: inline; }
+}
+
 .crest { flex-shrink: 0; width: auto; }
 
 /* avatar (iniciais por baixo; foto da Sleeper por cima) */

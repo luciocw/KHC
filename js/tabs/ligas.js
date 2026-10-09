@@ -9,6 +9,7 @@
 //   - Temporada finalizada: ordem e medalhas pela classificação final
 //     (data/<ano>.json — 1º–4º pelos playoffs, 5º+ pela temporada regular).
 //   - Lateral: líderes (ou campeões) das outras séries.
+//   - Botões Baixar / Compartilhar: a tabela vira PNG (js/ui/export.js).
 //
 // Lê: appState.leagues, appState.season, appState.series, appState.failedLeagues
 // Depende de: config, sanitize, data, ui/helpers
@@ -121,27 +122,36 @@ function zonesFor(tier, finalized) {
 }
 
 /**
+ * Zona e linha de corte da posição i (0-based) numa série de n times.
+ * Compartilhado pela tabela e pela exportação em imagem.
+ * @returns {{zone: (''|'promo'|'playoff'|'releg'), cut: (''|'promo'|'playoff'|'releg')}}
+ */
+function zoneOf(i, n, z) {
+    let zone = '';
+    if (i < z.up) zone = 'promo';
+    else if (z.down && i >= n - z.down) zone = 'releg';
+    else if (i < z.playoff) zone = 'playoff';
+
+    let cut = '';
+    if (z.up && i === z.up - 1) cut = 'promo';
+    else if (z.down && i === n - z.down - 1) cut = 'releg';
+    else if (i === z.playoff - 1 && z.playoff < n) cut = 'playoff';
+    return { zone, cut };
+}
+
+/**
  * Linha da tabela de classificação.
  * @returns {string}
  */
 function buildStandingsRow(t, i, n, z, finalEntry) {
     const pos = i + 1;
-    let zone = '';
-    if (i < z.up) zone = 'z-promo';
-    else if (z.down && i >= n - z.down) zone = 'z-releg';
-    else if (i < z.playoff) zone = 'z-playoff';
-
-    let cut = '';
-    if (z.up && i === z.up - 1) cut = 'cut-promo';
-    else if (z.down && i === n - z.down - 1) cut = 'cut-releg';
-    else if (i === z.playoff - 1 && z.playoff < n) cut = 'cut-playoff';
-
+    const { zone, cut } = zoneOf(i, n, z);
     const trophy = finalEntry && finalEntry.trophy;
     const posCell = trophy ? medalHTML(pos) : `<span class="pos">${pos}</span>`;
     const wins = sanitizeNumber(t.wins, 0, VALIDATION.MAX_WINS);
     const losses = sanitizeNumber(t.losses, 0, VALIDATION.MAX_LOSSES);
 
-    return `<tr class="${zone} ${cut}">
+    return `<tr class="${zone ? 'z-' + zone : ''} ${cut ? 'cut-' + cut : ''}">
         <td>${posCell}</td>
         <td class="cell-team">${teamButtonHTML({ user: t.ownerName, team: t.teamName, avatarId: t.avatar })}</td>
         <td class="rec">${wins}–${losses}</td>
@@ -162,17 +172,32 @@ function promotedLabel(n) {
 }
 
 /**
+ * Itens da legenda das zonas (texto puro). Compartilhado pela tabela e pela
+ * exportação em imagem.
+ * @returns {Array<{mark: (''|'medal'|'promo'|'playoff'|'releg'), text: string}>}
+ */
+function zoneLegendItems(z, finalized) {
+    const items = [];
+    if (finalized) items.push({ mark: 'medal', text: 'Top 4 pelos playoffs' });
+    if (z.up) items.push({ mark: 'promo', text: `Subiram · ${z.up}` });
+    const sobem = !finalized && z.promote ? ` · ${promotedLabel(z.promote)} sobem` : '';
+    items.push({ mark: 'playoff', text: `Playoffs · top ${z.playoff}${sobem}` });
+    if (z.down) items.push({ mark: 'releg', text: `${finalized ? 'Caíram' : 'Rebaixamento'} · ${z.down}` });
+    if (z.isElite) items.push({ mark: '', text: 'Liga paralela: não rebaixa' });
+    return items;
+}
+
+/**
  * Legenda das zonas.
  * @returns {string}
  */
 function buildZoneLegend(z, finalized) {
-    const items = [];
-    if (finalized) items.push('<span><i class="legend__medal"></i>Top 4 pelos playoffs</span>');
-    if (z.up) items.push(`<span><i style="background:var(--zone-promo)"></i>Subiram · ${z.up}</span>`);
-    const sobem = !finalized && z.promote ? ` · ${promotedLabel(z.promote)} sobem` : '';
-    items.push(`<span><i style="background:var(--zone-playoff)"></i>Playoffs · top ${z.playoff}${sobem}</span>`);
-    if (z.down) items.push(`<span><i style="background:var(--zone-releg)"></i>${finalized ? 'Caíram' : 'Rebaixamento'} · ${z.down}</span>`);
-    if (z.isElite) items.push('<span>Liga paralela: não rebaixa</span>');
+    const items = zoneLegendItems(z, finalized).map(it => {
+        let mark = '';
+        if (it.mark === 'medal') mark = '<i class="legend__medal"></i>';
+        else if (it.mark) mark = `<i style="background:var(--zone-${it.mark})"></i>`;
+        return `<span>${mark}${escapeHtml(it.text)}</span>`;
+    });
     return `<div class="legend">${items.join('')}</div>`;
 }
 
@@ -196,6 +221,24 @@ function buildLeaderLink(league, finalized, finalIdx) {
 }
 
 /**
+ * Dados da classificação de uma série na temporada selecionada (ordem,
+ * zonas, subtítulo). Usado pela aba e pela exportação em imagem.
+ * @param {Object} league  item de appState.leagues
+ * @returns {{tier: string, meta: Object, teams: Array, z: Object, finalized: boolean,
+ *            seriesIdx: (Object|undefined), subtitle: string}}
+ */
+function standingsModel(league) {
+    const tier = league.info.tier;
+    const finalized = isSeasonFinalized();
+    const seriesIdx = finalized ? getFinalStandingsIndex()[league.info.name] : undefined;
+    const teams = sortByFinalStandings(league.teams, seriesIdx);
+    const subtitle = finalized
+        ? `${teams.length} times · classificação final ${appState.season}`
+        : `${teams.length} times · ${weekLabel() || 'Temporada em andamento'} · PPR`;
+    return { tier, meta: SERIES_META[tier], teams, z: zonesFor(tier, finalized), finalized, seriesIdx, subtitle };
+}
+
+/**
  * Renderiza a aba Ligas.
  * @returns {string} HTML
  */
@@ -208,12 +251,8 @@ function renderLigas() {
     appState.series = tier;
 
     const league = leagues.find(l => l.info.tier === tier);
-    const meta = SERIES_META[tier];
-    const finalized = isSeasonFinalized();
+    const { meta, teams, z, finalized, seriesIdx, subtitle } = standingsModel(league);
     const finalIdx = finalized ? getFinalStandingsIndex() : {};
-    const seriesIdx = finalized ? finalIdx[league.info.name] : undefined;
-    const teams = sortByFinalStandings(league.teams, seriesIdx);
-    const z = zonesFor(tier, finalized);
     const n = teams.length;
 
     const tabs = leagues.map(l => {
@@ -226,10 +265,6 @@ function renderLigas() {
     const rows = teams.map((t, i) =>
         buildStandingsRow(t, i, n, z, seriesIdx ? seriesIdx[t.ownerName] : null)).join('');
 
-    const subtitle = finalized
-        ? `${n} times · classificação final ${escapeHtml(appState.season)}`
-        : `${n} times · ${escapeHtml(weekLabel() || 'Temporada em andamento')} · PPR`;
-
     const others = leagues.filter(l => l.info.tier !== tier)
         .map(l => buildLeaderLink(l, finalized, finalIdx)).join('');
 
@@ -240,9 +275,17 @@ function renderLigas() {
             <section class="card" data-league="${meta.league}" aria-labelledby="series-title">
                 <header class="card__hd">
                     ${crestHTML(tier, 56)}
-                    <div>
+                    <div class="grow">
                         <h2 class="display" id="series-title">${escapeHtml(meta.name)}</h2>
-                        <p>${subtitle}</p>
+                        <p>${escapeHtml(subtitle)}</p>
+                    </div>
+                    <div class="export-actions" role="group" aria-label="Exportar tabela como imagem">
+                        <button type="button" class="export-btn" data-action="export-download" aria-label="Baixar tabela da ${escapeHtml(meta.name)} como imagem">
+                            <span data-icon="download" data-size="18"></span><span class="export-btn__label">Baixar</span>
+                        </button>
+                        ${canShareFiles() ? `<button type="button" class="export-btn" data-action="export-share" aria-label="Compartilhar tabela da ${escapeHtml(meta.name)} como imagem">
+                            <span data-icon="share" data-size="18"></span><span class="export-btn__label">Compartilhar</span>
+                        </button>` : ''}
                     </div>
                 </header>
                 <div class="table-wrap">

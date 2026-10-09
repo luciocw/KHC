@@ -293,6 +293,12 @@ function bindEvents() {
             return;
         }
 
+        const exportBtn = target.closest('[data-action="export-download"], [data-action="export-share"]');
+        if (exportBtn) {
+            exportStandings(exportBtn, exportBtn.getAttribute('data-action') === 'export-share' ? 'share' : 'download');
+            return;
+        }
+
         if (target.closest('[data-action="reload"]')) {
             loadData();
             return;
@@ -303,6 +309,10 @@ function bindEvents() {
             appState.topFilter = filter.getAttribute('data-top-filter');
             renderView();
         }
+    });
+
+    document.addEventListener('pointerdown', (e) => {
+        if (e.target instanceof Element && e.target.closest('[data-action="export-share"]')) prefetchExport();
     });
 
     document.addEventListener('change', (e) => {
