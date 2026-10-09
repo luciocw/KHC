@@ -8,6 +8,7 @@
 //     ou a jogar. Vencedor só é marcado na semana encerrada.
 //   - Playoffs: rótulos pelo chaveamento (Final, 3º lugar, Semifinal…);
 //     jogos fora do chaveamento = Consolação; sem jogo = lista "Sem confronto".
+//   - Destaques: maior pontuação, maior vitória, jogo mais apertado.
 //   - Botões Baixar / Compartilhar: os confrontos viram PNG (ui/export.js).
 //
 // Dados sob demanda (só a série/semana aberta), em memória; loadData() limpa.
@@ -99,7 +100,8 @@ function playoffLabel(game, totalRounds) {
 /**
  * Confrontos prontos para desenhar (HTML e PNG).
  * @returns {{games: Array<{label: string, a: Object, b: Object, winner: (''|'a'|'b')}>,
- *            byes: Array<Object>, status: string, subtitle: string, isPlayoff: boolean}}
+ *            byes: Array<Object>, status: string, subtitle: string, isPlayoff: boolean,
+ *            highlights: Array<{label: string, value: string, who: string}>}}
  */
 function roundModel(league, round) {
     const { settings, week, data } = round;
@@ -139,7 +141,48 @@ function roundModel(league, round) {
 
     const statusText = { final: 'Encerrada', live: 'Em andamento', upcoming: 'A jogar' }[status];
     const weekText = isPlayoff ? `Playoffs · Semana ${week}` : `Semana ${week} de ${settings.playoffStart - 1}`;
-    return { games, byes, status, isPlayoff, subtitle: `${weekText} · ${statusText}` };
+    return { games, byes, status, isPlayoff, subtitle: `${weekText} · ${statusText}`, highlights: roundHighlights(games, status) };
+}
+
+/**
+ * Destaques da rodada: maior pontuação, maior vitória e jogo mais
+ * apertado. Semana em andamento: parciais (só jogos que já pontuaram).
+ * @returns {Array<{label: string, value: string, who: string}>} vazio se não houver
+ */
+function roundHighlights(games, status) {
+    if (status === 'upcoming') return [];
+    const live = status === 'live';
+    const played = games.filter(g => g.a.points > 0 || g.b.points > 0);
+    if (!played.length) return [];
+
+    const sides = played.flatMap(g => [g.a, g.b]);
+    const top = sides.reduce((x, y) => (y.points > x.points ? y : x));
+    const margin = g => Math.abs(g.a.points - g.b.points);
+    const lead = g => (g.a.points >= g.b.points ? g.a : g.b);
+    const widest = played.reduce((x, y) => (margin(y) > margin(x) ? y : x));
+    const both = played.filter(g => g.a.points > 0 && g.b.points > 0);
+    const closest = both.length ? both.reduce((x, y) => (margin(y) < margin(x) ? y : x)) : null;
+
+    const items = [
+        { label: 'Maior pontuação', value: fmtPts(top.points), who: top.team.teamName },
+        { label: live ? 'Maior vantagem' : 'Maior vitória', value: `+${fmtPts(margin(widest))}`, who: lead(widest).team.teamName }
+    ];
+    if (closest && closest !== widest) {
+        items.push({ label: 'Mais apertado', value: fmtPts(margin(closest)), who: `${closest.a.team.teamName} × ${closest.b.team.teamName}` });
+    }
+    return items;
+}
+
+/** Faixa de destaques da rodada. */
+function highlightsHTML(items, live) {
+    if (!items.length) return '';
+    return `<div class="highlights" aria-label="Destaques da rodada${live ? ' (parcial)' : ''}">
+        ${items.map(it => `<div class="highlight">
+            <span class="eyebrow">${escapeHtml(it.label)}${live ? ' · parcial' : ''}</span>
+            <b class="num">${escapeHtml(it.value)}</b>
+            <span class="highlight__who" dir="auto">${escapeHtml(it.who)}</span>
+        </div>`).join('')}
+    </div>`;
 }
 
 /** Lado de um confronto (time + pontos). */
@@ -224,7 +267,7 @@ function renderRodada() {
             ? `<p class="match-byes"><b>Sem confronto:</b> ${m.byes.map(s => escapeHtml(s.team.teamName)).join(' · ')}</p>`
             : '';
         body = games
-            ? `<ul class="matches">${games}</ul>${byes}`
+            ? `${highlightsHTML(m.highlights, m.status === 'live')}<ul class="matches">${games}</ul>${byes}`
             : stateHTML({ icon: 'calendar', title: 'Sem confrontos', text: 'Esta semana não tem jogos nesta série.' });
         if (games) {
             actions = `<div class="export-actions" role="group" aria-label="Exportar confrontos como imagem">

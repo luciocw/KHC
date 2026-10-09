@@ -347,7 +347,8 @@ async function drawRoundCanvas(league, round) {
 
     const ROW_H = m.isPlayoff ? 84 : 72;
     const BYES_H = m.byes.length ? 46 : 0;
-    const H = EXPORT_HEAD_H + m.games.length * ROW_H + BYES_H;
+    const HL_H = m.highlights.length ? 74 : 0;
+    const H = EXPORT_HEAD_H + HL_H + m.games.length * ROW_H + BYES_H;
     const { canvas, ctx } = startExportCard(H, c, crest, meta.name, m.subtitle);
 
     const mid = EXPORT_W / 2;
@@ -355,6 +356,36 @@ async function drawRoundCanvas(league, round) {
     const nameMax = mid - 70 - (PAD + AV + 10);
     let y = EXPORT_HEAD_H;
     hLine(ctx, 0, EXPORT_W, y - 1, c.border);
+
+    // Destaques: uma coluna por item, filete na cor da liga
+    if (HL_H) {
+        const n = m.highlights.length;
+        const colW = (EXPORT_W - PAD * 2 - (n - 1) * 8) / n;
+        const live = m.status === 'live';
+        m.highlights.forEach((it, i) => {
+            const x = PAD + i * (colW + 8);
+            const top = y + 12;
+            const h = HL_H - 24;
+            roundRect(ctx, x, top, colW, h, 8);
+            ctx.fillStyle = c.surface2;
+            ctx.fill();
+            ctx.fillStyle = c.accent;
+            ctx.fillRect(x, top, 3, h);
+            ctx.fillStyle = c.text3;
+            setFont(ctx, 800, 11, 'condensed');
+            ctx.fillText((it.label + (live ? ' · parcial' : '')).toUpperCase().split('').join('\u200A'), x + 14, top + 16);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = c.text;
+            setFont(ctx, 900, 20, 'condensed');
+            ctx.fillText(it.value, x + colW - 12, top + h / 2);
+            const vw = ctx.measureText(it.value).width;
+            ctx.textAlign = 'left';
+            setFont(ctx, 700, 13);
+            ctx.fillText(fitText(ctx, it.who, colW - 14 - vw - 24), x + 14, top + 35);
+        });
+        y += HL_H;
+        hLine(ctx, 0, EXPORT_W, y - 1, c.border);
+    }
 
     m.games.forEach((g, gi) => {
         const top = y + gi * ROW_H;

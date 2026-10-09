@@ -219,6 +219,8 @@ abbr[title] { text-decoration: none; cursor: help; }
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border);
+    /* app na tela inicial do iPhone: header abaixo do relógio/notch */
+    padding-top: env(safe-area-inset-top);
 }
 
 .site-header__in {
@@ -816,6 +818,45 @@ abbr[title] { text-decoration: none; cursor: help; }
     cursor: pointer;
 }
 .week-nav__select select:hover { border-color: var(--accent); }
+
+.highlights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--s-8);
+    padding: var(--s-12) var(--s-12) 0;
+}
+@media (min-width: 1024px) { .highlights { padding: var(--s-16) var(--s-16) 0; } }
+.highlight {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: 2px var(--s-12);
+    padding: 10px 14px;
+    border-radius: var(--r-md);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    min-width: 0;
+}
+.highlight .eyebrow { grid-column: 1; }
+.highlight b {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    font-weight: 900;
+    font-stretch: 75%;
+    font-size: var(--fs-20);
+    color: var(--text);
+}
+.highlight__who {
+    grid-column: 1;
+    font-size: var(--fs-14);
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 .matches {
     list-style: none;
