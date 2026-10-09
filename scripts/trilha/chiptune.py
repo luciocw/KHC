@@ -526,6 +526,7 @@ def run(track, argv=None):
             lufs = float(next(it))
         else:
             out = os.path.splitext(a)[0]
+    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
         raw = os.path.join(tmp, "raw.wav")
         _write_wav(raw, track.mixdown(cuts=cuts))
