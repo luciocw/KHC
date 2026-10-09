@@ -114,7 +114,7 @@ function cardsFor(root, tier) {
     return { box, cards };
 }
 /** Entradas: slide | zoom | drop | float | side */
-function drawCards(c, lt, a, b, style) {
+function drawCards(c, lt, a, b, style, wall = lt) {
     const n = c.cards.length;
     c.cards.forEach((cd, i) => {
         const t0 = lerp(a, b, n > 1 ? i / (n - 1) : 0);
@@ -124,7 +124,7 @@ function drawCards(c, lt, a, b, style) {
         if (style === 'zoom') o.s = lerp(.4, 1, ease.back(Math.min(1, p)));
         if (style === 'drop') o.y = (1 - p) * -900;
         if (style === 'side') o.x = (1 - p) * (i % 2 ? 1100 : -1100);
-        if (style === 'float') { o.y = (1 - p) * 120 + Math.sin(lt * 2.2 + i * 1.3) * 10; o.r = Math.sin(lt * 1.7 + i) * .7; }
+        if (style === 'float') { o.y = (1 - p) * 120 + Math.sin(wall * 2.2 + i * 1.3) * 10; o.r = Math.sin(wall * 1.7 + i) * .7; }
         set(cd.card, o);
     });
 }
@@ -245,14 +245,14 @@ function leagueScene(a, b, tier, cfg) {
         });
         s.cap = KHC.caption(root, cfg.caption[0], cfg.caption[1]);
         if (cfg.build) cfg.build(s, root);
-    }, (lt, t, root) => {
+    }, (lt, t, root, wall) => {
         const s = root.s;
         drawHead(s.head, lt);
-        drawCards(s.c, t, cfg.enter[0], cfg.enter[1], cfg.style);
+        drawCards(s.c, t, cfg.enter[0], cfg.enter[1], cfg.style, wall);
         countAll(s.c, t, cfg.count[0], cfg.count[1]);
         s.stamps.forEach(st => KHC.drawStamp(st.el, t, st.at));
         KHC.drawCaption(s.cap, t, cfg.capAt);
-        if (cfg.draw) cfg.draw(s, lt, t);
+        if (cfg.draw) cfg.draw(s, lt, t, wall);
     });
 }
 
@@ -279,11 +279,11 @@ leagueScene(12, 17, 'serie-a', {
     stamps: [{ on: 'Public Enemy #1', text: 'Maior placar do TNF', at: 14.2, rot: -2.5 }],
     caption: ['79.2 × 0.0 na quinta.', 'Domingo é só protocolo.'], capAt: 15.4,
     build(s, root) { s.up = el('div', 'oneup', root, '1UP'); },
-    draw(s, lt, t) {
+    draw(s, lt, t, wall) {
         const pe = rowOf(s.c, 'Public Enemy #1');
         const on = t >= 14.2;
-        pe.row.style.filter = on ? `hue-rotate(${(t - 14.2) * 540}deg) saturate(1.6)` : '';
-        cardOf(s.c, 'Public Enemy #1').card.style.borderColor = on ? `hsl(${(t * 400) % 360} 90% 60%)` : '';
+        pe.row.style.filter = on ? `hue-rotate(${(wall % 2) * 540}deg) saturate(1.6)` : '';
+        cardOf(s.c, 'Public Enemy #1').card.style.borderColor = on ? `hsl(${(wall * 400) % 360} 90% 60%)` : '';
         const u = prog(t, 15.2, 15.95);
         set(s.up, { o: u > 0 && u < 1 ? 1 - u * .6 : 0, x: 110, y: 520 + 84 - ease.out(u) * 150, s: 1 + (1 - u) * .3 });
     },
@@ -325,11 +325,11 @@ leagueScene(22, 27, 'serie-c', {
             return { b, x: (i * 263) % 1000 + 30, sp: 180 + (i * 53) % 160, off: (i * .37) % 3 };
         });
     },
-    draw(s, lt, t) {
+    draw(s, lt, t, wall) {
         s.bub.forEach((o, i) => {
-            const burst = i < 8 ? prog(t, 22.6 + i * .08, 23.6 + i * .08) : ((lt + o.off) % 3) / 3;
+            const burst = i < 8 ? prog(t, 22.6 + i * .08, 23.6 + i * .08) : ((wall + o.off) % 3) / 3;
             const y = 1950 - burst * (1950 + 100);
-            set(o.b, { o: burst > 0 && burst < 1 ? .9 : 0, x: o.x + Math.sin(t * 3 + i) * 20, y });
+            set(o.b, { o: burst > 0 && burst < 1 ? .9 : 0, x: o.x + Math.sin(wall * 3 + i) * 20, y });
         });
         const k = rowOf(s.c, 'Kelce Gremista'), card = cardOf(s.c, 'Kelce Gremista');
         const d = prog(t, 24.5, 25.15);
@@ -337,7 +337,7 @@ leagueScene(22, 27, 'serie-c', {
         set(k.av, { s: lerp(1, .55, ease.out(d)) + wob, sy: lerp(1, .4, ease.out(d)) + wob, y: d * 14 });
         const g = prog(t, 25.2, 25.8);
         k.row.style.filter = g > 0 ? `grayscale(${g}) brightness(${1 - g * .3})` : '';
-        card.card.style.translate = `0 ${Math.sin(t * 2.2) * 6}px`;
+        card.card.style.translate = `0 ${Math.sin(wall * 2.2) * 6}px`;
     },
 });
 
@@ -403,6 +403,10 @@ KHC.scene(32, 35.5, root => {
 [[3, 'khc'], [7, 'elite'], [12, 'serie-a'], [17, 'serie-b'], [22, 'serie-c'], [27, 'serie-d'], [32, 'khc']]
     .forEach(([p, lg]) => KHC.wipe(p, lg));
 KHC.fadeOut(35.05, 35.5);
+
+// Pausas de leitura (tempo da timeline, duração). Múltiplos de 0,2 s para a
+// trilha (150 BPM) continuar na grade; a mesma lista está em scripts/trilha/semana5.py.
+KHC.hold([[2.5, 0.6], [6.6, 0.8], [8.9, 1.6], [13.95, 1.6], [18.75, 1.6], [23.85, 1.6], [29.25, 1.6]]);
 
 KHC.start(35.5);
 await window.ready();

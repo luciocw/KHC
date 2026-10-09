@@ -6,7 +6,8 @@
 // quadro e grava com o ffmpeg; no navegador, ?play toca em tempo real.
 //
 // Cada vídeo define cenas: KHC.scene(início, fim, montar, desenhar). `montar`
-// cria o DOM uma vez; `desenhar(lt, t, root)` recebe o tempo local da cena.
+// cria o DOM uma vez; `desenhar(lt, t, root, wall)` recebe o tempo local da cena, o da
+// timeline e o do vídeo (`wall`, que não congela nas pausas de leitura).
 // =============================================================================
 (function () {
     const W = 1080, H = 1920;
@@ -74,13 +75,33 @@
     const overlays = [];  // desenhados por cima de tudo (transições, HUD…)
     function overlay(draw) { overlays.push(draw); }
 
-    function seek(t) {
+    // Pausas de leitura: [instante da timeline, duração]. Durante a pausa o
+    // tempo da timeline congela (o quadro fica parado para leitura); efeitos
+    // ambientes usam `wall`, o tempo real do vídeo, e seguem se mexendo.
+    let holds = [];
+    function hold(list) { holds = list.slice().sort((a, b) => a[0] - b[0]); }
+    const holdTotal = () => holds.reduce((a, h) => a + h[1], 0);
+    /** Tempo do vídeo → tempo da timeline. */
+    function timeline(wall) {
+        let acc = 0;
+        for (const [at, d] of holds) {
+            if (wall <= at + acc) break;
+            if (wall < at + acc + d) return at;
+            acc += d;
+        }
+        return wall - acc;
+    }
+    /** Tempo da timeline → tempo do vídeo (útil para a trilha). */
+    function videoTime(t) { return t + holds.filter(h => h[0] < t).reduce((a, h) => a + h[1], 0); }
+
+    function seek(wall) {
+        const t = timeline(wall);
         for (const s of scenes) {
             const on = t >= s.a && t < s.b;
             s.root.style.display = on ? 'block' : 'none';
-            if (on) s.draw(t - s.a, t, s.root);
+            if (on) s.draw(t - s.a, t, s.root, wall);
         }
-        for (const d of overlays) d(t);
+        for (const d of overlays) d(t, wall);
     }
 
     // --------------------------------------------------------- componentes
@@ -188,11 +209,12 @@
 
     function start(duration) {
         mount();
+        duration += holdTotal();
         window.seek = seek;
         window.duration = duration;
         window.ready = ready;
         const q = new URLSearchParams(location.search);
-        if (q.has('t')) seek(parseFloat(q.get('t')));
+        if (q.has('t')) seek(parseFloat(q.get('t')));  // tempo do vídeo
         else if (q.has('play')) {
             const t0 = performance.now();
             const loop = () => { const t = (performance.now() - t0) / 1000; seek(t % duration); requestAnimationFrame(loop); };
@@ -200,7 +222,7 @@
         } else seek(0);
     }
 
-    window.KHC = { W, H, LEAGUE, clamp, prog, lerp, ease, enter, blink, shake, el, esc, set, fmt,
+    window.KHC = { W, H, LEAGUE, hold, timeline, videoTime, clamp, prog, lerp, ease, enter, blink, shake, el, esc, set, fmt,
         scene, overlay, hud, matchCard, countPoints, stamp, drawStamp, caption, drawCaption,
         wipe, fadeOut, start };
 })();
