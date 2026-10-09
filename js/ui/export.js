@@ -1,6 +1,6 @@
 // =============================================================================
-// UI / EXPORT — Exporta a classificação (Ligas) ou os confrontos (Rodada)
-// de uma série como imagem (PNG).
+// UI / EXPORT — Exporta como imagem (PNG): a classificação (Ligas), os
+// confrontos (Rodada) de uma série ou o perfil de um jogador.
 //
 // A tabela é redesenhada num <canvas> com largura fixa (sempre com a coluna
 // PC, mesmo no celular), no visual do card da aba Ligas. Cores lidas dos
@@ -98,11 +98,11 @@ function drawMedal(ctx, cx, cy, pos, c) {
     ctx.textAlign = 'left';
 }
 
-/** Avatar 34×34 arredondado: foto ou iniciais. */
-function drawAvatar(ctx, x, y, img, name, c) {
-    const s = 34;
+/** Avatar arredondado (34px por padrão): foto ou iniciais. */
+function drawAvatar(ctx, x, y, img, name, c, size) {
+    const s = size || 34;
     ctx.save();
-    roundRect(ctx, x, y, s, s, 8);
+    roundRect(ctx, x, y, s, s, s > 40 ? 12 : 8);
     ctx.fillStyle = c.surface3;
     ctx.fill();
     ctx.clip();
@@ -113,7 +113,7 @@ function drawAvatar(ctx, x, y, img, name, c) {
         ctx.drawImage(img, x + (s - w) / 2, y + (s - h) / 2, w, h);
     } else {
         ctx.fillStyle = c.text2;
-        setFont(ctx, 900, 13, 'condensed');
+        setFont(ctx, 900, Math.round(s * 0.38), 'condensed');
         ctx.textAlign = 'center';
         ctx.fillText(initialsOf(name), x + s / 2, y + s / 2 + 1);
         ctx.textAlign = 'left';
@@ -162,10 +162,11 @@ const EXPORT_HEAD_H = 92;
 
 /**
  * Canvas com o card (fundo, filete da liga, escudo, nome e subtítulo).
+ * `logo` opcional ({w, draw(ctx, x, y)}) substitui o escudo (ex.: avatar).
  * Deixa o contexto recortado no card; feche com finishExportCard().
  * @returns {{canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D}}
  */
-function startExportCard(H, c, crest, title, subtitle) {
+function startExportCard(H, c, crest, title, subtitle, logo) {
     const PAD = 16;
     const canvas = document.createElement('canvas');
     canvas.width = EXPORT_W * EXPORT_SCALE;
@@ -184,8 +185,9 @@ function startExportCard(H, c, crest, title, subtitle) {
     ctx.fillStyle = c.accent;
     ctx.fillRect(0, 0, EXPORT_W, 4);
 
-    const crestH = 56, crestW = Math.round(crestH * 141 / 160);
-    if (crest) ctx.drawImage(crest, PAD, 4 + 16, crestW, crestH);
+    const crestH = 56, crestW = logo ? logo.w : Math.round(crestH * 141 / 160);
+    if (logo) logo.draw(ctx, PAD, 4 + 16);
+    else if (crest) ctx.drawImage(crest, PAD, 4 + 16, crestW, crestH);
     const tx = PAD + crestW + 14;
     ctx.fillStyle = c.accent;
     setFont(ctx, 900, 20, 'expanded');
@@ -452,6 +454,153 @@ async function drawRoundCanvas(league, round) {
     return canvas;
 }
 
+/** Chip arredondado com texto (ex.: "EM ANDAMENTO", "5º"). Desenha à esquerda de xRight. */
+function drawChip(ctx, xRight, cy, text, bg, fg) {
+    setFont(ctx, 800, 12, 'condensed');
+    const label = text.toUpperCase().split('').join('\u200A');
+    const w = ctx.measureText(label).width + 20;
+    roundRect(ctx, xRight - w, cy - 12, w, 24, 4);
+    ctx.fillStyle = bg;
+    ctx.fill();
+    ctx.fillStyle = fg;
+    ctx.textAlign = 'center';
+    ctx.fillText(label, xRight - w / 2, cy + 1);
+    ctx.textAlign = 'left';
+}
+
+/** Rótulo de seção (eyebrow). */
+function drawEyebrow(ctx, text, x, y, c) {
+    ctx.fillStyle = c.text3;
+    setFont(ctx, 800, 12, 'condensed');
+    ctx.fillText(text.toUpperCase().split('').join('\u200A'), x, y);
+}
+
+/**
+ * Desenha o perfil do jogador: avatar, séries atuais, conquistas, carreira
+ * e histórico (escudo + ano · série + time · V–D · pts + medalha/posição).
+ * @param {string} username
+ * @returns {Promise<HTMLCanvasElement>}
+ */
+async function drawProfileCanvas(username) {
+    const p = profileModel(username);
+    const c = exportPalette(null);
+    const tiers = [...new Set(p.history.map(h => seriesIdToTier(h.serie)).filter(t => SERIES_META[t]))];
+    const [{ avatars: [avatar] }, ...crests] = await Promise.all([
+        loadExportAssets(null, [p.avatarId]),
+        ...tiers.map(t => loadExportImage(`assets/logo/png/${SERIES_META[t].crest}`, false))
+    ]);
+    const crestOf = Object.fromEntries(tiers.map((t, i) => [t, crests[i]]));
+
+    const PAD = 16, GAP = 8, LABEL_H = 36;
+    const MEDAL_H = 96, STAT_H = 72, ROW_H = 56;
+    const H = EXPORT_HEAD_H + LABEL_H + MEDAL_H + LABEL_H + STAT_H
+        + (p.history.length ? LABEL_H + p.history.length * ROW_H : 0) + PAD;
+
+    const logo = { w: 56, draw: (ctx, x, y) => drawAvatar(ctx, x, y, avatar, p.username, c, 56) };
+    const { canvas, ctx } = startExportCard(H, c, null, p.username, '', logo);
+
+    // Séries atuais (pílulas na cor da liga), no lugar do subtítulo
+    let px = PAD + 56 + 14;
+    p.current.forEach(t => {
+        const meta = SERIES_META[t];
+        const color = cssToken(`--league-${meta.league}`);
+        setFont(ctx, 800, 12, 'condensed');
+        const label = meta.short.toUpperCase().split('').join('\u200A');
+        const w = ctx.measureText(label).width + 16;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, px, 54, w, 22, 4);
+        ctx.stroke();
+        ctx.fillStyle = color;
+        ctx.fillText(label, px + 8, 65);
+        px += w + 6;
+    });
+
+    let y = EXPORT_HEAD_H;
+    hLine(ctx, 0, EXPORT_W, y - 1, c.border);
+    const tileW = n => (EXPORT_W - PAD * 2 - GAP * (n - 1)) / n;
+    const tile = (x, top, w, h) => {
+        roundRect(ctx, x, top, w, h, 8);
+        ctx.fillStyle = c.surface2;
+        ctx.fill();
+    };
+
+    // Conquistas
+    drawEyebrow(ctx, 'Conquistas', PAD, y + LABEL_H / 2 + 2, c);
+    y += LABEL_H;
+    const mw = tileW(4);
+    MEDAL_KEYS.forEach((k, i) => {
+        const v = p.trophies[k] || 0;
+        const x = PAD + i * (mw + GAP);
+        tile(x, y, mw, MEDAL_H - 8);
+        const cx = x + mw / 2;
+        if (v) {
+            drawMedal(ctx, cx, y + 22, i + 1, c);
+        } else {
+            ctx.fillStyle = c.surface3;
+            ctx.beginPath();
+            ctx.arc(cx, y + 22, 13, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = c.text3;
+            setFont(ctx, 900, 14, 'condensed');
+            ctx.textAlign = 'center';
+            ctx.fillText(String(i + 1), cx, y + 23);
+        }
+        ctx.textAlign = 'center';
+        ctx.fillStyle = v ? c.text : c.text3;
+        setFont(ctx, 900, 22, 'condensed');
+        ctx.fillText(String(v), cx, y + 52);
+        setFont(ctx, 400, 12);
+        ctx.fillStyle = v ? c.text2 : c.text3;
+        ctx.fillText(MEDAL_LABELS[k], cx, y + 73);
+        ctx.textAlign = 'left';
+    });
+    y += MEDAL_H;
+
+    // Carreira
+    drawEyebrow(ctx, 'Carreira', PAD, y + LABEL_H / 2 - 2, c);
+    y += LABEL_H - 4;
+    const sw = tileW(4);
+    [['Temporadas', String(p.stats.seasons)], ['V–D', `${p.stats.wins}–${p.stats.losses}`],
+     ['Aproveitamento', p.winRate], ['Pontos totais', fmtPts(p.stats.pts)]].forEach(([k, v], i) => {
+        const x = PAD + i * (sw + GAP);
+        tile(x, y, sw, STAT_H - 8);
+        drawEyebrow(ctx, k, x + 14, y + 20, c);
+        ctx.fillStyle = c.text;
+        setFont(ctx, 900, 24, 'condensed');
+        ctx.fillText(v, x + 14, y + 44);
+    });
+    y += STAT_H;
+
+    // Histórico
+    if (p.history.length) {
+        drawEyebrow(ctx, 'Histórico', PAD, y + LABEL_H / 2, c);
+        y += LABEL_H;
+        hLine(ctx, PAD, EXPORT_W - PAD, y - 1, c.border);
+        p.history.forEach((h, i) => {
+            const top = y + i * ROW_H;
+            const cy = top + ROW_H / 2;
+            if (i < p.history.length - 1) hLine(ctx, PAD, EXPORT_W - PAD, top + ROW_H - 1, c.border);
+            const crest = crestOf[seriesIdToTier(h.serie)];
+            if (crest) ctx.drawImage(crest, PAD, cy - 17, 30, 34);
+            ctx.fillStyle = c.text;
+            setFont(ctx, 700, 15);
+            ctx.fillText(`${h.season} · ${seriesNameById(h.serie)}`, PAD + 44, cy - 9);
+            ctx.fillStyle = c.text3;
+            setFont(ctx, 400, 13);
+            ctx.fillText(fitText(ctx, `${h.team} · ${h.w}–${h.l} · ${fmtPts(h.pts)} pts`, EXPORT_W - PAD * 2 - 44 - 150), PAD + 44, cy + 11);
+
+            const xr = EXPORT_W - PAD;
+            if (h.active) drawChip(ctx, xr, cy, 'Em andamento', 'rgba(235, 64, 52, .15)', '#FF7A6E');
+            else if (h.rank >= 1 && h.rank <= 4) drawMedal(ctx, xr - 13, cy, h.rank, c);
+            else if (h.rank) drawChip(ctx, xr, cy, `${h.rank}º`, c.surface3, c.text);
+        });
+    }
+
+    finishExportCard(ctx, H, c);
+    return canvas;
+}
+
 let _exportCache = null;   // { key, blob } da última imagem gerada
 
 /**
@@ -469,11 +618,21 @@ function canShareFiles() {
 }
 
 /**
- * O que exportar na aba atual: classificação (Ligas) ou confrontos (Rodada).
+ * O que exportar: perfil aberto, classificação (Ligas) ou confrontos (Rodada).
  * A chave do cache muda quando os dados recarregam.
  * @returns {{key: string, name: string, title: string, draw: function(): Promise<HTMLCanvasElement>}|null}
  */
 function exportTarget() {
+    const user = typeof currentDrawerUser === 'function' ? currentDrawerUser() : null;
+    if (user) {
+        const slug = user.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'jogador';
+        return {
+            key: `perfil|${user}|${appState.lastUpdated || ''}`,
+            name: `khc-perfil-${slug}.png`,
+            title: `${user} · Ultimate League KHC`,
+            draw: () => drawProfileCanvas(user)
+        };
+    }
     const league = appState.leagues.find(l => l.info.tier === appState.series);
     if (!league) return null;
     const tier = league.info.tier;
