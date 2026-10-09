@@ -975,6 +975,10 @@ abbr[title] { text-decoration: none; cursor: help; }
 }
 
 /* === POWER === */
+.view-actions { display: flex; justify-content: flex-end; margin-bottom: var(--s-12); }
+.view-actions .export-btn__label { display: inline; }
+.view-actions .export-btn { padding: 0 var(--s-12); }
+
 .note {
     display: flex;
     gap: 10px;

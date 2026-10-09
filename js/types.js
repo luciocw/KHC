@@ -117,6 +117,7 @@
  * Resultado da derivação do Power Ranking.
  * @property {Team} team
  * @property {number} pwr               Score 0-100
+ * @property {number} strength          All-play 0-1 (força)
  * @property {Tier} tier
  * @property {number} rank              Posição no ranking power
  */

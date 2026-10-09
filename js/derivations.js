@@ -5,8 +5,9 @@
 // devolvem dados. Facilita teste, reuso entre tabs, e composição.
 //
 // Conceitos:
-//   • pwrScore       — Power Score 0-100 de um time, dado contexto (max/min pts)
-//   • tierForPwr     — Mapeia score → tier S/A/B/C/D (limites do handoff)
+//   • powerRanking   — Power Score 0-100 (força all-play + V–D + fase) e
+//                      tiers S/A/B/C/D por posição (allPlayRates, percentiles,
+//                      tierForRank)
 //   • legendsAggregator — Agrega trofeus cross-season para a aba Lendas
 //   • careerForUser  — Histórico cross-season de um jogador para o Drawer
 //
@@ -16,72 +17,134 @@
 // --- POWER SCORE ---
 
 /**
- * Pesos do Power Score. Documentados em handoff:
- *   pwr = winRate*60 + ptsNormalizado*40
- * Win rate puxa mais que pontos para refletir que vitórias decidem playoffs.
+ * Pesos do Power Score (0–100):
+ *   força         50% — all-play: em cada semana, de quantos times da liga
+ *                       inteira (Séries A–D) a pontuação venceria. Tira a
+ *                       sorte do adversário e compara séries de forma justa.
+ *   aproveitamento 30% — V–D real (é o que leva aos playoffs).
+ *   fase          20% — média das últimas 3 semanas, em percentil.
  */
-const PWR_WEIGHTS = Object.freeze({ winRate: 0.6, ptsNorm: 0.4 });
+const PWR_WEIGHTS = Object.freeze({ strength: 0.5, winRate: 0.3, form: 0.2 });
+const PWR_FORM_WEEKS = 3;
 
 /**
- * Calcula o Power Score de um time.
- * @param {Team} team
- * @param {{maxPts: number, minPts: number}} ctx
- * @returns {number} Score arredondado a 1 casa decimal, no intervalo [0, 100]
+ * All-play por time: fração dos confrontos possíveis, semana a semana,
+ * contra todos os outros times, que a pontuação venceria (empate = ½).
+ * @param {Object<string, number[]>} weekly  chave do time → pontos por semana
+ * @returns {Object<string, number>} chave → [0, 1]
  */
-function pwrScore(team, ctx) {
-    const games = team.w + team.l;
-    const winRate = games > 0 ? team.w / games : 0;
-
-    const range = ctx.maxPts - ctx.minPts;
-    const ptsNorm = range > 0 ? (team.pts - ctx.minPts) / range : 0;
-
-    const raw = (winRate * PWR_WEIGHTS.winRate + ptsNorm * PWR_WEIGHTS.ptsNorm) * 100;
-    return Math.round(raw * 10) / 10;
+function allPlayRates(weekly) {
+    const keys = Object.keys(weekly);
+    const weeks = Math.max(0, ...keys.map(k => weekly[k].length));
+    const wins = {}, games = {};
+    keys.forEach(k => { wins[k] = 0; games[k] = 0; });
+    for (let w = 0; w < weeks; w++) {
+        const played = keys.filter(k => typeof weekly[k][w] === 'number');
+        played.forEach(k => {
+            const pts = weekly[k][w];
+            played.forEach(o => {
+                if (o === k) return;
+                const op = weekly[o][w];
+                wins[k] += pts > op ? 1 : pts === op ? 0.5 : 0;
+                games[k] += 1;
+            });
+        });
+    }
+    const out = {};
+    keys.forEach(k => { out[k] = games[k] ? wins[k] / games[k] : 0; });
+    return out;
 }
 
 /**
- * Mapa de tier por score (handoff do redesign):
- *   S Favoritos ≥ 80 · A Candidatos 65–79 · B Meio de tabela 50–64 ·
- *   C Pressionados 35–49 · D Lanternas < 35
- * @param {number} score
+ * Percentil de cada valor dentro da lista: fração dos outros valores
+ * menores (empate = ½). Robusto a uma semana fora da curva.
+ * @param {Object<string, number>} values
+ * @returns {Object<string, number>} [0, 1]
+ */
+function percentiles(values) {
+    const keys = Object.keys(values);
+    const out = {};
+    keys.forEach(k => {
+        if (keys.length < 2) { out[k] = 0.5; return; }
+        let below = 0;
+        keys.forEach(o => {
+            if (o === k) return;
+            below += values[o] < values[k] ? 1 : values[o] === values[k] ? 0.5 : 0;
+        });
+        out[k] = below / (keys.length - 1);
+    });
+    return out;
+}
+
+/**
+ * Tiers por posição: 10% S · 20% A · 40% B · 20% C · 10% D
+ * (40 times → 4 · 8 · 16 · 8 · 4).
+ * @param {number} rank 1-based
+ * @param {number} n total de times
  * @returns {Tier}
  */
-function tierForPwr(score) {
-    if (score >= 80) return 'S';
-    if (score >= 65) return 'A';
-    if (score >= 50) return 'B';
-    if (score >= 35) return 'C';
-    return 'D';
+function tierForRank(rank, n) {
+    const s = Math.max(1, Math.round(n * 0.1));
+    const a = Math.round(n * 0.2);
+    const d = Math.max(1, Math.round(n * 0.1));
+    const c = Math.round(n * 0.2);
+    if (rank <= s) return 'S';
+    if (rank <= s + a) return 'A';
+    if (rank > n - d) return 'D';
+    if (rank > n - d - c) return 'C';
+    return 'B';
 }
 
 /**
- * Aplica pwr + tier a uma lista de times. Retorna nova lista ordenada por pwr desc.
- * @param {Team[]} teams
- * @returns {PowerRow[]}
+ * Power Ranking. Cada time traz `key` e, quando disponíveis, os pontos por
+ * semana em `weekly` (chave → pontos). Sem placares semanais, força e fase
+ * usam o percentil dos pontos da temporada (prévia).
+ * @param {Team[]} teams  { key, w, l, pts, ... }
+ * @param {Object<string, number[]>|null} weekly
+ * @returns {PowerRow[]} ordenadas por pwr desc, com rank e tier
  */
-function powerRanking(teams) {
+function powerRanking(teams, weekly) {
     if (teams.length === 0) return [];
+    const hasWeekly = !!weekly && teams.every(t => weekly[t.key] && weekly[t.key].length);
 
-    const allPts = teams.map(t => t.pts);
-    const ctx = {
-        maxPts: Math.max(...allPts),
-        minPts: Math.min(...allPts)
-    };
+    let strength, form;
+    if (hasWeekly) {
+        const pool = {};
+        teams.forEach(t => { pool[t.key] = weekly[t.key]; });
+        strength = allPlayRates(pool);
+        const recent = {};
+        teams.forEach(t => {
+            const last = weekly[t.key].slice(-PWR_FORM_WEEKS);
+            recent[t.key] = last.reduce((x, y) => x + y, 0) / last.length;
+        });
+        form = percentiles(recent);
+    } else {
+        const season = {};
+        teams.forEach(t => { season[t.key] = t.pts; });
+        strength = form = percentiles(season);
+    }
 
-    const scored = teams.map(team => ({
-        team,
-        pwr: pwrScore(team, ctx),
-        tier: /** @type {Tier} */ ('D'), // placeholder, sobrescrito abaixo
-        rank: 0
-    }));
-
-    scored.sort((a, b) => b.pwr - a.pwr);
-    scored.forEach((row, i) => {
-        row.rank = i + 1;
-        row.tier = tierForPwr(row.pwr);
+    const rows = teams.map(team => {
+        const games = team.w + team.l;
+        const winRate = games > 0 ? team.w / games : 0;
+        const raw = (strength[team.key] * PWR_WEIGHTS.strength
+            + winRate * PWR_WEIGHTS.winRate
+            + form[team.key] * PWR_WEIGHTS.form) * 100;
+        return {
+            team,
+            pwr: Math.round(raw * 10) / 10,
+            strength: strength[team.key],
+            tier: /** @type {Tier} */ ('B'),
+            rank: 0
+        };
     });
 
-    return scored;
+    rows.sort((x, y) => (y.pwr - x.pwr) || (y.team.pts - x.team.pts));
+    rows.forEach((row, i) => {
+        row.rank = i + 1;
+        row.tier = tierForRank(row.rank, rows.length);
+    });
+    return rows;
 }
 
 // --- LENDAS (cross-season trophy aggregation) ---

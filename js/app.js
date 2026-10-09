@@ -241,6 +241,7 @@ async function loadData() {
     appState.lastError = null;
     appState.isFromCache = false;
     resetRoundCache();
+    resetPowerCache();
     render();
 
     const validLeagues = config ? config.leagues.filter(l => !l.id.includes('placeholder')) : [];

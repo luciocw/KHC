@@ -11,7 +11,7 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 - **Rodada:** confrontos e placar da semana por série (‹ semana ›), rótulos de playoff (Final, 3º lugar, Semifinal…) e exportação em PNG; destaques da semana (maior pontuação, maior vitória, jogo mais apertado)
 - **App na tela inicial:** manifest + ícones (`assets/app/`) — Android instala pelo Chrome, iPhone pelo Safari (Compartilhar → Adicionar à Tela de Início)
 - **Top Scorers:** filtro por série e "Incluir Elite" (desligado por padrão, evita time duplicado)
-- **Power Ranking:** tiers S Favoritos · A Candidatos · B Meio de tabela · C Pressionados · D Lanternas (60% aproveitamento + 40% pontos normalizados; sem Elite)
+- **Power Ranking:** tiers S Favoritos · A Candidatos · B Meio de tabela · C Pressionados · D Lanternas por posição (10/20/40/20/10%). PWR = 50% força (all-play semana a semana contra as Séries A–D) + 30% aproveitamento + 20% fase (últimas 3 semanas); sem Elite. Exporta PNG
 - **Lendas:** Hall da Fama ordenado por títulos (ouro → prata → bronze → 4º)
 - **Perfil do jogador:** lateral no desktop, bottom sheet no celular
 - **Modelo de dados híbrido:** temporadas finalizadas vêm de JSON estático (`data/<ano>.json`); temporada ativa vem da Sleeper API em tempo real
