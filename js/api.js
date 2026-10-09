@@ -221,6 +221,32 @@ async function fetchRoundData(leagueId, week) {
     };
 }
 
+/**
+ * Pontos de cada time numa semana já encerrada (Power Ranking). Semana
+ * encerrada não muda: fica guardada no aparelho (localStorage) para não
+ * baixar de novo.
+ * @param {string} leagueId
+ * @param {number} week
+ * @returns {Promise<Object<number, number>>} rosterId → pontos
+ */
+async function fetchWeekScores(leagueId, week) {
+    const key = `khc_wk_${leagueId}_${week}`;
+    try {
+        const hit = localStorage.getItem(key);
+        if (hit) return JSON.parse(hit);
+    } catch (e) { /* sem storage: segue para a rede */ }
+
+    const res = await fetchWithRetry(`https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`);
+    if (!res.ok) throw new Error(getErrorMessage(res.status));
+    const raw = await res.json();
+    const out = {};
+    (Array.isArray(raw) ? raw : []).forEach(m => {
+        if (m && Number.isInteger(m.roster_id)) out[m.roster_id] = sanitizeNumber(m.points, 0, VALIDATION.MAX_POINTS, 0);
+    });
+    try { localStorage.setItem(key, JSON.stringify(out)); } catch (e) { /* cheio ou bloqueado */ }
+    return out;
+}
+
 async function fetchLeagueData(leagueInfo) {
     const baseUrl = 'https://api.sleeper.app/v1/league';
 
