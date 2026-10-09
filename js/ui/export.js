@@ -1,6 +1,6 @@
 // =============================================================================
 // UI / EXPORT — Exporta como imagem (PNG): a classificação (Ligas), os
-// confrontos (Rodada) de uma série ou o perfil de um jogador.
+// confrontos (Rodada) de uma série, o Power Ranking ou o perfil de um jogador.
 //
 // A tabela é redesenhada num <canvas> com largura fixa (sempre com a coluna
 // PC, mesmo no celular), no visual do card da aba Ligas. Cores lidas dos
@@ -163,27 +163,28 @@ const EXPORT_HEAD_H = 92;
 /**
  * Canvas com o card (fundo, filete da liga, escudo, nome e subtítulo).
  * `logo` opcional ({w, draw(ctx, x, y)}) substitui o escudo (ex.: avatar).
+ * `W`: largura em px CSS (padrão EXPORT_W).
  * Deixa o contexto recortado no card; feche com finishExportCard().
  * @returns {{canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D}}
  */
-function startExportCard(H, c, crest, title, subtitle, logo) {
+function startExportCard(H, c, crest, title, subtitle, logo, W = EXPORT_W) {
     const PAD = 16;
     const canvas = document.createElement('canvas');
-    canvas.width = EXPORT_W * EXPORT_SCALE;
+    canvas.width = W * EXPORT_SCALE;
     canvas.height = H * EXPORT_SCALE;
     const ctx = canvas.getContext('2d');
     ctx.scale(EXPORT_SCALE, EXPORT_SCALE);
     ctx.textBaseline = 'middle';
 
     ctx.fillStyle = c.bg;
-    ctx.fillRect(0, 0, EXPORT_W, H);
+    ctx.fillRect(0, 0, W, H);
     ctx.save();
-    roundRect(ctx, 0.5, 0.5, EXPORT_W - 1, H - 1, 8);
+    roundRect(ctx, 0.5, 0.5, W - 1, H - 1, 8);
     ctx.fillStyle = c.surface;
     ctx.fill();
     ctx.clip();
     ctx.fillStyle = c.accent;
-    ctx.fillRect(0, 0, EXPORT_W, 4);
+    ctx.fillRect(0, 0, W, 4);
 
     const crestH = 56, crestW = logo ? logo.w : Math.round(crestH * 141 / 160);
     if (logo) logo.draw(ctx, PAD, 4 + 16);
@@ -191,19 +192,19 @@ function startExportCard(H, c, crest, title, subtitle, logo) {
     const tx = PAD + crestW + 14;
     ctx.fillStyle = c.accent;
     setFont(ctx, 900, 20, 'expanded');
-    ctx.fillText(fitText(ctx, title.toUpperCase(), EXPORT_W - tx - PAD), tx, 38);
+    ctx.fillText(fitText(ctx, title.toUpperCase(), W - tx - PAD), tx, 38);
     ctx.fillStyle = c.text2;
     setFont(ctx, 400, 13);
-    ctx.fillText(fitText(ctx, subtitle, EXPORT_W - tx - PAD), tx, 64);
+    ctx.fillText(fitText(ctx, subtitle, W - tx - PAD), tx, 64);
     return { canvas, ctx };
 }
 
 /** Tira o recorte e desenha a borda do card. */
-function finishExportCard(ctx, H, c) {
+function finishExportCard(ctx, H, c, W = EXPORT_W) {
     ctx.restore();
     ctx.strokeStyle = c.border;
     ctx.lineWidth = 1;
-    roundRect(ctx, 0.5, 0.5, EXPORT_W - 1, H - 1, 8);
+    roundRect(ctx, 0.5, 0.5, W - 1, H - 1, 8);
     ctx.stroke();
 }
 
@@ -601,6 +602,111 @@ async function drawProfileCanvas(username) {
     return canvas;
 }
 
+/**
+ * Desenha o Power Ranking: duas colunas por posição (1–20 | 21–40), com
+ * badge do tier, série na cor da liga, V–D, pontos e PWR com barra.
+ * @returns {Promise<HTMLCanvasElement>}
+ */
+async function drawPowerCanvas() {
+    const rows = powerRows();
+    const W = 1080, PAD = 16, GAP = 16, ROW_H = 52, LEGEND_H = 50;
+    const c = exportPalette(null);
+    const tierColor = Object.fromEntries(['s', 'a', 'b', 'c', 'd'].map(k => [k.toUpperCase(), cssToken(`--tier-${k}`)]));
+    const tierText = { S: c.bg, A: c.bg, B: c.text, C: c.text, D: c.text2 };
+    const { crest, avatars } = await loadExportAssets(null, rows.map(r => r.team.avatarId));
+
+    const perCol = Math.ceil(rows.length / 2);
+    const H = EXPORT_HEAD_H + 8 + perCol * ROW_H + 8 + LEGEND_H;
+    const series = [...new Set(rows.map(r => r.team._leagueTier))]
+        .sort((a, b) => TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b))
+        .map(t => SERIES_META[t].id);
+    const subtitle = `Temporada ${appState.season} · ${weekLabel() || (isSeasonFinalized() ? 'Temporada encerrada' : 'Em andamento')} · Séries ${series[0]}–${series[series.length - 1]}`;
+    const { canvas, ctx } = startExportCard(H, c, crest, 'Power Ranking', subtitle, null, W);
+    hLine(ctx, 0, W, EXPORT_HEAD_H - 1, c.border);
+
+    const colW = (W - PAD * 2 - GAP) / 2;
+    rows.forEach((r, i) => {
+        const col = i < perCol ? 0 : 1;
+        const x = PAD + col * (colW + GAP);
+        const top = EXPORT_HEAD_H + 8 + (i % perCol) * ROW_H;
+        const cy = top + ROW_H / 2;
+        if ((i % perCol) < perCol - 1 && i < rows.length - 1) hLine(ctx, x, x + colW, top + ROW_H - 1, c.border);
+
+        ctx.fillStyle = c.text2;
+        setFont(ctx, 900, 16, 'condensed');
+        ctx.fillText(`#${r.rank}`, x, cy);
+
+        roundRect(ctx, x + 38, cy - 10, 24, 20, 2);
+        ctx.fillStyle = tierColor[r.tier];
+        ctx.fill();
+        ctx.fillStyle = tierText[r.tier];
+        setFont(ctx, 900, 12, 'condensed');
+        ctx.textAlign = 'center';
+        ctx.fillText(r.tier, x + 50, cy + 1);
+        ctx.textAlign = 'left';
+
+        drawAvatar(ctx, x + 72, cy - 17, avatars[i], r.team.team || r.team.user, c);
+        const nx = x + 72 + 34 + 10;
+        const nameMax = colW - (nx - x) - 76;
+        ctx.fillStyle = c.text;
+        setFont(ctx, 700, 14);
+        ctx.fillText(fitText(ctx, r.team.team || '', nameMax), nx, cy - 8);
+
+        const meta = SERIES_META[r.team._leagueTier];
+        const short = meta ? meta.short : '';
+        ctx.fillStyle = meta ? cssToken(`--league-${meta.league}`) : c.text3;
+        setFont(ctx, 800, 12);
+        ctx.fillText(short, nx, cy + 11);
+        const sw = ctx.measureText(short).width;
+        ctx.fillStyle = c.text3;
+        setFont(ctx, 400, 12);
+        ctx.fillText(fitText(ctx, ` · ${r.team.w}–${r.team.l} · ${fmtPts(r.team.pts)} pts`, nameMax - sw), nx + sw, cy + 11);
+
+        const xr = x + colW;
+        ctx.textAlign = 'right';
+        ctx.fillStyle = c.text;
+        setFont(ctx, 900, 20, 'condensed');
+        ctx.fillText(r.pwr.toFixed(1), xr, cy - 5);
+        ctx.textAlign = 'left';
+        roundRect(ctx, xr - 56, cy + 10, 56, 5, 2.5);
+        ctx.fillStyle = c.surface3;
+        ctx.fill();
+        const pct = Math.max(0, Math.min(100, r.pwr)) / 100;
+        if (pct > 0) {
+            roundRect(ctx, xr - 56, cy + 10, Math.max(5, 56 * pct), 5, 2.5);
+            ctx.fillStyle = r.tier === 'C' || r.tier === 'D' ? c.border2 : tierColor[r.tier];
+            ctx.fill();
+        }
+    });
+
+    // Legenda dos tiers
+    const ly = H - LEGEND_H / 2;
+    hLine(ctx, 0, W, H - LEGEND_H, c.border);
+    let lx = PAD;
+    Object.keys(TIER_CONFIG).forEach(k => {
+        roundRect(ctx, lx, ly - 10, 24, 20, 2);
+        ctx.fillStyle = tierColor[k];
+        ctx.fill();
+        ctx.fillStyle = tierText[k];
+        setFont(ctx, 900, 12, 'condensed');
+        ctx.textAlign = 'center';
+        ctx.fillText(k, lx + 12, ly + 1);
+        ctx.textAlign = 'left';
+        ctx.fillStyle = c.text2;
+        setFont(ctx, 400, 12);
+        ctx.fillText(TIER_CONFIG[k].name, lx + 32, ly);
+        lx += 32 + ctx.measureText(TIER_CONFIG[k].name).width + 20;
+    });
+    ctx.textAlign = 'right';
+    ctx.fillStyle = c.text3;
+    setFont(ctx, 400, 12);
+    ctx.fillText(PWR_FORMULA_SHORT, W - PAD, ly);
+    ctx.textAlign = 'left';
+
+    finishExportCard(ctx, H, c, W);
+    return canvas;
+}
+
 let _exportCache = null;   // { key, blob } da última imagem gerada
 
 /**
@@ -618,7 +724,8 @@ function canShareFiles() {
 }
 
 /**
- * O que exportar: perfil aberto, classificação (Ligas) ou confrontos (Rodada).
+ * O que exportar: perfil aberto, Power Ranking, classificação (Ligas) ou
+ * confrontos (Rodada).
  * A chave do cache muda quando os dados recarregam.
  * @returns {{key: string, name: string, title: string, draw: function(): Promise<HTMLCanvasElement>}|null}
  */
@@ -631,6 +738,14 @@ function exportTarget() {
             name: `khc-perfil-${slug}.png`,
             title: `${user} · Ultimate League KHC`,
             draw: () => drawProfileCanvas(user)
+        };
+    }
+    if (appState.tab === 'power') {
+        return {
+            key: `power|${appState.season}|${appState.lastUpdated || ''}`,
+            name: `khc-${appState.season}-power-ranking.png`,
+            title: `Power Ranking · ${appState.season}`,
+            draw: () => drawPowerCanvas()
         };
     }
     const league = appState.leagues.find(l => l.info.tier === appState.series);

@@ -6,6 +6,7 @@
 //   - Tiers como cabeçalhos horizontais: badge + nome em PT-BR.
 //   - Card: #rank | avatar | time + série · V–D · pts | PWR + barra.
 //   - Sem setas de movimento: não há histórico semanal para comparar.
+//   - Botões Baixar / Compartilhar: o ranking vira PNG (ui/export.js).
 //
 // Lê: appState.rosterData
 // Depende de: config, sanitize, derivations, ui/helpers
@@ -63,17 +64,29 @@ function renderPwrCard(row, tierCls) {
     </button>`;
 }
 
+/** Resumo da fórmula (nota da aba e rodapé da imagem). */
+const PWR_FORMULA_SHORT = 'PWR = 60% aproveitamento + 40% pontos normalizados';
+
+/**
+ * Linhas do Power Ranking da temporada (só séries regulares).
+ * Usado pela aba e pela imagem exportada.
+ * @returns {Array<object>} PowerRow ordenadas
+ */
+function powerRows() {
+    const regular = appState.rosterData.filter(r => r.leagueTier !== 'elite');
+    return powerRanking(mapRosterToTeams(regular));
+}
+
 /**
  * Renderiza a aba Power Ranking.
  * @returns {string} HTML
  */
 function renderPowerRankings() {
-    const regular = appState.rosterData.filter(r => r.leagueTier !== 'elite');
-    if (!regular.length) {
+    const rows = powerRows();
+    if (!rows.length) {
         return stateHTML({ icon: 'zap', title: 'Nada por aqui ainda' });
     }
 
-    const rows = powerRanking(mapRosterToTeams(regular));
     const sections = Object.keys(TIER_CONFIG).map(key => {
         const list = rows.filter(r => r.tier === key);
         if (!list.length) return '';
@@ -90,6 +103,16 @@ function renderPowerRankings() {
 
     return `
         ${partialWarningHTML()}
+        <div class="view-actions">
+            <div class="export-actions" role="group" aria-label="Exportar Power Ranking como imagem">
+                <button type="button" class="export-btn" data-action="export-download" aria-label="Baixar Power Ranking como imagem">
+                    <span data-icon="download" data-size="18"></span><span class="export-btn__label">Baixar</span>
+                </button>
+                ${canShareFiles() ? `<button type="button" class="export-btn" data-action="export-share" aria-label="Compartilhar Power Ranking como imagem">
+                    <span data-icon="share" data-size="18"></span><span class="export-btn__label">Compartilhar</span>
+                </button>` : ''}
+            </div>
+        </div>
         <div class="note">
             <span data-icon="info" data-size="18"></span>
             <span><b>Como calculamos:</b> PWR = 60% aproveitamento + 40% pontos normalizados (0–100).
