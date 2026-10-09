@@ -1,5 +1,6 @@
 // =============================================================================
-// UI / EXPORT — Exporta a classificação de uma série como imagem (PNG).
+// UI / EXPORT — Exporta a classificação (Ligas) ou os confrontos (Rodada)
+// de uma série como imagem (PNG).
 //
 // A tabela é redesenhada num <canvas> com largura fixa (sempre com a coluna
 // PC, mesmo no celular), no visual do card da aba Ligas. Cores lidas dos
@@ -10,7 +11,7 @@
 //
 // Avatares vêm da Sleeper CDN (CORS *); se algum falhar, usa iniciais.
 // Depende de: config, sanitize, ui/helpers, tabs/ligas (standingsModel, zoneOf,
-// zoneLegendItems), tabs/temporadas (weekLabel)
+// zoneLegendItems), tabs/rodada (currentRound, roundModel), tabs/temporadas (weekLabel)
 // =============================================================================
 
 const EXPORT_W = 814;          // largura em px CSS (igual ao card no desktop)
@@ -120,46 +121,52 @@ function drawAvatar(ctx, x, y, img, name, c) {
     ctx.restore();
 }
 
-/**
- * Desenha a classificação de uma série num canvas.
- * @param {Object} league  item de appState.leagues
- * @returns {Promise<HTMLCanvasElement>}
- */
-async function drawStandingsCanvas(league) {
-    const m = standingsModel(league);
-    const n = m.teams.length;
-    const c = {
-        bg: cssToken('--bg'), surface: cssToken('--surface'), surface3: cssToken('--surface-3'),
+/** Cores do card (tokens CSS), com o acento da liga. */
+function exportPalette(meta) {
+    return {
+        bg: cssToken('--bg'), surface: cssToken('--surface'), surface2: cssToken('--surface-2'), surface3: cssToken('--surface-3'),
         border: cssToken('--border'), border2: cssToken('--border-2'),
         text: cssToken('--text'), text2: cssToken('--text-2'), text3: cssToken('--text-3'),
-        accent: cssToken(`--league-${m.meta.league}`) || cssToken('--orange'),
+        accent: (meta && cssToken(`--league-${meta.league}`)) || cssToken('--orange'),
         promo: cssToken('--zone-promo'), playoff: cssToken('--zone-playoff'), releg: cssToken('--zone-releg'),
         promoBg: cssToken('--zone-promo-bg'), relegBg: cssToken('--zone-releg-bg'),
+        live: cssToken('--live'),
         medals: ['gold', 'silver', 'bronze', 'fourth'].map(k => [cssToken(`--${k}`), cssToken(`--${k}-deep`)])
     };
+}
 
+/**
+ * Espera a fonte e carrega escudo + avatares (null onde falhar).
+ * @param {Object} meta  SERIES_META[tier]
+ * @param {Array<string|null>} avatarIds
+ * @returns {Promise<{crest: (HTMLImageElement|null), avatars: Array<HTMLImageElement|null>}>}
+ */
+async function loadExportAssets(meta, avatarIds) {
     if (document.fonts && document.fonts.load) {
         await Promise.all(['400 15px Archivo', '700 15px Archivo', '800 12px Archivo', '900 20px Archivo']
             .map(f => document.fonts.load(f).catch(() => null)));
     }
-    const crestFile = m.meta ? m.meta.crest : 'escudo-khc.png';
+    const crestFile = meta ? meta.crest : 'escudo-khc.png';
     const [crest, ...avatars] = await Promise.all([
         loadExportImage(`assets/logo/png/${crestFile}`, false),
-        ...m.teams.map(t => (typeof t.avatar === 'string' && VALIDATION.AVATAR_PATTERN.test(t.avatar)
+        ...avatarIds.map(id => (typeof id === 'string' && VALIDATION.AVATAR_PATTERN.test(id)
             // ?export: URL distinta da <img> da página, cuja cópia em cache veio
             // sem cabeçalho CORS (a CDN só o envia quando há Origin)
-            ? loadExportImage(`${sanitizeAvatarUrl(t.avatar)}?export`, true)
+            ? loadExportImage(`${sanitizeAvatarUrl(id)}?export`, true)
             : Promise.resolve(null)))
     ]);
+    return { crest, avatars };
+}
 
-    // Layout (px CSS)
-    const PAD = 16, HEAD_H = 92, THEAD_H = 34, ROW_H = 57;
-    const legend = zoneLegendItems(m.z, m.finalized);
-    const LEGEND_H = 46;
-    const H = HEAD_H + THEAD_H + n * ROW_H + LEGEND_H;
-    const colPC = EXPORT_W - 14, colPF = colPC - 86, colVD = colPF - 84;
-    const colTeam = 56;
+const EXPORT_HEAD_H = 92;
 
+/**
+ * Canvas com o card (fundo, filete da liga, escudo, nome e subtítulo).
+ * Deixa o contexto recortado no card; feche com finishExportCard().
+ * @returns {{canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D}}
+ */
+function startExportCard(H, c, crest, title, subtitle) {
+    const PAD = 16;
     const canvas = document.createElement('canvas');
     canvas.width = EXPORT_W * EXPORT_SCALE;
     canvas.height = H * EXPORT_SCALE;
@@ -167,7 +174,6 @@ async function drawStandingsCanvas(league) {
     ctx.scale(EXPORT_SCALE, EXPORT_SCALE);
     ctx.textBaseline = 'middle';
 
-    // Card
     ctx.fillStyle = c.bg;
     ctx.fillRect(0, 0, EXPORT_W, H);
     ctx.save();
@@ -178,16 +184,47 @@ async function drawStandingsCanvas(league) {
     ctx.fillStyle = c.accent;
     ctx.fillRect(0, 0, EXPORT_W, 4);
 
-    // Cabeçalho: escudo, nome, subtítulo
     const crestH = 56, crestW = Math.round(crestH * 141 / 160);
     if (crest) ctx.drawImage(crest, PAD, 4 + 16, crestW, crestH);
     const tx = PAD + crestW + 14;
     ctx.fillStyle = c.accent;
     setFont(ctx, 900, 20, 'expanded');
-    ctx.fillText(fitText(ctx, m.meta.name.toUpperCase(), EXPORT_W - tx - PAD), tx, 38);
+    ctx.fillText(fitText(ctx, title.toUpperCase(), EXPORT_W - tx - PAD), tx, 38);
     ctx.fillStyle = c.text2;
     setFont(ctx, 400, 13);
-    ctx.fillText(m.subtitle, tx, 64);
+    ctx.fillText(fitText(ctx, subtitle, EXPORT_W - tx - PAD), tx, 64);
+    return { canvas, ctx };
+}
+
+/** Tira o recorte e desenha a borda do card. */
+function finishExportCard(ctx, H, c) {
+    ctx.restore();
+    ctx.strokeStyle = c.border;
+    ctx.lineWidth = 1;
+    roundRect(ctx, 0.5, 0.5, EXPORT_W - 1, H - 1, 8);
+    ctx.stroke();
+}
+
+/**
+ * Desenha a classificação de uma série num canvas.
+ * @param {Object} league  item de appState.leagues
+ * @returns {Promise<HTMLCanvasElement>}
+ */
+async function drawStandingsCanvas(league) {
+    const m = standingsModel(league);
+    const n = m.teams.length;
+    const c = exportPalette(m.meta);
+    const { crest, avatars } = await loadExportAssets(m.meta, m.teams.map(t => t.avatar));
+
+    // Layout (px CSS)
+    const HEAD_H = EXPORT_HEAD_H, THEAD_H = 34, ROW_H = 57;
+    const legend = zoneLegendItems(m.z, m.finalized);
+    const LEGEND_H = 46;
+    const H = HEAD_H + THEAD_H + n * ROW_H + LEGEND_H;
+    const colPC = EXPORT_W - 14, colPF = colPC - 86, colVD = colPF - 84;
+    const colTeam = 56;
+
+    const { canvas, ctx } = startExportCard(H, c, crest, m.meta.name, m.subtitle);
 
     // Cabeçalho da tabela
     let y = HEAD_H;
@@ -290,11 +327,97 @@ async function drawStandingsCanvas(league) {
         lx += ctx.measureText(it.text).width + 18;
     });
 
-    ctx.restore();
-    ctx.strokeStyle = c.border;
-    ctx.lineWidth = 1;
-    roundRect(ctx, 0.5, 0.5, EXPORT_W - 1, H - 1, 8);
-    ctx.stroke();
+    finishExportCard(ctx, H, c);
+    return canvas;
+}
+
+/**
+ * Desenha os confrontos da semana (aba Rodada) num canvas: placar lado a
+ * lado, vencedor em destaque, rótulo de playoff acima do placar.
+ * @param {Object} league
+ * @param {Object} round  currentRound(league) já carregado
+ * @returns {Promise<HTMLCanvasElement>}
+ */
+async function drawRoundCanvas(league, round) {
+    const meta = SERIES_META[league.info.tier];
+    const m = roundModel(league, round);
+    const c = exportPalette(meta);
+    const sides = m.games.flatMap(g => [g.a, g.b]);
+    const { crest, avatars } = await loadExportAssets(meta, sides.map(s => s.team.avatar));
+
+    const ROW_H = m.isPlayoff ? 84 : 72;
+    const BYES_H = m.byes.length ? 46 : 0;
+    const H = EXPORT_HEAD_H + m.games.length * ROW_H + BYES_H;
+    const { canvas, ctx } = startExportCard(H, c, crest, meta.name, m.subtitle);
+
+    const mid = EXPORT_W / 2;
+    const AV = 34, PAD = 16;
+    const nameMax = mid - 70 - (PAD + AV + 10);
+    let y = EXPORT_HEAD_H;
+    hLine(ctx, 0, EXPORT_W, y - 1, c.border);
+
+    m.games.forEach((g, gi) => {
+        const top = y + gi * ROW_H;
+        if (gi % 2 === 1) {
+            ctx.fillStyle = c.surface2;
+            ctx.fillRect(0, top, EXPORT_W, ROW_H);
+        }
+        if (gi < m.games.length - 1) hLine(ctx, 0, EXPORT_W, top + ROW_H - 1, c.border);
+        let cy = top + ROW_H / 2;
+        if (g.label) {
+            ctx.fillStyle = g.label === 'Final' ? c.accent : c.text3;
+            setFont(ctx, 800, 11, 'condensed');
+            ctx.textAlign = 'center';
+            ctx.fillText(g.label.toUpperCase().split('').join('\u200A'), mid, top + 15);
+            ctx.textAlign = 'left';
+            cy += 8;
+        }
+
+        [['a', g.a, avatars[gi * 2]], ['b', g.b, avatars[gi * 2 + 1]]].forEach(([k, sd, img]) => {
+            const left = k === 'a';
+            const state = g.winner ? (g.winner === k ? 'win' : 'lose') : '';
+            const avX = left ? PAD : EXPORT_W - PAD - AV;
+            drawAvatar(ctx, avX, cy - AV / 2, img, sd.team.teamName || sd.team.ownerName, c);
+            const nx = left ? avX + AV + 10 : avX - 10;
+            ctx.textAlign = left ? 'left' : 'right';
+            ctx.fillStyle = state === 'lose' ? c.text2 : c.text;
+            setFont(ctx, 700, 15);
+            ctx.fillText(fitText(ctx, sd.team.teamName || '', nameMax), nx, cy - 8);
+            ctx.fillStyle = c.text3;
+            setFont(ctx, 400, 12);
+            ctx.fillText(fitText(ctx, sd.team.ownerName || '', nameMax), nx, cy + 11);
+
+            // placar
+            const pts = m.status === 'upcoming' ? '—' : fmtPts(sd.points);
+            ctx.fillStyle = state === 'win' ? c.text : state === 'lose' ? c.text3 : c.text2;
+            setFont(ctx, 900, 22, 'condensed');
+            ctx.textAlign = left ? 'right' : 'left';
+            ctx.fillText(pts, left ? mid - 22 : mid + 22, cy);
+            if (state === 'win') {
+                ctx.fillStyle = c.accent;
+                ctx.fillRect(left ? 0 : EXPORT_W - 3, top, 3, ROW_H);
+            }
+        });
+        ctx.textAlign = 'center';
+        ctx.fillStyle = c.text3;
+        setFont(ctx, 700, 12);
+        ctx.fillText('×', mid, cy);
+        ctx.textAlign = 'left';
+    });
+
+    if (BYES_H) {
+        const by = y + m.games.length * ROW_H;
+        hLine(ctx, 0, EXPORT_W, by, c.border);
+        setFont(ctx, 700, 12);
+        ctx.fillStyle = c.text2;
+        const lead = 'Sem confronto: ';
+        ctx.fillText(lead, 14, by + BYES_H / 2);
+        const lw = ctx.measureText(lead).width;
+        setFont(ctx, 400, 12);
+        ctx.fillText(fitText(ctx, m.byes.map(s => s.team.teamName).join(' · '), EXPORT_W - 28 - lw), 14 + lw, by + BYES_H / 2);
+    }
+
+    finishExportCard(ctx, H, c);
     return canvas;
 }
 
@@ -314,25 +437,41 @@ function canShareFiles() {
     }
 }
 
-/** Série selecionada e chave do cache (muda quando os dados recarregam). */
+/**
+ * O que exportar na aba atual: classificação (Ligas) ou confrontos (Rodada).
+ * A chave do cache muda quando os dados recarregam.
+ * @returns {{key: string, name: string, title: string, draw: function(): Promise<HTMLCanvasElement>}|null}
+ */
 function exportTarget() {
     const league = appState.leagues.find(l => l.info.tier === appState.series);
     if (!league) return null;
+    const tier = league.info.tier;
+    const seriesName = SERIES_META[tier].name;
+    if (appState.tab === 'rodada') {
+        const round = currentRound(league);
+        if (!round || !round.data) return null;
+        return {
+            key: `rodada|${appState.season}|${tier}|${round.week}|${round.data.fetchedAt}`,
+            name: `khc-${appState.season}-${tier}-semana-${round.week}.png`,
+            title: `${seriesName} · Semana ${round.week} · ${appState.season}`,
+            draw: () => drawRoundCanvas(league, round)
+        };
+    }
     return {
-        league,
-        key: `${appState.season}|${league.info.tier}|${appState.lastUpdated || ''}`,
-        name: `khc-${appState.season}-${league.info.tier}.png`,
-        title: `${SERIES_META[league.info.tier].name} · ${appState.season}`
+        key: `ligas|${appState.season}|${tier}|${appState.lastUpdated || ''}`,
+        name: `khc-${appState.season}-${tier}.png`,
+        title: `${seriesName} · ${appState.season}`,
+        draw: () => drawStandingsCanvas(league)
     };
 }
 
 /**
- * PNG da série (do cache quando possível).
+ * PNG da aba atual (do cache quando possível).
  * @returns {Promise<Blob>}
  */
 async function exportBlob(target) {
     if (_exportCache && _exportCache.key === target.key) return _exportCache.blob;
-    const canvas = await drawStandingsCanvas(target.league);
+    const canvas = await target.draw();
     const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
     if (!blob) throw new Error('canvas vazio');
     _exportCache = { key: target.key, blob };
@@ -352,7 +491,7 @@ function downloadBlob(blob, name) {
 }
 
 /**
- * Baixar ou compartilhar a série selecionada na aba Ligas.
+ * Baixar ou compartilhar a imagem da aba atual (Ligas ou Rodada).
  *
  * Compartilhar precisa do toque "recente": alguns navegadores (Safari)
  * recusam se a imagem demorou a ficar pronta. Nesse caso a imagem fica em

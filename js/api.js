@@ -164,6 +164,63 @@ async function fetchNflState() {
     }
 }
 
+/**
+ * Configuração da liga que a aba Rodada usa: semana atual / última
+ * pontuada (settings.leg / last_scored_leg) e playoffs.
+ * @param {string} leagueId
+ * @returns {Promise<{leg: number, lastScored: number, playoffStart: number, playoffTeams: number}>}
+ */
+async function fetchLeagueSettings(leagueId) {
+    const res = await fetchWithRetry(`https://api.sleeper.app/v1/league/${leagueId}`);
+    if (!res.ok) throw new Error(getErrorMessage(res.status));
+    const league = await res.json();
+    const st = (league && league.settings) || {};
+    const int = (v, max, dflt) => Math.round(sanitizeNumber(v, 0, max, dflt));
+    return {
+        leg: int(st.leg, 30, 0),
+        lastScored: int(st.last_scored_leg, 30, 0),
+        playoffStart: int(st.playoff_week_start, 30, REGULAR_SEASON_WEEKS + 1) || REGULAR_SEASON_WEEKS + 1,
+        playoffTeams: int(st.playoff_teams, 32, 0)
+    };
+}
+
+/**
+ * Confrontos de uma semana numa liga + chaveamento dos vencedores (para
+ * rotular Final, 3º lugar…). Sem cache local: o placar muda na rodada.
+ *
+ * @param {string} leagueId
+ * @param {number} week
+ * @returns {Promise<{week: number, fetchedAt: number,
+ *   matchups: Array<{rosterId: number, matchupId: (number|null), points: number}>,
+ *   bracket: Array<{r: number, t1: number, t2: number, p: (number|null)}>}>}
+ */
+async function fetchRoundData(leagueId, week) {
+    const base = `https://api.sleeper.app/v1/league/${leagueId}`;
+    const [matchRes, bracketRes] = await Promise.all([
+        fetchWithRetry(`${base}/matchups/${week}`),
+        fetchWithRetry(`${base}/winners_bracket`)
+    ]);
+    if (!matchRes.ok) throw new Error(getErrorMessage(matchRes.status));
+
+    const raw = await matchRes.json();
+    const bracketRaw = bracketRes.ok ? await bracketRes.json() : [];
+
+    return {
+        week,
+        fetchedAt: Date.now(),
+        matchups: (Array.isArray(raw) ? raw : [])
+            .filter(m => m && Number.isInteger(m.roster_id))
+            .map(m => ({
+                rosterId: m.roster_id,
+                matchupId: Number.isInteger(m.matchup_id) ? m.matchup_id : null,
+                points: sanitizeNumber(m.points, 0, VALIDATION.MAX_POINTS, 0)
+            })),
+        bracket: (Array.isArray(bracketRaw) ? bracketRaw : [])
+            .filter(g => g && Number.isInteger(g.r) && Number.isInteger(g.t1) && Number.isInteger(g.t2))
+            .map(g => ({ r: g.r, t1: g.t1, t2: g.t2, p: Number.isInteger(g.p) ? g.p : null }))
+    };
+}
+
 async function fetchLeagueData(leagueInfo) {
     const baseUrl = 'https://api.sleeper.app/v1/league';
 

@@ -1,9 +1,9 @@
 // =============================================================================
 // APP — Bootstrap, roteamento por hash e render.
 //
-// URL (compartilhável):  #/<aba>/<ano>[/<série>]   ·   #/jogador/<usuario>
-//   abas: ligas · top · power · lendas · temporadas · regras
-//   série (só Ligas): elite · a · b · c · d …
+// URL (compartilhável):  #/<aba>/<ano>[/<série>[/<semana>]]   ·   #/jogador/<usuario>
+//   abas: ligas · rodada · top · power · lendas · temporadas · regras
+//   série (Ligas e Rodada): elite · a · b · c · d …   ·   semana (só Rodada)
 //
 // Fluxo: hash → appState → loadData() (se mudou a temporada) → render().
 // Cada aba tem um render*() que devolve HTML para #view.
@@ -12,6 +12,7 @@
 
 const TABS = [
     { id: 'ligas',      label: 'Ligas',       short: 'Ligas',  title: 'Classificação', icon: 'trophy',   render: () => renderLigas(),         needsData: true },
+    { id: 'rodada',     label: 'Rodada',      short: 'Rodada', title: 'Rodada',        icon: 'swords',   render: () => renderRodada(),        needsData: true },
     { id: 'top',        label: 'Top Scorers', short: 'Top',    title: 'Top Scorers',   icon: 'chart',    render: () => renderTopScorers(),    needsData: true },
     { id: 'power',      label: 'Power',       short: 'Power',  title: 'Power Ranking', icon: 'zap',      render: () => renderPowerRankings(), needsData: true },
     { id: 'lendas',     label: 'Lendas',      short: 'Lendas', title: 'Lendas KHC',    icon: 'crown',    render: () => renderLegends() },
@@ -28,37 +29,43 @@ const TAB_BY_ID = Object.fromEntries(TABS.map(t => [t.id, t]));
  * Monta o hash de uma view.
  * @param {string} tab
  * @param {string} season
- * @param {string} [tier] só usado na aba Ligas
+ * @param {string} [tier] abas Ligas e Rodada
+ * @param {number|null} [week] só aba Rodada
  * @returns {string}
  */
-function hashFor(tab, season, tier) {
+function hashFor(tab, season, tier, week) {
     if (tab === 'regras') return '#/regras';
     let h = `#/${tab}/${season}`;
-    if (tab === 'ligas' && tier && SERIES_META[tier]) h += '/' + SERIES_META[tier].league;
+    if ((tab === 'ligas' || tab === 'rodada') && tier && SERIES_META[tier]) {
+        h += '/' + SERIES_META[tier].league;
+        if (tab === 'rodada' && week) h += '/' + week;
+    }
     return h;
 }
 
 /**
  * Lê o hash atual.
- * @returns {{tab: string, season: (string|null), tier: (string|null), player: (string|null)}}
+ * @returns {{tab: string, season: (string|null), tier: (string|null), week: (number|null), player: (string|null)}}
  */
 function parseHash() {
     const parts = location.hash.replace(/^#\/?/, '').split('/');
     if (parts[0] === 'jogador' && parts[1]) {
         let player = null;
         try { player = decodeURIComponent(parts.slice(1).join('/')); } catch (e) { player = null; }
-        return { tab: null, season: null, tier: null, player };
+        return { tab: null, season: null, tier: null, week: null, player };
     }
     const tab = TAB_BY_ID[parts[0]] ? parts[0] : null;
     const season = KHC_CONFIG[parts[1]] ? parts[1] : null;
     const tier = Object.keys(SERIES_META).find(t => SERIES_META[t].league === (parts[2] || '').toLowerCase()) || null;
-    return { tab, season, tier, player: null };
+    const w = parseInt(parts[3], 10);
+    const week = w >= 1 && w <= 30 ? w : null;
+    return { tab, season, tier, week, player: null };
 }
 
 /** Atualiza a URL para refletir o estado atual (sem criar histórico). */
 function syncHash() {
     if (isPlayerDrawerOpen()) return;
-    const h = hashFor(appState.tab, appState.season, appState.series);
+    const h = hashFor(appState.tab, appState.season, appState.series, appState.matchWeek);
     if (location.hash !== h) history.replaceState(null, '', h);
 }
 
@@ -86,6 +93,7 @@ function applyHash(opts = {}) {
     if (route.tab) appState.tab = route.tab;
     if (route.season) appState.season = route.season;
     if (route.tier) appState.series = route.tier;
+    if (route.tab === 'rodada') appState.matchWeek = route.week;
 
     if (prevTab !== appState.tab) window.scrollTo(0, 0);
 
@@ -232,6 +240,7 @@ async function loadData() {
     appState.failedLeagues = [];
     appState.lastError = null;
     appState.isFromCache = false;
+    resetRoundCache();
     render();
 
     const validLeagues = config ? config.leagues.filter(l => !l.id.includes('placeholder')) : [];
@@ -316,6 +325,10 @@ function bindEvents() {
     });
 
     document.addEventListener('change', (e) => {
+        if (e.target && e.target.matches && e.target.matches('[data-week-select]')) {
+            location.hash = hashFor('rodada', appState.season, appState.series, Number(e.target.value));
+            return;
+        }
         if (e.target && e.target.id === 'incElite') {
             appState.includeElite = e.target.checked;
             if (!appState.includeElite && appState.topFilter === 'elite') appState.topFilter = 'all';
