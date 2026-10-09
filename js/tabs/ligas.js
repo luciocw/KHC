@@ -9,7 +9,7 @@
 //   - Temporada finalizada: ordem e medalhas pela classificação final
 //     (data/<ano>.json — 1º–4º pelos playoffs, 5º+ pela temporada regular).
 //   - Lateral: líderes (ou campeões) das outras séries.
-//   - Botão Exportar: a tabela vira PNG (js/ui/export.js).
+//   - Botões Baixar / Compartilhar: a tabela vira PNG (js/ui/export.js).
 //
 // Lê: appState.leagues, appState.season, appState.series, appState.failedLeagues
 // Depende de: config, sanitize, data, ui/helpers
@@ -279,9 +279,14 @@ function renderLigas() {
                         <h2 class="display" id="series-title">${escapeHtml(meta.name)}</h2>
                         <p>${escapeHtml(subtitle)}</p>
                     </div>
-                    <button type="button" class="export-btn" data-action="export-standings" aria-label="Exportar tabela da ${escapeHtml(meta.name)} como imagem">
-                        <span data-icon="download" data-size="18"></span><span class="export-btn__label">Exportar</span>
-                    </button>
+                    <div class="export-actions" role="group" aria-label="Exportar tabela como imagem">
+                        <button type="button" class="export-btn" data-action="export-download" aria-label="Baixar tabela da ${escapeHtml(meta.name)} como imagem">
+                            <span data-icon="download" data-size="18"></span><span class="export-btn__label">Baixar</span>
+                        </button>
+                        ${canShareFiles() ? `<button type="button" class="export-btn" data-action="export-share" aria-label="Compartilhar tabela da ${escapeHtml(meta.name)} como imagem">
+                            <span data-icon="share" data-size="18"></span><span class="export-btn__label">Compartilhar</span>
+                        </button>` : ''}
+                    </div>
                 </header>
                 <div class="table-wrap">
                     <table class="standings">

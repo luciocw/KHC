@@ -5,8 +5,8 @@
 // PC, mesmo no celular), no visual do card da aba Ligas. Cores lidas dos
 // tokens CSS (:root), fonte Archivo já carregada pela página.
 //
-//   - Celular (toque) com Web Share de arquivos → abre o "Compartilhar".
-//   - Senão → baixa khc-<ano>-<série>.png.
+//   - Baixar: khc-<ano>-<série>.png (desktop e celular).
+//   - Compartilhar: Web Share com arquivo, só onde o navegador suporta.
 //
 // Avatares vêm da Sleeper CDN (CORS *); se algum falhar, usa iniciais.
 // Depende de: config, sanitize, ui/helpers, tabs/ligas (standingsModel, zoneOf,
@@ -298,39 +298,95 @@ async function drawStandingsCanvas(league) {
     return canvas;
 }
 
+let _exportCache = null;   // { key, blob } da última imagem gerada
+
 /**
- * Exporta a série selecionada na aba Ligas: compartilha (celular) ou baixa.
- * @param {HTMLButtonElement} btn
+ * O navegador compartilha arquivos (Web Share nível 2)? Decide se o botão
+ * Compartilhar aparece.
+ * @returns {boolean}
  */
-async function exportStandings(btn) {
+function canShareFiles() {
+    try {
+        return !!(navigator.canShare && typeof File === 'function' &&
+            navigator.canShare({ files: [new File([''], 'khc.png', { type: 'image/png' })] }));
+    } catch (e) {
+        return false;
+    }
+}
+
+/** Série selecionada e chave do cache (muda quando os dados recarregam). */
+function exportTarget() {
     const league = appState.leagues.find(l => l.info.tier === appState.series);
-    if (!league || btn.disabled) return;
+    if (!league) return null;
+    return {
+        league,
+        key: `${appState.season}|${league.info.tier}|${appState.lastUpdated || ''}`,
+        name: `khc-${appState.season}-${league.info.tier}.png`,
+        title: `${SERIES_META[league.info.tier].name} · ${appState.season}`
+    };
+}
+
+/**
+ * PNG da série (do cache quando possível).
+ * @returns {Promise<Blob>}
+ */
+async function exportBlob(target) {
+    if (_exportCache && _exportCache.key === target.key) return _exportCache.blob;
+    const canvas = await drawStandingsCanvas(target.league);
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    if (!blob) throw new Error('canvas vazio');
+    _exportCache = { key: target.key, blob };
+    return blob;
+}
+
+/** Baixa o arquivo (desktop e celular). */
+function downloadBlob(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+/**
+ * Baixar ou compartilhar a série selecionada na aba Ligas.
+ *
+ * Compartilhar precisa do toque "recente": alguns navegadores (Safari)
+ * recusam se a imagem demorou a ficar pronta. Nesse caso a imagem fica em
+ * cache e o botão pede um segundo toque, que compartilha na hora.
+ *
+ * @param {HTMLButtonElement} btn
+ * @param {'download'|'share'} mode
+ */
+async function exportStandings(btn, mode) {
+    const target = exportTarget();
+    if (!target || btn.disabled) return;
+    const cached = _exportCache && _exportCache.key === target.key;
     btn.disabled = true;
     btn.setAttribute('aria-busy', 'true');
     try {
-        const canvas = await drawStandingsCanvas(league);
-        const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
-        if (!blob) throw new Error('canvas vazio');
-        const name = `khc-${appState.season}-${league.info.tier}.png`;
-        const file = typeof File === 'function' ? new File([blob], name, { type: 'image/png' }) : null;
-        const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-
-        if (touch && file && navigator.canShare && navigator.canShare({ files: [file] })) {
-            try {
-                await navigator.share({ files: [file], title: `${SERIES_META[league.info.tier].name} · ${appState.season}` });
-                return;
-            } catch (e) {
-                if (e && e.name === 'AbortError') return; // usuário cancelou
-            }
+        const blob = cached ? _exportCache.blob : await exportBlob(target);
+        if (mode === 'download') {
+            downloadBlob(blob, target.name);
+            return;
         }
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = name;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        const file = new File([blob], target.name, { type: 'image/png' });
+        try {
+            await navigator.share({ files: [file], title: target.title });
+            btn.classList.remove('is-ready');
+            btn.querySelector('.export-btn__label').textContent = 'Compartilhar';
+        } catch (e) {
+            if (e && e.name === 'AbortError') return; // usuário cancelou
+            if (e && e.name === 'NotAllowedError' && !cached) {
+                btn.classList.add('is-ready');
+                btn.querySelector('.export-btn__label').textContent = 'Toque para compartilhar';
+                return;
+            }
+            throw e;
+        }
     } catch (e) {
         console.error('Falha ao exportar tabela', e);
         alert('Não foi possível gerar a imagem. Tente novamente.');
@@ -338,4 +394,13 @@ async function exportStandings(btn) {
         btn.disabled = false;
         btn.removeAttribute('aria-busy');
     }
+}
+
+/**
+ * Começa a gerar a imagem já no toque (pointerdown), antes do click, para
+ * o Compartilhar caber na janela do gesto do usuário.
+ */
+function prefetchExport() {
+    const target = exportTarget();
+    if (target) exportBlob(target).catch(() => null);
 }
