@@ -293,6 +293,12 @@ function bindEvents() {
             return;
         }
 
+        const exportBtn = target.closest('[data-action="export-standings"]');
+        if (exportBtn) {
+            exportStandings(exportBtn);
+            return;
+        }
+
         if (target.closest('[data-action="reload"]')) {
             loadData();
             return;
