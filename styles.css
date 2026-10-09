@@ -1286,6 +1286,9 @@ abbr[title] { text-decoration: none; cursor: help; }
 }
 .drawer__pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: var(--s-8); }
 .drawer__close { align-self: flex-start; }
+.drawer__actions { margin-top: var(--s-8); }
+.drawer__actions .export-btn { height: 36px; min-width: 36px; padding: 0 var(--s-12); }
+.drawer__actions .export-btn__label { display: inline; }
 .drawer__body {
     display: flex;
     flex-direction: column;

@@ -12,6 +12,8 @@
 // Histórico (escudo + ano · série + time · V–D · pts + medalha/posição ou
 // "Em andamento").
 //
+// Botões Baixar / Compartilhar: o perfil vira PNG (ui/export.js).
+//
 // Abre a partir de qualquer elemento [data-user] (delegação no document).
 // Depende de: config, sanitize, data, derivations, icons, ui/helpers
 // =============================================================================
@@ -22,6 +24,7 @@
     let _lastFocusedTrigger = null;
     let _hashBeforeOpen = null;
     let _isOpen = false;
+    let _currentUser = null;
 
     const getDrawer = () => document.getElementById('player-drawer');
     const getScrim = () => document.getElementById('scrim');
@@ -131,18 +134,37 @@
     }
 
     /**
-     * HTML do perfil.
+     * Dados do perfil (usado pelo drawer e pela imagem exportada).
      * @param {string} username
-     * @returns {string}
+     * @returns {{username: string, avatarId: (string|undefined), current: string[],
+     *            trophies: Object<string, number>, stats: Object, winRate: string, history: Array}}
      */
-    function renderDrawerContent(username) {
+    function profileModel(username) {
         const career = careerForUser(username, getFinalizedSeasons());
         const activeRows = activeRowsFor(username);
         const history = buildHistory(career, activeRows);
         const stats = statsFromHistory(history);
         const games = stats.wins + stats.losses;
-        const winRate = games > 0 ? Math.round((stats.wins / games) * 100) + '%' : '—';
-        const current = TIER_ORDER.filter(t => activeRows.some(r => r.serie === SERIES_META[t].id));
+        return {
+            username: sanitizeString(username, 64, 'Jogador'),
+            avatarId: findAvatarId(username, activeRows),
+            current: TIER_ORDER.filter(t => activeRows.some(r => r.serie === SERIES_META[t].id)),
+            trophies: career.trophies,
+            stats,
+            winRate: games > 0 ? Math.round((stats.wins / games) * 100) + '%' : '—',
+            history
+        };
+    }
+
+    /**
+     * HTML do perfil.
+     * @param {string} username
+     * @returns {string}
+     */
+    function renderDrawerContent(username) {
+        const p = profileModel(username);
+        const { stats, winRate, history, current } = p;
+        const career = { trophies: p.trophies };
 
         const trophyTiles = MEDAL_KEYS.map((k, i) => {
             const v = career.trophies[k] || 0;
@@ -162,10 +184,18 @@
 
         return `
             <header class="drawer__hd">
-                ${avatarHTML({ avatarId: findAvatarId(username, activeRows), name: username, size: 'lg' })}
+                ${avatarHTML({ avatarId: p.avatarId, name: username, size: 'lg' })}
                 <div class="grow">
-                    <h2 class="display drawer__title" id="drawer-title" dir="auto">${escapeHtml(sanitizeString(username, 64, 'Jogador'))}</h2>
+                    <h2 class="display drawer__title" id="drawer-title" dir="auto">${escapeHtml(p.username)}</h2>
                     ${current.length ? `<div class="drawer__pills">${current.map(seriesPillHTML).join('')}</div>` : ''}
+                    <div class="export-actions drawer__actions" role="group" aria-label="Exportar perfil como imagem">
+                        <button type="button" class="export-btn" data-action="export-download" aria-label="Baixar perfil de ${escapeHtml(p.username)} como imagem">
+                            <span data-icon="download" data-size="18"></span><span class="export-btn__label">Baixar</span>
+                        </button>
+                        ${canShareFiles() ? `<button type="button" class="export-btn" data-action="export-share" aria-label="Compartilhar perfil de ${escapeHtml(p.username)} como imagem">
+                            <span data-icon="share" data-size="18"></span><span class="export-btn__label">Compartilhar</span>
+                        </button>` : ''}
+                    </div>
                 </div>
                 <button type="button" class="icon-btn drawer__close" data-close-drawer aria-label="Fechar perfil">${IconRegistry.close({ size: 20 })}</button>
             </header>
@@ -223,7 +253,10 @@
             document.addEventListener('keydown', handleKeydown);
         }
 
-        document.getElementById('drawer-content').innerHTML = renderDrawerContent(username);
+        const content = document.getElementById('drawer-content');
+        content.innerHTML = renderDrawerContent(username);
+        renderIcons(content);
+        _currentUser = username;
         drawer.hidden = false;
         getScrim().hidden = false;
         _isOpen = true;
@@ -243,6 +276,7 @@
         getDrawer().hidden = true;
         getScrim().hidden = true;
         _isOpen = false;
+        _currentUser = null;
         unlockBodyScroll();
         document.removeEventListener('keydown', handleKeydown);
 
@@ -280,4 +314,7 @@
     window.openPlayerDrawer = openPlayerDrawer;
     window.closePlayerDrawer = closePlayerDrawer;
     window.isPlayerDrawerOpen = isPlayerDrawerOpen;
+    window.profileModel = profileModel;
+    /** @returns {string|null} usuário do perfil aberto */
+    window.currentDrawerUser = () => (_isOpen ? _currentUser : null);
 })();
