@@ -258,6 +258,37 @@ function simulateOdds({ teams, schedule, spots, relegate, seed, sims = ODDS_PARA
     return out;
 }
 
+/**
+ * Monta a entrada de simulateOdds() a partir das rodadas encerradas:
+ * vitórias e pontos de cada time recalculados dos placares (empate = ½) e
+ * os confrontos das semanas restantes. Usado pelo site (tabs/chances.js) e
+ * pelo registro semanal (scripts/snapshot-chances.mjs) — mesma conta.
+ *
+ * @param {number[]} rosterIds  ordem dos times (define a semente por time)
+ * @param {Array<Object<number, number>>} scores  por semana encerrada: rosterId → pontos
+ * @param {Array<Array<[number, number]>>} pairs  confrontos de todas as semanas da temporada regular
+ * @param {number} scored  nº de semanas encerradas
+ * @returns {{teams: Array<{id: number, wins: number, pf: number, scores: number[]}>, schedule: Array}}
+ */
+function buildOddsInput(rosterIds, scores, pairs, scored) {
+    const teams = rosterIds.map(id => ({ id, wins: 0, pf: 0, scores: [] }));
+    const byId = Object.fromEntries(teams.map(t => [t.id, t]));
+    scores.slice(0, scored).forEach((byRoster, wi) => {
+        teams.forEach(t => {
+            const p = byRoster[t.id];
+            if (typeof p === 'number') { t.scores.push(p); t.pf += p; }
+        });
+        (pairs[wi] || []).forEach(([a, b]) => {
+            const pa = byRoster[a], pb = byRoster[b];
+            if (!byId[a] || !byId[b] || typeof pa !== 'number' || typeof pb !== 'number') return;
+            if (pa > pb) byId[a].wins += 1;
+            else if (pb > pa) byId[b].wins += 1;
+            else { byId[a].wins += 0.5; byId[b].wins += 0.5; }
+        });
+    });
+    return { teams, schedule: pairs.slice(scored) };
+}
+
 // --- LENDAS (cross-season trophy aggregation) ---
 
 const TROPHY_ORDER = ['gold', 'silver', 'bronze', 'fourth'];

@@ -9,6 +9,8 @@
 //   - Placares e confrontos de semanas encerradas vêm do cache do aparelho
 //     (fetchWeekScores / fetchWeekPairs), compartilhado com o Power Ranking.
 //   - Elite: mesmo modelo; o estudo não tem o formato 8/4, então é estimativa.
+//   - Registro semanal: scripts/snapshot-chances.mjs refaz a mesma conta e
+//     guarda em data/chances-<ano>.json (GitHub Actions, toda terça/quarta).
 //
 // Lê: appState.season, appState.lastUpdated
 // Depende de: config, api, derivations, tabs/ligas (zonesFor)
@@ -41,26 +43,10 @@ async function loadLeagueOdds(league) {
         Promise.all(weeks.map(w => fetchWeekPairs(id, w)))
     ]);
 
-    // Vitórias e pontos pelas rodadas encerradas (mesma base da simulação).
-    const teams = league.teams.map(t => ({ id: t.teamId, wins: 0, pf: 0, scores: [] }));
-    const byId = Object.fromEntries(teams.map(t => [t.id, t]));
-    scores.forEach((byRoster, wi) => {
-        teams.forEach(t => {
-            const p = byRoster[t.id];
-            if (typeof p === 'number') { t.scores.push(p); t.pf += p; }
-        });
-        pairs[wi].forEach(([a, b]) => {
-            const pa = byRoster[a], pb = byRoster[b];
-            if (!byId[a] || !byId[b] || typeof pa !== 'number' || typeof pb !== 'number') return;
-            if (pa > pb) byId[a].wins += 1;
-            else if (pb > pa) byId[b].wins += 1;
-            else { byId[a].wins += 0.5; byId[b].wins += 0.5; }
-        });
-    });
-
+    const { teams, schedule } = buildOddsInput(league.teams.map(t => t.teamId), scores, pairs, scored);
     const odds = simulateOdds({
         teams,
-        schedule: pairs.slice(scored),
+        schedule,
         spots: z.playoff,
         relegate: z.down,
         seed: seedFrom(`${id}|${scored}`)
