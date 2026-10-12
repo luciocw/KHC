@@ -62,6 +62,10 @@ assets/
   banners/                  og-image 1200×630, hero, header
 ```
 
+## Registro semanal das chances
+
+`scripts/snapshot-chances.mjs` refaz a conta da visão **Chances** (mesmo código do site) e grava em `data/chances-<ano>.json` as chances de cada time após cada rodada encerrada e, quando a temporada regular fecha, o resultado final (quem foi aos playoffs e quem caiu). Serve para conferir se o modelo acerta. O GitHub Actions (`.github/workflows/chances.yml`) roda toda terça e quarta; também dá para rodar à mão em **Actions → Registro das chances → Run workflow** ou `node scripts/snapshot-chances.mjs 2026`.
+
 ## Como atualizar quando a Sleeper renovar as ligas
 
 A cada ano, novos league IDs são gerados. Pra adicionar um novo ano:

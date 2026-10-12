@@ -1,0 +1,43 @@
+# Registro semanal das chances de playoffs / rebaixamento.
+# Roda terça e quarta (a Sleeper fecha a rodada depois do Monday Night;
+# quarta é a repescagem). O script é idempotente: só grava rodadas novas
+# em data/chances-<ano>.json e, no fim da temporada regular, o resultado.
+name: Registro das chances
+
+on:
+  schedule:
+    - cron: '17 13 * * 2,3'   # 13:17 UTC = 10:17 em Brasília
+  workflow_dispatch:
+    inputs:
+      season:
+        description: 'Temporada (vazio = a mais recente)'
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chances
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Registrar chances
+        run: node scripts/snapshot-chances.mjs ${{ github.event.inputs.season }}
+      - name: Commit
+        run: |
+          if git diff --quiet -- data/; then
+            echo "Sem mudanças."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898797+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git commit -m "Chances: registro após a rodada encerrada"
+          git push
