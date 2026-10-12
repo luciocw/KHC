@@ -5,6 +5,7 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 
 ## Funcionalidades
 
+- **Landing (porta de entrada):** na 1ª visita pela raiz do site abre uma apresentação curta da KHC; "Ver as ligas" leva ao hub e, dali em diante, a raiz abre o hub direto. Links com endereço (`#/ligas/…`, compartilhados, app instalado) nunca passam pela landing, e quem já usava o hub também não. `#/inicio` abre a landing a qualquer momento (link de divulgação e botão em Regras). O botão "Quero jogar" ainda não tem destino: entra quando houver link de inscrição
 - **7 abas:** Ligas, Rodada, Top Scorers, Power Ranking, Lendas KHC, Temporadas, Regras
 - **Endereço por tela** (compartilhável): `#/ligas/2026/a`, `#/top/2026`, `#/jogador/<usuario>`
 - **Ligas:** uma série por vez, com zonas de acesso / playoffs / rebaixamento por temporada e medalhas (número dentro) na classificação final; botões Baixar / Compartilhar geram PNG da tabela; seletor **Tabela | Chances** com Playoffs % e Queda % (simulação do resto da temporada regular, calibrada com o histórico de ligas 10/6 do Sleeper, atualiza quando a rodada fecha)
@@ -42,6 +43,7 @@ data/
 scripts/
   derive-season.mjs         derivador de JSON a partir da Sleeper API
 js/
+  landing.js                landing da 1ª visita e #/inicio (carregado no <head>)
   config.js                 KHC_CONFIG (ligas + regras por ano), SERIES_META, appState
   sanitize.js               escapeHtml, sanitizeAvatarUrl, sanitizeNumber, etc.
   api.js                    fetch+retry, cache (localStorage), fetchLeagueData, fetchNflState, confrontos

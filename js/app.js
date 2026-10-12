@@ -65,6 +65,9 @@ function parseHash() {
 /** Atualiza a URL para refletir o estado atual (sem criar histórico). */
 function syncHash() {
     if (isPlayerDrawerOpen()) return;
+    // Com a landing aberta a URL fica como chegou (raiz ou #/inicio); ela
+    // chama syncHash() de novo ao sair (js/landing.js).
+    if (document.documentElement.classList.contains('is-landing')) return;
     const h = hashFor(appState.tab, appState.season, appState.series, appState.matchWeek);
     if (location.hash !== h) history.replaceState(null, '', h);
 }

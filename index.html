@@ -33,8 +33,70 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Landing: decide antes da primeira pintura se abre a landing ou o hub -->
+    <script src="js/landing.js"></script>
 </head>
 <body>
+    <!-- Landing (1ª visita e #/inicio). Visível só com <html class="is-landing">; ver js/landing.js -->
+    <div class="landing" id="landing">
+        <div class="ld-wrap">
+            <header class="ld-top">
+                <span class="ld-brand"><img src="assets/logo/svg/escudo-khc.svg" alt="" width="28" height="32"><span>Ultimate League KHC</span></span>
+                <button class="ld-hub-link" type="button" data-landing-leave>Ver as ligas →</button>
+            </header>
+
+            <div class="ld-hero">
+                <div>
+                    <p class="ld-label ld-eyebrow"><span class="ld-live" aria-hidden="true"></span>Temporada 2026 em andamento</p>
+                    <h1 class="ld-wide ld-title">Fantasy com <em>rebaixamento.</em> Vai encarar?</h1>
+                    <p class="ld-lead">Aqui tem acesso, queda, medalha e um grupo inteiro esperando você errar a escalação. Fantasy Football (NFL), zoeira corre solta, se tem medo, fica fora!</p>
+                    <button class="ld-btn" type="button" data-landing-to-end>Quero jogar</button>
+                </div>
+                <div class="ld-ladder" aria-label="As séries da KHC, da Elite à Série D">
+                    <div class="ld-step ld-step--elite" style="--c: var(--league-elite)"><img src="assets/logo/svg/escudo-elite.svg" alt="" width="36" height="41"><b>Elite</b><small>só a nata</small></div>
+                    <div class="ld-step" style="--c: var(--league-a)"><img src="assets/logo/svg/escudo-serie-a.svg" alt="" width="36" height="41"><b>Série A</b><small>pressão</small></div>
+                    <div class="ld-step" style="--c: var(--league-b)"><img src="assets/logo/svg/escudo-serie-b.svg" alt="" width="36" height="41"><b>Série B</b><small>quase lá</small></div>
+                    <div class="ld-step" style="--c: var(--league-c)"><img src="assets/logo/svg/escudo-serie-c.svg" alt="" width="36" height="41"><b>Série C</b><small>briga de rua</small></div>
+                    <div class="ld-step" style="--c: var(--league-d)"><img src="assets/logo/svg/escudo-serie-d.svg" alt="" width="36" height="41"><b>Série D</b><small>raiz</small></div>
+                </div>
+            </div>
+
+            <div class="ld-bits">
+                <div class="ld-bit">
+                    <span class="ld-big ld-up">3 ↑</span>
+                    <h2>Fez 13–1? Que lindo.</h2>
+                    <p>Quem sobe é campeão, vice e 3º dos <b>playoffs</b>. Campanha boa só te coloca na festa.</p>
+                </div>
+                <div class="ld-bit">
+                    <span class="ld-big ld-down">3 ↓</span>
+                    <h2>Ficou nos 3 últimos?</h2>
+                    <p>Desce. Sem tapetão, sem recurso. E fica registrado no seu perfil, que ninguém esquecerá. JAMAIS!</p>
+                </div>
+                <div class="ld-bit">
+                    <span class="ld-big ld-gold">2×</span>
+                    <h2>Ganhou? Joga dobrado.</h2>
+                    <p>Campeão e vice de cada série vão pra Elite e disputam duas ligas na mesma temporada.</p>
+                </div>
+            </div>
+
+            <div class="ld-end" id="landingEnd">
+                <h2 class="ld-wide">Temporada 2026 já em andamento. Se interessou? Bora jogar em 2027.</h2>
+                <div class="ld-end__actions">
+                    <button class="ld-btn" type="button" id="landingJoin">Quero jogar</button>
+                    <button class="ld-btn ld-btn--ghost" type="button" id="landingRisk">Qual a chance de eu cair?</button>
+                    <button class="ld-btn ld-btn--ghost" type="button" data-landing-leave>Só quero ver as ligas</button>
+                </div>
+                <p class="ld-verdict" id="landingVerdict" aria-live="polite"></p>
+            </div>
+        </div>
+
+        <div class="ld-dock" id="landingDock" aria-hidden="true">
+            <span>Bora jogar em 2027?</span>
+            <button class="ld-btn" type="button" tabindex="-1" data-landing-to-end>Quero jogar</button>
+        </div>
+    </div>
+
     <a href="#main" class="skip-link">Pular para o conteúdo</a>
 
     <header class="site-header">
