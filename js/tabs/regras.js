@@ -62,7 +62,8 @@ const RULES = [
  * @returns {string} HTML
  */
 function renderRules() {
-    return `<div class="rules">${RULES.map(r => `
+    return `<a class="btn rules__intro" href="#/inicio">Ver a apresentação da KHC</a>
+    <div class="rules">${RULES.map(r => `
         <section class="card rule">
             <h2 class="display rule__title"><span class="rule__icon" data-icon="${r.icon}" data-size="20"></span>${r.title}</h2>
             ${r.lead ? `<p class="rule__lead">${r.lead}</p>` : ''}
