@@ -242,6 +242,7 @@ async function loadData() {
     appState.isFromCache = false;
     resetRoundCache();
     resetPowerCache();
+    resetChancesCache();
     render();
 
     const validLeagues = config ? config.leagues.filter(l => !l.id.includes('placeholder')) : [];
@@ -300,6 +301,14 @@ function bindEvents() {
             if (year !== appState.season && KHC_CONFIG[year]) {
                 location.hash = hashFor(appState.tab, year, appState.series);
             }
+            return;
+        }
+
+        const viewBtn = target.closest('[data-ligas-view]');
+        if (viewBtn) {
+            appState.ligasView = viewBtn.getAttribute('data-ligas-view') === 'chances' ? 'chances' : 'tabela';
+            try { localStorage.setItem('khc_ligas_view', appState.ligasView); } catch (err) { /* sem storage */ }
+            renderView();
             return;
         }
 

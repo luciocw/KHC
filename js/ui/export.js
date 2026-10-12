@@ -54,6 +54,22 @@ function fitText(ctx, text, maxW) {
     return s + '…';
 }
 
+/** Quebra o texto em até `max` linhas que caibam em maxW (a última com …). */
+function wrapLines(ctx, text, maxW, max) {
+    const words = text.split(' ');
+    const lines = [];
+    let cur = '';
+    words.forEach(wd => {
+        const next = cur ? `${cur} ${wd}` : wd;
+        if (ctx.measureText(next).width <= maxW || !cur) cur = next;
+        else { lines.push(cur); cur = wd; }
+    });
+    if (cur) lines.push(cur);
+    if (lines.length <= max) return lines;
+    const head = lines.slice(0, max - 1);
+    return [...head, fitText(ctx, lines.slice(max - 1).join(' '), maxW)];
+}
+
 function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
     ctx.moveTo(x + r, y);
@@ -222,9 +238,12 @@ async function drawStandingsCanvas(league) {
     // Layout (px CSS)
     const HEAD_H = EXPORT_HEAD_H, THEAD_H = 34, ROW_H = 57;
     const legend = zoneLegendItems(m.z, m.finalized);
-    const LEGEND_H = 46;
+    const chances = m.view === 'chances' && m.odds.status === 'ready' ? m.odds : null;
+    const LEGEND_H = chances ? 88 : 46;
     const H = HEAD_H + THEAD_H + n * ROW_H + LEGEND_H;
     const colPC = EXPORT_W - 14, colPF = colPC - 86, colVD = colPF - 84;
+    // Chances: Playoffs (e Queda) no lugar de PF / PC
+    const chanceCols = chances ? (m.z.down ? [['Playoffs', colPF, 'playoffs'], ['Queda', colPC, 'releg']] : [['Playoffs', colPC, 'playoffs']]) : [];
     const colTeam = 56;
 
     const { canvas, ctx } = startExportCard(H, c, crest, m.meta.name, m.subtitle);
@@ -240,8 +259,12 @@ async function drawStandingsCanvas(league) {
     ctx.fillText(spaced('TIME'), colTeam, thY);
     ctx.textAlign = 'right';
     ctx.fillText(spaced('V–D'), colVD, thY);
-    ctx.fillText(spaced('PF'), colPF, thY);
-    ctx.fillText(spaced('PC'), colPC, thY);
+    if (chances) {
+        chanceCols.forEach(([label, x]) => ctx.fillText(spaced(label.toUpperCase()), x, thY));
+    } else {
+        ctx.fillText(spaced('PF'), colPF, thY);
+        ctx.fillText(spaced('PC'), colPC, thY);
+    }
     ctx.textAlign = 'left';
     y += THEAD_H;
 
@@ -297,17 +320,33 @@ async function drawStandingsCanvas(league) {
         ctx.fillStyle = c.text;
         setFont(ctx, 800, 14);
         ctx.fillText(`${wins}–${losses}`, colVD, mid);
-        ctx.fillStyle = c.text2;
-        setFont(ctx, 400, 14);
-        ctx.fillText(fmtPts(t.fpts), colPF, mid);
-        ctx.fillText(fmtPts(t.fptsAgainst), colPC, mid);
+        if (chances) {
+            const o = chances.data.byId[t.teamId] || { playoffs: 0, releg: 0 };
+            setFont(ctx, 800, 15);
+            chanceCols.forEach(([, x, k]) => {
+                const hot = k === 'playoffs' ? o.playoffs >= 0.9 : o.releg >= 0.5;
+                ctx.fillStyle = hot ? (k === 'playoffs' ? c.promo : c.releg) : c.text;
+                ctx.fillText(fmtPct(o[k]), x, mid);
+            });
+        } else {
+            ctx.fillStyle = c.text2;
+            setFont(ctx, 400, 14);
+            ctx.fillText(fmtPts(t.fpts), colPF, mid);
+            ctx.fillText(fmtPts(t.fptsAgainst), colPC, mid);
+        }
         ctx.textAlign = 'left';
     });
     y += n * ROW_H;
 
     // Legenda
     hLine(ctx, 0, EXPORT_W, y, c.border);
-    const ly = y + LEGEND_H / 2;
+    const ly = y + 23;
+    if (chances) {
+        ctx.fillStyle = c.text3;
+        setFont(ctx, 400, 12);
+        wrapLines(ctx, chancesNote(m.tier, chances), EXPORT_W - 28, 2)
+            .forEach((line, i) => ctx.fillText(line, 14, y + 52 + i * 17));
+    }
     let lx = 14;
     setFont(ctx, 400, 12);
     legend.forEach(it => {
@@ -763,8 +802,8 @@ function exportTarget() {
         };
     }
     return {
-        key: `ligas|${appState.season}|${tier}|${appState.lastUpdated || ''}`,
-        name: `khc-${appState.season}-${tier}.png`,
+        key: `ligas|${appState.season}|${tier}|${appState.lastUpdated || ''}|${appState.ligasView}|${leagueOdds(league).status}`,
+        name: `khc-${appState.season}-${tier}${appState.ligasView === 'chances' && !isSeasonFinalized() ? '-chances' : ''}.png`,
         title: `${seriesName} · ${appState.season}`,
         draw: () => drawStandingsCanvas(league)
     };

@@ -9,6 +9,8 @@
 //   - Temporada finalizada: ordem e medalhas pela classificação final
 //     (data/<ano>.json — 1º–4º pelos playoffs, 5º+ pela temporada regular).
 //   - Lateral: líderes (ou campeões) das outras séries.
+//   - Seletor Tabela | Chances: Chances troca PF/PC por Playoffs % e Queda %
+//     (tabs/chances.js), só com a temporada regular em andamento.
 //   - Botões Baixar / Compartilhar: a tabela vira PNG (js/ui/export.js).
 //
 // Lê: appState.leagues, appState.season, appState.series, appState.failedLeagues
@@ -143,7 +145,7 @@ function zoneOf(i, n, z) {
  * Linha da tabela de classificação.
  * @returns {string}
  */
-function buildStandingsRow(t, i, n, z, finalEntry) {
+function buildStandingsRow(t, i, n, z, finalEntry, chances) {
     const pos = i + 1;
     const { zone, cut } = zoneOf(i, n, z);
     const trophy = finalEntry && finalEntry.trophy;
@@ -155,9 +157,39 @@ function buildStandingsRow(t, i, n, z, finalEntry) {
         <td>${posCell}</td>
         <td class="cell-team">${teamButtonHTML({ user: t.ownerName, team: t.teamName, avatarId: t.avatar })}</td>
         <td class="rec">${wins}–${losses}</td>
-        <td>${fmtPts(t.fpts)}</td>
-        <td class="hide-mobile">${fmtPts(t.fptsAgainst)}</td>
+        ${chances ? chanceCellsHTML(t, z, chances) : `<td>${fmtPts(t.fpts)}</td>
+        <td class="hide-mobile">${fmtPts(t.fptsAgainst)}</td>`}
     </tr>`;
+}
+
+/**
+ * Células Playoffs % / Queda % (visão Chances).
+ * @param {Object} t  time
+ * @param {Object} z  zonas
+ * @param {{status: string, data?: Object}} odds
+ * @returns {string}
+ */
+function chanceCellsHTML(t, z, odds) {
+    const o = odds.status === 'ready' && odds.data.byId ? odds.data.byId[t.teamId] : null;
+    const cell = (p, hotCls, hot) => o
+        ? `<td class="pct${hot ? ' ' + hotCls : ''}">${fmtPct(p)}</td>`
+        : '<td class="pct is-pending">…</td>';
+    return cell(o && o.playoffs, 'pct--up', o && o.playoffs >= 0.9)
+        + (z.down ? cell(o && o.releg, 'pct--down', o && o.releg >= 0.5) : '');
+}
+
+/**
+ * Nota da visão Chances (rodada usada e de onde vem o modelo).
+ * @returns {string} texto puro
+ */
+function chancesNote(tier, odds) {
+    if (odds.status === 'loading') return 'Calculando chances…';
+    if (odds.status === 'error') return 'Não deu pra calcular as chances agora. Tente atualizar.';
+    const after = odds.data.afterWeek ? `após a rodada ${odds.data.afterWeek}` : 'antes da rodada 1';
+    const base = tier === 'elite'
+        ? 'estimativa do modelo (ainda sem histórico do formato 8 times / 4 vagas)'
+        : 'calibradas com o histórico de ligas 10 times / 6 vagas do Sleeper';
+    return `Chances ${after} · ${ODDS_PARAMS.sims / 1000} mil simulações do resto da temporada regular, ${base}. Atualiza quando a rodada fecha.`;
 }
 
 /**
@@ -225,17 +257,22 @@ function buildLeaderLink(league, finalized, finalIdx) {
  * zonas, subtítulo). Usado pela aba e pela exportação em imagem.
  * @param {Object} league  item de appState.leagues
  * @returns {{tier: string, meta: Object, teams: Array, z: Object, finalized: boolean,
- *            seriesIdx: (Object|undefined), subtitle: string}}
+ *            seriesIdx: (Object|undefined), subtitle: string, view: ('tabela'|'chances'),
+ *            odds: Object, chancesAvailable: boolean}}
  */
 function standingsModel(league) {
     const tier = league.info.tier;
     const finalized = isSeasonFinalized();
+    // Visão Chances: só com temporada regular em andamento.
+    const odds = finalized ? { status: 'off' } : leagueOdds(league);
+    const chancesAvailable = !finalized && !(odds.status === 'ready' && !odds.data.active);
+    const view = chancesAvailable && appState.ligasView === 'chances' ? 'chances' : 'tabela';
     const seriesIdx = finalized ? getFinalStandingsIndex()[league.info.name] : undefined;
     const teams = sortByFinalStandings(league.teams, seriesIdx);
     const subtitle = finalized
         ? `${teams.length} times · classificação final ${appState.season}`
         : `${teams.length} times · ${weekLabel() || 'Temporada em andamento'} · PPR`;
-    return { tier, meta: SERIES_META[tier], teams, z: zonesFor(tier, finalized), finalized, seriesIdx, subtitle };
+    return { tier, meta: SERIES_META[tier], teams, z: zonesFor(tier, finalized), finalized, seriesIdx, subtitle, view, odds, chancesAvailable };
 }
 
 /**
@@ -251,7 +288,8 @@ function renderLigas() {
     appState.series = tier;
 
     const league = leagues.find(l => l.info.tier === tier);
-    const { meta, teams, z, finalized, seriesIdx, subtitle } = standingsModel(league);
+    const { meta, teams, z, finalized, seriesIdx, subtitle, view, odds, chancesAvailable } = standingsModel(league);
+    const chances = view === 'chances' ? odds : null;
     const finalIdx = finalized ? getFinalStandingsIndex() : {};
     const n = teams.length;
 
@@ -263,7 +301,17 @@ function renderLigas() {
     }).join('');
 
     const rows = teams.map((t, i) =>
-        buildStandingsRow(t, i, n, z, seriesIdx ? seriesIdx[t.ownerName] : null)).join('');
+        buildStandingsRow(t, i, n, z, seriesIdx ? seriesIdx[t.ownerName] : null, chances)).join('');
+
+    const toggle = chancesAvailable ? `<div class="view-switch" role="group" aria-label="O que mostrar na tabela">
+            <button type="button" data-ligas-view="tabela" aria-pressed="${view === 'tabela'}">Tabela</button>
+            <button type="button" data-ligas-view="chances" aria-pressed="${view === 'chances'}">Chances</button>
+        </div>` : '';
+    const cols = chances
+        ? `<th scope="col" class="th-pct"><abbr title="Chance de ir aos playoffs">Playoffs</abbr></th>
+                            ${z.down ? '<th scope="col" class="th-pct"><abbr title="Chance de rebaixamento">Queda</abbr></th>' : ''}`
+        : `<th scope="col"><abbr title="Pontos feitos">PF</abbr></th>
+                            <th scope="col" class="hide-mobile"><abbr title="Pontos contra">PC</abbr></th>`;
 
     const others = leagues.filter(l => l.info.tier !== tier)
         .map(l => buildLeaderLink(l, finalized, finalIdx)).join('');
@@ -288,20 +336,21 @@ function renderLigas() {
                         </button>` : ''}
                     </div>
                 </header>
+                ${toggle}
                 <div class="table-wrap">
-                    <table class="standings">
+                    <table class="standings${chances ? ' standings--chances' : ''}">
                         <caption class="sr-only">Classificação da ${escapeHtml(meta.name)}</caption>
                         <thead><tr>
                             <th scope="col">#</th>
                             <th scope="col">Time</th>
                             <th scope="col"><abbr title="Vitórias e derrotas">V–D</abbr></th>
-                            <th scope="col"><abbr title="Pontos feitos">PF</abbr></th>
-                            <th scope="col" class="hide-mobile"><abbr title="Pontos contra">PC</abbr></th>
+                            ${cols}
                         </tr></thead>
                         <tbody>${rows}</tbody>
                     </table>
                 </div>
                 ${buildZoneLegend(z, finalized)}
+                ${chances ? `<p class="chances-note">${escapeHtml(chancesNote(league.info.tier, odds))}</p>` : ''}
             </section>
             ${others ? `<aside class="leaders" aria-label="Outras séries">
                 <div class="eyebrow">${finalized ? 'Campeões das outras séries' : 'Líderes das outras séries'}</div>
