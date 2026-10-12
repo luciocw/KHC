@@ -247,6 +247,36 @@ async function fetchWeekScores(leagueId, week) {
     return out;
 }
 
+/**
+ * Confrontos (pares de roster_id) de uma semana. O calendário não muda
+ * durante a temporada: fica guardado no aparelho.
+ * @param {string} leagueId
+ * @param {number} week
+ * @returns {Promise<Array<[number, number]>>}
+ */
+async function fetchWeekPairs(leagueId, week) {
+    const key = `khc_pairs_${leagueId}_${week}`;
+    try {
+        const hit = localStorage.getItem(key);
+        if (hit) return JSON.parse(hit);
+    } catch (e) { /* sem storage */ }
+
+    const res = await fetchWithRetry(`https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`);
+    if (!res.ok) throw new Error(getErrorMessage(res.status));
+    const raw = await res.json();
+    const groups = {};
+    (Array.isArray(raw) ? raw : []).forEach(m => {
+        if (m && Number.isInteger(m.roster_id) && Number.isInteger(m.matchup_id)) {
+            (groups[m.matchup_id] = groups[m.matchup_id] || []).push(m.roster_id);
+        }
+    });
+    const pairs = Object.values(groups).filter(g => g.length === 2);
+    if (pairs.length) {
+        try { localStorage.setItem(key, JSON.stringify(pairs)); } catch (e) { /* cheio ou bloqueado */ }
+    }
+    return pairs;
+}
+
 async function fetchLeagueData(leagueInfo) {
     const baseUrl = 'https://api.sleeper.app/v1/league';
 

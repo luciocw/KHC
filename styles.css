@@ -738,6 +738,53 @@ abbr[title] { text-decoration: none; cursor: help; }
 .standings tr.cut-playoff td { border-bottom: 1px dashed var(--border-2); }
 .standings tr.cut-releg td { border-bottom: 1px dashed var(--zone-releg); }
 
+/* Seletor Tabela | Chances */
+.view-switch {
+    display: inline-flex;
+    margin: 0 var(--s-16) var(--s-12);
+    padding: 3px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--surface-2);
+}
+.view-switch button {
+    min-height: 36px;
+    padding: 0 var(--s-16);
+    border: 0;
+    border-radius: var(--r-sm);
+    background: none;
+    color: var(--text-2);
+    font-weight: 800;
+    font-stretch: 75%;
+    font-size: var(--fs-12);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+.view-switch button:hover { color: var(--text); }
+.view-switch button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+
+/* Visão Chances: Playoffs % / Queda % (visíveis também no celular) */
+.standings td.pct { font-weight: 800; color: var(--text); }
+.standings td.pct.is-pending { color: var(--text-3); font-weight: 400; }
+.standings td.pct--up { color: var(--zone-promo); }
+.standings td.pct--down { color: var(--zone-releg); }
+.standings--chances th:last-child,
+.standings--chances td:last-child { padding-right: 14px; }
+@media (max-width: 1023px) {
+    /* celular: mais espaço para o nome do time */
+    .standings--chances th:first-child,
+    .standings--chances td:first-child { width: 36px; padding-left: 10px; }
+    .standings--chances th, .standings--chances td { padding-left: 6px; padding-right: 6px; }
+    .standings--chances .avatar { display: none; }
+}
+.chances-note {
+    margin: 0;
+    padding: 0 14px var(--s-12);
+    font-size: var(--fs-12);
+    color: var(--text-3);
+}
+
 .pos {
     font-weight: 900;
     font-stretch: 75%;

@@ -8,6 +8,7 @@
 //   • powerRanking   — Power Score 0-100 (força all-play + V–D + fase) e
 //                      tiers S/A/B/C/D por posição (allPlayRates, percentiles,
 //                      tierForRank)
+//   • simulateOdds   — chance de playoffs / rebaixamento (Monte Carlo calibrado)
 //   • legendsAggregator — Agrega trofeus cross-season para a aba Lendas
 //   • careerForUser  — Histórico cross-season de um jogador para o Drawer
 //
@@ -145,6 +146,116 @@ function powerRanking(teams, weekly) {
         row.tier = tierForRank(row.rank, rows.length);
     });
     return rows;
+}
+
+// --- CHANCES (playoffs / rebaixamento) ---
+
+/**
+ * Parâmetros da simulação, calibrados com o histórico de ligas encerradas
+ * do Sleeper (estudo "Chance de playoffs por formato de liga", redraft
+ * 10/6 após a rodada 4: erro médio de 1,4 ponto; em 12/6, 12/8, 14/6, 16/6
+ * e 16/8 o erro fica entre 0,5 e 3,2 pontos). Placares da KHC 2025:
+ *   σ  variação semanal de um time ......................... 23 pts
+ *   τ  diferença real de força entre os times ................ 8 pts
+ *   drift  quanto a força muda por semana (trocas, lesões) ... 4 pts
+ */
+const ODDS_PARAMS = Object.freeze({ sigma: 23, tau: 8, drift: 4, sims: 10000 });
+
+/** PRNG determinístico (mulberry32): mesma rodada → mesmos números. */
+function seededRandom(seed) {
+    let a = seed >>> 0;
+    return () => {
+        a = (a + 0x6D2B79F5) >>> 0;
+        let t = a;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+/** Semente a partir de um texto (FNV-1a). */
+function seedFrom(text) {
+    let h = 2166136261;
+    for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+    return h >>> 0;
+}
+
+/**
+ * Simula o resto da temporada regular (Monte Carlo) e devolve a chance de
+ * cada time terminar entre os `spots` primeiros (playoffs) e entre os
+ * `relegate` últimos (rebaixamento). Classificação: vitórias, depois pontos.
+ *
+ * Força de cada time = média dos placares puxada para a média da liga
+ * (com poucos jogos, uma semana boa ou ruim engana) + incerteza; a força
+ * ainda muda um pouco a cada semana.
+ *
+ * @param {Object} input
+ * @param {Array<{id: (string|number), wins: number, pf: number, scores: number[]}>} input.teams
+ * @param {Array<Array<[(string|number), (string|number)]>>} input.schedule  confrontos das semanas restantes
+ * @param {number} input.spots
+ * @param {number} input.relegate
+ * @param {number} input.seed
+ * @param {number} [input.sims]
+ * @returns {Object<string, {playoffs: number, releg: number}>} id → [0, 1]
+ */
+function simulateOdds({ teams, schedule, spots, relegate, seed, sims = ODDS_PARAMS.sims }) {
+    const { sigma, tau, drift } = ODDS_PARAMS;
+    const n = teams.length;
+    const rand = seededRandom(seed);
+    let spare = null;
+    const normal = () => {
+        if (spare !== null) { const v = spare; spare = null; return v; }
+        let u = 0;
+        while (u === 0) u = rand();
+        const r = Math.sqrt(-2 * Math.log(u));
+        const th = 2 * Math.PI * rand();
+        spare = r * Math.sin(th);
+        return r * Math.cos(th);
+    };
+
+    const idx = {};
+    teams.forEach((t, i) => { idx[t.id] = i; });
+    const all = teams.flatMap(t => t.scores);
+    const leagueMean = all.length ? all.reduce((a, b) => a + b, 0) / all.length : 0;
+    const post = teams.map(t => {
+        const g = t.scores.length;
+        if (!g) return { m: leagueMean, sd: tau };
+        const mean = t.scores.reduce((a, b) => a + b, 0) / g;
+        const k = (tau * tau) / (tau * tau + (sigma * sigma) / g);
+        return { m: leagueMean + (mean - leagueMean) * k, sd: Math.sqrt(1 / (1 / (tau * tau) + g / (sigma * sigma))) };
+    });
+    const pairs = schedule.map(week => week
+        .map(([a, b]) => [idx[a], idx[b]])
+        .filter(([a, b]) => a !== undefined && b !== undefined));
+
+    const po = new Float64Array(n), rl = new Float64Array(n);
+    const mu = new Float64Array(n), w = new Float64Array(n), pf = new Float64Array(n), x = new Float64Array(n);
+    const order = Array.from({ length: n }, (_, i) => i);
+    for (let s = 0; s < sims; s++) {
+        for (let i = 0; i < n; i++) {
+            mu[i] = post[i].m + post[i].sd * normal();
+            w[i] = teams[i].wins;
+            pf[i] = teams[i].pf;
+        }
+        for (const week of pairs) {
+            for (let i = 0; i < n; i++) {
+                mu[i] += drift * normal();
+                x[i] = mu[i] + sigma * normal();
+                pf[i] += x[i];
+            }
+            for (const [a, b] of week) {
+                if (x[a] > x[b]) w[a] += 1; else w[b] += 1;
+            }
+        }
+        order.sort((i, j) => (w[j] - w[i]) || (pf[j] - pf[i]));
+        for (let r = 0; r < n; r++) {
+            if (r < spots) po[order[r]] += 1;
+            if (relegate && r >= n - relegate) rl[order[r]] += 1;
+        }
+    }
+    const out = {};
+    teams.forEach((t, i) => { out[t.id] = { playoffs: po[i] / sims, releg: rl[i] / sims }; });
+    return out;
 }
 
 // --- LENDAS (cross-season trophy aggregation) ---
