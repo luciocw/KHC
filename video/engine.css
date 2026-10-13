@@ -77,3 +77,11 @@ body { font-family: var(--font); color: var(--text); -webkit-font-smoothing: ant
 .wipe-crest { position: absolute; left: 50%; top: 50%; width: 420px; height: 420px; margin: -210px 0 0 -210px; object-fit: contain;
     filter: drop-shadow(0 20px 40px rgba(0,0,0,.45)); }
 .fade { position: absolute; inset: 0; background: #000; opacity: 0; }
+
+/* Linha de time avulsa (prêmios, rankings) */
+.trow { position: relative; display: flex; align-items: center; gap: 24px; height: 118px; padding: 0 28px;
+    background: rgba(22,19,17,.94); border: 2px solid var(--border); border-radius: 22px; }
+.trow .av { width: 84px; height: 84px; border-radius: 18px; }
+.tname { font-weight: 800; font-size: 46px; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tsub { font-family: Mono, monospace; font-size: 28px; color: var(--text-3); margin-top: 4px; white-space: nowrap; }
+.tval { font-family: Mono, monospace; font-size: 64px; text-align: right; min-width: 200px; color: var(--text); }

@@ -139,10 +139,11 @@ class Track:
     entra a melodia; as fases devem começar em tempos que caiam nessa grade.
     """
 
-    def __init__(self, dur, bpm=150, grid=0.0, seed=0):
+    def __init__(self, dur, bpm=150, grid=0.0, seed=0, swing=0.0):
         self.dur = dur
         self.n = int(round(SR * dur))
         self.e8 = 60 / bpm / 2
+        self.swing = swing * 2 * self.e8  # atraso das colcheias do contratempo (0,12 = saltitante)
         self.grid = grid
         self.rng = np.random.default_rng(seed)
         self.lead, self.harm, self.bass, self.drums, self.fx = (np.zeros(self.n) for _ in range(5))
@@ -239,8 +240,8 @@ class Track:
         ka = int(round((a - self.grid) / e8))
         kb = int(round((b - self.grid) / e8))
         for k in range(ka, kb):
-            t = self.grid + k * e8
             rel = k - ka
+            t = self.grid + k * e8 + (self.swing if rel % 2 else 0)
             bar, pos = (rel // 8) % nb, rel % 8
             m = mel[rel % len(mel)]
             if melody and m not in (None, "."):
