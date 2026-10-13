@@ -277,6 +277,16 @@ async function fetchWeekPairs(leagueId, week) {
     return pairs;
 }
 
+/**
+ * Logo que o usuário escolheu para o time nesta liga (metadata.avatar).
+ * @param {Object} user  item de /league/<id>/users
+ * @returns {string|null}
+ */
+function leagueAvatarOf(user) {
+    const url = user && user.metadata && user.metadata.avatar;
+    return typeof url === 'string' && VALIDATION.LEAGUE_AVATAR_PATTERN.test(url) ? url : null;
+}
+
 async function fetchLeagueData(leagueInfo) {
     const baseUrl = 'https://api.sleeper.app/v1/league';
 
@@ -343,7 +353,8 @@ async function fetchLeagueData(leagueInfo) {
                 leagueTier: sanitizeTier(leagueInfo.tier),
                 teamName: teamName,
                 ownerName: ownerName,
-                avatar: user.avatar || null,
+                // logo do time nesta liga; sem ele, a foto da conta
+                avatar: leagueAvatarOf(user) || user.avatar || null,
                 wins: sanitizeNumber(settings.wins, 0, VALIDATION.MAX_WINS, 0),
                 losses: sanitizeNumber(settings.losses, 0, VALIDATION.MAX_LOSSES, 0),
                 ties: sanitizeNumber(settings.ties, 0, VALIDATION.MAX_WINS, 0),
