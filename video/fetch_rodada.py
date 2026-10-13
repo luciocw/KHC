@@ -57,7 +57,8 @@ def main():
             url = meta.get("avatar") or (
                 f"https://sleepercdn.com/avatars/{u['avatar']}" if u.get("avatar") else None)
             if url:
-                avatar = f"assets/avatars/{u.get('user_id') or r['roster_id']}.jpg"
+                # por liga: o mesmo dono pode usar um logo diferente em cada liga
+                avatar = f"assets/avatars/{tier}-{u.get('user_id') or r['roster_id']}.jpg"
                 try:
                     download(url, os.path.join(out, avatar))
                 except Exception as e:  # avatar é opcional

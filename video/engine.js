@@ -140,6 +140,18 @@
         return { card, rows };
     }
 
+    /** Linha de time (avatar, nome, linha de apoio e valor à direita). */
+    function teamRow(parent, { name, avatar, sub = '', value = '' }) {
+        const row = el('div', 'trow', parent);
+        const av = el('div', 'av', row);
+        if (avatar) el('img', '', av).src = avatar; else av.textContent = name.slice(0, 1);
+        const who = el('div', 'who', row);
+        const nm = el('div', 'tname', who, esc(name));
+        const sb = el('div', 'tsub', who, sub);
+        const val = el('div', 'tval', row, esc(value));
+        return { row, av, name: nm, sub: sb, val };
+    }
+
     /** Atualiza os pontos contando de 0 até o valor em [a, b]. */
     function countPoints(card, t, a, b) {
         const p = ease.out(prog(t, a, b));
@@ -223,6 +235,6 @@
     }
 
     window.KHC = { W, H, LEAGUE, hold, timeline, videoTime, clamp, prog, lerp, ease, enter, blink, shake, el, esc, set, fmt,
-        scene, overlay, hud, matchCard, countPoints, stamp, drawStamp, caption, drawCaption,
+        scene, overlay, hud, matchCard, teamRow, countPoints, stamp, drawStamp, caption, drawCaption,
         wipe, fadeOut, start };
 })();

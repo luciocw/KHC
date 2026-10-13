@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>KHC Awards · Semana 5</title>
+<link rel="stylesheet" href="../engine.css">
+<style>
+.boot { position: absolute; inset: 0; background: #fff; transform-origin: center; }
+.big-logo { position: absolute; left: 50%; top: 230px; width: 380px; height: 380px; margin-left: -190px; object-fit: contain;
+    filter: drop-shadow(0 30px 60px rgba(0,0,0,.6)); }
+.awards-px { position: absolute; left: 0; right: 0; top: 660px; text-align: center; font-family: Pixel; font-size: 46px; color: #F2B705;
+    text-shadow: 5px 5px 0 #000; }
+.open-l { position: absolute; left: 60px; right: 60px; font-weight: 900; font-size: 112px; line-height: .95; letter-spacing: -2px; text-transform: uppercase; }
+.open-l.o { color: var(--orange); }
+.week-chip { position: absolute; left: 60px; top: 1290px; font-family: Mono; font-size: 46px; letter-spacing: 4px; background: var(--orange);
+    color: #120a05; padding: 14px 26px; border-radius: 10px; }
+.open-sub { position: absolute; left: 60px; right: 60px; top: 1420px; font-weight: 600; font-size: 50px; line-height: 1.15; color: var(--text-2); }
+
+.award { position: absolute; left: 60px; right: 60px; top: 230px; }
+.award .n { font-weight: 800; font-size: 32px; letter-spacing: 6px; color: var(--text-2); display: flex; align-items: center; gap: 18px; }
+.award .n::before { content: ''; width: 60px; height: 5px; background: var(--orange); }
+.award .t { font-weight: 900; font-size: 96px; line-height: .98; letter-spacing: -1px; color: var(--orange); margin-top: 14px; text-transform: uppercase; font-stretch: 108%; }
+.award .px { font-family: Pixel; font-size: 24px; color: #F2B705; margin-top: 18px; }
+
+.group { position: absolute; left: 50px; right: 50px; display: flex; flex-direction: column; gap: 14px; }
+.glabel { font-family: Pixel; font-size: 30px; margin: 0 0 6px 6px; }
+.good { color: var(--success); } .bad { color: var(--danger); }
+.trow.win { border-color: var(--success); box-shadow: 0 0 40px rgba(61,214,140,.25); }
+.trow.lose { border-color: var(--danger); }
+.trow.hot { border-color: var(--orange); }
+.fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 20px 0 0 20px; background: linear-gradient(90deg, rgba(235,64,52,.10), rgba(235,64,52,.38)); }
+.trow > :not(.fill):not(.stamp):not(.crown) { position: relative; }
+.tag { position: absolute; z-index: 6; font-family: Pixel; font-size: 34px; color: #fff; text-shadow: 5px 5px 0 #000; opacity: 0; text-align: center; left: 0; right: 0; }
+.diff { position: absolute; left: 0; right: 0; top: 1040px; text-align: center; }
+.diff .lbl { font-family: Pixel; font-size: 30px; color: var(--text-2); }
+.diff .num { font-family: Mono; font-size: 200px; line-height: 1; color: var(--orange); }
+.crown { position: absolute; right: 26px; top: -22px; font-family: Pixel; font-size: 22px; background: #F2B705; color: #120a05; padding: 8px 12px; border-radius: 6px; }
+.cutline { position: relative; height: 0; border-top: 6px dashed var(--orange); margin: 22px 0; }
+.cutline span { position: absolute; left: 50%; top: -26px; transform: translateX(-50%); background: var(--bg); padding: 0 18px;
+    font-family: Pixel; font-size: 24px; color: var(--orange); white-space: nowrap; }
+.err { position: absolute; left: 0; right: 0; top: 1050px; text-align: center; font-family: Pixel; font-size: 120px; color: var(--danger); text-shadow: 8px 8px 0 #000; opacity: 0; }
+.poll-q { position: absolute; left: 60px; right: 60px; top: 520px; font-weight: 900; font-size: 84px; line-height: 1.02; }
+.poll-q span { color: var(--orange); }
+.opt { position: absolute; left: 60px; right: 60px; height: 150px; display: flex; align-items: center; gap: 30px; padding: 0 30px;
+    background: rgba(22,19,17,.94); border: 2px solid var(--border); border-radius: 24px; }
+.opt .k { font-family: Pixel; font-size: 60px; color: var(--orange); width: 90px; text-align: center; }
+.opt .av { width: 100px; height: 100px; border-radius: 20px; }
+.opt .nm { font-weight: 800; font-size: 52px; }
+.reply { position: absolute; left: 0; right: 0; top: 1640px; text-align: center; font-family: Pixel; font-size: 34px; color: var(--text); }
+.end-k { position: absolute; left: 60px; top: 560px; font-family: Pixel; font-size: 40px; color: var(--orange); }
+.end-1 { position: absolute; left: 60px; right: 60px; top: 650px; font-weight: 900; font-size: 150px; line-height: .95; letter-spacing: -2px; }
+.end-2 { position: absolute; left: 60px; right: 60px; top: 990px; font-weight: 900; font-size: 150px; line-height: .95; letter-spacing: -2px; color: var(--orange); }
+.end-logo { position: absolute; left: 50%; top: 1340px; width: 260px; height: 260px; margin-left: -130px; object-fit: contain; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="fx"></div>
+<script src="../engine.js"></script>
+<script>
+(async () => {
+const data = await (await fetch('data.json')).json();
+const { el, set, prog, lerp, ease, enter, blink, fmt, LEAGUE } = KHC;
+const ALL = data.leagues.flatMap(l => l.matchups.flat().map(t => ({ ...t, tier: l.tier })));
+const av = (name, tier) => (ALL.find(t => t.name.trim() === name && (!tier || t.tier === tier)) || {}).avatar;
+const LABEL = { elite: 'Elite', 'serie-a': 'Série A', 'serie-b': 'Série B', 'serie-c': 'Série C', 'serie-d': 'Série D' };
+
+// ------------------------------------------------------------ helpers locais
+function head(root, n, title, px) {
+    KHC.hud(root, 'KHC AWARDS · S5', []);
+    const a = el('div', 'award', root);
+    el('div', 'n', a, `PRÊMIO Nº ${String(n).padStart(2, '0')}`);
+    const t = el('div', 't', a, title);
+    const p = el('div', 'px', a, px);
+    return { a, t, p };
+}
+function drawHead(h, lt) {
+    const p = enter(lt, .1, .45, ease.back);
+    set(h.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    set(h.p, { o: lt > .4 ? (lt < 1.2 ? blink(lt, .15) : 1) : 0 });
+}
+function row(parent, name, tier, sub, value, cls = '') {
+    const r = KHC.teamRow(parent, { name, avatar: av(name, tier), sub, value });
+    if (cls) r.row.classList.add(...cls.split(' '));
+    return r;
+}
+function slideIn(r, t, a, from = 1100) { const p = enter(t, a, .35); set(r.row, { o: Math.min(1, p * 1.6), x: (1 - p) * from }); }
+function count(elm, t, a, b, v, digits = 1, suffix = '') {
+    const p = ease.out(prog(t, a, b));
+    elm.textContent = (v * p).toFixed(digits) + suffix;
+}
+function caption(root, l1, l2) { return KHC.caption(root, l1, l2); }
+
+// ================================================================ CENAS
+// 0–3 · Abertura
+KHC.scene(0, 3, root => {
+    const s = root.s = {};
+    s.logo = el('img', 'big-logo', root); s.logo.src = LEAGUE.khc.crest;
+    s.px = el('div', 'awards-px', root, 'KHC AWARDS');
+    s.l1 = el('div', 'open-l', root, 'Prêmios que'); s.l1.style.top = '800px';
+    s.l2 = el('div', 'open-l', root, 'ninguém'); s.l2.style.top = '910px';
+    s.l3 = el('div', 'open-l o', root, 'queria'); s.l3.style.top = '1020px';
+    s.l4 = el('div', 'open-l o', root, 'ganhar.'); s.l4.style.top = '1130px';
+    s.chip = el('div', 'week-chip', root, 'SEMANA 5');
+    s.sub = el('div', 'open-sub', root, 'Placares finais. Desculpas, não.');
+    s.boot = el('div', 'boot', root);
+}, (lt, t, root) => {
+    const s = root.s;
+    const b = prog(lt, 0, .16);
+    set(s.boot, { o: 1 - b, sy: lerp(.004, 1, ease.out(b)) });
+    const lp = enter(lt, .05, .6, ease.elastic);
+    set(s.logo, { s: lp, r: (1 - lp) * 20 });
+    set(s.px, { o: lt < 1.2 ? blink(lt, .15) : 1 });
+    [s.l1, s.l2, s.l3, s.l4].forEach((e, i) => {
+        const p = enter(lt, .25 + i * .16, .35, ease.back);
+        set(e, { o: Math.min(1, p * 2), y: (1 - p) * 80 });
+    });
+    const c = enter(lt, 1.2, .3, ease.back);
+    set(s.chip, { o: c, s: lerp(1.6, 1, c) });
+    const sb = enter(lt, 1.7, .4);
+    set(s.sub, { o: sb, y: (1 - sb) * 30 });
+});
+
+// 3–7,5 · Clube do 5–0 × Clube do 0–5
+KHC.scene(3, 7.5, root => {
+    const s = root.s = {};
+    s.h = head(root, 1, 'Clube do 5–0', 'E O CLUBE DO 0–5');
+    const g1 = el('div', 'group', root); g1.style.top = '520px';
+    el('div', 'glabel good', g1, '★ INVICTOS');
+    s.good = [row(g1, 'San Andreas Chiefs', 'serie-c', 'Série C · 856.7 pts', '5–0', 'win'),
+              row(g1, 'LeandroGaucho', 'serie-d', 'Série D · 811.3 pts', '5–0', 'win')];
+    const g2 = el('div', 'group', root); g2.style.top = '860px';
+    el('div', 'glabel bad', g2, '☠ INVICTOS AO CONTRÁRIO');
+    s.bad = [row(g2, 'Ceará Dolphins', 'serie-b', 'Série B · 86% de queda', '0–5', 'lose'),
+             row(g2, 'WI Redentor', 'serie-c', 'Série C · 89% de queda', '0–5', 'lose'),
+             row(g2, 'Kelce Gremista', 'serie-c', 'Série C · 96% de queda', '0–5', 'lose'),
+             row(g2, 'Elieser', 'serie-d', 'Série D · sem rebaixamento', '0–5', 'lose')];
+    s.cap = caption(root, 'Dois invictos.', 'Quatro, na arte de perder.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    s.good.forEach((r, i) => slideIn(r, t, 3.4 + i * .15));
+    s.bad.forEach((r, i) => slideIn(r, t, 4.6 + i * .15, -1100));
+    KHC.drawCaption(s.cap, t, 6.0);
+});
+
+// 7,5–12 · Ladrão de Vitórias
+KHC.scene(7.5, 12, root => {
+    const s = root.s = {};
+    s.h = head(root, 2, 'Ladrão de Vitórias', 'ROUBO À MÃO DESARMADA');
+    const g = el('div', 'group', root); g.style.top = '580px';
+    s.a = row(g, 'Caipiracicaba', 'serie-a', 'Série A · VENCEU', '0.0', 'win');
+    s.b = row(g, 'Fofura e Fé', 'serie-a', 'Série A · perdeu', '0.0', 'lose');
+    s.d = el('div', 'diff', root, '<div class="lbl">DIFERENÇA</div><div class="num">0.28</div>');
+    s.st = KHC.stamp(s.a.row, 'O VAR é o calendário', { top: -46, right: 30, rot: -3 });
+    s.cap = caption(root, 'Venceu por 0.28.', 'Nem o Sleeper viu.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    slideIn(s.a, t, 7.8); slideIn(s.b, t, 7.95, -1100);
+    count(s.a.val, t, 8.0, 9.0, 120.52, 2); count(s.b.val, t, 8.0, 9.0, 120.24, 2);
+    const d = enter(t, 9.3, .35, ease.back);
+    set(s.d, { o: d > 0 ? 1 : 0, s: lerp(2.2, 1, d), r: Math.sin(prog(t, 9.3, 9.9) * 20) * 3 * (1 - prog(t, 9.3, 9.9)) });
+    KHC.drawStamp(s.st, t, 9.6);
+    KHC.drawCaption(s.cap, t, 10.2);
+});
+
+// 12–16,5 · Dupla Personalidade
+KHC.scene(12, 16.5, root => {
+    const s = root.s = {};
+    s.h = head(root, 3, 'Dupla Personalidade', 'QUACK ATTACK × QUACK ATTACK');
+    const g = el('div', 'group', root); g.style.top = '560px';
+    el('div', 'glabel good', g, 'SÉRIE B · O PATO VOA');
+    s.b = row(g, 'Quack Attack', 'serie-b', 'venceu · 4–1', '0.0', 'win');
+    s.crown = el('div', 'crown', s.b.row, 'MAIOR DA KHC');
+    const g2 = el('div', 'group', root); g2.style.top = '900px';
+    el('div', 'glabel bad', g2, 'ELITE · O PATO AFUNDA');
+    s.e = row(g2, 'Quack Attack', 'elite', 'perdeu · 1–4', '0.0', 'lose');
+    s.st = KHC.stamp(s.e.row, 'Mesmo dono. Outro pato.', { top: -46, right: 30, rot: -2.5 });
+    s.cap = caption(root, '263 pontos na B.', 'Na Elite, 1–4. Pato manco.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    slideIn(s.b, t, 12.4); slideIn(s.e, t, 12.55, -1100);
+    count(s.b.val, t, 12.6, 13.5, 263.14); count(s.e.val, t, 12.6, 13.5, 189.04);
+    const c = enter(t, 13.5, .3, ease.back);
+    set(s.crown, { o: c, s: lerp(2, 1, c), r: 4 });
+    const [x, y] = KHC.shake(t, 14.0, .35, 18);
+    s.e.row.style.translate = `${x}px ${y}px`;
+    KHC.drawStamp(s.st, t, 14.0);
+    KHC.drawCaption(s.cap, t, 14.6);
+});
+
+// 16,5–21 · A Matemática Pediu Demissão
+KHC.scene(16.5, 21, root => {
+    const s = root.s = {};
+    s.h = head(root, 4, 'A Matemática Pediu Demissão', 'CHANCE DE PLAYOFFS · SÉRIE C');
+    const g = el('div', 'group', root); g.style.top = '760px';
+    s.p = row(g, 'Pandemônio FC', 'serie-c', '1–4 · 8º lugar', '0%', 'hot');
+    s.r = row(g, 'romanerinha', 'serie-c', '2–3 · 7º lugar', '0%');
+    s.err = el('div', 'err', root, 'ERR 1/0');
+    s.st = KHC.stamp(s.p.row, 'Pior campanha. Mais chance.', { top: -46, right: 30, rot: -2.5 });
+    s.cap = caption(root, '1–4 com 55%. 2–3 com 16%.', 'Ninguém entendeu. Nem o modelo.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    slideIn(s.p, t, 16.8); slideIn(s.r, t, 16.95, -1100);
+    count(s.p.val, t, 17.0, 18.0, 55, 0, '%'); count(s.r.val, t, 17.0, 18.0, 16, 0, '%');
+    const e = t >= 18.4 && t < 19.2;
+    set(s.err, { o: e ? blink(t, .1) : 0, x: e ? Math.sin(t * 157) * 14 : 0 });
+    KHC.drawStamp(s.st, t, 18.6);
+    KHC.drawCaption(s.cap, t, 19.2);
+});
+
+// 21–25,5 · Pé-frio do Ano (bicampeão)
+KHC.scene(21, 25.5, root => {
+    const s = root.s = {};
+    s.h = head(root, 5, 'Pé-frio do Ano', 'BICAMPEÃO · PONTOS NA TEMPORADA');
+    const g = el('div', 'group', root); g.style.top = '760px';
+    s.e = row(g, 'Elieser', 'serie-d', 'Série D · 0–5', '0.0', 'lose');
+    s.n = row(g, 'New England Patriotas', 'serie-d', 'Série D · 4–1', '0.0', 'win');
+    s.st = KHC.stamp(s.e.row, 'Bicampeão do azar', { top: -46, right: 30, rot: -3 });
+    s.cap = caption(root, 'Mais pontos que um 4–1.', 'E nenhuma vitória.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    slideIn(s.e, t, 21.3); slideIn(s.n, t, 21.45, -1100);
+    count(s.e.val, t, 21.6, 22.6, 753.1); count(s.n.val, t, 21.6, 22.6, 718.5);
+    KHC.drawStamp(s.st, t, 23.0);
+    KHC.drawCaption(s.cap, t, 23.6);
+});
+
+// 25,5–30 · Bola Murcha
+KHC.scene(25.5, 30, root => {
+    const s = root.s = {};
+    s.h = head(root, 6, 'Bola Murcha', 'MENOR PLACAR DA SEMANA');
+    const g = el('div', 'group', root); g.style.top = '760px';
+    s.r = row(g, 'romanerinha', 'serie-c', 'Série C · perdeu', '0.0', 'lose');
+    el('div', 'glabel', g, ' ');
+    s.k = row(g, 'Kelce Gremista', 'serie-c', 'na semana · PWR 0.9 na temporada', '105.6');
+    s.st = KHC.stamp(s.r.row, 'Murchou sozinho', { top: -46, right: 30, rot: -2.5 });
+    s.cap = caption(root, '51.3 pontos.', 'Nem o Kelce Gremista fez tão pouco.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    slideIn(s.r, t, 25.8);
+    // o placar cai de 150 até 51.3, como balão esvaziando
+    const p = ease.out(prog(t, 26.0, 27.0));
+    s.r.val.textContent = t < 26 ? '' : (150 - (150 - 51.28) * p).toFixed(1);
+    const d = prog(t, 27.2, 27.8);
+    const wob = d > 0 && d < 1 ? Math.sin(d * 30) * .05 * (1 - d) : 0;
+    set(s.r.av, { s: lerp(1, .55, ease.out(d)) + wob, sy: lerp(1, .4, ease.out(d)) + wob, y: d * 14 });
+    s.r.row.style.filter = t >= 27.6 ? `grayscale(${prog(t, 27.6, 28.2)})` : '';
+    slideIn(s.k, t, 27.0, -1100);
+    KHC.drawStamp(s.st, t, 27.4);
+    KHC.drawCaption(s.cap, t, 28.2);
+});
+
+// 30–35,5 · Fila do Rebaixamento
+const FILA = [['Kelce Gremista', 'serie-c', 96], ['WI Redentor', 'serie-c', 89], ['Ceará Dolphins', 'serie-b', 86],
+    ['Diogoashura', 'serie-a', 72], ['Gumagol971', 'serie-b', 69], ['Cruzeiro do Neymar SFC', 'serie-a', 61],
+    ['Caipiracicaba', 'serie-a', 51], ['SiaraBigheads', 'serie-b', 44], ['Pandemônio FC', 'serie-c', 23]];
+KHC.scene(30, 35.5, root => {
+    const s = root.s = {};
+    s.h = head(root, 7, 'Fila do Rebaixamento', 'CHANCE DE QUEDA · A, B E C');
+    const g = el('div', 'group', root); g.style.top = '520px'; g.style.gap = '8px';
+    s.rows = FILA.map(([n, tier, q]) => {
+        const r = row(g, n, tier, LABEL[tier], '0%');
+        r.row.style.height = '96px';
+        r.fill = el('i', 'fill', r.row); r.row.prepend(r.fill);
+        r.q = q;
+        return r;
+    });
+    s.diogo = s.rows[3];
+    s.st = KHC.stamp(s.diogo.row, '4º na Elite. Aqui, 72%', { top: 54, right: 220, rot: -2 });
+    s.cap = caption(root, 'Nove na zona.', 'Alguns já estão de mudança.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    s.rows.forEach((r, i) => {
+        slideIn(r, t, 30.4 + i * .09);
+        const p = ease.out(prog(t, 30.9 + i * .09, 31.8 + i * .09));
+        r.val.textContent = Math.round(r.q * p) + '%';
+        r.fill.style.width = (r.q * p) + '%';
+    });
+    s.diogo.row.classList.toggle('hot', t >= 32.6);
+    KHC.drawStamp(s.st, t, 32.6);
+    KHC.drawCaption(s.cap, t, 33.4);
+});
+
+// 35,5–39,5 · Corda Bamba
+KHC.scene(35.5, 39.5, root => {
+    const s = root.s = {};
+    s.h = head(root, 8, 'Corda Bamba', 'PLAYOFFS DA ELITE · TOP 4');
+    const g = el('div', 'group', root); g.style.top = '760px';
+    s.a = row(g, 'Diogoashura', 'elite', '4º · 3–2 · dentro', '0%');
+    const cut = el('div', 'cutline', g, '<span>LINHA DOS PLAYOFFS</span>');
+    s.b = row(g, 'Public Enemy #1', 'elite', '5º · 2–3 · fora', '0%', 'hot');
+    s.cut = cut;
+    s.st = KHC.stamp(s.b.row, 'O 5º tem mais chance que o 4º', { top: 132, right: 30, rot: -2.5 });
+    s.cap = caption(root, '46% contra 47%.', 'Quem está dentro torce pra sair.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    slideIn(s.a, t, 35.8); slideIn(s.b, t, 35.95, -1100);
+    set(s.cut, { o: enter(t, 35.9, .3) });
+    count(s.a.val, t, 36.0, 36.8, 46, 0, '%'); count(s.b.val, t, 36.0, 36.8, 47, 0, '%');
+    const wob = t > 37.2 ? Math.sin((t - 37.2) * 9) * 2.5 : 0;
+    set(s.a.row, { o: 1, r: wob }); set(s.b.row, { o: 1, r: -wob });
+    KHC.drawStamp(s.st, t, 37.2);
+    KHC.drawCaption(s.cap, t, 37.8);
+});
+
+// 39,5–43 · Vote no Grupo
+KHC.scene(39.5, 43, root => {
+    const s = root.s = {};
+    KHC.hud(root, 'KHC AWARDS · S5', []);
+    s.q = el('div', 'poll-q', root, 'Quem leva a<br><span>Bola Murcha</span><br>na semana 6?');
+    s.opts = [['Kelce Gremista', 'serie-c'], ['WI Redentor', 'serie-c'], ['romanerinha', 'serie-c']].map(([n, tier], i) => {
+        const o = el('div', 'opt', root); o.style.top = (900 + i * 180) + 'px';
+        el('div', 'k', o, String(i + 1));
+        const a = el('div', 'av', o); el('img', '', a).src = av(n, tier);
+        el('div', 'nm', o, KHC.esc(n));
+        return o;
+    });
+    s.reply = el('div', 'reply', root, 'RESPONDA COM 1, 2 OU 3');
+}, (lt, t, root) => {
+    const s = root.s;
+    const q = enter(t, 39.7, .4, ease.back);
+    set(s.q, { o: Math.min(1, q * 2), y: (1 - q) * 60 });
+    s.opts.forEach((o, i) => { const p = enter(t, 40.2 + i * .3, .3, ease.back); set(o, { o: Math.min(1, p * 2), x: (1 - p) * 1100 }); });
+    set(s.reply, { o: t >= 41.4 ? blink(t, .25) : 0 });
+});
+
+// 43–46,5 · Fim
+KHC.scene(43, 46.5, root => {
+    const s = root.s = {};
+    KHC.hud(root, 'KHC AWARDS · S5', []);
+    s.k = el('div', 'end-k', root, 'SEMANA 6');
+    s.l1 = el('div', 'end-1', root, 'Ainda dá<br>tempo.');
+    s.l2 = el('div', 'end-2', root, 'Pra<br>alguns.');
+    s.logo = el('img', 'end-logo', root); s.logo.src = LEAGUE.khc.crest;
+}, (lt, t, root) => {
+    const s = root.s;
+    set(s.k, { o: enter(t, 43.1, .3) });
+    const a = enter(t, 43.6, .4, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
+    const b = enter(t, 44.4, .3, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
+    const l = enter(t, 45.0, .5, ease.elastic); set(s.logo, { s: l });
+});
+
+[[3, 'khc'], [7.5, 'serie-a'], [12, 'serie-b'], [16.5, 'serie-c'], [21, 'serie-d'], [25.5, 'serie-c'],
+ [30, 'serie-a'], [35.5, 'elite'], [39.5, 'khc'], [43, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
+KHC.fadeOut(46.05, 46.5);
+
+KHC.start(46.5);
+await window.ready();
+window.loaded = true;
+})();
+</script>
+</body>
+</html>
