@@ -34,11 +34,26 @@ function escapeHtml(str) {
  * @param {string} avatarId - ID do avatar do Sleeper
  * @returns {string} - URL segura ou URL padrão
  */
+/**
+ * Avatar aceito: id da foto da conta ou URL do logo do time na liga.
+ * @param {*} avatar
+ * @returns {boolean}
+ */
+function isValidAvatar(avatar) {
+    return typeof avatar === 'string'
+        && (VALIDATION.AVATAR_PATTERN.test(avatar) || VALIDATION.LEAGUE_AVATAR_PATTERN.test(avatar));
+}
+
 function sanitizeAvatarUrl(avatarId) {
     const defaultAvatar = 'https://sleepercdn.com/images/v2/icons/player_default.webp';
 
     if (!avatarId || typeof avatarId !== 'string') {
         return defaultAvatar;
+    }
+
+    // Logo do time na liga: URL completa da CDN da Sleeper (já validada)
+    if (VALIDATION.LEAGUE_AVATAR_PATTERN.test(avatarId)) {
+        return avatarId;
     }
 
     // Valida formato do avatar ID (apenas caracteres seguros)

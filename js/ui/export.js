@@ -165,7 +165,7 @@ async function loadExportAssets(meta, avatarIds) {
     const crestFile = meta ? meta.crest : 'escudo-khc.png';
     const [crest, ...avatars] = await Promise.all([
         loadExportImage(`assets/logo/png/${crestFile}`, false),
-        ...avatarIds.map(id => (typeof id === 'string' && VALIDATION.AVATAR_PATTERN.test(id)
+        ...avatarIds.map(id => (isValidAvatar(id)
             // ?export: URL distinta da <img> da página, cuja cópia em cache veio
             // sem cabeçalho CORS (a CDN só o envia quando há Origin)
             ? loadExportImage(`${sanitizeAvatarUrl(id)}?export`, true)

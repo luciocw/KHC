@@ -28,7 +28,7 @@ function initialsOf(name) {
  */
 function avatarHTML({ avatarId, name, size } = {}) {
     const cls = size === 'lg' ? 'avatar avatar--lg' : 'avatar';
-    const valid = typeof avatarId === 'string' && VALIDATION.AVATAR_PATTERN.test(avatarId);
+    const valid = isValidAvatar(avatarId);
     const img = valid
         ? `<img src="${sanitizeAvatarUrl(avatarId)}" alt="" loading="lazy" onerror="this.remove()">`
         : '';
