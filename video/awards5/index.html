@@ -34,6 +34,9 @@
 .diff { position: absolute; left: 0; right: 0; top: 1040px; text-align: center; }
 .diff .lbl { font-family: Pixel; font-size: 30px; color: var(--text-2); }
 .diff .num { font-family: Mono; font-size: 200px; line-height: 1; color: var(--orange); }
+.flag { height: 44px; margin: 18px 60px; border-radius: 6px;
+    background: repeating-conic-gradient(#fff 0 25%, #111 0 50%) 0 0 / 44px 44px; }
+.nick { color: #F2B705; }
 .crown { position: absolute; right: 26px; top: -22px; font-family: Pixel; font-size: 22px; background: #F2B705; color: #120a05; padding: 8px 12px; border-radius: 6px; }
 .cutline { position: relative; height: 0; border-top: 6px dashed var(--orange); margin: 22px 0; }
 .cutline span { position: absolute; left: 50%; top: -26px; transform: translateX(-50%); background: var(--bg); padding: 0 18px;
@@ -147,13 +150,13 @@ KHC.scene(3, 7.5, root => {
 // 7,5–12 · Ladrão de Vitórias
 KHC.scene(7.5, 12, root => {
     const s = root.s = {};
-    s.h = head(root, 2, 'Ladrão de Vitórias', 'ROUBO À MÃO DESARMADA');
+    s.h = head(root, 2, 'Ladrão de Vitórias', 'O VIGARISTA ATACA DE NOVO');
     const g = el('div', 'group', root); g.style.top = '580px';
-    s.a = row(g, 'Caipiracicaba', 'serie-a', 'Série A · VENCEU', '0.0', 'win');
+    s.a = row(g, 'Caipiracicaba', 'serie-a', '<span class="nick">"o Vigarista"</span> · VENCEU', '0.0', 'win');
     s.b = row(g, 'Fofura e Fé', 'serie-a', 'Série A · perdeu', '0.0', 'lose');
-    s.d = el('div', 'diff', root, '<div class="lbl">DIFERENÇA</div><div class="num">0.28</div>');
-    s.st = KHC.stamp(s.a.row, 'O VAR é o calendário', { top: -46, right: 30, rot: -3 });
-    s.cap = caption(root, 'Venceu por 0.28.', 'Nem o Sleeper viu.');
+    s.d = el('div', 'diff', root, '<div class="lbl">FOTO-CHEGADA</div><div class="flag"></div><div class="num">0.28</div><div class="flag"></div>');
+    s.st = KHC.stamp(s.a.row, 'Plano infalível do Vigarista', { top: -58, right: 24, rot: -2 });
+    s.cap = caption(root, 'Venceu por 0.28.', 'Pela primeira vez, o plano do Vigarista deu certo.');
 }, (lt, t, root) => {
     const s = root.s;
     drawHead(s.h, lt);
