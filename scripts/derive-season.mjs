@@ -78,7 +78,8 @@ async function deriveSeries(series) {
     return {
       user: user?.display_name ?? 'unknown',
       team: user ? teamNameOf(user) : 'unknown',
-      avatarId: user?.avatar ?? null,
+      // logo do time na liga (metadata.avatar); sem ele, a foto da conta
+      avatarId: (/^https:\/\/sleepercdn\.com\/uploads\/[A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif)$/i.test(user?.metadata?.avatar || '') ? user.metadata.avatar : null) ?? user?.avatar ?? null,
       w: s.wins ?? 0,
       l: s.losses ?? 0,
       pts: round2(combinePts(s.fpts, s.fpts_decimal)),

@@ -83,7 +83,9 @@ const VALIDATION = {
     MAX_WINS: 50,
     MAX_LOSSES: 50,
     VALID_TIERS: TIER_ORDER,
-    AVATAR_PATTERN: /^[a-zA-Z0-9_-]+$/
+    AVATAR_PATTERN: /^[a-zA-Z0-9_-]+$/,                 // foto da conta (id)
+    // logo do time na liga (metadata.avatar dos usuários da liga)
+    LEAGUE_AVATAR_PATTERN: /^https:\/\/sleepercdn\.com\/uploads\/[A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif)$/i
 };
 
 // --- ESTADO DA APLICAÇÃO ---
