@@ -22,3 +22,9 @@ python3 scripts/trilha/semana6.py saida --video /tmp/v.mp4  # trilha + mux
 - Nada de print de tabela: todo texto é renderizado.
 
 Os avatares não vão para o git (`.gitignore`). O `fetch_rodada.py` baixa de novo.
+
+## Elenco e regras da zoeira
+
+- **Imperius Rex FC** e **Public Enemy #1** são os donos das ligas KHC. Todo vídeo deve zoar os dois de alguma forma (um selo, uma legenda, o fim…), mesmo quando eles não são o assunto da semana.
+- **Caipiracicaba** tem o apelido de **"o Vigarista"** (inspirado no Dick Vigarista da Corrida Maluca). Use o apelido quando ele aparecer.
+- A zoeira é liberada com todos os participantes, sempre com base nos números reais da rodada. Antes de afirmar "venceu/perdeu", confira quem enfrentou quem (`data.json`: cada item de `matchups` é um par de adversários).
