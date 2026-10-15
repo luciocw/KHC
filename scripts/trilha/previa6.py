@@ -49,7 +49,7 @@ liga(33.0, lambda x: t.low_life(x, x + 0.8))  # Série D: Elieser
 # Fim
 t.play(R(39.0), R(43.0), "heroi")
 t.stage_clear(R(39.4))
-t.ba_dum_tss(R(40.6))  # "Ou o Vigarista."
+t.ba_dum_tss(R(40.6))  # "Ou o Imperius Rex FC."
 t.save_beep(R(41.4))
 
 for p in (3.0, 9.0, 15.0, 21.0, 27.0, 33.0, 39.0):
