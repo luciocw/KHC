@@ -16,7 +16,7 @@
 
 .colhead { position: absolute; left: 76px; right: 76px; top: 440px; display: flex; justify-content: space-between;
     font-family: Mono; font-size: 24px; color: var(--text-3); letter-spacing: 2px; }
-.rec .q { color: var(--danger); }
+.rec .q, .tsub .q { color: var(--danger); }
 .rec .nick { color: #F2B705; }
 .pts.hi { color: var(--success); } .pts.lo { color: #8a7d73; }
 
@@ -25,6 +25,12 @@
     repeating-linear-gradient(90deg, rgba(0,0,0,.55) 0 4px, transparent 4px 140px),
     linear-gradient(180deg, rgba(229,56,59,.10), rgba(0,0,0,.6)); }
 .water { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(59,130,246,.05), rgba(59,130,246,.28)); }
+
+/* Denúncia */
+.poll { position: absolute; left: 60px; right: 60px; top: 1080px; display: flex; gap: 24px; }
+.popt { flex: 1; text-align: center; font-family: Pixel; font-size: 30px; padding: 38px 0; border-radius: 18px;
+    background: rgba(22,19,17,.94); border: 3px solid var(--border); color: var(--text); }
+.popt.on { border-color: var(--orange); color: var(--orange); box-shadow: 0 0 40px rgba(242,106,27,.35); }
 
 /* Vigarista */
 .villain { position: absolute; left: 60px; right: 60px; top: 230px; }
@@ -218,8 +224,47 @@ leagueScene(33, 39, 'serie-d', {
     caption: ['0–5 com 26% de playoffs.', 'A matemática segue de licença.'],
 });
 
-// 39–43 · Fim
-KHC.scene(39, 43, root => {
+// 39–45 · Denúncia: complô da KHC contra Los Pollos Hermanos?
+KHC.scene(39, 45, root => {
+    const s = root.s = {};
+    hudFor(root, 'serie-a');
+    const v = el('div', 'villain', root);
+    el('div', 'k', v, 'DENÚNCIA · SÉRIE A');
+    s.t = el('div', 't', v, 'Complô da KHC?');
+    const d = el('div', 'duel', root); d.style.top = '560px';
+    const lp = team('serie-a', 'Los Pollos Hermanos');
+    s.vit = KHC.teamRow(d, { name: 'Los Pollos Hermanos', avatar: lp.avatar, sub: 'a vítima · 2–3 · 6º', value: '' });
+    s.vit.row.classList.add('hot');
+    el('div', 'glabel', d, '<span style="font-family:Pixel;font-size:26px;color:var(--text-2)">ADVERSÁRIOS:</span>');
+    const own = (n, sub, val) => {
+        const tm = team('serie-a', n);
+        const r = KHC.teamRow(d, { name: n, avatar: tm.avatar, sub, value: val });
+        r.row.classList.add('x'); return r;
+    };
+    s.o1 = own('Public Enemy #1', '<span class="q">DONO DA LIGA</span> · venceu 223 a 161', 'S5');
+    s.o2 = own('Imperius Rex FC', '<span class="q">DONO DA LIGA</span> · e agora?', 'S6');
+    s.st = KHC.stamp(s.vit.row, 'Confidencial', { top: -58, right: 24, rot: -5 });
+    const q = el('div', 'poll', root);
+    s.p1 = el('div', 'popt', q, 'PERSEGUIÇÃO?'); s.p2 = el('div', 'popt', q, 'MEDO?');
+    s.cap = KHC.caption(root, 'Dois donos da liga em duas semanas.', 'Coincidência? Achamos que não.');
+}, (lt, t, root) => {
+    const s = root.s;
+    const p = enter(t, 39.15, .45, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    const a = enter(t, 39.5, .35); set(s.vit.row, { o: a, x: (1 - a) * -1100 });
+    const b = enter(t, 39.9, .35), c = enter(t, 40.2, .35);
+    set(s.o1.row, { o: b, x: (1 - b) * 1100 }); set(s.o2.row, { o: c, x: (1 - c) * 1100 });
+    KHC.drawStamp(s.st, t, 40.8);
+    // enquete piscando entre as duas teorias
+    const q1 = enter(t, 41.5, .3, ease.back), q2 = enter(t, 41.8, .3, ease.back);
+    const pick = t > 42.2 ? Math.floor((t - 42.2) / .35) % 2 : -1;
+    set(s.p1, { o: q1, s: lerp(1.6, 1, q1) * (pick === 0 ? 1.08 : 1) });
+    set(s.p2, { o: q2, s: lerp(1.6, 1, q2) * (pick === 1 ? 1.08 : 1) });
+    s.p1.classList.toggle('on', pick === 0); s.p2.classList.toggle('on', pick === 1);
+    KHC.drawCaption(s.cap, t, 42.4);
+});
+
+// 45–49 · Fim
+KHC.scene(45, 49, root => {
     const s = root.s = {};
     KHC.hud(root, 'PRÉVIA · SEMANA 6', []);
     s.k = el('div', 'end-k', root, 'SEMANA 6');
@@ -228,22 +273,22 @@ KHC.scene(39, 43, root => {
     s.logo = el('img', 'end-logo', root); s.logo.src = LEAGUE.khc.crest;
 }, (lt, t, root) => {
     const s = root.s;
-    set(s.k, { o: enter(t, 39.1, .3) });
-    const a = enter(t, 39.4, .45, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
-    const b = enter(t, 40.6, .35, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
-    const l = enter(t, 41.4, .5, ease.elastic); set(s.logo, { s: l });
+    set(s.k, { o: enter(t, 45.1, .3) });
+    const a = enter(t, 45.4, .45, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
+    const b = enter(t, 46.6, .35, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
+    const l = enter(t, 47.4, .5, ease.elastic); set(s.logo, { s: l });
 });
 
-[[3, 'elite'], [9, 'serie-a'], [15, 'khc'], [21, 'serie-b'], [27, 'serie-c'], [33, 'serie-d'], [39, 'khc']]
+[[3, 'elite'], [9, 'serie-a'], [15, 'khc'], [21, 'serie-b'], [27, 'serie-c'], [33, 'serie-d'], [39, 'serie-a'], [45, 'khc']]
     .forEach(([p, lg]) => KHC.wipe(p, lg));
-KHC.fadeOut(42.55, 43);
+KHC.fadeOut(48.55, 49);
 
 // Pausas de leitura (tempo da timeline, duração): cards completos e legenda
 // inteira antes de cada troca. A mesma lista está em scripts/trilha/previa6.py.
 KHC.hold([[5.0, 0.6], [7.05, 0.8], [11.0, 0.6], [13.05, 0.8], [20.3, 0.8], [23.0, 0.6], [25.05, 0.8],
-    [29.0, 0.6], [31.05, 0.8], [35.0, 0.6], [37.05, 0.8]]);
+    [29.0, 0.6], [31.05, 0.8], [35.0, 0.6], [37.05, 0.8], [40.6, 0.6], [43.3, 1.0]]);
 
-KHC.start(43);
+KHC.start(49);
 await window.ready();
 window.loaded = true;
 })();

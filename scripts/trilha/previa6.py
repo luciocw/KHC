@@ -10,10 +10,11 @@ Uso: python3 scripts/trilha/previa6.py SAIDA [--video VIDEO.mp4]
 from chiptune import Track, note, notes, remap, run
 
 HOLDS = [(5.0, 0.6), (7.05, 0.8), (11.0, 0.6), (13.05, 0.8), (20.3, 0.8), (23.0, 0.6), (25.05, 0.8),
-         (29.0, 0.6), (31.05, 0.8), (35.0, 0.6), (37.05, 0.8)]
+         (29.0, 0.6), (31.05, 0.8), (35.0, 0.6), (37.05, 0.8),
+         (40.6, 0.6), (43.3, 1.0)]
 R = remap(HOLDS)
 
-t = Track(dur=R(43.0), bpm=168, grid=1.2, seed=66, swing=0.12)
+t = Track(dur=R(49.0), bpm=168, grid=1.2, seed=66, swing=0.12)
 
 # Abertura
 t.console_on(0.0)
@@ -46,13 +47,21 @@ liga(21.0, t.damage)  # Série B: clássico da zona
 liga(27.0, t.deflate)  # Série C: 51 pontos × invicto
 liga(33.0, lambda x: t.low_life(x, x + 0.8))  # Série D: Elieser
 
-# Fim
-t.play(R(39.0), R(43.0), "heroi")
-t.stage_clear(R(39.4))
-t.ba_dum_tss(R(40.6))  # "Ou o Imperius Rex FC."
-t.save_beep(R(41.4))
+# Denúncia: complô da KHC contra Los Pollos Hermanos?
+t.play(R(39.0), R(45.0), "subterranea")
+t.blips(R(39.5), R(40.2), 3, base="C4", step=3)
+t.alarm(R(40.8), 0.6)  # "Confidencial"
+t.blip(R(41.5), note("E5"))  # PERSEGUIÇÃO?
+t.blip(R(41.8), note("A5"))  # MEDO?
+t.cricket(R(42.4))  # "Coincidência?"
 
-for p in (3.0, 9.0, 15.0, 21.0, 27.0, 33.0, 39.0):
+# Fim
+t.play(R(45.0), R(49.0), "heroi")
+t.stage_clear(R(45.4))
+t.ba_dum_tss(R(46.6))  # "Ou o Imperius Rex FC."
+t.save_beep(R(47.4))
+
+for p in (3.0, 9.0, 15.0, 21.0, 27.0, 33.0, 39.0, 45.0):
     t.warp(R(p))
 
 run(t)
