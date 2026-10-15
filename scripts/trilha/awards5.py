@@ -24,6 +24,7 @@ t.defeat(5.3)
 # 02 · Ladrão de Vitórias
 t.play(7.5, 12.0, "chefao")
 t.coins(8.0, 9.0)
+t.countdown(8.9, 9.3)  # largada da foto-chegada
 t.alarm(9.3, 0.5)
 t.stamp(9.6)
 
