@@ -197,7 +197,7 @@
         const crest = el('img', 'wipe-crest', w);
         crest.src = LEAGUE[league].crest;
         overlay(t => {
-            const p = prog(t, peak - .35, peak + .35);
+            const p = prog(t, peak - .45, peak + .45);
             if (p <= 0 || p >= 1) { w.style.display = 'none'; return; }
             w.style.display = 'block';
             // entra pela direita, cobre a tela no pico e sai pela esquerda
