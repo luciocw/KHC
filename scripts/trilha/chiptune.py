@@ -453,7 +453,7 @@ class Track:
 
     def warp(self, peak):
         """Transição: glissando de pulso baixinho (sem ruído), pico em `peak`."""
-        pre, post = 0.35, 0.15
+        pre, post = 0.45, 0.2
         t = self._t(pre + post)
         m = np.where(t < pre, 60 + 24 * (t / pre) ** 1.5, 84 - 20 * (t - pre) / post)
         shape = np.where(t < pre, 0.3 + 0.7 * t / pre, np.exp(-(t - pre) / 0.06))

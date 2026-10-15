@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>KHC Prévia · Semana 6</title>
+<link rel="stylesheet" href="../engine.css">
+<style>
+.boot { position: absolute; inset: 0; background: #fff; transform-origin: center; }
+.big-logo { position: absolute; left: 50%; top: 230px; width: 380px; height: 380px; margin-left: -190px; object-fit: contain;
+    filter: drop-shadow(0 30px 60px rgba(0,0,0,.6)); }
+.press { position: absolute; left: 0; right: 0; top: 660px; text-align: center; font-family: Pixel; font-size: 40px; color: #F2B705; text-shadow: 5px 5px 0 #000; }
+.open-l { position: absolute; left: 60px; right: 60px; font-weight: 900; font-size: 120px; line-height: .95; letter-spacing: -2px; text-transform: uppercase; }
+.open-l.o { color: var(--orange); }
+.open-sub { position: absolute; left: 60px; right: 60px; top: 1260px; font-weight: 700; font-size: 58px; line-height: 1.1; color: var(--text-2); }
+.open-sub b { color: var(--orange); }
+
+.colhead { position: absolute; left: 76px; right: 76px; top: 440px; display: flex; justify-content: space-between;
+    font-family: Mono; font-size: 24px; color: var(--text-3); letter-spacing: 2px; }
+.rec .q { color: var(--danger); }
+.rec .nick { color: #F2B705; }
+.pts.hi { color: var(--success); } .pts.lo { color: #8a7d73; }
+
+.bricks { position: absolute; inset: 0; opacity: .5; background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.55) 0 4px, transparent 4px 70px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.55) 0 4px, transparent 4px 140px),
+    linear-gradient(180deg, rgba(229,56,59,.10), rgba(0,0,0,.6)); }
+.water { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(59,130,246,.05), rgba(59,130,246,.28)); }
+
+/* Vigarista */
+.villain { position: absolute; left: 60px; right: 60px; top: 230px; }
+.villain .k { font-family: Pixel; font-size: 30px; color: #F2B705; }
+.villain .t { font-weight: 900; font-size: 104px; line-height: .95; color: var(--orange); margin-top: 16px; text-transform: uppercase; letter-spacing: -1px; }
+.duel { position: absolute; left: 50px; right: 50px; display: flex; flex-direction: column; gap: 14px; top: 560px; }
+.vs { text-align: center; font-family: Pixel; font-size: 56px; color: var(--orange); text-shadow: 5px 5px 0 #000; margin: 4px 0; }
+.replay { position: absolute; left: 60px; right: 60px; top: 1010px; height: 420px; border-radius: 22px; overflow: hidden;
+    background: #0b0b0b; border: 3px solid #3A322C; }
+.replay .tag { position: absolute; left: 26px; top: 22px; font-family: Pixel; font-size: 26px; color: #fff; }
+.replay .tag i { display: inline-block; width: 22px; height: 22px; border-radius: 50%; background: var(--danger); margin-right: 12px; vertical-align: -2px; }
+.replay .was { position: absolute; left: 0; right: 0; top: 96px; text-align: center; font-weight: 800; font-size: 40px; color: var(--text-2); }
+.replay .num { position: absolute; left: 0; right: 0; top: 160px; text-align: center; font-family: Mono; font-size: 150px; color: var(--orange); }
+.replay .num::after { content: ''; position: absolute; left: 50%; top: 50%; width: var(--strike, 0px); height: 14px; margin-left: -230px;
+    background: var(--danger); transform: rotate(-8deg); }
+.replay .real { position: absolute; left: 0; right: 0; top: 340px; text-align: center; font-weight: 800; font-size: 36px; color: var(--text); }
+.replay .real b { color: var(--danger); }
+.scan { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0 3px, transparent 3px 8px); pointer-events: none; }
+
+.end-k { position: absolute; left: 60px; top: 520px; font-family: Pixel; font-size: 40px; color: var(--orange); }
+.end-1 { position: absolute; left: 60px; right: 60px; top: 610px; font-weight: 900; font-size: 140px; line-height: .95; letter-spacing: -2px; }
+.end-2 { position: absolute; left: 60px; right: 60px; top: 1060px; font-weight: 900; font-size: 140px; line-height: .95; letter-spacing: -2px; color: var(--orange); }
+.end-logo { position: absolute; left: 50%; top: 1420px; width: 240px; height: 240px; margin-left: -120px; object-fit: contain; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="fx"></div>
+<script src="../engine.js"></script>
+<script>
+(async () => {
+const data = await (await fetch('data.json')).json();
+const { el, set, prog, lerp, ease, enter, blink, LEAGUE } = KHC;
+const L = Object.fromEntries(data.leagues.map(l => [l.tier, l]));
+const TIERS = ['elite', 'serie-a', 'serie-b', 'serie-c', 'serie-d'];
+const team = (tier, name) => L[tier].matchups.flat().find(t => t.name === name);
+
+// ------------------------------------------------------------ helpers locais
+function hudFor(root, tier) {
+    const h = KHC.hud(root, 'PRÉVIA · SEMANA 6', TIERS);
+    const i = TIERS.indexOf(tier);
+    h.segs.forEach((s, k) => { if (k < i) s.classList.add('on'); if (k === i) s.classList.add('now'); });
+}
+function head(root, tier, world) {
+    const hd = el('div', 'phase-head', root);
+    hd.style.setProperty('--c', LEAGUE[tier].color);
+    el('div', 'kicker', hd, 'CONFRONTOS DA SEMANA 6');
+    el('div', 'league-name', hd, L[tier].label);
+    const w = el('div', 'world', hd, world);
+    const c = el('img', 'crest', hd); c.src = LEAGUE[tier].crest;
+    return { w, c };
+}
+function drawHead(h, lt) {
+    const p = enter(lt, .05, .45, ease.back);
+    set(h.c, { s: p, r: (1 - p) * -30 });
+    set(h.w, { o: lt < 1.2 ? blink(lt, .15) : 1 });
+}
+/** Card de confronto com V–D, posição, queda e % de playoffs no lugar dos pontos. */
+function cards(root, tier, nicks = {}) {
+    const box = el('div', 'cards', root);
+    box.style.top = '476px'; box.style.gap = '12px';
+    const cs = L[tier].matchups.map(m => {
+        const cd = KHC.matchCard(box, m, LEAGUE[tier].color);
+        cd.rows.forEach(r => {
+            const tm = r.team;
+            const nick = nicks[tm.name] ? ` · <span class="nick">${nicks[tm.name]}</span>` : '';
+            const q = tm.queda >= 40 ? ` · <span class="q">${tm.queda}% queda</span>` : '';
+            r.rec.innerHTML = `${tm.record.replace('-', '–')} · ${tm.pos}º${q}${nick}`;
+            r.pts.classList.add(tm.playoffs >= 80 ? 'hi' : tm.playoffs < 30 ? 'lo' : 'mid');
+        });
+        return cd;
+    });
+    return { box, cs };
+}
+function drawCards(c, t, a, b) {
+    const n = c.cs.length;
+    c.cs.forEach((cd, i) => {
+        const p = enter(t, lerp(a, b, i / (n - 1)), .35);
+        set(cd.card, { o: Math.min(1, p * 1.6), x: (1 - p) * (i % 2 ? 1100 : -1100) });
+        const q = ease.out(prog(t, b + .1, b + .9));
+        cd.rows.forEach(r => { r.pts.textContent = Math.round(r.team.playoffs * q) + '%'; });
+    });
+}
+const cardOf = (c, name) => c.cs.find(cd => cd.rows.some(r => r.team.name === name));
+
+function leagueScene(a, b, tier, cfg) {
+    KHC.scene(a, b, root => {
+        const s = root.s = {};
+        if (cfg.bg) el('div', cfg.bg, root);
+        hudFor(root, tier);
+        s.h = head(root, tier, cfg.world);
+        el('div', 'colhead', root, '<span>V–D · POSIÇÃO</span><span>PLAYOFFS</span>');
+        s.c = cards(root, tier, cfg.nicks);
+        const hot = cardOf(s.c, cfg.on);
+        hot.card.classList.add('hot');
+        hot.card.style.marginTop = '44px';  // espaço para o selo não cobrir o card de cima
+        s.st = KHC.stamp(hot.card, cfg.stamp, { top: -56, rot: -2 });
+        s.cap = KHC.caption(root, cfg.caption[0], cfg.caption[1]);
+    }, (lt, t, root) => {
+        const s = root.s;
+        drawHead(s.h, lt);
+        drawCards(s.c, t, a + .5, a + 1.1);
+        KHC.drawStamp(s.st, t, a + 2.6);
+        KHC.drawCaption(s.cap, t, a + 3.1);
+    });
+}
+
+// ================================================================ CENAS
+// 0–3 · Abertura
+KHC.scene(0, 3, root => {
+    const s = root.s = {};
+    s.logo = el('img', 'big-logo', root); s.logo.src = LEAGUE.khc.crest;
+    s.press = el('div', 'press', root, 'PRESS START');
+    s.l1 = el('div', 'open-l', root, 'Prévia'); s.l1.style.top = '800px';
+    s.l2 = el('div', 'open-l o', root, 'Semana 6'); s.l2.style.top = '920px';
+    s.sub = el('div', 'open-sub', root, '24 confrontos.<br>Alguns valem vaga. <b>Outros, só a honra.</b>');
+    s.boot = el('div', 'boot', root);
+}, (lt, t, root) => {
+    const s = root.s;
+    const b = prog(lt, 0, .16);
+    set(s.boot, { o: 1 - b, sy: lerp(.004, 1, ease.out(b)) });
+    const lp = enter(lt, .05, .6, ease.elastic); set(s.logo, { s: lp, r: (1 - lp) * 20 });
+    s.press.textContent = lt < 1.1 ? 'PRESS START' : '▶ START!';
+    set(s.press, { o: lt < 1.1 ? blink(lt, .2) : 1 });
+    [s.l1, s.l2].forEach((e, i) => { const p = enter(lt, .25 + i * .18, .4, ease.back); set(e, { o: Math.min(1, p * 2), y: (1 - p) * 80 }); });
+    const sb = enter(lt, 1.3, .4); set(s.sub, { o: sb, y: (1 - sb) * 40 });
+});
+
+leagueScene(3, 9, 'elite', {
+    world: 'FASE 1 · O CASTELO', on: 'Diogoashura',
+    stamp: 'O 4º recebe o nº 1 do Power Ranking',
+    caption: ['Diogoashura × Gordinhas.', 'A vaga do 4º lugar treme.'],
+});
+leagueScene(9, 15, 'serie-a', {
+    world: 'FASE 2 · TURBO', on: 'Diogoashura', nicks: { Caipiracicaba: 'o Vigarista' },
+    stamp: 'Dupla jornada: Elite e Série A',
+    caption: ['Diogoashura: um jogo pra sonhar,', 'outro pra não cair.'],
+});
+
+// 15–21 · O Vigarista
+KHC.scene(15, 21, root => {
+    const s = root.s = {};
+    hudFor(root, 'serie-a');
+    const v = el('div', 'villain', root);
+    el('div', 'k', v, 'DUELO DA SEMANA · SÉRIE A');
+    s.t = el('div', 't', v, 'O Vigarista<br>ataca de novo');
+    const d = el('div', 'duel', root);
+    const mk = (n, sub, cls) => {
+        const tm = team('serie-a', n);
+        const r = KHC.teamRow(d, { name: n, avatar: tm.avatar, sub, value: tm.record.replace('-', '–') });
+        r.row.classList.add(cls); return r;
+    };
+    s.a = mk('Caipiracicaba', '<span style="color:#F2B705">"o Vigarista"</span> · 8º · 51% queda', 'hot');
+    s.vs = el('div', 'vs', d, 'VS');
+    s.b = mk('Fofura e Fé', '7º · 33% queda', 'x');
+    const rp = el('div', 'replay', root);
+    rp.innerHTML = '<div class="tag"><i></i>REPLAY</div><div class="was">No Awards S5, ele "venceu" por</div>'
+        + '<div class="num">0.28</div><div class="real">Na real: perdeu de <b>147 a 120</b>. Pra outro time.</div><div class="scan"></div>';
+    s.rp = rp; s.num = rp.querySelector('.num'); s.real = rp.querySelector('.real');
+    s.st = KHC.stamp(rp, 'Enganou até a edição', { top: 18, right: 24, rot: -4 });
+    s.cap = KHC.caption(root, 'Desta vez,', 'vai ter que ganhar no campo.');
+    s.cap.c.style.top = '1500px';
+}, (lt, t, root) => {
+    const s = root.s;
+    const p = enter(t, 15.15, .45, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    const a = enter(t, 15.6, .35), b = enter(t, 15.75, .35);
+    set(s.a.row, { o: a, x: (1 - a) * -1100 }); set(s.b.row, { o: b, x: (1 - b) * 1100 });
+    const v = enter(t, 15.9, .3, ease.back); set(s.vs, { o: v, s: lerp(2.5, 1, v) });
+    // fita de replay: entra, risca o 0.28, mostra o placar real
+    const r = enter(t, 16.6, .3); set(s.rp, { o: r, f: t < 17.0 ? `blur(${(1 - prog(t, 16.6, 17.0)) * 6}px)` : 'none' });
+    s.rp.style.translate = t > 16.6 && t < 17.1 ? `${Math.sin(t * 173) * 10}px 0` : '0 0';
+    s.num.style.setProperty('--strike', (460 * ease.out(prog(t, 17.6, 17.9))) + 'px');
+    const re = enter(t, 18.0, .35); set(s.real, { o: re, y: (1 - re) * 20 });
+    KHC.drawStamp(s.st, t, 18.6);
+    KHC.drawCaption(s.cap, t, 19.4);
+});
+
+leagueScene(21, 27, 'serie-b', {
+    bg: 'bricks', world: 'FASE 3 · SUBSOLO', on: 'Ceará Dolphins',
+    stamp: 'Clássico da zona: 86% × 69% de queda',
+    caption: ['Lanterna × vice-lanterna.', 'Alguém vai ter que ganhar. Infelizmente.'],
+});
+leagueScene(27, 33, 'serie-c', {
+    bg: 'water', world: 'FASE 4 · AQUÁTICA', on: 'romanerinha',
+    stamp: 'Fez 51 pontos. Pegou o invicto.',
+    caption: ['romanerinha × San Andreas (5–0).', 'Boa sorte. Vai precisar.'],
+});
+leagueScene(33, 39, 'serie-d', {
+    world: 'FASE FINAL', on: 'Elieser',
+    stamp: 'Agora vai? (não vai)',
+    caption: ['0–5 com 26% de playoffs.', 'A matemática segue de licença.'],
+});
+
+// 39–43 · Fim
+KHC.scene(39, 43, root => {
+    const s = root.s = {};
+    KHC.hud(root, 'PRÉVIA · SEMANA 6', []);
+    s.k = el('div', 'end-k', root, 'SEMANA 6');
+    s.l1 = el('div', 'end-1', root, 'Que vença<br>o menos<br>pior.');
+    s.l2 = el('div', 'end-2', root, 'Ou o<br>Vigarista.');
+    s.logo = el('img', 'end-logo', root); s.logo.src = LEAGUE.khc.crest;
+}, (lt, t, root) => {
+    const s = root.s;
+    set(s.k, { o: enter(t, 39.1, .3) });
+    const a = enter(t, 39.4, .45, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
+    const b = enter(t, 40.6, .35, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
+    const l = enter(t, 41.4, .5, ease.elastic); set(s.logo, { s: l });
+});
+
+[[3, 'elite'], [9, 'serie-a'], [15, 'khc'], [21, 'serie-b'], [27, 'serie-c'], [33, 'serie-d'], [39, 'khc']]
+    .forEach(([p, lg]) => KHC.wipe(p, lg));
+KHC.fadeOut(42.55, 43);
+
+// Pausas de leitura (tempo da timeline, duração): cards completos e legenda
+// inteira antes de cada troca. A mesma lista está em scripts/trilha/previa6.py.
+KHC.hold([[5.0, 0.6], [7.05, 0.8], [11.0, 0.6], [13.05, 0.8], [20.3, 0.8], [23.0, 0.6], [25.05, 0.8],
+    [29.0, 0.6], [31.05, 0.8], [35.0, 0.6], [37.05, 0.8]]);
+
+KHC.start(43);
+await window.ready();
+window.loaded = true;
+})();
+</script>
+</body>
+</html>
