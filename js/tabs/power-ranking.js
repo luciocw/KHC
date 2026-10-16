@@ -83,7 +83,7 @@ function resetPowerCache() {
  * @returns {Promise<{weekly: Object<string, number[]>, weeks: number}>}
  */
 async function loadPowerWeekly() {
-    const leagues = appState.leagues.filter(l => l.info.tier !== 'elite');
+    const leagues = appState.leagues.filter(l => isRegularSeries(l.info.tier));
     const perLeague = await Promise.all(leagues.map(async l => {
         const st = await fetchLeagueSettings(l.info.id);
         const weeks = Math.max(0, Math.min(st.lastScored, st.playoffStart - 1));
@@ -125,7 +125,7 @@ function powerWeekly() {
  * @returns {Array<object>} PowerRow ordenadas
  */
 function powerRows() {
-    const regular = appState.rosterData.filter(r => r.leagueTier !== 'elite');
+    const regular = appState.rosterData.filter(r => isRegularSeries(r.leagueTier));
     const w = powerWeekly();
     return powerRanking(mapRosterToTeams(regular), w.status === 'ready' && w.weeks ? w.weekly : null);
 }
@@ -135,7 +135,7 @@ function powerRows() {
  * @returns {string} HTML
  */
 function renderPowerRankings() {
-    const regular = appState.rosterData.filter(r => r.leagueTier !== 'elite');
+    const regular = appState.rosterData.filter(r => isRegularSeries(r.leagueTier));
     if (!regular.length) {
         return stateHTML({ icon: 'zap', title: 'Nada por aqui ainda' });
     }

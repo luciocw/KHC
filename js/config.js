@@ -29,6 +29,7 @@ const KHC_CONFIG = {
             { id: '1370034537232355328', name: 'KHC Serie B', tier: 'serie-b' },
             { id: '1370036025006505984', name: 'KHC Serie C', tier: 'serie-c' },
             { id: '1370091129751474176', name: 'KHC Serie D', tier: 'serie-d' },
+            { id: '1383129184330579968', name: 'KHC Guilhotina', tier: 'guilhotina' },
         ]
     }
 };
@@ -45,10 +46,22 @@ const SERIES_META = {
     'serie-d': { id: 'D',     name: 'Série D',   short: 'Série D', league: 'd',     crest: 'escudo-serie-d.png' },
     'serie-e': { id: 'E',     name: 'Série E',   short: 'Série E', league: 'e',     crest: 'escudo-serie-e.png' },
     'serie-f': { id: 'F',     name: 'Série F',   short: 'Série F', league: 'f',     crest: 'escudo-serie-f.png' },
+    // Liga paralela: quem faz menos pontos na semana é cortado (sem V–D)
+    'guilhotina': { id: 'G',  name: 'KHC Guilhotina', short: 'Guilhotina', league: 'g', crest: 'escudo-khc.png', kind: 'guillotine' },
 };
 
 // Ordem de exibição (abas, filtros, histórico): Elite primeiro, depois A → F.
-const TIER_ORDER = ['elite', 'serie-a', 'serie-b', 'serie-c', 'serie-d', 'serie-e', 'serie-f'];
+const TIER_ORDER = ['elite', 'serie-a', 'serie-b', 'serie-c', 'serie-d', 'serie-e', 'serie-f', 'guilhotina'];
+
+/** Guilhotina: liga paralela sem V–D, fora de Power, Top, Rodada e Chances. */
+function isGuillotine(tier) {
+    return !!(SERIES_META[tier] && SERIES_META[tier].kind === 'guillotine');
+}
+
+/** Série regular (A–F): acesso/rebaixamento, Power Ranking e Chances. */
+function isRegularSeries(tier) {
+    return tier !== 'elite' && !isGuillotine(tier);
+}
 
 const CREST_PATH = 'assets/logo/png/ui/';
 const DEFAULT_AVATAR = 'https://sleepercdn.com/images/v2/icons/player_default.webp';

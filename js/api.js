@@ -180,7 +180,8 @@ async function fetchLeagueSettings(leagueId) {
         leg: int(st.leg, 30, 0),
         lastScored: int(st.last_scored_leg, 30, 0),
         playoffStart: int(st.playoff_week_start, 30, REGULAR_SEASON_WEEKS + 1) || REGULAR_SEASON_WEEKS + 1,
-        playoffTeams: int(st.playoff_teams, 32, 0)
+        playoffTeams: int(st.playoff_teams, 32, 0),
+        lastChopped: int(st.last_chopped_leg, 30, 0)   // guilhotina
     };
 }
 
@@ -227,14 +228,17 @@ async function fetchRoundData(leagueId, week) {
  * baixar de novo.
  * @param {string} leagueId
  * @param {number} week
+ * @param {{live?: boolean}} [opts] live: semana em andamento (sem cache)
  * @returns {Promise<Object<number, number>>} rosterId → pontos
  */
-async function fetchWeekScores(leagueId, week) {
+async function fetchWeekScores(leagueId, week, opts = {}) {
     const key = `khc_wk_${leagueId}_${week}`;
-    try {
-        const hit = localStorage.getItem(key);
-        if (hit) return JSON.parse(hit);
-    } catch (e) { /* sem storage: segue para a rede */ }
+    if (!opts.live) {
+        try {
+            const hit = localStorage.getItem(key);
+            if (hit) return JSON.parse(hit);
+        } catch (e) { /* sem storage: segue para a rede */ }
+    }
 
     const res = await fetchWithRetry(`https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`);
     if (!res.ok) throw new Error(getErrorMessage(res.status));
@@ -243,7 +247,9 @@ async function fetchWeekScores(leagueId, week) {
     (Array.isArray(raw) ? raw : []).forEach(m => {
         if (m && Number.isInteger(m.roster_id)) out[m.roster_id] = sanitizeNumber(m.points, 0, VALIDATION.MAX_POINTS, 0);
     });
-    try { localStorage.setItem(key, JSON.stringify(out)); } catch (e) { /* cheio ou bloqueado */ }
+    if (!opts.live) {
+        try { localStorage.setItem(key, JSON.stringify(out)); } catch (e) { /* cheio ou bloqueado */ }
+    }
     return out;
 }
 
@@ -359,7 +365,9 @@ async function fetchLeagueData(leagueInfo) {
                 losses: sanitizeNumber(settings.losses, 0, VALIDATION.MAX_LOSSES, 0),
                 ties: sanitizeNumber(settings.ties, 0, VALIDATION.MAX_WINS, 0),
                 fpts: sanitizeNumber(points, 0, VALIDATION.MAX_POINTS, 0),
-                fptsAgainst: sanitizeNumber(pointsAgainst, 0, VALIDATION.MAX_POINTS, 0)
+                fptsAgainst: sanitizeNumber(pointsAgainst, 0, VALIDATION.MAX_POINTS, 0),
+                // guilhotina: time cortado fica com o elenco vazio
+                rosterSize: Array.isArray(r.players) ? r.players.length : 0
             };
 
             return teamObj;

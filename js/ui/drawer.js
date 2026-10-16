@@ -55,7 +55,10 @@
                         l: t.losses,
                         pts: t.fpts,
                         active: true,
-                        avatar: t.avatar
+                        avatar: t.avatar,
+                        // guilhotina: sem V–D; mostra se segue vivo
+                        guillotine: isGuillotine(league.info.tier),
+                        alive: t.rosterSize !== 0
                     });
                 });
             });
@@ -88,6 +91,8 @@
      */
     function statsFromHistory(history) {
         let wins = 0, losses = 0, pts = 0;
+        // Guilhotina fica fora dos totais (sem V–D, pontos de outra natureza)
+        history = history.filter(h => !h.guillotine);
         history.forEach(h => {
             wins += Number(h.w) || 0;
             losses += Number(h.l) || 0;
@@ -119,7 +124,8 @@
     function renderHistoryRow(h) {
         const tier = seriesIdToTier(h.serie);
         let badge;
-        if (h.active) badge = '<span class="chip chip--live-soft">Em andamento</span>';
+        if (h.guillotine) badge = h.alive ? '<span class="chip chip--alive">Vivo</span>' : '<span class="chip chip--final">Cortado</span>';
+        else if (h.active) badge = '<span class="chip chip--live-soft">Em andamento</span>';
         else if (h.rank >= 1 && h.rank <= 4) badge = medalHTML(h.rank);
         else if (h.rank) badge = `<span class="chip chip--final">${h.rank}º</span>`;
         else badge = '';
@@ -127,7 +133,7 @@
             ${crestHTML(tier, 34)}
             <span class="grow">
                 <b>${h.season} · ${escapeHtml(seriesNameById(h.serie))}</b>
-                <span class="team__name history-row__team" dir="auto">${escapeHtml(h.team)} · ${h.w}–${h.l} · ${fmtPts(h.pts)} pts</span>
+                <span class="team__name history-row__team" dir="auto">${escapeHtml(h.team)} · ${h.guillotine ? '' : `${h.w}–${h.l} · `}${fmtPts(h.pts)} pts</span>
             </span>
             ${badge}
         </div>`;
