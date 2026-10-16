@@ -118,6 +118,24 @@ PHASES = {
                 "D5 . - C5 A4 . - -", "G#4 . - B4 E5 . - -"),
         ch=chords("A3 C4 E4", "A3 C4 F4", "A3 D4 F4", "G#3 B3 E4"),
         roots=["A2", "F2", "D2", "E2"], bass="march", drums="sparse"),
+    # terror de castelo de vampiro, Lá frígio (Bb e o trítono D#)
+    "terror": dict(
+        mel=seq("A4 - A4 Bb4 A4 - E5 -", "D#5 - D5 - C5 - Bb4 -",
+                "A4 - C5 E5 F5 - E5 -", "D#5 - E5 - A4 - - -"),
+        ch=chords("A3 C4 E4", "A3 D#4 F#4", "A3 C4 F4", "G#3 B3 E4"),
+        roots=["A2", "D#2", "F2", "E2"], bass="ostinato", drums="drive", duty=0.25),
+    # carrasco: mesma harmonia, melodia aguda em semicromatismo e baixo em pedal
+    "carrasco": dict(
+        mel=seq("E5 F5 E5 D#5 E5 - A5 -", "G#5 - F5 - D#5 - E5 -",
+                "C6 B5 Bb5 A5 - F5 A5 -", "G#5 - B5 - E5 - E5 -"),
+        ch=chords("A3 C4 E4", "G#3 B3 D4", "A3 C4 F4", "G#3 B3 E4"),
+        roots=["A1", "E2", "F2", "E2"], bass="pedal", drums="boss"),
+    # caixinha de música assombrada, Mi menor com cromatismo, sem bateria
+    "assombrada": dict(
+        mel=seq("E5 . . G5 . . F#5 .", "F5 . . . E5 . . .",
+                "B4 . . C5 . . A#4 .", "B4 . . . - - - -"),
+        ch=chords("E4 G4 B4", "E4 G4 A#4", "E4 G4 C5", "D#4 F#4 B4"),
+        roots=["E2", "C#2", "C2", "B1"], bass="waltz", drums="none", duty=0.125, vib=0.3),
 }
 
 
@@ -441,6 +459,19 @@ class Track:
         self.bass_note(start + 0.15, note("C3"), 0.15, 1.0)
         self.kick(start + 0.15, 0.8)
         self.jingle(start + 0.35, notes("E7 B7"), 0.03, duty=0.125, vel=0.7)
+
+    def toll(self, start, root="A2", dur=1.6):
+        """Sino de igreja/castelo: fundamental + quinta + parcial desafinado, decaimento longo."""
+        t = self._t(dur)
+        m = note(root)
+        s = self._triangle(hz(m), t) + 0.5 * self._triangle(hz(m + 19), t) + 0.35 * self._pulse(hz(m + 27.4), t, 0.125)
+        self._add(self.fx, start, s * self._env(len(t), dur / 3), 0.5)
+
+    def chop(self, impact):
+        """Lâmina da guilhotina: desce assobiando (tonal) e bate seco em `impact`."""
+        self.glide(impact - 0.2, note("C7"), note("C5"), 0.2, duty=0.125, vel=0.35)
+        self.stamp(impact)
+        self.bass_note(impact, note("A1"), 0.25, 1.0)
 
     def stage_clear(self, start):
         self.jingle(start, notes("C5 E5 G5 C6 E6 G6"), 0.05, duty=0.25, vel=0.9, last=0.1)

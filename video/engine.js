@@ -18,6 +18,7 @@
         'serie-c': { color: '#3B82F6', crest: '../../assets/logo/png/escudo-serie-c.png' },
         'serie-d': { color: '#22C55E', crest: '../../assets/logo/png/escudo-serie-d.png' },
         khc: { color: '#F26A1B', crest: '../../assets/logo/png/escudo-khc.png' },
+        guilhotina: { color: '#B3121B', crest: '../../assets/logo/png/escudo-guilhotina.png' },
     };
 
     // ---------------------------------------------------------------- tempo
