@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>KHC Guilhotina · Apresentação</title>
+<link rel="stylesheet" href="../engine.css">
+<style>
+:root { --blood: #B3121B; --bone: #D9D4CE; --gold: #F2B705; }
+#stage { background:
+    radial-gradient(1200px 760px at 50% -10%, #3d0a0d 0%, transparent 62%),
+    radial-gradient(900px 600px at 50% 115%, #22090a 0%, transparent 70%),
+    repeating-linear-gradient(90deg, transparent 0 143px, rgba(255,255,255,.022) 143px 145px),
+    var(--bg); }
+.boot { position: absolute; inset: 0; background: #fff; }
+.flash { position: absolute; inset: 0; background: var(--blood); opacity: 0; pointer-events: none; z-index: 20; mix-blend-mode: screen; }
+.drip { position: absolute; top: 0; width: 22px; border-radius: 0 0 11px 11px; background: var(--blood); }
+
+/* lâmina (SVG) */
+.blade { position: absolute; left: 40px; width: 1000px; height: 200px; z-index: 10; pointer-events: none; }
+.blade svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 18px 30px rgba(0,0,0,.6)); }
+
+/* corte: duas metades do mesmo elemento, separadas na diagonal */
+.slot { position: relative; }
+.half { position: absolute; inset: 0; }
+.half.top { clip-path: polygon(-5% -50%, 105% -50%, 105% 44%, -5% 62%); }
+.half.bot { clip-path: polygon(-5% 62%, 105% 44%, 105% 150%, -5% 150%); }
+.cutline { position: absolute; left: -20px; right: -20px; top: 52%; height: 6px; margin-top: -3px; background: #fff;
+    box-shadow: 0 0 18px #ff3b3b, 0 0 40px var(--blood); transform-origin: left center; opacity: 0; z-index: 4; }
+
+/* abertura */
+.g-crest { position: absolute; left: 50%; top: 250px; width: 470px; height: 540px; margin-left: -235px; object-fit: contain;
+    filter: drop-shadow(0 40px 70px rgba(0,0,0,.7)); }
+.g-kick { position: absolute; left: 0; right: 0; top: 860px; text-align: center; font-family: Pixel; font-size: 30px; color: var(--gold);
+    text-shadow: 4px 4px 0 #000; }
+.g-title { position: absolute; left: 40px; right: 40px; top: 930px; height: 170px; }
+.g-title .half div { text-align: center; font-weight: 900; font-size: 124px; line-height: 170px; letter-spacing: -2px; color: var(--blood);
+    text-shadow: 0 6px 0 #000; }
+.g-sub { position: absolute; left: 60px; right: 60px; top: 1210px; font-weight: 800; font-size: 64px; line-height: 1.1; color: var(--text); }
+.g-sub b { color: var(--blood); }
+
+/* regra */
+.q-l { position: absolute; left: 60px; right: 60px; height: 130px; }
+.q-l .half div { font-weight: 900; font-size: 120px; line-height: 130px; letter-spacing: -2px; text-transform: uppercase; }
+.chop-word { position: absolute; left: 0; right: 0; top: 860px; text-align: center; font-weight: 900; font-size: 168px; letter-spacing: -4px;
+    color: var(--blood); text-shadow: 0 0 60px rgba(179,18,27,.6), 8px 8px 0 #000; }
+.rule-sub { position: absolute; left: 60px; right: 60px; top: 1230px; font-weight: 800; font-size: 56px; line-height: 1.12; color: var(--text-2); }
+.rule-sub b { color: var(--text); }
+
+/* cemitério */
+.graves { position: absolute; left: 50px; right: 50px; top: 480px; display: flex; flex-direction: column; gap: 30px; }
+.graves .slot { height: 156px; }
+.grow { position: absolute; inset: 0; display: flex; align-items: center; gap: 22px; padding: 0 26px;
+    background: rgba(22,19,17,.96); border: 2px solid var(--border); border-radius: 22px; }
+.grow .av { width: 104px; height: 104px; border-radius: 18px; }
+.grow .nm { font-weight: 800; font-size: 50px; line-height: 1; white-space: nowrap; margin-top: -52px; }
+.grow .right { margin-left: auto; text-align: right; }
+.grow .wk { font-family: Pixel; font-size: 22px; color: var(--blood); }
+.grow .wp { font-family: Mono; font-size: 54px; color: var(--text-2); margin-top: 6px; }
+.roast { position: absolute; left: 150px; top: 84px; z-index: 6; font-weight: 800; font-size: 35px; color: var(--orange); white-space: nowrap;
+    background: #120c0a; padding: 2px 12px; border-radius: 6px; opacity: 0; }
+.rip { position: absolute; left: 6px; top: -16px; z-index: 6; font-family: Pixel; font-size: 20px; color: #fff; background: var(--blood);
+    padding: 6px 10px; border-radius: 4px; opacity: 0; }
+
+/* vigarista e donos */
+.villain { position: absolute; left: 60px; right: 60px; top: 240px; }
+.villain .k { font-family: Pixel; font-size: 30px; color: var(--gold); }
+.villain .t { font-weight: 900; font-size: 112px; line-height: .95; color: var(--blood); margin-top: 18px; text-transform: uppercase; letter-spacing: -2px; }
+.duel { position: absolute; left: 50px; right: 50px; top: 590px; display: flex; flex-direction: column; gap: 76px; }
+.trow.hot { border-color: var(--blood); box-shadow: 0 0 0 2px rgba(179,18,27,.3), 0 20px 50px rgba(0,0,0,.5); }
+.tsub .g { color: var(--gold); } .tsub .q { color: #ff4d4d; }
+.ficha { position: absolute; left: 60px; right: 60px; top: 860px; padding: 34px 34px; border-radius: 22px; background: #0b0908;
+    border: 3px dashed #4a3f37; font-family: Mono; font-size: 41px; line-height: 1.75; color: var(--text-2); }
+.ficha div { opacity: 0; white-space: nowrap; }
+.ficha b { color: var(--text); } .ficha i { font-style: normal; color: var(--gold); }
+.gaps { position: absolute; left: 60px; right: 60px; top: 860px; padding: 26px 34px; border-radius: 22px; background: #0b0908;
+    border: 3px dashed #4a3f37; }
+.gh { font-family: Mono; font-size: 28px; letter-spacing: 3px; color: var(--text-3); margin-bottom: 14px; }
+.gr { display: flex; align-items: center; gap: 20px; height: 66px; font-family: Mono; font-size: 38px; color: var(--text-2); }
+.gw { width: 64px; } .gb { height: 30px; border-radius: 6px; background: #5d5853; }
+.gv { color: var(--text); }
+.gr.close .gb { background: var(--blood); } .gr.close .gv, .gr.close .gw { color: #ff4d4d; }
+.noose { position: absolute; right: 120px; top: 0; width: 6px; background: #8c6a43; }
+.meter { position: absolute; left: 60px; right: 60px; top: 1130px; }
+.meter .lb { font-family: Mono; font-size: 32px; letter-spacing: 3px; color: var(--text-2); display: flex; justify-content: space-between; }
+.meter .lb b { color: #ff4d4d; }
+.meter .bar { margin-top: 18px; height: 54px; border-radius: 10px; background: #1d1916; border: 3px solid var(--border); overflow: hidden; }
+.meter .fill { height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--blood) 0 34px, #d4202b 34px 40px); }
+
+/* fim */
+.end-k { position: absolute; left: 60px; top: 360px; font-family: Pixel; font-size: 40px; color: var(--gold); }
+.end-1 { position: absolute; left: 60px; right: 60px; top: 450px; font-weight: 900; font-size: 150px; line-height: .95; letter-spacing: -3px; }
+.end-2 { position: absolute; left: 60px; right: 60px; top: 760px; font-weight: 900; font-size: 150px; line-height: .95; letter-spacing: -3px; color: var(--blood); }
+.end-3 { position: absolute; left: 60px; right: 60px; top: 1120px; font-weight: 800; font-size: 50px; line-height: 1.15; color: var(--text-2); }
+.end-3 b { color: var(--text); }
+.end-logo { position: absolute; left: 50%; top: 1400px; width: 260px; height: 300px; margin-left: -130px; object-fit: contain; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="fx"></div>
+<script src="../engine.js"></script>
+<script>
+(async () => {
+const G = await (await fetch('guilhotina.json')).json();
+const { el, set, prog, lerp, ease, enter, blink, shake, LEAGUE } = KHC;
+const team = n => G.teams.find(t => t.name === n);
+const cut = G.teams.filter(t => t.cut).sort((a, b) => a.cut - b.cut);
+const br = v => v.toFixed(2).replace('.', ',');
+const CREST = LEAGUE.guilhotina.crest;
+
+// ------------------------------------------------------------ peças locais
+const BLADE = `<svg viewBox="0 0 1000 200" preserveAspectRatio="none">
+  <defs><linearGradient id="st" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a948e"/><stop offset=".7" stop-color="#5d5853"/><stop offset="1" stop-color="#3c3835"/></linearGradient></defs>
+  <rect x="470" y="0" width="60" height="40" fill="#2b2724"/>
+  <polygon points="0,30 1000,30 1000,110 0,200" fill="url(#st)"/>
+  <polygon points="0,182 1000,96 1000,110 0,200" fill="#B3121B"/>
+  <rect x="0" y="30" width="1000" height="10" fill="#c9c3bc" opacity=".5"/></svg>`;
+function blade(parent) { const b = el('div', 'blade', parent, BLADE); return b; }
+/** Lâmina que cai até `y` (topo do elemento) em `a` e sai em seguida. */
+function drawBlade(b, t, a, y, from = -900) {
+    if (t < a - .2 || t > a + .45) { b.style.opacity = 0; return; }
+    const d = ease.inOut(prog(t, a - .2, a)) ;
+    const up = prog(t, a + .1, a + .45);
+    set(b, { o: 1 - up, y: lerp(from, y, d) - up * 60 });
+}
+/** Duas cópias do conteúdo, cortadas na diagonal; `fill(div)` monta cada cópia. */
+function sliced(parent, cls, fill) {
+    const s = el('div', 'slot ' + cls, parent);
+    const top = el('div', 'half top', s), bot = el('div', 'half bot', s);
+    fill(top); fill(bot);
+    const line = el('div', 'cutline', s);
+    line.style.transform = 'rotate(-1.4deg)';
+    return { s, top, bot, line };
+}
+function drawSlice(sl, t, a, { dx = 16, dy = 10, rot = 1, gray = true } = {}) {
+    const p = enter(t, a, .3, ease.back);
+    const f = gray ? `grayscale(${prog(t, a, a + .3)}) brightness(${1 - .4 * prog(t, a, a + .3)})` : 'none';
+    set(sl.top, { x: -p * dx, y: -p * dy, r: -p * 1.2 * rot, f });
+    set(sl.bot, { x: p * dx, y: p * dy, r: p * 1.4 * rot, f });
+    const l = prog(t, a - .08, a);
+    sl.line.style.opacity = t < a - .08 ? 0 : 1 - prog(t, a + .05, a + .45);
+    sl.line.style.transform = `rotate(-1.4deg) scaleX(${l})`;
+}
+function flash(root) { return el('div', 'flash', root); }
+function drawFlash(f, t, hits) {
+    f.style.opacity = Math.max(0, ...hits.map(h => (t >= h ? .55 * (1 - prog(t, h, h + .3)) : 0)));
+}
+function shakeRoot(root, t, hits, amp = 16) {
+    let x = 0, y = 0;
+    for (const h of hits) { const [a, b] = shake(t, h, .3, amp); x += a; y += b; }
+    root.style.transform = `translate(${x}px, ${y}px)`;
+}
+function hud(root) { KHC.hud(root, 'GUILHOTINA · S1–S5', []); }
+function drips(root, list) {
+    return list.map(([x, w]) => { const d = el('div', 'drip', root); d.style.left = x + 'px'; d.style.width = w + 'px'; return d; });
+}
+function drawDrips(ds, t, a) {
+    ds.forEach((d, i) => { d.style.height = (ease.out(prog(t, a + i * .07, a + 1.4 + i * .1)) * (60 + (i * 53) % 110)) + 'px'; });
+}
+
+// ================================================================ CENAS
+// 0–3.6 · Abertura: o escudo cai, o título é cortado
+KHC.scene(0, 3.6, root => {
+    const s = root.s = {};
+    s.dr = drips(root, [[90, 22], [260, 14], [610, 26], [880, 16], [990, 20]]);
+    s.crest = el('img', 'g-crest', root); s.crest.src = CREST;
+    s.kick = el('div', 'g-kick', root, 'A LIGA QUE A KHC ESCONDIA');
+    s.title = sliced(root, 'g-title', h => el('div', '', h, 'GUILHOTINA'));
+    s.sub = el('div', 'g-sub', root, '23 entraram.<br>Toda semana, <b>uma cabeça rola.</b>');
+    s.fl = flash(root);
+    s.boot = el('div', 'boot', root);
+}, (lt, t, root) => {
+    const s = root.s;
+    set(s.boot, { o: 1 - prog(lt, 0, .18) });
+    const c = enter(lt, .1, .45, p => p * p);
+    set(s.crest, { y: lerp(-1300, 0, c), r: (1 - c) * 12 });
+    drawDrips(s.dr, lt, .55);
+    const k = enter(lt, .8, .3); set(s.kick, { o: k > 0 ? blink(lt, .12) * (lt < 1.3 ? 1 : 0) + (lt >= 1.3 ? 1 : 0) : 0 });
+    const ti = enter(lt, 1.0, .35, ease.back);
+    set(s.title.s, { o: Math.min(1, ti * 2), s: lerp(1.6, 1, ti) });
+    drawSlice(s.title, lt, 1.6, { dx: 0, dy: 9, rot: 0, gray: false });
+    const sb = enter(lt, 2.05, .4); set(s.sub, { o: sb, y: (1 - sb) * 40 });
+    drawFlash(s.fl, lt, [.55, 1.6]);
+    shakeRoot(root, lt, [.55, 1.6], 20);
+});
+
+// 3.6–7 · A regra
+KHC.scene(3.6, 7, root => {
+    const s = root.s = {};
+    hud(root);
+    s.lines = ['Fez menos', 'pontos na', 'semana?'].map((w, i) => {
+        const sl = sliced(root, 'q-l', h => el('div', '', h, w));
+        sl.s.style.top = (380 + i * 135) + 'px';
+        return sl;
+    });
+    s.bl = blade(root); s.bl.style.top = '0px';
+    s.word = el('div', 'chop-word', root, 'CORTADO.');
+    s.sub = el('div', 'rule-sub', root, 'Sem V–D. Sem choro. Sem recurso.<br><b>O elenco vai pro waiver e os urubus agradecem.</b>');
+    s.fl = flash(root);
+}, (lt, t, root) => {
+    const s = root.s;
+    s.lines.forEach((sl, i) => {
+        const p = enter(t, 3.75 + i * .15, .35, ease.back);
+        set(sl.s, { o: Math.min(1, p * 2), x: (1 - p) * -300 });
+        drawSlice(sl, t, 4.75 + i * .03, { dx: 0, dy: 7, rot: 0, gray: false });
+    });
+    // a lâmina atravessa a tela inteira
+    const bp = prog(t, 4.5, 4.85);
+    set(s.bl, { o: bp > 0 && bp < 1 ? 1 : 0, y: lerp(-260, 2000, ease.inOut(bp)) });
+    const w = enter(t, 4.9, .25);
+    set(s.word, { o: w > 0 ? 1 : 0, s: lerp(2.6, 1, w), r: -4 });
+    const sb = enter(t, 5.4, .4); set(s.sub, { o: sb, y: (1 - sb) * 40 });
+    drawFlash(s.fl, t, [4.78]);
+    shakeRoot(root, t, [4.78, 4.95], 22);
+});
+
+// 7–16.5 · O cemitério: um corte por rodada, sem dó
+const ROAST = {
+    'pedrocestaro': 'Relaxou demais. Caiu na estreia.',
+    'Quack Attack': 'Muito bíceps, pouco ponto.',
+    'Pandemônio FC': 'Vestiu a capa da morte. Morreu.',
+    'RegisCarrara': 'Nem logo tinha. Agora nem time.',
+    'Inaciombn18': 'A foto já era ele indo embora.',
+};
+const CHOP = i => 8.0 + i * 1.3;
+KHC.scene(7, 16.5, root => {
+    const s = root.s = {};
+    hud(root);
+    const hd = el('div', 'phase-head', root);
+    hd.style.setProperty('--c', LEAGUE.guilhotina.color);
+    el('div', 'kicker', hd, 'S1 → S5 · 5 CABEÇAS');
+    el('div', 'league-name', hd, 'Cemitério');
+    s.crest = el('img', 'crest', hd); s.crest.src = CREST;
+    const box = el('div', 'graves', root);
+    s.rows = cut.map(tm => {
+        const sl = sliced(box, '', h => {
+            const r = el('div', 'grow', h);
+            const av = el('div', 'av', r); el('img', '', av).src = tm.avatar;
+            el('div', 'nm', r, KHC.esc(tm.name));
+            el('div', 'right', r, `<div class="wk">S${tm.cut}</div><div class="wp">${br(tm.weeks[tm.cut - 1])}</div>`);
+        });
+        sl.roast = el('div', 'roast', sl.s, KHC.esc(ROAST[tm.name] || 'Cortado.'));
+        sl.rip = el('div', 'rip', sl.s, 'CORTADO');
+        sl.bl = blade(sl.s); sl.bl.style.top = '-120px';
+        return sl;
+    });
+    s.cap = KHC.caption(root, '5 cabeças rolaram.', 'Dó? Nenhum.');
+    s.fl = flash(root);
+}, (lt, t, root) => {
+    const s = root.s;
+    const p = enter(lt, .05, .45, ease.back); set(s.crest, { s: p, r: (1 - p) * -30 });
+    s.rows.forEach((sl, i) => {
+        const e = enter(t, 7.35 + i * .1, .35);
+        set(sl.s, { o: Math.min(1, e * 1.6), x: (1 - e) * (i % 2 ? 1100 : -1100) });
+        drawBlade(sl.bl, t, CHOP(i), 0, -700);
+        drawSlice(sl, t, CHOP(i));
+        const r = enter(t, CHOP(i) + .15, .3, ease.back);
+        set(sl.roast, { o: r, s: lerp(1.5, 1, r), r: -1.5 });
+        const q = enter(t, CHOP(i) + .05, .2);
+        set(sl.rip, { o: q, s: lerp(2, 1, q), r: -6 });
+    });
+    KHC.drawCaption(s.cap, t, 14.3);
+    const hits = cut.map((_, i) => CHOP(i));
+    drawFlash(s.fl, t, hits);
+    shakeRoot(root, t, hits, 12);
+});
+
+// 16.5–21.5 · Nem o Vigarista escapa: ele também corre da lâmina toda rodada
+KHC.scene(16.5, 21.5, root => {
+    const s = root.s = {};
+    hud(root);
+    const v = el('div', 'villain', root);
+    el('div', 'k', v, 'NEM ELE ESCAPA');
+    s.t = el('div', 't', v, 'O Vigarista<br>também corre.');
+    s.t.style.fontSize = '94px';
+    const d = el('div', 'duel', root); d.style.top = '620px';
+    const c = team('Caipiracicaba');
+    s.row = KHC.teamRow(d, { name: c.name, avatar: c.avatar,
+        sub: '<span class="g">"o Vigarista"</span> · vivo (por enquanto)', value: '' });
+    s.row.row.classList.add('hot');
+    s.st = KHC.stamp(s.row.row, 'Aqui não tem edição', { top: -56, right: 24, rot: -3 });
+    // distância até a lâmina: pontos dele − pontos do cortado, rodada a rodada
+    const gaps = G.weeks.map(w => ({ w: w.week, gap: c.weeks[w.week - 1] - w.cut_pts }));
+    const max = Math.max(...gaps.map(g => g.gap)), min = Math.min(...gaps.map(g => g.gap));
+    const f = el('div', 'gaps', root);
+    el('div', 'gh', f, 'DISTÂNCIA DA LÂMINA');
+    s.bars = gaps.map(g => {
+        const r = el('div', 'gr' + (g.gap === min ? ' close' : ''), f);
+        el('div', 'gw', r, 'S' + g.w);
+        const bar = el('div', 'gb', r);
+        const v = el('div', 'gv', r, '+' + br(g.gap));
+        return { bar, v, w: 520 * g.gap / max };
+    });
+    s.cap = KHC.caption(root, 'Menor pontuação da rodada?', 'Cabeça rola. Até a dele.');
+}, (lt, t, root) => {
+    const s = root.s;
+    const p = enter(t, 16.65, .45, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    const a = enter(t, 17.0, .35); set(s.row.row, { o: a, x: (1 - a) * -1100 });
+    s.bars.forEach((g, i) => {
+        const q = ease.out(prog(t, 17.4 + i * .15, 17.8 + i * .15));
+        g.bar.style.width = (g.w * q) + 'px';
+        g.v.style.opacity = q;
+    });
+    KHC.drawStamp(s.st, t, 18.6);
+    KHC.drawCaption(s.cap, t, 19.3);
+});
+
+// 21.5–27 · Os donos da KHC: medo da lâmina
+KHC.scene(21.5, 27, root => {
+    const s = root.s = {};
+    hud(root);
+    const v = el('div', 'villain', root);
+    el('div', 'k', v, 'E OS DONOS DA KHC?');
+    s.t = el('div', 't', v, 'Medo da<br>lâmina?');
+    const d = el('div', 'duel', root); d.style.top = '650px';
+    s.rows = G.absent.map(o => {
+        const r = KHC.teamRow(d, { name: o.name, avatar: o.avatar, sub: '<span class="q">DONO DA KHC</span> · fora da Guilhotina', value: '' });
+        r.st = KHC.stamp(r.row, 'Não se inscreveu', { top: -56, right: 24, rot: -4 });
+        return r;
+    });
+    const m = el('div', 'meter', root); m.style.top = '1110px';
+    m.innerHTML = '<div class="lb"><span>MEDÔMETRO</span><b>ARREGÃO</b></div><div class="bar"><div class="fill"></div></div>';
+    s.m = m; s.fill = m.querySelector('.fill'); s.lvl = m.querySelector('b');
+    s.cap = KHC.caption(root, 'Mandam na KHC inteira.', 'Na liga da lâmina, sumiram.');
+}, (lt, t, root) => {
+    const s = root.s;
+    const p = enter(t, 21.65, .45, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    s.rows.forEach((r, i) => {
+        const a = enter(t, 22.0 + i * .2, .35);
+        // tremem de medo
+        const tr = t > 22.6 ? Math.sin(t * 61 + i) * 4 : 0;
+        set(r.row, { o: a, x: (1 - a) * (i ? 1100 : -1100) + tr });
+        KHC.drawStamp(r.st, t, 22.8 + i * .3);
+    });
+    set(s.m, { o: enter(t, 23.5, .3) });
+    s.fill.style.width = (ease.out(prog(t, 23.6, 24.3)) * 100) + '%';
+    set(s.lvl, { o: t < 24.3 ? 0 : blink(t, .2) * .6 + .4 });
+    KHC.drawCaption(s.cap, t, 24.5);
+});
+
+// 27–30.5 · Fim
+KHC.scene(27, 30.5, root => {
+    const s = root.s = {};
+    KHC.hud(root, 'GUILHOTINA · S6', []);
+    s.k = el('div', 'end-k', root, 'SEMANA 6');
+    s.l1 = el('div', 'end-1', root, `${G.alive} pescoços.`);
+    s.l2 = el('div', 'end-2', root, 'Quem é<br>o próximo?');
+    s.l3 = el('div', 'end-3', root, 'A partir de agora, a Guilhotina<br>entra no <b>Awards</b> e na <b>Prévia</b>.');
+    s.logo = el('img', 'end-logo', root); s.logo.src = CREST;
+}, (lt, t, root) => {
+    const s = root.s;
+    set(s.k, { o: enter(t, 27.1, .3) });
+    const a = enter(t, 27.3, .4, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
+    const b = enter(t, 27.9, .35, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
+    const c = enter(t, 28.6, .4); set(s.l3, { o: c, y: (1 - c) * 30 });
+    const l = enter(t, 29.0, .5, ease.elastic); set(s.logo, { s: l });
+});
+
+[3.6, 7, 16.5, 21.5, 27].forEach(p => KHC.wipe(p, 'guilhotina'));
+KHC.fadeOut(30.1, 30.5);
+
+// Pausas de leitura (tempo da timeline, duração). A mesma lista está em
+// scripts/trilha/guilhotina.py.
+KHC.hold([[2.9, 0.5], [6.2, 0.5], [15.2, 1.0], [20.4, 0.6], [25.8, 0.8]]);
+
+KHC.start(30.5);
+await window.ready();
+window.loaded = true;
+})();
+</script>
+</body>
+</html>

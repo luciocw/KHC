@@ -4,8 +4,10 @@ Os vídeos são páginas HTML animadas, gravadas quadro a quadro pelo Chromium e
 
 - `engine.js` / `engine.css`: timeline (`seek(t)`), HUD, cards de confronto, selos de zoeira, legendas, transições e fade. As cores e fontes são as da KHC.
 - `fetch_rodada.py`: baixa da Sleeper os confrontos da semana de todas as ligas (`data.json`) e os avatares.
+- `fetch_guilhotina.py`: baixa a KHC Guilhotina (`guilhotina.json`): vivos, cortados por rodada, quem escapou por pouco e os donos da KHC que não estão na liga.
 - `render.cjs`: grava o vídeo (`--stills` gera PNGs para conferir quadros soltos).
 - `semana5/`: as cenas do KHC Confrontos · Semana 5 (TNF).
+- `guilhotina/`: apresentação da KHC Guilhotina (cortes com a lâmina, trilha de terror).
 
 ## Fazer um vídeo novo
 
@@ -28,3 +30,5 @@ Os avatares não vão para o git (`.gitignore`). O `fetch_rodada.py` baixa de no
 - **Imperius Rex FC** e **Public Enemy #1** são os donos das ligas KHC. Todo vídeo deve zoar os dois de alguma forma (um selo, uma legenda, o fim…), mesmo quando eles não são o assunto da semana.
 - **Caipiracicaba** tem o apelido de **"o Vigarista"** (inspirado no Dick Vigarista da Corrida Maluca). Use o apelido quando ele aparecer.
 - A zoeira é liberada com todos os participantes, sempre com base nos números reais da rodada. Antes de afirmar "venceu/perdeu", confira quem enfrentou quem (`data.json`: cada item de `matchups` é um par de adversários).
+- **KHC Guilhotina** (liga de 23 times, sem V–D): a cada rodada, a menor pontuação entre os vivos é cortada. Não tem juiz nem imunidade, e o Vigarista corre o mesmo risco. Imperius Rex FC e Public Enemy #1 **não** estão na Guilhotina: zoar o "medo da lâmina". A partir da Semana 6, ela entra no Awards e na Prévia (`python3 video/fetch_guilhotina.py video/<pasta>`).
+- Trilha: o padrão é a fase `plataforma` (Mario). Na Guilhotina, use as fases de terror (`terror`, `carrasco`, `assombrada`) com os efeitos `chop` e `toll`.
