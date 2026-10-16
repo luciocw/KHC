@@ -18,3 +18,4 @@
 *.tmp
 *.temp
 video/*/assets/avatars/
+__pycache__/
