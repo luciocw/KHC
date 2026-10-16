@@ -628,10 +628,11 @@ async function drawProfileCanvas(username) {
             ctx.fillText(`${h.season} · ${seriesNameById(h.serie)}`, PAD + 44, cy - 9);
             ctx.fillStyle = c.text3;
             setFont(ctx, 400, 13);
-            ctx.fillText(fitText(ctx, `${h.team} · ${h.w}–${h.l} · ${fmtPts(h.pts)} pts`, EXPORT_W - PAD * 2 - 44 - 150), PAD + 44, cy + 11);
+            ctx.fillText(fitText(ctx, `${h.team} · ${h.guillotine ? '' : `${h.w}–${h.l} · `}${fmtPts(h.pts)} pts`, EXPORT_W - PAD * 2 - 44 - 150), PAD + 44, cy + 11);
 
             const xr = EXPORT_W - PAD;
-            if (h.active) drawChip(ctx, xr, cy, 'Em andamento', 'rgba(235, 64, 52, .15)', '#FF7A6E');
+            if (h.guillotine) drawChip(ctx, xr, cy, h.alive ? 'Vivo' : 'Cortado', h.alive ? 'rgba(61, 214, 140, .15)' : c.surface3, h.alive ? c.promo : c.text);
+            else if (h.active) drawChip(ctx, xr, cy, 'Em andamento', 'rgba(235, 64, 52, .15)', '#FF7A6E');
             else if (h.rank >= 1 && h.rank <= 4) drawMedal(ctx, xr - 13, cy, h.rank, c);
             else if (h.rank) drawChip(ctx, xr, cy, `${h.rank}º`, c.surface3, c.text);
         });
@@ -746,6 +747,105 @@ async function drawPowerCanvas() {
     return canvas;
 }
 
+/**
+ * Desenha a guilhotina: vivos (zona de corte em vermelho) e cortados com a
+ * rodada do corte.
+ * @returns {Promise<HTMLCanvasElement>}
+ */
+async function drawGuillotineCanvas(league, data) {
+    const meta = SERIES_META[league.info.tier];
+    const m = guillotineModel(league, data);
+    const c = exportPalette(meta);
+    const all = [...m.alive.map(r => r.team), ...m.cut.map(x => x.team)];
+    const { crest, avatars } = await loadExportAssets(meta, all.map(t => t.avatar));
+    const ROW_H = 50, CUT_H = 44, THEAD_H = 34, LABEL_H = 40, LEGEND_H = 40;
+    const H = EXPORT_HEAD_H + THEAD_H + m.alive.length * ROW_H + LEGEND_H
+        + (m.cut.length ? LABEL_H + m.cut.length * CUT_H + 8 : 0);
+    const { canvas, ctx } = startExportCard(H, c, crest, meta.name, m.subtitle);
+    const colPF = EXPORT_W - 14, colWk = colPF - 110;
+    const spaced = s => s.toUpperCase().split('').join('\u200A');
+
+    let y = EXPORT_HEAD_H;
+    hLine(ctx, 0, EXPORT_W, y + THEAD_H - 1, c.border);
+    ctx.fillStyle = c.text3;
+    setFont(ctx, 800, 12, 'condensed');
+    ctx.fillText('#', 14, y + THEAD_H / 2);
+    ctx.fillText(spaced('Vivos'), 56, y + THEAD_H / 2);
+    ctx.textAlign = 'right';
+    ctx.fillText(spaced(`Sem ${m.week}`), colWk, y + THEAD_H / 2);
+    ctx.fillText('PF', colPF, y + THEAD_H / 2);
+    ctx.textAlign = 'left';
+    y += THEAD_H;
+
+    const n = m.alive.length;
+    const nameRow = (t, img, x, mid, maxW) => {
+        drawAvatar(ctx, x, mid - 17, img, t.teamName || t.ownerName, c);
+        ctx.fillStyle = c.text;
+        setFont(ctx, 700, 15);
+        ctx.fillText(fitText(ctx, t.teamName || '', maxW), x + 44, mid - 8);
+        ctx.fillStyle = c.text3;
+        setFont(ctx, 400, 12);
+        ctx.fillText(fitText(ctx, t.ownerName || '', maxW), x + 44, mid + 11);
+    };
+    m.alive.forEach((r, i) => {
+        const top = y + i * ROW_H, mid = top + ROW_H / 2;
+        const danger = i >= n - m.danger;
+        if (danger) { ctx.fillStyle = c.relegBg; ctx.fillRect(0, top, EXPORT_W, ROW_H); }
+        ctx.fillStyle = danger ? c.releg : c.playoff;
+        ctx.fillRect(0, top, 3, ROW_H);
+        if (i < n - 1) hLine(ctx, 0, EXPORT_W, top + ROW_H - 1, m.danger && i === n - m.danger - 1 ? c.releg : c.border, m.danger && i === n - m.danger - 1);
+        ctx.fillStyle = danger ? c.releg : c.text2;
+        setFont(ctx, 900, 16, 'condensed');
+        ctx.fillText(String(i + 1), 14, mid);
+        nameRow(r.team, avatars[i], 56, mid, colWk - 90 - 100);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = c.text;
+        setFont(ctx, 800, 15);
+        ctx.fillText(m.isLive && !m.started ? '—' : fmtPts(r.week), colWk, mid);
+        ctx.fillStyle = c.text2;
+        setFont(ctx, 400, 14);
+        ctx.fillText(fmtPts(r.pf), colPF, mid);
+        ctx.textAlign = 'left';
+    });
+    y += n * ROW_H;
+
+    hLine(ctx, 0, EXPORT_W, y, c.border);
+    ctx.fillStyle = c.text2;
+    setFont(ctx, 400, 12);
+    const legend = (m.danger ? 'Zona de corte: menor pontuação da semana · ' : '') + 'Cortado: o elenco vai para o waiver';
+    ctx.fillText(legend, 14, y + LEGEND_H / 2);
+    y += LEGEND_H;
+
+    if (m.cut.length) {
+        hLine(ctx, 0, EXPORT_W, y, c.border);
+        drawEyebrow(ctx, `Cortados · ${m.cut.length}`, 14, y + LABEL_H / 2 + 2, c);
+        y += LABEL_H;
+        m.cut.forEach((x, i) => {
+            const top = y + i * CUT_H, mid = top + CUT_H / 2;
+            hLine(ctx, 0, EXPORT_W, top, c.border);
+            roundRect(ctx, 14, mid - 11, 36, 22, 4);
+            ctx.fillStyle = c.relegBg;
+            ctx.fill();
+            ctx.fillStyle = c.releg;
+            setFont(ctx, 900, 12, 'condensed');
+            ctx.textAlign = 'center';
+            ctx.fillText(`R${x.week}`, 32, mid + 1);
+            ctx.textAlign = 'left';
+            ctx.globalAlpha = 0.85;
+            nameRow(x.team, avatars[n + i], 62, mid, colWk - 90 - 100);
+            ctx.globalAlpha = 1;
+            ctx.textAlign = 'right';
+            ctx.fillStyle = c.text3;
+            setFont(ctx, 800, 14);
+            ctx.fillText(`${fmtPts(x.pts)} pts`, colPF, mid);
+            ctx.textAlign = 'left';
+        });
+    }
+
+    finishExportCard(ctx, H, c);
+    return canvas;
+}
+
 let _exportCache = null;   // { key, blob } da última imagem gerada
 
 /**
@@ -790,6 +890,16 @@ function exportTarget() {
     const league = appState.leagues.find(l => l.info.tier === appState.series);
     if (!league) return null;
     const tier = league.info.tier;
+    if (appState.tab === 'ligas' && isGuillotine(tier)) {
+        const g = guillotineData(league);
+        if (g.status !== 'ready') return null;
+        return {
+            key: `guil|${appState.season}|${g.data.fetchedAt}`,
+            name: `khc-${appState.season}-guilhotina.png`,
+            title: `KHC Guilhotina · ${appState.season}`,
+            draw: () => drawGuillotineCanvas(league, g.data)
+        };
+    }
     const seriesName = SERIES_META[tier].name;
     if (appState.tab === 'rodada') {
         const round = currentRound(league);

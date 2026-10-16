@@ -9,6 +9,7 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 - **7 abas:** Ligas, Rodada, Top Scorers, Power Ranking, Lendas KHC, Temporadas, Regras
 - **Endereço por tela** (compartilhável): `#/ligas/2026/a`, `#/top/2026`, `#/jogador/<usuario>`
 - **Ligas:** uma série por vez, com zonas de acesso / playoffs / rebaixamento por temporada e medalhas (número dentro) na classificação final; botões Baixar / Compartilhar geram PNG da tabela; seletor **Tabela | Chances** com Playoffs % e Queda % (simulação do resto da temporada regular, calibrada com o histórico de ligas 10/6 do Sleeper, atualiza quando a rodada fecha)
+- **KHC Guilhotina:** dentro de Ligas (aba Guilhotina): vivos ordenados pela pontuação da semana, zona de corte quando todos já pontuaram, cortados com a rodada do corte; fora de Rodada, Top, Power e Chances; exporta PNG
 - **Rodada:** confrontos e placar da semana por série (‹ semana ›), rótulos de playoff (Final, 3º lugar, Semifinal…) e exportação em PNG; destaques da semana (maior pontuação, maior vitória, jogo mais apertado)
 - **App na tela inicial:** manifest + ícones (`assets/app/`) — Android instala pelo Chrome, iPhone pelo Safari (Compartilhar → Adicionar à Tela de Início)
 - **Top Scorers:** filtro por série e "Incluir Elite" (desligado por padrão, evita time duplicado)
@@ -56,7 +57,7 @@ js/
     drawer.js               perfil do jogador (focus trap, Esc, URL #/jogador/…)
     export.js               classificação / confrontos em PNG (canvas), baixar e compartilhar
   tabs/
-    ligas.js · chances.js · rodada.js · top-scorers.js · power-ranking.js · lendas.js · temporadas.js · regras.js
+    ligas.js · chances.js · guilhotina.js · rodada.js · top-scorers.js · power-ranking.js · lendas.js · temporadas.js · regras.js
   app.js                    roteamento por hash, loadData, render
 assets/
   logo/svg/                 escudos oficiais em vetor (KHC, Elite, Séries A–F, Copa)

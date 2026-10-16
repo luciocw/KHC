@@ -246,6 +246,7 @@ async function loadData() {
     resetRoundCache();
     resetPowerCache();
     resetChancesCache();
+    Object.keys(_guillotine).forEach(k => delete _guillotine[k]);
     render();
 
     const validLeagues = config ? config.leagues.filter(l => !l.id.includes('placeholder')) : [];

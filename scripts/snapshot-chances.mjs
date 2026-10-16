@@ -25,9 +25,9 @@ const API = 'https://api.sleeper.app/v1';
 const ctx = vm.createContext({ console });
 const code = (await readFile(resolve(ROOT, 'js/config.js'), 'utf8'))
     + '\n' + (await readFile(resolve(ROOT, 'js/derivations.js'), 'utf8'))
-    + '\n;globalThis.__khc = { KHC_CONFIG, TIER_ORDER, ODDS_PARAMS, simulateOdds, seedFrom, buildOddsInput };';
+    + '\n;globalThis.__khc = { KHC_CONFIG, TIER_ORDER, isGuillotine, isRegularSeries, ODDS_PARAMS, simulateOdds, seedFrom, buildOddsInput };';
 vm.runInContext(code, ctx);
-const { KHC_CONFIG, TIER_ORDER, ODDS_PARAMS, simulateOdds, seedFrom, buildOddsInput } = ctx.__khc;
+const { KHC_CONFIG, TIER_ORDER, isGuillotine, isRegularSeries, ODDS_PARAMS, simulateOdds, seedFrom, buildOddsInput } = ctx.__khc;
 
 async function get(path) {
     for (let attempt = 0; attempt < 4; attempt++) {
@@ -54,7 +54,7 @@ async function week(leagueId, w) {
 function zones(cfg, tier) {
     const rules = cfg.rules;
     if (tier === 'elite') return { spots: rules.elitePlayoffTeams, relegate: 0 };
-    const regular = cfg.leagues.map(l => l.tier).filter(t => t !== 'elite')
+    const regular = cfg.leagues.map(l => l.tier).filter(isRegularSeries)
         .sort((a, b) => TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b));
     return { spots: rules.playoffTeams, relegate: regular[regular.length - 1] === tier ? 0 : rules.relegate };
 }
@@ -81,6 +81,7 @@ async function main() {
 
     for (const league of cfg.leagues) {
         const { id, tier } = league;
+        if (isGuillotine(tier)) continue;   // sem playoffs nem queda
         const [info, users, rosters] = await Promise.all([get(`/league/${id}`), get(`/league/${id}/users`), get(`/league/${id}/rosters`)]);
         const st = info.settings || {};
         const regWeeks = Math.max(1, (st.playoff_week_start || 15) - 1);

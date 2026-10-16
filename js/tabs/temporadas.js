@@ -108,7 +108,7 @@ function renderFinalizedSeason(season) {
 function renderActiveSeason(year) {
     const cfg = KHC_CONFIG[year] || { leagues: [] };
     const loaded = appState.leaguesBySeason[year] || [];
-    const tiers = cfg.leagues.map(l => l.tier)
+    const tiers = cfg.leagues.map(l => l.tier).filter(t => !isGuillotine(t))
         .sort((a, b) => TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b));
 
     const cols = tiers.map(tier => {

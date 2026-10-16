@@ -109,7 +109,7 @@ function zonesFor(tier, finalized) {
     }
     const regular = (cfg.leagues || [])
         .map(l => l.tier)
-        .filter(t => t !== 'elite')
+        .filter(isRegularSeries)
         .sort((a, b) => TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b));
     const isTop = regular[0] === tier;
     const isLowest = regular[regular.length - 1] === tier;
@@ -288,17 +288,20 @@ function renderLigas() {
     appState.series = tier;
 
     const league = leagues.find(l => l.info.tier === tier);
-    const { meta, teams, z, finalized, seriesIdx, subtitle, view, odds, chancesAvailable } = standingsModel(league);
-    const chances = view === 'chances' ? odds : null;
-    const finalIdx = finalized ? getFinalStandingsIndex() : {};
-    const n = teams.length;
-
     const tabs = leagues.map(l => {
         const m = SERIES_META[l.info.tier];
         const current = l.info.tier === tier;
         return `<a href="${hashFor('ligas', appState.season, l.info.tier)}" data-league="${m.league}"${current ? ' aria-current="page"' : ''}>
             ${crestHTML(l.info.tier, 28)}<span>${escapeHtml(m.short)}</span></a>`;
     }).join('');
+    if (isGuillotine(tier)) {
+        return `${partialWarningHTML()}<nav class="series-tabs" aria-label="Séries">${tabs}</nav>${renderGuillotine(league)}`;
+    }
+
+    const { meta, teams, z, finalized, seriesIdx, subtitle, view, odds, chancesAvailable } = standingsModel(league);
+    const chances = view === 'chances' ? odds : null;
+    const finalIdx = finalized ? getFinalStandingsIndex() : {};
+    const n = teams.length;
 
     const rows = teams.map((t, i) =>
         buildStandingsRow(t, i, n, z, seriesIdx ? seriesIdx[t.ownerName] : null, chances)).join('');
@@ -313,7 +316,7 @@ function renderLigas() {
         : `<th scope="col"><abbr title="Pontos feitos">PF</abbr></th>
                             <th scope="col" class="hide-mobile"><abbr title="Pontos contra">PC</abbr></th>`;
 
-    const others = leagues.filter(l => l.info.tier !== tier)
+    const others = leagues.filter(l => l.info.tier !== tier && !isGuillotine(l.info.tier))
         .map(l => buildLeaderLink(l, finalized, finalIdx)).join('');
 
     return `

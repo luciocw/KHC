@@ -223,7 +223,7 @@ function matchesSkeletonHTML() {
  * @returns {string} HTML
  */
 function renderRodada() {
-    const leagues = sortLeagues(appState.leagues);
+    const leagues = sortLeagues(appState.leagues).filter(l => !isGuillotine(l.info.tier));
     const tier = resolveSeriesTier(leagues);
     if (!tier) {
         return stateHTML({ icon: 'swords', title: 'Nada por aqui ainda', text: 'Nenhuma série desta temporada carregou.' });

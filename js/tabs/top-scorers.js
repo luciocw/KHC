@@ -35,6 +35,7 @@ function buildTopRow(t, i) {
  */
 function renderTopScorers() {
     const tiers = TIER_ORDER.filter(tier =>
+        !isGuillotine(tier) &&
         appState.rosterData.some(t => t.leagueTier === tier) &&
         (appState.includeElite || tier !== 'elite'));
     const hasElite = appState.rosterData.some(t => t.leagueTier === 'elite');
@@ -42,6 +43,7 @@ function renderTopScorers() {
     if (!tiers.includes(appState.topFilter)) appState.topFilter = 'all';
 
     const list = appState.rosterData
+        .filter(t => !isGuillotine(t.leagueTier))
         .filter(t => appState.includeElite || t.leagueTier !== 'elite')
         .filter(t => appState.topFilter === 'all' || t.leagueTier === appState.topFilter)
         .slice()
