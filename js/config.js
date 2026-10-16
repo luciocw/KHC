@@ -47,7 +47,7 @@ const SERIES_META = {
     'serie-e': { id: 'E',     name: 'Série E',   short: 'Série E', league: 'e',     crest: 'escudo-serie-e.png' },
     'serie-f': { id: 'F',     name: 'Série F',   short: 'Série F', league: 'f',     crest: 'escudo-serie-f.png' },
     // Liga paralela: quem faz menos pontos na semana é cortado (sem V–D)
-    'guilhotina': { id: 'G',  name: 'KHC Guilhotina', short: 'Guilhotina', league: 'g', crest: 'escudo-khc.png', kind: 'guillotine' },
+    'guilhotina': { id: 'G',  name: 'KHC Guilhotina', short: 'Guilhotina', league: 'g', crest: 'escudo-guilhotina.png', kind: 'guillotine' },
 };
 
 // Ordem de exibição (abas, filtros, histórico): ligas paralelas (Elite,
