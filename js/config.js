@@ -50,8 +50,9 @@ const SERIES_META = {
     'guilhotina': { id: 'G',  name: 'KHC Guilhotina', short: 'Guilhotina', league: 'g', crest: 'escudo-khc.png', kind: 'guillotine' },
 };
 
-// Ordem de exibição (abas, filtros, histórico): Elite primeiro, depois A → F.
-const TIER_ORDER = ['elite', 'serie-a', 'serie-b', 'serie-c', 'serie-d', 'serie-e', 'serie-f', 'guilhotina'];
+// Ordem de exibição (abas, filtros, histórico): ligas paralelas (Elite,
+// Guilhotina) primeiro, depois as séries A → F.
+const TIER_ORDER = ['elite', 'guilhotina', 'serie-a', 'serie-b', 'serie-c', 'serie-d', 'serie-e', 'serie-f'];
 
 /** Guilhotina: liga paralela sem V–D, fora de Power, Top, Rodada e Chances. */
 function isGuillotine(tier) {
