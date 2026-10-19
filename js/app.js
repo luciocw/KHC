@@ -257,6 +257,7 @@ async function loadData() {
     resetRoundCache();
     resetPowerCache();
     resetChancesCache();
+    resetBracketCache();
     resetPremierCache();
     Object.keys(_guillotine).forEach(k => delete _guillotine[k]);
     render();
@@ -313,7 +314,8 @@ function bindEvents() {
 
         const viewBtn = target.closest('[data-ligas-view]');
         if (viewBtn) {
-            appState.ligasView = viewBtn.getAttribute('data-ligas-view') === 'chances' ? 'chances' : 'tabela';
+            const v = viewBtn.getAttribute('data-ligas-view');
+            appState.ligasView = v === 'chances' || v === 'chaveamento' ? v : 'tabela';
             try { localStorage.setItem('khc_ligas_view', appState.ligasView); } catch (err) { /* sem storage */ }
             renderView();
             return;

@@ -1035,6 +1035,50 @@ abbr[title] { text-decoration: none; cursor: help; }
 .match-byes b { color: var(--text); font-weight: 700; }
 .round .state { padding: var(--s-32) var(--s-16); }
 
+/* === CHAVEAMENTO (visão da aba Ligas) === */
+.bracket {
+    display: grid;
+    gap: var(--s-4);
+    padding: var(--s-4) 0 0;
+}
+@media (min-width: 1024px) {
+    .bracket { grid-template-columns: repeat(var(--rounds, 3), minmax(0, 1fr)); gap: 0; }
+    .bracket__round + .bracket__round { border-left: 1px solid var(--border); }
+}
+.bracket__head {
+    margin: 0;
+    padding: var(--s-12) var(--s-12) 0;
+}
+.bracket__head .is-live { color: var(--live); }
+@media (min-width: 1024px) { .bracket__head { padding: var(--s-16) var(--s-16) 0; } }
+.bracket .matches { grid-template-columns: 1fr; }
+.bracket__seed {
+    width: 22px;
+    flex-shrink: 0;
+    font-weight: 900;
+    font-stretch: 75%;
+    font-size: var(--fs-14);
+    color: var(--text-3);
+}
+.bracket__tbd {
+    min-height: 52px;
+    color: var(--text-3);
+    font-size: var(--fs-12);
+    font-style: italic;
+}
+.match--final { border-color: var(--accent); }
+.bracket__podium {
+    list-style: none;
+    margin: 0;
+    padding: var(--s-12) var(--s-12) 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-8) var(--s-16);
+}
+@media (min-width: 1024px) { .bracket__podium { padding: var(--s-16) var(--s-16) 0; } }
+.bracket__podium li { display: flex; align-items: center; gap: var(--s-8); min-width: 0; }
+.bracket__podium-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /* === TOP SCORERS === */
 .chips {
     display: flex;

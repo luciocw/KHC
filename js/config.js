@@ -119,8 +119,11 @@ const appState = {
     season: '2026',
     series: 'serie-a',        // tier selecionado nas abas Ligas e Rodada
     matchWeek: null,          // semana na aba Rodada (null = atual da liga)
-    ligasView: (() => {       // aba Ligas: 'tabela' | 'chances' (lembrado no aparelho)
-        try { return localStorage.getItem('khc_ligas_view') === 'chances' ? 'chances' : 'tabela'; } catch (e) { return 'tabela'; }
+    ligasView: (() => {       // aba Ligas: 'tabela' | 'chances' | 'chaveamento' (lembrado no aparelho)
+        try {
+            const v = localStorage.getItem('khc_ligas_view');
+            return v === 'chances' || v === 'chaveamento' ? v : 'tabela';
+        } catch (e) { return 'tabela'; }
     })(),
     topFilter: 'all',         // tier ou 'all' na aba Top Scorers
     includeElite: false,      // Top Scorers: Elite desligada evita time duplicado

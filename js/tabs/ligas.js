@@ -9,8 +9,9 @@
 //   - Temporada finalizada: ordem e medalhas pela classificação final
 //     (data/<ano>.json — 1º–4º pelos playoffs, 5º+ pela temporada regular).
 //   - Lateral: líderes (ou campeões) das outras séries.
-//   - Seletor Tabela | Chances: Chances troca PF/PC por Playoffs % e Queda %
-//     (tabs/chances.js), só com a temporada regular em andamento.
+//   - Seletor Tabela | Chances | Chaveamento: Chances troca PF/PC por
+//     Playoffs % e Queda % (tabs/chances.js), só com a temporada regular em
+//     andamento; Chaveamento mostra os playoffs (tabs/chaveamento.js).
 //   - Botões Baixar / Compartilhar: a tabela vira PNG (js/ui/export.js).
 //
 // Lê: appState.leagues, appState.season, appState.series, appState.failedLeagues
@@ -257,7 +258,7 @@ function buildLeaderLink(league, finalized, finalIdx) {
  * zonas, subtítulo). Usado pela aba e pela exportação em imagem.
  * @param {Object} league  item de appState.leagues
  * @returns {{tier: string, meta: Object, teams: Array, z: Object, finalized: boolean,
- *            seriesIdx: (Object|undefined), subtitle: string, view: ('tabela'|'chances'),
+ *            seriesIdx: (Object|undefined), subtitle: string, view: ('tabela'|'chances'|'chaveamento'),
  *            odds: Object, chancesAvailable: boolean}}
  */
 function standingsModel(league) {
@@ -266,7 +267,8 @@ function standingsModel(league) {
     // Visão Chances: só com temporada regular em andamento.
     const odds = finalized ? { status: 'off' } : leagueOdds(league);
     const chancesAvailable = !finalized && !(odds.status === 'ready' && !odds.data.active);
-    const view = chancesAvailable && appState.ligasView === 'chances' ? 'chances' : 'tabela';
+    const want = appState.ligasView;
+    const view = want === 'chaveamento' ? 'chaveamento' : chancesAvailable && want === 'chances' ? 'chances' : 'tabela';
     const seriesIdx = finalized ? getFinalStandingsIndex()[league.info.name] : undefined;
     const teams = sortByFinalStandings(league.teams, seriesIdx);
     const subtitle = finalized
@@ -306,42 +308,45 @@ function renderLigas() {
     const rows = teams.map((t, i) =>
         buildStandingsRow(t, i, n, z, seriesIdx ? seriesIdx[t.ownerName] : null, chances)).join('');
 
-    const toggle = chancesAvailable ? `<div class="view-switch" role="group" aria-label="O que mostrar na tabela">
-            <button type="button" data-ligas-view="tabela" aria-pressed="${view === 'tabela'}">Tabela</button>
-            <button type="button" data-ligas-view="chances" aria-pressed="${view === 'chances'}">Chances</button>
-        </div>` : '';
+    const views = [['tabela', 'Tabela'], ...(chancesAvailable ? [['chances', 'Chances']] : []), ['chaveamento', 'Chaveamento']];
+    const toggle = `<div class="view-switch" role="group" aria-label="O que mostrar">
+            ${views.map(([v, label]) => `<button type="button" data-ligas-view="${v}" aria-pressed="${view === v}">${label}</button>`).join('')}
+        </div>`;
+    const bracket = view === 'chaveamento' ? bracketViewHTML(league) : null;
+    const cardSubtitle = bracket ? (bracket.subtitle === null ? '' : bracket.subtitle) : subtitle;
     const cols = chances
         ? `<th scope="col" class="th-pct"><abbr title="Chance de ir aos playoffs">Playoffs</abbr></th>
                             ${z.down ? '<th scope="col" class="th-pct"><abbr title="Chance de rebaixamento">Queda</abbr></th>' : ''}`
         : `<th scope="col"><abbr title="Pontos feitos">PF</abbr></th>
                             <th scope="col" class="hide-mobile"><abbr title="Pontos contra">PC</abbr></th>`;
 
-    const others = leagues.filter(l => l.info.tier !== tier && !isGuillotine(l.info.tier))
+    // Chaveamento usa a largura toda (sem a lateral de líderes)
+    const others = bracket ? '' : leagues.filter(l => l.info.tier !== tier && !isGuillotine(l.info.tier))
         .map(l => buildLeaderLink(l, finalized, finalIdx)).join('');
 
     return `
         ${partialWarningHTML()}
         ${premierOffseasonCardHTML()}
         <nav class="series-tabs" aria-label="Séries">${tabs}</nav>
-        <div class="grid-2">
+        <div class="${others ? 'grid-2' : ''}">
             <section class="card" data-league="${meta.league}" aria-labelledby="series-title">
                 <header class="card__hd">
                     ${crestHTML(tier, 56)}
                     <div class="grow">
                         <h2 class="display" id="series-title">${escapeHtml(meta.name)}</h2>
-                        <p>${escapeHtml(subtitle)}</p>
+                        <p>${escapeHtml(cardSubtitle)}</p>
                     </div>
-                    <div class="export-actions" role="group" aria-label="Exportar tabela como imagem">
+                    ${bracket && !bracket.ready ? '' : `<div class="export-actions" role="group" aria-label="Exportar tabela como imagem">
                         <button type="button" class="export-btn" data-action="export-download" aria-label="Baixar tabela da ${escapeHtml(meta.name)} como imagem">
                             <span data-icon="download" data-size="18"></span><span class="export-btn__label">Baixar</span>
                         </button>
                         ${canShareFiles() ? `<button type="button" class="export-btn" data-action="export-share" aria-label="Compartilhar tabela da ${escapeHtml(meta.name)} como imagem">
                             <span data-icon="share" data-size="18"></span><span class="export-btn__label">Compartilhar</span>
                         </button>` : ''}
-                    </div>
+                    </div>`}
                 </header>
                 ${toggle}
-                <div class="table-wrap">
+                ${bracket ? bracket.html : `<div class="table-wrap">
                     <table class="standings${chances ? ' standings--chances' : ''}">
                         <caption class="sr-only">Classificação da ${escapeHtml(meta.name)}</caption>
                         <thead><tr>
@@ -354,7 +359,7 @@ function renderLigas() {
                     </table>
                 </div>
                 ${buildZoneLegend(z, finalized)}
-                ${chances ? `<p class="chances-note">${escapeHtml(chancesNote(league.info.tier, odds))}</p>` : ''}
+                ${chances ? `<p class="chances-note">${escapeHtml(chancesNote(league.info.tier, odds))}</p>` : ''}`}
             </section>
             ${others ? `<aside class="leaders" aria-label="Outras séries">
                 <div class="eyebrow">${finalized ? 'Campeões das outras séries' : 'Líderes das outras séries'}</div>

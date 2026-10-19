@@ -1,6 +1,7 @@
 // =============================================================================
 // UI / EXPORT — Exporta como imagem (PNG): a classificação (Ligas), os
-// confrontos (Rodada) de uma série, o Power Ranking ou o perfil de um jogador.
+// confrontos (Rodada) ou o chaveamento de uma série, o Power Ranking ou o
+// perfil de um jogador.
 //
 // A tabela é redesenhada num <canvas> com largura fixa (sempre com a coluna
 // PC, mesmo no celular), no visual do card da aba Ligas. Cores lidas dos
@@ -489,6 +490,118 @@ async function drawRoundCanvas(league, round) {
         setFont(ctx, 400, 12);
         ctx.fillText(fitText(ctx, m.byes.map(s => s.team.teamName).join(' · '), EXPORT_W - 28 - lw), 14 + lw, by + BYES_H / 2);
     }
+
+    finishExportCard(ctx, H, c);
+    return canvas;
+}
+
+/**
+ * Desenha o chaveamento (visão Chaveamento da aba Ligas): pódio, uma seção
+ * por semana de playoff e os jogos como na Rodada (semente antes do nome).
+ * @param {Object} league
+ * @param {Object} data  bracketData(league).data
+ * @returns {Promise<HTMLCanvasElement>}
+ */
+async function drawBracketCanvas(league, data) {
+    const meta = SERIES_META[league.info.tier];
+    const m = bracketModel(league, data);
+    const c = exportPalette(meta);
+    const games = m.rounds.flatMap(r => r.games);
+    const { crest, avatars } = await loadExportAssets(meta, games.flatMap(g => [g.a, g.b]).map(s => (s.team ? s.team.avatar : null)));
+
+    const ROW_H = 76, SEC_H = 36, PODIUM_H = m.podium.length ? 56 : 0, NOTE_H = 46;
+    const H = EXPORT_HEAD_H + PODIUM_H + m.rounds.length * SEC_H + games.length * ROW_H + NOTE_H;
+    const { canvas, ctx } = startExportCard(H, c, crest, meta.name, m.subtitle);
+    const mid = EXPORT_W / 2;
+    const AV = 34, PAD = 16, SEED_W = 28;
+    const nameMax = mid - 70 - (PAD + SEED_W + AV + 10);
+    let y = EXPORT_HEAD_H;
+    hLine(ctx, 0, EXPORT_W, y - 1, c.border);
+
+    if (PODIUM_H) {
+        let x = PAD;
+        const cy = y + PODIUM_H / 2;
+        const colW = (EXPORT_W - PAD * 2) / 3;
+        m.podium.forEach(it => {
+            drawMedal(ctx, x + 13, cy, it.pos, c);
+            ctx.fillStyle = c.text;
+            setFont(ctx, 700, 15);
+            ctx.fillText(fitText(ctx, it.team.teamName || '', colW - 44), x + 34, cy);
+            x += colW;
+        });
+        y += PODIUM_H;
+        hLine(ctx, 0, EXPORT_W, y - 1, c.border);
+    }
+
+    let gi = 0;
+    m.rounds.forEach(r => {
+        ctx.fillStyle = c.surface2;
+        ctx.fillRect(0, y, EXPORT_W, SEC_H);
+        const st = r.status === 'live' ? ' · ao vivo' : r.status === 'final' ? ' · encerrada' : '';
+        drawEyebrow(ctx, `${r.title} · Semana ${r.week}${st}`, 14, y + SEC_H / 2, c);
+        y += SEC_H;
+        hLine(ctx, 0, EXPORT_W, y - 1, c.border);
+        r.games.forEach(g => {
+            const top = y;
+            hLine(ctx, 0, EXPORT_W, top + ROW_H - 1, c.border);
+            if (g.p) {
+                ctx.fillStyle = g.p === 1 ? c.accent : c.text3;
+                setFont(ctx, 800, 11, 'condensed');
+                ctx.textAlign = 'center';
+                ctx.fillText(g.label.toUpperCase().split('').join('\u200A'), mid, top + 15);
+                ctx.textAlign = 'left';
+            }
+            const cy = top + ROW_H / 2 + (g.p ? 8 : 0);
+
+            [['a', g.a, avatars[gi * 2]], ['b', g.b, avatars[gi * 2 + 1]]].forEach(([k, sd, img]) => {
+                const left = k === 'a';
+                ctx.textAlign = left ? 'left' : 'right';
+                if (!sd.team) {
+                    ctx.fillStyle = c.text3;
+                    setFont(ctx, 400, 13);
+                    ctx.fillText(fitText(ctx, sd.placeholder, mid - 40 - PAD), left ? PAD : EXPORT_W - PAD, cy);
+                    ctx.textAlign = 'left';
+                    return;
+                }
+                const state = g.winner ? (g.winner === k ? 'win' : 'lose') : '';
+                ctx.fillStyle = c.text3;
+                setFont(ctx, 900, 14, 'condensed');
+                ctx.fillText(`${sd.seed}º`, left ? PAD : EXPORT_W - PAD, cy);
+                const avX = left ? PAD + SEED_W : EXPORT_W - PAD - SEED_W - AV;
+                drawAvatar(ctx, avX, cy - AV / 2, img, sd.team.teamName || sd.team.ownerName, c);
+                const nx = left ? avX + AV + 10 : avX - 10;
+                ctx.fillStyle = state === 'lose' ? c.text2 : c.text;
+                setFont(ctx, 700, 15);
+                ctx.fillText(fitText(ctx, sd.team.teamName || '', nameMax), nx, cy - 8);
+                ctx.fillStyle = c.text3;
+                setFont(ctx, 400, 12);
+                ctx.fillText(fitText(ctx, sd.team.ownerName || '', nameMax), nx, cy + 11);
+                if (sd.points !== null && g.status !== 'upcoming') {
+                    ctx.fillStyle = state === 'win' ? c.text : state === 'lose' ? c.text3 : c.text2;
+                    setFont(ctx, 900, 22, 'condensed');
+                    ctx.textAlign = left ? 'right' : 'left';
+                    ctx.fillText(fmtPts(sd.points), left ? mid - 22 : mid + 22, cy);
+                }
+                if (state === 'win') {
+                    ctx.fillStyle = c.accent;
+                    ctx.fillRect(left ? 0 : EXPORT_W - 3, top, 3, ROW_H);
+                }
+                ctx.textAlign = 'left';
+            });
+            ctx.textAlign = 'center';
+            ctx.fillStyle = c.text3;
+            setFont(ctx, 700, 12);
+            ctx.fillText('×', mid, cy);
+            ctx.textAlign = 'left';
+            y += ROW_H;
+            gi++;
+        });
+    });
+
+    ctx.fillStyle = c.text3;
+    setFont(ctx, 400, 12);
+    wrapLines(ctx, m.note, EXPORT_W - 28, 2).forEach((line, i, all) =>
+        ctx.fillText(line, 14, y + NOTE_H / 2 + (i - (all.length - 1) / 2) * 16));
 
     finishExportCard(ctx, H, c);
     return canvas;
@@ -984,6 +1097,16 @@ function exportTarget() {
             name: `khc-${appState.season}-${tier}-semana-${round.week}.png`,
             title: `${seriesName} · Semana ${round.week} · ${appState.season}`,
             draw: () => drawRoundCanvas(league, round)
+        };
+    }
+    if (appState.ligasView === 'chaveamento') {
+        const b = bracketData(league);
+        if (b.status !== 'ready') return null;
+        return {
+            key: `chave|${appState.season}|${tier}|${b.data.fetchedAt}`,
+            name: `khc-${appState.season}-${tier}-chaveamento.png`,
+            title: `${seriesName} · Chaveamento · ${appState.season}`,
+            draw: () => drawBracketCanvas(league, b.data)
         };
     }
     return {
