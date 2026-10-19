@@ -102,7 +102,7 @@ function backToNflHTML() {
 function renderPremier() {
     const entry = premierData();
     const header = (subtitle, actions) => `<header class="card__hd">
-            <img class="crest" src="${CREST_PATH}${PREMIER_LEAGUE.crest}" alt="" width="49" height="56">
+            <img class="crest crest--round" src="${CREST_PATH}${PREMIER_LEAGUE.crest}" alt="" width="56" height="56">
             <div class="grow">
                 <h2 class="display" id="premier-title">${escapeHtml(PREMIER_LEAGUE.name)}</h2>
                 <p>${escapeHtml(subtitle)}</p>
@@ -169,7 +169,7 @@ function premierOffseasonCardHTML() {
     const entry = premierData();
     const leader = entry.status === 'ready' ? entry.data.teams[0] : null;
     return `<a class="card offseason-card" data-league="epl" href="#/premier">
-        <img class="crest" src="${CREST_PATH}${PREMIER_LEAGUE.crest}" alt="" width="35" height="40">
+        <img class="crest crest--round" src="${CREST_PATH}${PREMIER_LEAGUE.crest}" alt="" width="40" height="40">
         <span class="grow">
             <span class="eyebrow eyebrow--accent">Enquanto a NFL descansa</span>
             <b>${escapeHtml(PREMIER_LEAGUE.name)}</b>

@@ -857,7 +857,9 @@ async function drawPremierCanvas(data) {
     const THEAD_H = 34, ROW_H = 57, NOTE_H = 44;
     const n = data.teams.length;
     const H = EXPORT_HEAD_H + THEAD_H + n * ROW_H + NOTE_H;
-    const { canvas, ctx } = startExportCard(H, c, crest, PREMIER_LEAGUE.name, premierSubtitle(data));
+    // logo redondo: 56×56 no lugar do escudo (141:160)
+    const logo = { w: 56, draw: (cx, x, y) => { if (crest) cx.drawImage(crest, x, y, 56, 56); } };
+    const { canvas, ctx } = startExportCard(H, c, crest, PREMIER_LEAGUE.name, premierSubtitle(data), logo);
     const colEf = EXPORT_W - 14, colPC = colEf - 80, colPF = colPC - 86, colRec = colPF - 90;
     const spaced = s => s.toUpperCase().split('').join('\u200A');
 

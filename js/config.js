@@ -71,7 +71,7 @@ const PREMIER_LEAGUE = {
     id: '1385073177100558336',
     name: 'Cocoricó Premier League',
     season: '2026/27',
-    crest: 'escudo-khc.png'   // provisório até o logo da liga
+    crest: 'escudo-premier.png'   // logo redondo (1:1)
 };
 
 const CREST_PATH = 'assets/logo/png/ui/';
