@@ -43,6 +43,13 @@ const RULES = [
         ]
     },
     {
+        icon: 'trophy',
+        title: 'Também na KHC',
+        items: [
+            '<a href="#/premier">Cocoricó Premier League</a>: fantasy de futebol na Sleeper, com a turma da KHC. Para a conversa não parar na entressafra da NFL.',
+        ]
+    },
+    {
         icon: 'history',
         title: 'Regras de 2025',
         lead: 'Temporada inaugural, com regras diferentes:',

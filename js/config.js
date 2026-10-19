@@ -64,6 +64,16 @@ function isRegularSeries(tier) {
     return tier !== 'elite' && !isGuillotine(tier);
 }
 
+// --- PREMIER LEAGUE (fantasy de futebol, fora das séries) ---
+// Página própria (#/premier), fora da navegação; destaque só na entressafra
+// da NFL. A Sleeper não entrega placares por rodada desta liga (só a tabela).
+const PREMIER_LEAGUE = {
+    id: '1385073177100558336',
+    name: 'Cocoricó Premier League',
+    season: '2026/27',
+    crest: 'escudo-premier.png'   // logo redondo (1:1)
+};
+
 const CREST_PATH = 'assets/logo/png/ui/';
 const DEFAULT_AVATAR = 'https://sleepercdn.com/images/v2/icons/player_default.webp';
 
