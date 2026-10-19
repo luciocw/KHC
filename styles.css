@@ -51,6 +51,7 @@
     --league-d: #22C55E;
     --league-e: #9B6BFF;
     --league-f: #1FC8DB;
+    --league-epl: #3EE6A8;  /* Premier League (provisório até o logo) */
     --league-g: #D9D4CE;   /* guilhotina: osso do escudo (o vermelho fica para a zona de corte) */
 
     /* status */
@@ -111,6 +112,7 @@
 [data-league="e"]     { --accent: var(--league-e); }
 [data-league="f"]     { --accent: var(--league-f); }
 [data-league="g"]     { --accent: var(--league-g); }
+[data-league="epl"]   { --accent: var(--league-epl); }
 
 /* === BASE === */
 *, *::before, *::after { box-sizing: border-box; }
@@ -839,6 +841,41 @@ abbr[title] { text-decoration: none; cursor: help; }
 .leader .crest { height: 40px; }
 .leader .eyebrow { display: block; margin-bottom: 2px; }
 .leader__rec { font-size: 24px; }
+
+/* Premier League: voltar para a NFL e cartão da entressafra */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: var(--tap);
+    margin-bottom: var(--s-12);
+    padding: 0 var(--s-16) 0 var(--s-8);
+    border: 1px solid var(--border-2);
+    border-radius: var(--r-md);
+    color: var(--text);
+    font-weight: 800;
+    font-stretch: 75%;
+    font-size: var(--fs-14);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+.back-link:hover { color: var(--text); border-color: var(--orange); }
+.back-link > span { display: inline-flex; }
+.offseason-card {
+    display: flex;
+    align-items: center;
+    gap: var(--s-12);
+    margin-bottom: var(--s-16);
+    padding: var(--s-12) var(--s-16);
+    border-left: 4px solid var(--accent);
+    color: var(--text);
+    text-decoration: none;
+}
+.offseason-card:hover { color: var(--text); background: var(--surface-2); }
+.offseason-card .grow { display: flex; flex-direction: column; gap: 2px; }
+.offseason-card small { color: var(--text-2); font-size: var(--fs-12); }
+.offseason-card__cta { color: var(--accent); font-weight: 800; white-space: nowrap; }
 
 /* Guilhotina: lista de cortados */
 .cut-list { border-top: 1px solid var(--border); padding: var(--s-12) 0 var(--s-8); }

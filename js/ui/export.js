@@ -846,6 +846,69 @@ async function drawGuillotineCanvas(league, data) {
     return canvas;
 }
 
+/**
+ * Desenha a tabela da Premier League (V–E–D, PF, PC, eficiência).
+ * @returns {Promise<HTMLCanvasElement>}
+ */
+async function drawPremierCanvas(data) {
+    const meta = { league: 'epl', crest: PREMIER_LEAGUE.crest };
+    const c = exportPalette(meta);
+    const { crest, avatars } = await loadExportAssets(meta, data.teams.map(t => t.avatar));
+    const THEAD_H = 34, ROW_H = 57, NOTE_H = 44;
+    const n = data.teams.length;
+    const H = EXPORT_HEAD_H + THEAD_H + n * ROW_H + NOTE_H;
+    const { canvas, ctx } = startExportCard(H, c, crest, PREMIER_LEAGUE.name, premierSubtitle(data));
+    const colEf = EXPORT_W - 14, colPC = colEf - 80, colPF = colPC - 86, colRec = colPF - 90;
+    const spaced = s => s.toUpperCase().split('').join('\u200A');
+
+    let y = EXPORT_HEAD_H;
+    hLine(ctx, 0, EXPORT_W, y + THEAD_H - 1, c.border);
+    ctx.fillStyle = c.text3;
+    setFont(ctx, 800, 12, 'condensed');
+    ctx.fillText('#', 14, y + THEAD_H / 2);
+    ctx.fillText(spaced('Time'), 56, y + THEAD_H / 2);
+    ctx.textAlign = 'right';
+    [['V–E–D', colRec], ['PF', colPF], ['PC', colPC], ['Efic.', colEf]].forEach(([t, x]) => ctx.fillText(spaced(t), x, y + THEAD_H / 2));
+    ctx.textAlign = 'left';
+    y += THEAD_H;
+
+    data.teams.forEach((t, i) => {
+        const top = y + i * ROW_H, mid = top + ROW_H / 2;
+        if (i < n - 1) hLine(ctx, 0, EXPORT_W, top + ROW_H - 1, c.border);
+        ctx.fillStyle = c.text2;
+        setFont(ctx, 900, 16, 'condensed');
+        ctx.fillText(String(i + 1), 14, mid);
+        drawAvatar(ctx, 56, mid - 17, avatars[i], t.teamName || t.ownerName, c);
+        const maxW = colRec - 70 - 100;
+        ctx.fillStyle = c.text;
+        setFont(ctx, 700, 15);
+        ctx.fillText(fitText(ctx, t.teamName || '', maxW), 100, mid - 8);
+        ctx.fillStyle = c.text3;
+        setFont(ctx, 400, 12);
+        ctx.fillText(fitText(ctx, t.ownerName || '', maxW), 100, mid + 11);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = c.text;
+        setFont(ctx, 800, 14);
+        ctx.fillText(`${t.wins}–${t.ties}–${t.losses}`, colRec, mid);
+        ctx.fillStyle = c.text2;
+        setFont(ctx, 400, 14);
+        ctx.fillText(fmtPts(t.fpts), colPF, mid);
+        ctx.fillText(fmtPts(t.fptsAgainst), colPC, mid);
+        ctx.fillStyle = c.text;
+        setFont(ctx, 800, 14);
+        ctx.fillText(fmtEff(t.efficiency), colEf, mid);
+        ctx.textAlign = 'left';
+    });
+    y += n * ROW_H;
+    hLine(ctx, 0, EXPORT_W, y, c.border);
+    ctx.fillStyle = c.text3;
+    setFont(ctx, 400, 12);
+    ctx.fillText(fitText(ctx, 'Efic. = pontos feitos ÷ máximo possível com a melhor escalação de cada rodada (cálculo da Sleeper)', EXPORT_W - 28), 14, y + NOTE_H / 2);
+
+    finishExportCard(ctx, H, c);
+    return canvas;
+}
+
 let _exportCache = null;   // { key, blob } da última imagem gerada
 
 /**
@@ -885,6 +948,16 @@ function exportTarget() {
             name: `khc-${appState.season}-power-ranking.png`,
             title: `Power Ranking · ${appState.season}`,
             draw: () => drawPowerCanvas()
+        };
+    }
+    if (appState.tab === 'premier') {
+        const p = premierData();
+        if (p.status !== 'ready') return null;
+        return {
+            key: `premier|${p.fetchedAt}`,
+            name: 'khc-premier-league.png',
+            title: PREMIER_LEAGUE.name,
+            draw: () => drawPremierCanvas(p.data)
         };
     }
     const league = appState.leagues.find(l => l.info.tier === appState.series);

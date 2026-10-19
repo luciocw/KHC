@@ -18,7 +18,10 @@ const TABS = [
     { id: 'lendas',     label: 'Lendas',      short: 'Lendas', title: 'Lendas KHC',    icon: 'crown',    render: () => renderLegends() },
     { id: 'temporadas', label: 'Temporadas',  short: 'Anos',   title: 'Temporadas',    icon: 'calendar', render: () => renderSeasons() },
     { id: 'regras',     label: 'Regras',      short: 'Regras', title: 'Regras',        icon: 'bookOpen', render: () => renderRules(), mobileInHeader: true },
+    // Fora do menu: só por link (#/premier), Regras e o cartão da entressafra
+    { id: 'premier',    label: 'Premier League', short: 'Premier', title: 'Premier League', icon: 'trophy', render: () => renderPremier(), hidden: true },
 ];
+const NAV_TABS = TABS.filter(t => !t.hidden);
 const TAB_BY_ID = Object.fromEntries(TABS.map(t => [t.id, t]));
 
 // -----------------------------------------------------------------------------
@@ -35,6 +38,7 @@ const TAB_BY_ID = Object.fromEntries(TABS.map(t => [t.id, t]));
  */
 function hashFor(tab, season, tier, week) {
     if (tab === 'regras') return '#/regras';
+    if (tab === 'premier') return '#/premier';
     let h = `#/${tab}/${season}`;
     if ((tab === 'ligas' || tab === 'rodada') && tier && SERIES_META[tier]) {
         h += '/' + SERIES_META[tier].league;
@@ -119,8 +123,8 @@ function renderShell() {
         return `<a href="${hashFor(t.id, appState.season, appState.series)}"${current ? ' aria-current="page"' : ''}>
             <span data-icon="${t.icon}" data-size="20"></span><span>${label}</span></a>`;
     };
-    document.getElementById(DOM_IDS.TOP_TABS).innerHTML = TABS.map(t => link(t, t.label)).join('');
-    document.getElementById(DOM_IDS.BOTTOM_NAV).innerHTML = TABS.filter(t => !t.mobileInHeader).map(t => link(t, t.short)).join('');
+    document.getElementById(DOM_IDS.TOP_TABS).innerHTML = NAV_TABS.map(t => link(t, t.label)).join('');
+    document.getElementById(DOM_IDS.BOTTOM_NAV).innerHTML = NAV_TABS.filter(t => !t.mobileInHeader).map(t => link(t, t.short)).join('');
 
     const rulesLink = document.getElementById('rulesLink');
     if (rulesLink) {
@@ -137,8 +141,14 @@ function renderShell() {
     }).join('');
 
     const tab = TAB_BY_ID[appState.tab];
+    const isPremier = appState.tab === 'premier';
     document.getElementById(DOM_IDS.EYEBROW).textContent =
-        appState.tab === 'regras' ? 'Como funciona' : `Temporada ${appState.season}`;
+        appState.tab === 'regras' ? 'Como funciona'
+        : isPremier ? `Fantasy de futebol · ${PREMIER_LEAGUE.season}`
+        : `Temporada ${appState.season}`;
+    // Premier: seletor de temporada e pílula da NFL não se aplicam
+    document.getElementById(DOM_IDS.SEASON_SELECT).hidden = isPremier;
+    document.getElementById(DOM_IDS.STATUS).hidden = isPremier;
     document.getElementById(DOM_IDS.TITLE).textContent = tab.title;
     document.title = `${tab.title} · Ultimate League KHC`;
 
@@ -246,6 +256,7 @@ async function loadData() {
     resetRoundCache();
     resetPowerCache();
     resetChancesCache();
+    resetPremierCache();
     Object.keys(_guillotine).forEach(k => delete _guillotine[k]);
     render();
 

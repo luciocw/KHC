@@ -295,7 +295,7 @@ function renderLigas() {
             ${crestHTML(l.info.tier, 28)}<span>${escapeHtml(m.short)}</span></a>`;
     }).join('');
     if (isGuillotine(tier)) {
-        return `${partialWarningHTML()}<nav class="series-tabs" aria-label="Séries">${tabs}</nav>${renderGuillotine(league)}`;
+        return `${partialWarningHTML()}${premierOffseasonCardHTML()}<nav class="series-tabs" aria-label="Séries">${tabs}</nav>${renderGuillotine(league)}`;
     }
 
     const { meta, teams, z, finalized, seriesIdx, subtitle, view, odds, chancesAvailable } = standingsModel(league);
@@ -321,6 +321,7 @@ function renderLigas() {
 
     return `
         ${partialWarningHTML()}
+        ${premierOffseasonCardHTML()}
         <nav class="series-tabs" aria-label="Séries">${tabs}</nav>
         <div class="grid-2">
             <section class="card" data-league="${meta.league}" aria-labelledby="series-title">
