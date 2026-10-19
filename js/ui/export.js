@@ -510,7 +510,9 @@ async function drawBracketCanvas(league, data) {
     const { crest, avatars } = await loadExportAssets(meta, games.flatMap(g => [g.a, g.b]).map(s => (s.team ? s.team.avatar : null)));
 
     const ROW_H = 76, SEC_H = 36, PODIUM_H = m.podium.length ? 56 : 0, NOTE_H = 46;
-    const H = EXPORT_HEAD_H + PODIUM_H + m.rounds.length * SEC_H + games.length * ROW_H + NOTE_H;
+    const BYE_H = 46;
+    const H = EXPORT_HEAD_H + PODIUM_H + m.rounds.length * SEC_H + games.length * ROW_H
+        + m.rounds.filter(r => r.byes.length).length * BYE_H + NOTE_H;
     const { canvas, ctx } = startExportCard(H, c, crest, meta.name, m.subtitle);
     const mid = EXPORT_W / 2;
     const AV = 34, PAD = 16, SEED_W = 28;
@@ -596,6 +598,17 @@ async function drawBracketCanvas(league, data) {
             y += ROW_H;
             gi++;
         });
+        if (r.byes.length) {
+            setFont(ctx, 700, 12);
+            ctx.fillStyle = c.text2;
+            const lead = 'Folga (direto às semis): ';
+            ctx.fillText(lead, 14, y + BYE_H / 2);
+            const lw = ctx.measureText(lead).width;
+            setFont(ctx, 400, 12);
+            ctx.fillText(fitText(ctx, r.byes.map(s => `${s.seed}º ${s.team.teamName}`).join(' · '), EXPORT_W - 28 - lw), 14 + lw, y + BYE_H / 2);
+            y += BYE_H;
+            hLine(ctx, 0, EXPORT_W, y - 1, c.border);
+        }
     });
 
     ctx.fillStyle = c.text3;

@@ -316,6 +316,7 @@ function bindEvents() {
         if (viewBtn) {
             const v = viewBtn.getAttribute('data-ligas-view');
             appState.ligasView = v === 'chances' || v === 'chaveamento' ? v : 'tabela';
+            appState.ligasViewChosen = true;
             try { localStorage.setItem('khc_ligas_view', appState.ligasView); } catch (err) { /* sem storage */ }
             renderView();
             return;

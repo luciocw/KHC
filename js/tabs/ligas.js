@@ -267,7 +267,8 @@ function standingsModel(league) {
     // Visão Chances: só com temporada regular em andamento.
     const odds = finalized ? { status: 'off' } : leagueOdds(league);
     const chancesAvailable = !finalized && !(odds.status === 'ready' && !odds.data.active);
-    const want = appState.ligasView;
+    // Playoffs (semanas 15–17): abre no Chaveamento até a pessoa escolher outra visão
+    const want = !finalized && weekLabel() === 'Playoffs' && !appState.ligasViewChosen ? 'chaveamento' : appState.ligasView;
     const view = want === 'chaveamento' ? 'chaveamento' : chancesAvailable && want === 'chances' ? 'chances' : 'tabela';
     const seriesIdx = finalized ? getFinalStandingsIndex()[league.info.name] : undefined;
     const teams = sortByFinalStandings(league.teams, seriesIdx);

@@ -1067,6 +1067,7 @@ abbr[title] { text-decoration: none; cursor: help; }
     font-style: italic;
 }
 .match--final { border-color: var(--accent); }
+.bracket__bye { border-style: dashed; }
 .bracket__podium {
     list-style: none;
     margin: 0;

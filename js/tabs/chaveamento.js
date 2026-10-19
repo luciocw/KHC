@@ -6,6 +6,8 @@
 //   - Séries A–D (6 times): 1º e 2º folgam nas quartas. Quartas 4º×5º e
 //     3º×6º na 15; semis (1º × venc. 4º×5º, 2º × venc. 3º×6º) e 5º lugar na
 //     16; final e 3º lugar na 17.
+//   - 1º e 2º aparecem como "Folga" na coluna das quartas.
+//   - Nas semanas de playoff a aba Ligas abre nesta visão (tabs/ligas.js).
 //   - Temporada regular em andamento: projeção "se terminasse hoje", com a
 //     ordem da tabela do site (vitórias, depois pontos).
 //   - Temporada regular encerrada: chaveamento oficial do Sleeper
@@ -110,7 +112,7 @@ function bracketWeekOf(settings, r) {
  * Chaveamento pronto para desenhar (HTML e PNG).
  * @param {Object} league
  * @param {Object} data  resultado de loadBracket
- * @returns {{rounds: Array<{r: number, week: number, title: string, games: Array}>,
+ * @returns {{rounds: Array<{r: number, week: number, title: string, games: Array, byes: Array}>,
  *            official: boolean, podium: Array<Object>, subtitle: string, note: string}}
  */
 function bracketModel(league, data) {
@@ -173,8 +175,13 @@ function bracketModel(league, data) {
                 else if (g.w && b.rid === g.w) winner = 'b';
                 return { label: playoffLabel(g, totalRounds), p: g.p, a, b, winner, status };
             });
+        // Folga: quem joga a rodada seguinte sem ter jogado esta (1º e 2º nas quartas)
+        const playing = new Set(games.filter(g => g.r === r).flatMap(g => [g.t1, g.t2]).filter(Boolean));
+        const byes = r === 1 ? games.filter(g => g.r === 2 && !g.p).flatMap(g => [g.t1, g.t2])
+            .filter(rid => rid && byRoster[rid] && !playing.has(rid))
+            .map(rid => ({ team: byRoster[rid], seed: seedOf[rid] })).sort((x, y) => x.seed - y.seed) : [];
         const main = list.find(g => !g.p) || list[0];
-        rounds.push({ r, week, status, title: main ? main.label.replace(/^Quartas de final$/, 'Quartas').replace(/^Semifinal$/, 'Semifinais') : `Rodada ${r}`, games: list });
+        rounds.push({ r, week, status, byes, title: main ? main.label.replace(/^Quartas de final$/, 'Quartas').replace(/^Semifinal$/, 'Semifinais') : `Rodada ${r}`, games: list });
     }
 
     // Pódio (quando a final e o 3º lugar já têm vencedor)
@@ -190,10 +197,9 @@ function bracketModel(league, data) {
         ? `Projeção · se a temporada regular terminasse hoje`
         : `Playoffs · ${champion || (anyLive ? 'em andamento' : `semanas ${settings.playoffStart}–${lastWeekOf(settings)}`)}`;
     const after = settings.lastScored ? `após a rodada ${settings.lastScored}` : 'antes da 1ª rodada';
-    const byeNote = spots === 6 ? ' 1º e 2º folgam nas quartas.' : '';
     const note = !data.official
-        ? `Pela tabela de hoje (${after}). O chaveamento oficial sai do Sleeper depois da semana ${settings.playoffStart - 1}.${byeNote}`
-        : `Chaveamento do Sleeper.${byeNote}`;
+        ? `Pela tabela de hoje (${after}). O chaveamento oficial sai do Sleeper depois da semana ${settings.playoffStart - 1}.`
+        : 'Chaveamento do Sleeper.';
     return { rounds, official: data.official, podium: podium.filter(x => x.team), subtitle, note };
 }
 
@@ -239,7 +245,10 @@ function bracketViewHTML(league) {
                 ${g.p ? `<div class="eyebrow match__label${g.p === 1 ? ' eyebrow--accent' : ''}">${escapeHtml(g.label)}</div>` : ''}
                 ${bracketSideHTML(g.a, g.winner === 'a' ? 'win' : g.winner === 'b' ? 'lose' : '', g.status)}
                 ${bracketSideHTML(g.b, g.winner === 'b' ? 'win' : g.winner === 'a' ? 'lose' : '', g.status)}
-            </li>`).join('')}</ul>
+            </li>`).join('')}${r.byes.length ? `<li class="match bracket__bye">
+                <div class="eyebrow match__label">Folga · direto às semis</div>
+                ${r.byes.map(s => bracketSideHTML({ ...s, points: null }, '', 'upcoming')).join('')}
+            </li>` : ''}</ul>
         </section>`).join('');
     const podium = m.podium.length ? `<ol class="bracket__podium" aria-label="Pódio">${m.podium.map(x => `<li>
             <span class="medal medal--${x.pos}">${x.pos}</span>

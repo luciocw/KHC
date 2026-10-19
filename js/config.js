@@ -119,6 +119,7 @@ const appState = {
     season: '2026',
     series: 'serie-a',        // tier selecionado nas abas Ligas e Rodada
     matchWeek: null,          // semana na aba Rodada (null = atual da liga)
+    ligasViewChosen: false,   // escolheu a visão nesta sessão (vale sobre o padrão dos playoffs)
     ligasView: (() => {       // aba Ligas: 'tabela' | 'chances' | 'chaveamento' (lembrado no aparelho)
         try {
             const v = localStorage.getItem('khc_ligas_view');
