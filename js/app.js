@@ -171,7 +171,7 @@ function renderStatus() {
         html = '<i class="dot"></i><b>Carregando…</b>';
     } else if (appState.loadState === 'error') {
         cls += ' is-error';
-        html = `<i class="dot"></i><b>Sem conexão com a Sleeper</b>${refresh}`;
+        html = `<i class="dot"></i><b>Sem conexão com o Sleeper</b>${refresh}`;
     } else if (finalized) {
         cls += ' is-final';
         html = '<i class="dot"></i><b>Temporada encerrada</b>';
@@ -203,7 +203,7 @@ function renderView() {
         const msg = appState.lastError ? getErrorMessage(appState.lastError) : 'Verifique sua conexão e tente de novo.';
         html = stateHTML({
             icon: 'alert',
-            title: 'Não deu pra falar com a Sleeper',
+            title: 'Não deu pra falar com o Sleeper',
             text: msg,
             action: '<button type="button" class="btn" data-action="reload">Tentar de novo</button>'
         });

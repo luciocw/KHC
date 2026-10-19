@@ -905,7 +905,7 @@ async function drawPremierCanvas(data) {
     hLine(ctx, 0, EXPORT_W, y, c.border);
     ctx.fillStyle = c.text3;
     setFont(ctx, 400, 12);
-    ctx.fillText(fitText(ctx, 'Efic. = pontos feitos ÷ máximo possível com a melhor escalação de cada rodada (cálculo da Sleeper)', EXPORT_W - 28), 14, y + NOTE_H / 2);
+    ctx.fillText(fitText(ctx, 'Efic. = pontos feitos ÷ máximo possível com a melhor escalação de cada rodada (cálculo do Sleeper)', EXPORT_W - 28), 14, y + NOTE_H / 2);
 
     finishExportCard(ctx, H, c);
     return canvas;
