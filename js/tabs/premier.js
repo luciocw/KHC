@@ -1,7 +1,7 @@
 // =============================================================================
 // TAB / PREMIER — Cocoricó Premier League (fantasy de futebol na Sleeper).
 //
-//   - Página própria (#/premier), fora do menu: entra por Regras, pelo link
+//   - Página própria (#/premier), fora do menu: entra pelo escudo no topo (#premierLink), por Regras, pelo link
 //     direto e pelo cartão "Enquanto a NFL descansa" na aba Ligas, que só
 //     aparece na entressafra da NFL (Sleeper state season_type = 'off').
 //   - Só a tabela: a Sleeper não entrega placares por rodada desta liga.

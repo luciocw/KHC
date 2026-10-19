@@ -295,34 +295,30 @@ abbr[title] { text-decoration: none; cursor: help; }
 .top-tabs svg, .bottom-nav svg { display: block; }
 
 .season-select {
-    display: inline-flex;
-    gap: 2px;
-    padding: 3px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--r-sm);
-    flex-shrink: 0;
-}
-.season-select button {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    height: 36px;
-    padding: 0 var(--s-12);
-    border: 0;
-    border-radius: 2px;
-    background: none;
-    color: var(--text-2);
+    flex-shrink: 0;
+}
+.season-select[hidden] { display: none; }
+.season-select select {
+    height: 38px;
+    padding: 0 30px 0 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23C9BEB4' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 9px center;
+    color: var(--text);
+    font: inherit;
     font-weight: 900;
     font-stretch: 75%;
     font-size: 15px;
     cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
 }
-.season-select button:hover { color: var(--text); }
-.season-select button[aria-checked="true"] {
-    background: var(--text);
-    color: var(--bg);
-}
+.season-select select.is-live { padding-left: 26px; }
+.season-select select:hover { border-color: var(--accent); }
+.season-select .dot { position: absolute; left: 11px; top: 50%; margin-top: -3.5px; pointer-events: none; }
 
 .dot {
     width: 7px;
@@ -348,6 +344,11 @@ abbr[title] { text-decoration: none; cursor: help; }
 }
 .icon-btn:hover { color: var(--text); background: var(--surface-2); }
 .icon-btn[aria-current="page"] { color: var(--orange); }
+/* Atalho discreto para a Cocoricó Premier League (fora do menu) */
+.premier-link img { width: 24px; height: 24px; border-radius: 50%; opacity: .75; filter: grayscale(.35); transition: opacity .15s, filter .15s; }
+.premier-link:hover img, .premier-link:focus-visible img { opacity: 1; filter: none; }
+.premier-link[hidden] { display: none; }
+.site-header .premier-link { width: 36px; }
 
 /* === BOTTOM NAV === */
 .bottom-nav { display: none; }
@@ -400,12 +401,22 @@ abbr[title] { text-decoration: none; cursor: help; }
     body { padding-bottom: 84px; }
 }
 
-/* Telas estreitas: só o escudo na marca (desktop estreito: as 6 abas
+/* Telas estreitas: só o escudo na marca (desktop estreito: as abas
    precisam do espaço; celular muito pequeno: o seletor de temporada). */
 @media (min-width: 1024px) and (max-width: 1199px) {
     .brand span { display: none; }
     .top-tabs { margin-left: var(--s-8); }
     .top-tabs a { padding: 0 10px; }
+}
+/* Abas um pouco mais justas, para caber seletor + atalho da Premier */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .top-tabs svg { display: none; }
+}
+@media (min-width: 1200px) {
+    .top-tabs a { padding: 0 10px; gap: 6px; }
+}
+@media (max-width: 1023px) {
+    .site-header .icon-btn { width: 36px; }
 }
 @media (max-width: 380px) {
     .brand span { display: none; }
