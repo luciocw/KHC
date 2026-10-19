@@ -133,12 +133,12 @@ function renderShell() {
     }
 
     const years = Object.keys(KHC_CONFIG).sort();
-    document.getElementById(DOM_IDS.SEASON_SELECT).innerHTML = years.map(y => {
-        const checked = y === appState.season;
-        const live = !isSeasonFinalized(y);
-        return `<button type="button" role="radio" aria-checked="${checked}" data-season="${y}"${live ? ' aria-label="' + y + ', em andamento"' : ''}>
-            ${live ? '<i class="dot" aria-hidden="true"></i>' : ''}${y}</button>`;
-    }).join('');
+    // Dropdown nativo: no celular abre o seletor do sistema; cabe quantos anos vierem
+    const live = !isSeasonFinalized(appState.season);
+    document.getElementById(DOM_IDS.SEASON_SELECT).innerHTML = `<span class="sr-only">Temporada</span>
+        ${live ? '<i class="dot" aria-hidden="true"></i>' : ''}
+        <select data-season-select${live ? ' class="is-live"' : ''}>${years.map(y =>
+            `<option value="${y}"${y === appState.season ? ' selected' : ''}>${y}</option>`).join('')}</select>`;
 
     const tab = TAB_BY_ID[appState.tab];
     const isPremier = appState.tab === 'premier';
@@ -311,15 +311,6 @@ function bindEvents() {
         const target = e.target instanceof Element ? e.target : null;
         if (!target) return;
 
-        const seasonBtn = target.closest('[data-season]');
-        if (seasonBtn) {
-            const year = seasonBtn.getAttribute('data-season');
-            if (year !== appState.season && KHC_CONFIG[year]) {
-                location.hash = hashFor(appState.tab, year, appState.series);
-            }
-            return;
-        }
-
         const viewBtn = target.closest('[data-ligas-view]');
         if (viewBtn) {
             appState.ligasView = viewBtn.getAttribute('data-ligas-view') === 'chances' ? 'chances' : 'tabela';
@@ -351,6 +342,11 @@ function bindEvents() {
     });
 
     document.addEventListener('change', (e) => {
+        if (e.target && e.target.matches && e.target.matches('[data-season-select]')) {
+            const year = e.target.value;
+            if (year !== appState.season && KHC_CONFIG[year]) location.hash = hashFor(appState.tab, year, appState.series);
+            return;
+        }
         if (e.target && e.target.matches && e.target.matches('[data-week-select]')) {
             location.hash = hashFor('rodada', appState.season, appState.series, Number(e.target.value));
             return;
@@ -360,20 +356,6 @@ function bindEvents() {
             if (!appState.includeElite && appState.topFilter === 'elite') appState.topFilter = 'all';
             renderView();
         }
-    });
-
-    // Setas no seletor de temporada (padrão radiogroup).
-    document.getElementById(DOM_IDS.SEASON_SELECT).addEventListener('keydown', (e) => {
-        if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
-        const years = Object.keys(KHC_CONFIG).sort();
-        const i = years.indexOf(appState.season);
-        const next = years[(i + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1) + years.length) % years.length];
-        e.preventDefault();
-        location.hash = hashFor(appState.tab, next, appState.series);
-        requestAnimationFrame(() => {
-            const btn = document.querySelector(`[data-season="${next}"]`);
-            if (btn) btn.focus();
-        });
     });
 
     // Atualiza o "há X min" da pílula de status.
