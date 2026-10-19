@@ -157,7 +157,7 @@ function renderPremier() {
                 <tbody>${rows}</tbody>
             </table>
         </div>
-        <p class="chances-note">Efic. = pontos feitos ÷ máximo possível com a melhor escalação de cada rodada (cálculo da Sleeper). Ordem: aproveitamento (empate vale meia vitória), depois pontos.</p>`);
+        <p class="chances-note">Efic. = pontos feitos ÷ máximo possível com a melhor escalação de cada rodada (cálculo do Sleeper). Ordem: aproveitamento (empate vale meia vitória), depois pontos.</p>`);
 }
 
 /**

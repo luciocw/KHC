@@ -46,7 +46,7 @@ const RULES = [
         icon: 'trophy',
         title: 'Também na KHC',
         items: [
-            '<a href="#/premier">Cocoricó Premier League</a>: fantasy de futebol na Sleeper, com a turma da KHC. Para a conversa não parar na entressafra da NFL.',
+            '<a href="#/premier">Cocoricó Premier League</a>: fantasy de futebol no Sleeper, com a turma da KHC. Para a conversa não parar na entressafra da NFL.',
         ]
     },
     {
