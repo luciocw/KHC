@@ -9,7 +9,8 @@
 //   - 1º e 2º aparecem como "Folga" na coluna das quartas.
 //   - Nas semanas de playoff a aba Ligas abre nesta visão (tabs/ligas.js).
 //   - Temporada regular em andamento: projeção "se terminasse hoje", com a
-//     ordem da tabela do site (vitórias, depois pontos).
+//     ordem da tabela do site (vitórias, depois pontos) e a chance de
+//     playoffs de cada time (tabs/chances.js).
 //   - Temporada regular encerrada: chaveamento oficial do Sleeper
 //     (winners_bracket), com placares das semanas de playoff.
 //
@@ -132,6 +133,10 @@ function bracketModel(league, data) {
             t2: g.t2 ? (league.teams[g.t2 - 1] || {}).teamId || null : null,
             w: null, l: null
         }));
+    // Projeção: chance de playoffs de cada time (mesma conta da visão Chances)
+    const odds = !data.official ? leagueOdds(league) : null;
+    const chanceOf = rid => (odds && odds.status === 'ready' && odds.data.active && odds.data.byId[rid]
+        ? odds.data.byId[rid].playoffs : null);
     const totalRounds = Math.max(0, ...games.map(g => g.r));
     const byM = {};
     games.forEach(g => { byM[g.m] = g; });
@@ -149,7 +154,7 @@ function bracketModel(league, data) {
         const played = data.official && week <= settings.leg;
         if (rid && byRoster[rid]) {
             const pts = played && data.scores[week] ? (data.scores[week][rid] || 0) : null;
-            return { team: byRoster[rid], seed: seedOf[rid], points: pts, rid };
+            return { team: byRoster[rid], seed: seedOf[rid], points: pts, rid, chance: chanceOf(rid) };
         }
         const src = from && byM[from.w || from.l];
         const who = from && from.w ? 'Vencedor' : 'Perdedor';
@@ -179,7 +184,7 @@ function bracketModel(league, data) {
         const playing = new Set(games.filter(g => g.r === r).flatMap(g => [g.t1, g.t2]).filter(Boolean));
         const byes = r === 1 ? games.filter(g => g.r === 2 && !g.p).flatMap(g => [g.t1, g.t2])
             .filter(rid => rid && byRoster[rid] && !playing.has(rid))
-            .map(rid => ({ team: byRoster[rid], seed: seedOf[rid] })).sort((x, y) => x.seed - y.seed) : [];
+            .map(rid => ({ team: byRoster[rid], seed: seedOf[rid], chance: chanceOf(rid) })).sort((x, y) => x.seed - y.seed) : [];
         const main = list.find(g => !g.p) || list[0];
         rounds.push({ r, week, status, byes, title: main ? main.label.replace(/^Quartas de final$/, 'Quartas').replace(/^Semifinal$/, 'Semifinais') : `Rodada ${r}`, games: list });
     }
@@ -198,7 +203,7 @@ function bracketModel(league, data) {
         : `Playoffs · ${champion || (anyLive ? 'em andamento' : `semanas ${settings.playoffStart}–${lastWeekOf(settings)}`)}`;
     const after = settings.lastScored ? `após a rodada ${settings.lastScored}` : 'antes da 1ª rodada';
     const note = !data.official
-        ? `Pela tabela de hoje (${after}). O chaveamento oficial sai do Sleeper depois da semana ${settings.playoffStart - 1}.`
+        ? `Pela tabela de hoje (${after}). % = chance de ir aos playoffs. O chaveamento oficial sai do Sleeper depois da semana ${settings.playoffStart - 1}.`
         : 'Chaveamento do Sleeper.';
     return { rounds, official: data.official, podium: podium.filter(x => x.team), subtitle, note };
 }
@@ -213,6 +218,7 @@ function bracketSideHTML(s, state, status) {
         <span class="bracket__seed num">${s.seed}º</span>
         ${teamButtonHTML({ user: s.team.ownerName, team: s.team.teamName, avatarId: s.team.avatar })}
         ${pts ? `<span class="num match__pts">${pts}</span>` : ''}
+        ${s.chance !== null && s.chance !== undefined ? `<span class="bracket__pct num${s.chance >= 0.9 ? ' is-hot' : ''}" title="Chance de ir aos playoffs">${fmtPct(s.chance)}</span>` : ''}
     </div>`;
 }
 

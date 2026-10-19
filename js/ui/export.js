@@ -578,7 +578,12 @@ async function drawBracketCanvas(league, data) {
                 ctx.fillStyle = c.text3;
                 setFont(ctx, 400, 12);
                 ctx.fillText(fitText(ctx, sd.team.ownerName || '', nameMax), nx, cy + 11);
-                if (sd.points !== null && g.status !== 'upcoming') {
+                if (sd.chance !== null && sd.chance !== undefined) {
+                    ctx.fillStyle = sd.chance >= 0.9 ? c.promo : c.text2;
+                    setFont(ctx, 800, 14);
+                    ctx.textAlign = left ? 'right' : 'left';
+                    ctx.fillText(fmtPct(sd.chance), left ? mid - 22 : mid + 22, cy);
+                } else if (sd.points !== null && g.status !== 'upcoming') {
                     ctx.fillStyle = state === 'win' ? c.text : state === 'lose' ? c.text3 : c.text2;
                     setFont(ctx, 900, 22, 'condensed');
                     ctx.textAlign = left ? 'right' : 'left';
@@ -605,7 +610,8 @@ async function drawBracketCanvas(league, data) {
             ctx.fillText(lead, 14, y + BYE_H / 2);
             const lw = ctx.measureText(lead).width;
             setFont(ctx, 400, 12);
-            ctx.fillText(fitText(ctx, r.byes.map(s => `${s.seed}º ${s.team.teamName}`).join(' · '), EXPORT_W - 28 - lw), 14 + lw, y + BYE_H / 2);
+            const pct = s => (s.chance !== null && s.chance !== undefined ? ` (${fmtPct(s.chance)})` : '');
+            ctx.fillText(fitText(ctx, r.byes.map(s => `${s.seed}º ${s.team.teamName}${pct(s)}`).join(' · '), EXPORT_W - 28 - lw), 14 + lw, y + BYE_H / 2);
             y += BYE_H;
             hLine(ctx, 0, EXPORT_W, y - 1, c.border);
         }
@@ -1116,7 +1122,7 @@ function exportTarget() {
         const b = bracketData(league);
         if (b.status !== 'ready') return null;
         return {
-            key: `chave|${appState.season}|${tier}|${b.data.fetchedAt}`,
+            key: `chave|${appState.season}|${tier}|${b.data.fetchedAt}|${leagueOdds(league).status}`,
             name: `khc-${appState.season}-${tier}-chaveamento.png`,
             title: `${seriesName} · Chaveamento · ${appState.season}`,
             draw: () => drawBracketCanvas(league, b.data)

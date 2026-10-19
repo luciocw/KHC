@@ -1068,6 +1068,16 @@ abbr[title] { text-decoration: none; cursor: help; }
 }
 .match--final { border-color: var(--accent); }
 .bracket__bye { border-style: dashed; }
+.bracket__pct {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--surface-3);
+    color: var(--text-2);
+    font-size: var(--fs-12);
+    font-weight: 800;
+}
+.bracket__pct.is-hot { color: var(--zone-promo); }
 .bracket__podium {
     list-style: none;
     margin: 0;
