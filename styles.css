@@ -348,6 +348,11 @@ abbr[title] { text-decoration: none; cursor: help; }
 }
 .icon-btn:hover { color: var(--text); background: var(--surface-2); }
 .icon-btn[aria-current="page"] { color: var(--orange); }
+/* Atalho discreto para a Cocoricó Premier League (fora do menu) */
+.premier-link img { width: 24px; height: 24px; border-radius: 50%; opacity: .75; filter: grayscale(.35); transition: opacity .15s, filter .15s; }
+.premier-link:hover img, .premier-link:focus-visible img { opacity: 1; filter: none; }
+.premier-link[hidden] { display: none; }
+.site-header .premier-link { width: 36px; }
 
 /* === BOTTOM NAV === */
 .bottom-nav { display: none; }
@@ -400,14 +405,25 @@ abbr[title] { text-decoration: none; cursor: help; }
     body { padding-bottom: 84px; }
 }
 
-/* Telas estreitas: só o escudo na marca (desktop estreito: as 6 abas
+/* Telas estreitas: só o escudo na marca (desktop estreito: as abas
    precisam do espaço; celular muito pequeno: o seletor de temporada). */
 @media (min-width: 1024px) and (max-width: 1199px) {
     .brand span { display: none; }
     .top-tabs { margin-left: var(--s-8); }
     .top-tabs a { padding: 0 10px; }
 }
-@media (max-width: 380px) {
+/* Desktop médio: abas só com texto, para caber seletor + atalho da Premier */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .top-tabs svg { display: none; }
+}
+@media (min-width: 1440px) {
+    .top-tabs { gap: 0; }
+    .top-tabs a { padding: 0 var(--s-8); gap: 6px; }
+}
+@media (max-width: 1023px) {
+    .site-header .icon-btn { width: 36px; }
+}
+@media (max-width: 440px) {
     .brand span { display: none; }
 }
 

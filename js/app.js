@@ -149,6 +149,7 @@ function renderShell() {
     // Premier: seletor de temporada e pílula da NFL não se aplicam
     document.getElementById(DOM_IDS.SEASON_SELECT).hidden = isPremier;
     document.getElementById(DOM_IDS.STATUS).hidden = isPremier;
+    document.getElementById('premierLink').hidden = isPremier;
     document.getElementById(DOM_IDS.TITLE).textContent = tab.title;
     document.title = `${tab.title} · Ultimate League KHC`;
 
