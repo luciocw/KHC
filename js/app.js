@@ -18,8 +18,9 @@ const TABS = [
     { id: 'lendas',     label: 'Lendas',      short: 'Lendas', title: 'Lendas KHC',    icon: 'crown',    render: () => renderLegends() },
     { id: 'temporadas', label: 'Temporadas',  short: 'Anos',   title: 'Temporadas',    icon: 'calendar', render: () => renderSeasons() },
     { id: 'regras',     label: 'Regras',      short: 'Regras', title: 'Regras',        icon: 'bookOpen', render: () => renderRules(), mobileInHeader: true },
-    // Fora do menu: só por link (#/premier), Regras e o cartão da entressafra
-    { id: 'premier',    label: 'Premier League', short: 'Premier', title: 'Premier League', icon: 'trophy', render: () => renderPremier(), hidden: true },
+    // Também na KHC (fora do menu): atalho no topo, Regras e o cartão da entressafra
+    { id: 'premier',    label: 'Premier League', short: 'Premier', title: 'Também na KHC', icon: 'trophy', render: () => renderPremier(), hidden: true, also: true },
+    { id: 'nba',        label: 'NBA',            short: 'NBA',     title: 'Também na KHC', icon: 'trophy', render: () => renderNba(),     hidden: true, also: true },
 ];
 const NAV_TABS = TABS.filter(t => !t.hidden);
 const TAB_BY_ID = Object.fromEntries(TABS.map(t => [t.id, t]));
@@ -38,7 +39,7 @@ const TAB_BY_ID = Object.fromEntries(TABS.map(t => [t.id, t]));
  */
 function hashFor(tab, season, tier, week) {
     if (tab === 'regras') return '#/regras';
-    if (tab === 'premier') return '#/premier';
+    if (TAB_BY_ID[tab] && TAB_BY_ID[tab].also) return `#/${tab}`;
     let h = `#/${tab}/${season}`;
     if ((tab === 'ligas' || tab === 'rodada') && tier && SERIES_META[tier]) {
         h += '/' + SERIES_META[tier].league;
@@ -141,15 +142,16 @@ function renderShell() {
             `<option value="${y}"${y === appState.season ? ' selected' : ''}>${y}</option>`).join('')}</select>`;
 
     const tab = TAB_BY_ID[appState.tab];
-    const isPremier = appState.tab === 'premier';
+    const isAlso = !!tab.also;
     document.getElementById(DOM_IDS.EYEBROW).textContent =
         appState.tab === 'regras' ? 'Como funciona'
-        : isPremier ? `Fantasy de futebol · ${PREMIER_LEAGUE.season}`
+        : appState.tab === 'premier' ? `Fantasy de futebol · ${PREMIER_LEAGUE.season}`
+        : appState.tab === 'nba' ? `Fantasy de basquete · ${NBA_LEAGUE.season}`
         : `Temporada ${appState.season}`;
-    // Premier: seletor de temporada e pílula da NFL não se aplicam
-    document.getElementById(DOM_IDS.SEASON_SELECT).hidden = isPremier;
-    document.getElementById(DOM_IDS.STATUS).hidden = isPremier;
-    document.getElementById('premierLink').hidden = isPremier;
+    // Também na KHC: seletor de temporada e pílula da NFL não se aplicam
+    document.getElementById(DOM_IDS.SEASON_SELECT).hidden = isAlso;
+    document.getElementById(DOM_IDS.STATUS).hidden = isAlso;
+    document.getElementById('premierLink').hidden = isAlso;
     document.getElementById(DOM_IDS.TITLE).textContent = tab.title;
     document.title = `${tab.title} · Ultimate League KHC`;
 

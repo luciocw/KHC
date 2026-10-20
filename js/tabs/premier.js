@@ -1,5 +1,6 @@
 // =============================================================================
-// TAB / PREMIER — Cocoricó Premier League (fantasy de futebol na Sleeper).
+// TAB / PREMIER — Cocoricó Premier League (fantasy de futebol no Sleeper),
+// aba da página "Também na KHC" (tabs/tambem.js).
 //
 //   - Página própria (#/premier), fora do menu: entra pelo escudo no topo (#premierLink), por Regras, pelo link
 //     direto e pelo cartão "Enquanto a NFL descansa" na aba Ligas, que só
@@ -110,6 +111,7 @@ function renderPremier() {
             ${actions}
         </header>`;
     const wrap = inner => `${backToNflHTML()}
+        ${alsoTabsHTML('premier')}
         <section class="card premier" data-league="epl" aria-labelledby="premier-title">${inner}</section>`;
 
     if (entry.status === 'loading') {

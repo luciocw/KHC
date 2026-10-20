@@ -65,13 +65,24 @@ function isRegularSeries(tier) {
 }
 
 // --- PREMIER LEAGUE (fantasy de futebol, fora das séries) ---
-// Página própria (#/premier), fora da navegação; destaque só na entressafra
+// Página "Também na KHC" (#/premier), fora da navegação; destaque só na entressafra
 // da NFL. A Sleeper não entrega placares por rodada desta liga (só a tabela).
 const PREMIER_LEAGUE = {
     id: '1385073177100558336',
     name: 'Cocoricó Premier League',
     season: '2026/27',
     crest: 'escudo-premier.png'   // logo redondo (1:1)
+};
+
+// --- NBA (National Burgundy Association, fantasy de basquete) ---
+// Liga nova em 2026/27, na página "Também na KHC" (#/nba). Sem ID ainda:
+// a página mostra "Em breve" até o ID do Sleeper entrar aqui.
+const NBA_LEAGUE = {
+    id: null,
+    name: 'National Burgundy Association',
+    short: 'NBA',
+    season: '2026/27',
+    crest: 'escudo-nba.png'
 };
 
 const CREST_PATH = 'assets/logo/png/ui/';
