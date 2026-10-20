@@ -346,11 +346,8 @@ abbr[title] { text-decoration: none; cursor: help; }
 }
 .icon-btn:hover { color: var(--text); background: var(--surface-2); }
 .icon-btn[aria-current="page"] { color: var(--orange); }
-/* Atalho discreto para a Cocoricó Premier League (fora do menu) */
-.premier-link img { width: 24px; height: 24px; border-radius: 50%; opacity: .75; filter: grayscale(.35); transition: opacity .15s, filter .15s; }
-.premier-link:hover img, .premier-link:focus-visible img { opacity: 1; filter: none; }
-.premier-link[hidden] { display: none; }
-.site-header .premier-link { width: 36px; }
+/* Atalho discreto para "Também na KHC" (fora do menu) */
+.site-header .also-link { width: 36px; }
 
 /* === BOTTOM NAV === */
 .bottom-nav { display: none; }

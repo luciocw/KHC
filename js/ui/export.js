@@ -382,7 +382,7 @@ async function drawStandingsCanvas(league) {
  * @returns {Promise<HTMLCanvasElement>}
  */
 async function drawRoundCanvas(league, round) {
-    const meta = SERIES_META[league.info.tier];
+    const meta = league.meta || SERIES_META[league.info.tier];   // meta: ligas de Também na KHC
     const m = roundModel(league, round);
     const c = exportPalette(meta);
     const sides = m.games.flatMap(g => [g.a, g.b]);
@@ -1092,6 +1092,16 @@ function exportTarget() {
         const cfg = ALSO_LEAGUES[appState.tab];
         const p = alsoData(cfg.key);
         if (p.status !== 'ready') return null;
+        if (alsoShowsRound(cfg, p.data)) {
+            const round = alsoRound(cfg);
+            if (round.status !== 'ready') return null;
+            return {
+                key: `${cfg.key}|rodada|${round.week}|${round.data.fetchedAt}`,
+                name: `khc-${cfg.key}-semana-${round.week}.png`,
+                title: `${cfg.name} · Semana ${round.week}`,
+                draw: () => drawRoundCanvas(alsoRoundLeague(cfg, p.data), round)
+            };
+        }
         return {
             key: `${cfg.key}|${p.fetchedAt}`,
             name: cfg.key === 'premier' ? 'khc-premier-league.png' : `khc-${cfg.key}.png`,

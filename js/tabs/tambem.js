@@ -7,24 +7,108 @@
 //     "Enquanto a NFL descansa" na aba Ligas (só na entressafra da NFL,
 //     Sleeper state season_type = 'off').
 //   - Abas com os escudos e botão "Voltar para a NFL" no topo.
-//   - Só a tabela: V–(E)–D, PF, PC e eficiência de escalação (PF ÷ máximo
+//   - Tabela: V–(E)–D, PF, PC e eficiência de escalação (PF ÷ máximo
 //     possível, o "ppts" que o próprio Sleeper calcula). Ordem como no
 //     Sleeper: aproveitamento (empate = ½ vitória), depois PF.
+//   - NBA também tem Rodada (#/nba/rodada/<semana>), com o mesmo modelo e
+//     exportação da aba Rodada da NFL (tabs/rodada.js). A Premier não tem
+//     placar por rodada no Sleeper.
 //   - Antes do draft: só os times que já entraram, e quantas vagas faltam.
 //
-// Depende de: config, sanitize, api, ui/helpers
+// Depende de: config, sanitize, api, ui/helpers, tabs/rodada
 // =============================================================================
 
 /** Ligas da página, na ordem das abas. */
 const ALSO_LEAGUES = {
-    premier: { ...PREMIER_LEAGUE, key: 'premier', league: 'epl', tab: 'Premier League', sport: 'futebol', ties: true, round: true },
-    nba:     { ...NBA_LEAGUE,     key: 'nba',     league: 'nba', tab: 'NBA',            sport: 'basquete', ties: false, round: false }
+    // weekly: o Sleeper entrega placar por semana (Rodada); a Premier não
+    premier: { ...PREMIER_LEAGUE, key: 'premier', league: 'epl', tab: 'Premier League', sport: 'futebol', ties: true, round: true, weekly: false },
+    nba:     { ...NBA_LEAGUE,     key: 'nba',     league: 'nba', tab: 'NBA',            sport: 'basquete', ties: false, round: false, weekly: true }
 };
 
-const _also = {};   // key → { status, data, fetchedAt } da sessão (o reload limpa)
+const _also = {};         // key → { status, data, fetchedAt } da sessão (o reload limpa)
+const _alsoRounds = {};   // leagueId → settings · `${leagueId}|${semana}` → confrontos
 
 function resetAlsoCache() {
     Object.keys(_also).forEach(k => delete _also[k]);
+    Object.keys(_alsoRounds).forEach(k => delete _alsoRounds[k]);
+}
+
+/** Mostra a visão Rodada? (liga com placar por semana, depois do draft) */
+function alsoShowsRound(cfg, data) {
+    return cfg.weekly && appState.tab === cfg.key && appState.alsoView === 'rodada' && !isAlsoPreseason(data);
+}
+
+/** "Liga" no formato de roundModel / drawRoundCanvas. */
+function alsoRoundLeague(cfg, data) {
+    return { info: { id: cfg.id, tier: null }, meta: { name: cfg.name, crest: cfg.crest, league: cfg.league }, teams: data.teams };
+}
+
+/**
+ * Semana aberta na Rodada de uma liga de Também na KHC (dispara o que faltar).
+ * @returns {{status: ('loading'|'ready'|'error'), week?: number, settings?: Object, data?: Object}}
+ */
+function alsoRound(cfg) {
+    const rerender = () => { if (appState.tab === cfg.key) renderView(); };
+    const st = _alsoRounds[cfg.id];
+    if (!st) {
+        _alsoRounds[cfg.id] = { status: 'loading' };
+        fetchLeagueSettings(cfg.id)
+            .then(data => { _alsoRounds[cfg.id] = { status: 'ready', data }; })
+            .catch(() => { _alsoRounds[cfg.id] = { status: 'error' }; })
+            .then(rerender);
+        return { status: 'loading' };
+    }
+    if (st.status !== 'ready') return { status: st.status };
+    const settings = st.data;
+    const last = lastWeekOf(settings);
+    const week = Math.min(Math.max(1, appState.alsoWeek || settings.leg || 1), last);
+    const key = `${cfg.id}|${week}`;
+    const rd = _alsoRounds[key];
+    if (!rd) {
+        _alsoRounds[key] = { status: 'loading' };
+        fetchRoundData(cfg.id, week)
+            .then(data => { _alsoRounds[key] = { status: 'ready', data }; })
+            .catch(() => { _alsoRounds[key] = { status: 'error' }; })
+            .then(rerender);
+        return { status: 'loading', week, settings };
+    }
+    return { status: rd.status, week, settings, data: rd.data };
+}
+
+/**
+ * Corpo da visão Rodada (semana, destaques, confrontos).
+ * @returns {{html: string, subtitle: string, ready: boolean}}
+ */
+function alsoRoundHTML(cfg, data) {
+    const round = alsoRound(cfg);
+    const nav = round.settings ? weekNavHTML(round.settings, round.week, `#/${cfg.key}/rodada/`) : '';
+    if (round.status === 'error') {
+        return {
+            html: stateHTML({
+                icon: 'alert', title: 'Não deu pra carregar os confrontos',
+                text: 'Verifique sua conexão e tente de novo.',
+                action: '<button type="button" class="btn" data-action="reload">Tentar de novo</button>'
+            }),
+            subtitle: '', ready: false
+        };
+    }
+    if (round.status !== 'ready') return { html: nav + matchesSkeletonHTML(), subtitle: 'Carregando…', ready: false };
+    const m = roundModel(alsoRoundLeague(cfg, data), round);
+    const games = m.games.map(g => `<li class="match">
+            ${g.label ? `<div class="eyebrow match__label${g.label === 'Final' ? ' eyebrow--accent' : ''}">${escapeHtml(g.label)}</div>` : ''}
+            ${matchSideHTML(g.a, g.winner === 'a' ? 'win' : g.winner === 'b' ? 'lose' : '', m.status)}
+            ${matchSideHTML(g.b, g.winner === 'b' ? 'win' : g.winner === 'a' ? 'lose' : '', m.status)}
+        </li>`).join('');
+    const byes = m.byes.length
+        ? `<p class="match-byes"><b>Sem confronto:</b> ${m.byes.map(s => escapeHtml(s.team.teamName)).join(' · ')}</p>`
+        : '';
+    return {
+        html: nav + (games
+            ? `${highlightsHTML(m.highlights, m.status === 'live')}<ul class="matches">${games}</ul>${byes}`
+            : stateHTML({ icon: 'calendar', title: 'Sem confrontos', text: 'Esta semana não tem jogos nesta liga.' })),
+        subtitle: m.subtitle,
+        ready: !!games
+    };
 }
 
 /**
@@ -179,6 +263,11 @@ function renderAlso(key) {
 
     const d = entry.data;
     const pre = isAlsoPreseason(d);
+    const showRound = alsoShowsRound(cfg, d);
+    const toggle = cfg.weekly && !pre ? `<div class="view-switch" role="group" aria-label="O que mostrar">
+            <button type="button" data-href="#/${cfg.key}" aria-pressed="${!showRound}">Tabela</button>
+            <button type="button" data-href="#/${cfg.key}/rodada" aria-pressed="${showRound}">Rodada</button>
+        </div>` : '';
     const actions = `<div class="export-actions" role="group" aria-label="Exportar tabela da ${escapeHtml(cfg.tab)} como imagem">
             <button type="button" class="export-btn" data-action="export-download" aria-label="Baixar tabela da ${escapeHtml(cfg.tab)} como imagem">
                 <span data-icon="download" data-size="18"></span><span class="export-btn__label">Baixar</span>
@@ -187,6 +276,10 @@ function renderAlso(key) {
                 <span data-icon="share" data-size="18"></span><span class="export-btn__label">Compartilhar</span>
             </button>` : ''}
         </div>`;
+    if (showRound) {
+        const r = alsoRoundHTML(cfg, d);
+        return wrap(`${header(r.subtitle, r.ready ? actions : '')}${toggle}${r.html}`);
+    }
     if (!d.teams.length) {
         return wrap(header(alsoSubtitle(cfg, d), '') + stateHTML({
             icon: 'calendar', title: 'Aguardando os times',
@@ -208,6 +301,7 @@ function renderAlso(key) {
         : `Efic. = pontos feitos ÷ máximo possível com a melhor escalação de cada rodada (cálculo do Sleeper). Ordem: aproveitamento${cfg.ties ? ' (empate vale meia vitória)' : ''}, depois pontos.`;
 
     return wrap(`${header(alsoSubtitle(cfg, d), actions)}
+        ${toggle}
         <div class="table-wrap">
             <table class="standings standings--compact">
                 <caption class="sr-only">Classificação da ${escapeHtml(cfg.name)}</caption>

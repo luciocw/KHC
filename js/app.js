@@ -39,7 +39,10 @@ const TAB_BY_ID = Object.fromEntries(TABS.map(t => [t.id, t]));
  */
 function hashFor(tab, season, tier, week) {
     if (tab === 'regras') return '#/regras';
-    if (TAB_BY_ID[tab] && TAB_BY_ID[tab].also) return `#/${tab}`;
+    if (TAB_BY_ID[tab] && TAB_BY_ID[tab].also) {
+        if (appState.tab !== tab || appState.alsoView !== 'rodada') return `#/${tab}`;
+        return `#/${tab}/rodada${appState.alsoWeek ? '/' + appState.alsoWeek : ''}`;
+    }
     let h = `#/${tab}/${season}`;
     if ((tab === 'ligas' || tab === 'rodada') && tier && SERIES_META[tier]) {
         h += '/' + SERIES_META[tier].league;
@@ -60,6 +63,11 @@ function parseHash() {
         return { tab: null, season: null, tier: null, week: null, player };
     }
     const tab = TAB_BY_ID[parts[0]] ? parts[0] : null;
+    // Também na KHC: #/nba/rodada/<semana>
+    if (tab && TAB_BY_ID[tab].also) {
+        const aw = parseInt(parts[2], 10);
+        return { tab, season: null, tier: null, week: aw >= 1 && aw <= 30 ? aw : null, player: null, alsoView: parts[1] === 'rodada' ? 'rodada' : 'tabela' };
+    }
     const season = KHC_CONFIG[parts[1]] ? parts[1] : null;
     const tier = Object.keys(SERIES_META).find(t => SERIES_META[t].league === (parts[2] || '').toLowerCase()) || null;
     const w = parseInt(parts[3], 10);
@@ -102,6 +110,10 @@ function applyHash(opts = {}) {
     if (route.season) appState.season = route.season;
     if (route.tier) appState.series = route.tier;
     if (route.tab === 'rodada') appState.matchWeek = route.week;
+    if (route.alsoView) {
+        appState.alsoView = route.alsoView;
+        appState.alsoWeek = route.week;
+    }
 
     if (prevTab !== appState.tab) window.scrollTo(0, 0);
 
@@ -151,7 +163,9 @@ function renderShell() {
     // Também na KHC: seletor de temporada e pílula da NFL não se aplicam
     document.getElementById(DOM_IDS.SEASON_SELECT).hidden = isAlso;
     document.getElementById(DOM_IDS.STATUS).hidden = isAlso;
-    document.getElementById('premierLink').hidden = isAlso;
+    const alsoLink = document.getElementById('alsoLink');
+    if (isAlso) alsoLink.setAttribute('aria-current', 'page');
+    else alsoLink.removeAttribute('aria-current');
     document.getElementById(DOM_IDS.TITLE).textContent = tab.title;
     document.title = `${tab.title} · Ultimate League KHC`;
 
@@ -314,6 +328,13 @@ function bindEvents() {
         const target = e.target instanceof Element ? e.target : null;
         if (!target) return;
 
+        const hrefBtn = target.closest('button[data-href]');
+        if (hrefBtn) {
+            const h = hrefBtn.getAttribute('data-href');
+            if (/^#\/[a-z]+(\/rodada)?$/.test(h)) location.hash = h;
+            return;
+        }
+
         const viewBtn = target.closest('[data-ligas-view]');
         if (viewBtn) {
             const v = viewBtn.getAttribute('data-ligas-view');
@@ -350,6 +371,10 @@ function bindEvents() {
         if (e.target && e.target.matches && e.target.matches('[data-season-select]')) {
             const year = e.target.value;
             if (year !== appState.season && KHC_CONFIG[year]) location.hash = hashFor(appState.tab, year, appState.series);
+            return;
+        }
+        if (e.target && e.target.matches && e.target.matches('[data-week-select][data-week-base]')) {
+            location.hash = e.target.getAttribute('data-week-base') + Number(e.target.value);
             return;
         }
         if (e.target && e.target.matches && e.target.matches('[data-week-select]')) {

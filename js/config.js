@@ -129,6 +129,8 @@ const appState = {
     season: '2026',
     series: 'serie-a',        // tier selecionado nas abas Ligas e Rodada
     matchWeek: null,          // semana na aba Rodada (null = atual da liga)
+    alsoView: 'tabela',       // Também na KHC: 'tabela' | 'rodada' (#/nba/rodada)
+    alsoWeek: null,           // semana escolhida na Rodada de Também na KHC
     ligasViewChosen: false,   // escolheu a visão nesta sessão (vale sobre o padrão dos playoffs)
     ligasView: (() => {       // aba Ligas: 'tabela' | 'chances' | 'chaveamento' (lembrado no aparelho)
         try {
