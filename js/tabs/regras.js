@@ -47,6 +47,7 @@ const RULES = [
         title: 'Também na KHC',
         items: [
             '<a href="#/premier">Cocoricó Premier League</a>: fantasy de futebol no Sleeper, com a turma da KHC. Para a conversa não parar na entressafra da NFL.',
+            '<a href="#/nba">National Burgundy Association</a>: fantasy de basquete no Sleeper, liga nova na temporada 2026/27 da NBA.',
         ]
     },
     {

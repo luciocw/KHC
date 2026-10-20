@@ -52,6 +52,7 @@
     --league-e: #9B6BFF;
     --league-f: #1FC8DB;
     --league-epl: #BE9051;  /* Premier League: dourado do logo Cocoricó PL */
+    --league-nba: #C24B66;  /* NBA: bordô do logo, clareado para ler no fundo escuro */
     --league-g: #D9D4CE;   /* guilhotina: osso do escudo (o vermelho fica para a zona de corte) */
 
     /* status */
@@ -113,6 +114,7 @@
 [data-league="f"]     { --accent: var(--league-f); }
 [data-league="g"]     { --accent: var(--league-g); }
 [data-league="epl"]   { --accent: var(--league-epl); }
+[data-league="nba"]   { --accent: var(--league-nba); }
 
 /* === BASE === */
 *, *::before, *::after { box-sizing: border-box; }
@@ -344,11 +346,8 @@ abbr[title] { text-decoration: none; cursor: help; }
 }
 .icon-btn:hover { color: var(--text); background: var(--surface-2); }
 .icon-btn[aria-current="page"] { color: var(--orange); }
-/* Atalho discreto para a Cocoricó Premier League (fora do menu) */
-.premier-link img { width: 24px; height: 24px; border-radius: 50%; opacity: .75; filter: grayscale(.35); transition: opacity .15s, filter .15s; }
-.premier-link:hover img, .premier-link:focus-visible img { opacity: 1; filter: none; }
-.premier-link[hidden] { display: none; }
-.site-header .premier-link { width: 36px; }
+/* Atalho discreto para "Também na KHC" (fora do menu) */
+.site-header .also-link { width: 36px; }
 
 /* === BOTTOM NAV === */
 .bottom-nav { display: none; }
@@ -858,8 +857,8 @@ abbr[title] { text-decoration: none; cursor: help; }
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    align-self: flex-start;
     min-height: var(--tap);
-    margin-bottom: var(--s-12);
     padding: 0 var(--s-16) 0 var(--s-8);
     border: 1px solid var(--border-2);
     border-radius: var(--r-md);
@@ -873,6 +872,7 @@ abbr[title] { text-decoration: none; cursor: help; }
 }
 .back-link:hover { color: var(--text); border-color: var(--orange); }
 .back-link > span { display: inline-flex; }
+.nba .state { border: 0; border-radius: 0; }
 .offseason-card {
     display: flex;
     align-items: center;

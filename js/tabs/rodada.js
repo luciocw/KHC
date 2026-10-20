@@ -194,19 +194,22 @@ function matchSideHTML(s, state, status) {
     </div>`;
 }
 
-/** Navegação de semana: ‹ [select] ›. */
-function weekNavHTML(settings, week) {
+/**
+ * Navegação de semana: ‹ [select] ›.
+ * @param {string} [base]  prefixo do hash (ex.: '#/nba/rodada/'); padrão: aba Rodada da NFL
+ */
+function weekNavHTML(settings, week, base) {
     const last = lastWeekOf(settings);
-    const link = w => hashFor('rodada', appState.season, appState.series, w);
+    const link = w => (base ? base + w : hashFor('rodada', appState.season, appState.series, w));
     const options = Array.from({ length: last }, (_, i) => i + 1).map(w =>
         `<option value="${w}"${w === week ? ' selected' : ''}>Semana ${w}${w >= settings.playoffStart ? ' · Playoffs' : ''}</option>`).join('');
     const arrow = (w, icon, label) => (w >= 1 && w <= last)
-        ? `<a class="icon-btn" href="${link(w)}" aria-label="${label}"><span data-icon="${icon}" data-size="20"></span></a>`
+        ? `<a class="icon-btn" href="${escapeHtml(link(w))}" aria-label="${label}"><span data-icon="${icon}" data-size="20"></span></a>`
         : `<span class="icon-btn is-disabled" aria-hidden="true"><span data-icon="${icon}" data-size="20"></span></span>`;
     return `<div class="week-nav">
         ${arrow(week - 1, 'chevronLeft', 'Semana anterior')}
         <label class="week-nav__select"><span class="sr-only">Semana</span>
-            <select data-week-select>${options}</select>
+            <select data-week-select${base ? ` data-week-base="${base}"` : ''}>${options}</select>
         </label>
         ${arrow(week + 1, 'chevronRight', 'Próxima semana')}
     </div>`;

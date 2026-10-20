@@ -65,13 +65,23 @@ function isRegularSeries(tier) {
 }
 
 // --- PREMIER LEAGUE (fantasy de futebol, fora das séries) ---
-// Página própria (#/premier), fora da navegação; destaque só na entressafra
-// da NFL. A Sleeper não entrega placares por rodada desta liga (só a tabela).
+// Página "Também na KHC" (#/premier), fora da navegação; destaque só na entressafra
+// da NFL. O Sleeper não entrega placares por rodada desta liga (só a tabela).
 const PREMIER_LEAGUE = {
     id: '1385073177100558336',
     name: 'Cocoricó Premier League',
     season: '2026/27',
     crest: 'escudo-premier.png'   // logo redondo (1:1)
+};
+
+// --- NBA (KHC NBA League · National Burgundy Association, basquete) ---
+// Liga nova em 2026/27, na página "Também na KHC" (#/nba).
+const NBA_LEAGUE = {
+    id: '1418094440345620480',
+    name: 'National Burgundy Association',
+    short: 'NBA',
+    season: '2026/27',
+    crest: 'escudo-nba.png'
 };
 
 const CREST_PATH = 'assets/logo/png/ui/';
@@ -119,6 +129,8 @@ const appState = {
     season: '2026',
     series: 'serie-a',        // tier selecionado nas abas Ligas e Rodada
     matchWeek: null,          // semana na aba Rodada (null = atual da liga)
+    alsoView: 'tabela',       // Também na KHC: 'tabela' | 'rodada' (#/nba/rodada)
+    alsoWeek: null,           // semana escolhida na Rodada de Também na KHC
     ligasViewChosen: false,   // escolheu a visão nesta sessão (vale sobre o padrão dos playoffs)
     ligasView: (() => {       // aba Ligas: 'tabela' | 'chances' | 'chaveamento' (lembrado no aparelho)
         try {
