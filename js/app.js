@@ -19,8 +19,8 @@ const TABS = [
     { id: 'temporadas', label: 'Temporadas',  short: 'Anos',   title: 'Temporadas',    icon: 'calendar', render: () => renderSeasons() },
     { id: 'regras',     label: 'Regras',      short: 'Regras', title: 'Regras',        icon: 'bookOpen', render: () => renderRules(), mobileInHeader: true },
     // Também na KHC (fora do menu): atalho no topo, Regras e o cartão da entressafra
-    { id: 'premier',    label: 'Premier League', short: 'Premier', title: 'Também na KHC', icon: 'trophy', render: () => renderPremier(), hidden: true, also: true },
-    { id: 'nba',        label: 'NBA',            short: 'NBA',     title: 'Também na KHC', icon: 'trophy', render: () => renderNba(),     hidden: true, also: true },
+    { id: 'premier',    label: 'Premier League', short: 'Premier', title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('premier'), hidden: true, also: true },
+    { id: 'nba',        label: 'NBA',            short: 'NBA',     title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('nba'),     hidden: true, also: true },
 ];
 const NAV_TABS = TABS.filter(t => !t.hidden);
 const TAB_BY_ID = Object.fromEntries(TABS.map(t => [t.id, t]));
@@ -260,7 +260,7 @@ async function loadData() {
     resetPowerCache();
     resetChancesCache();
     resetBracketCache();
-    resetPremierCache();
+    resetAlsoCache();
     Object.keys(_guillotine).forEach(k => delete _guillotine[k]);
     render();
 

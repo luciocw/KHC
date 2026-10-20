@@ -13,7 +13,7 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 - **Chaveamento** (Ligas → Tabela | Chances | Chaveamento): playoffs de cada série. Elite: semis 1º×4º e 2º×3º (sem. 15), final e 3º lugar (16). Séries A–D: 1º e 2º folgam; quartas 4º×5º e 3º×6º (15), semis e 5º lugar (16), final e 3º lugar (17). Na temporada regular mostra a projeção pela tabela de hoje, com a chance de playoffs de cada time; depois, o chaveamento do Sleeper com placares. Nas semanas de playoff, Ligas abre direto no Chaveamento. Exporta em imagem
 - **Também na KHC** (`#/premier`, `#/nba`): página fora do menu, com abas por liga, botão Voltar para a NFL e atalho discreto (escudo) no topo; aparece em Regras e, na entressafra da NFL, como cartão na aba Ligas
   - **Premier League** (`#/premier`): tabela da Cocoricó Premier League (V–E–D, PF, PC, eficiência de escalação) e exportar
-  - **NBA** (`#/nba`): National Burgundy Association, liga nova em 2026/27. Mostra "Em breve" até o ID do Sleeper entrar em `NBA_LEAGUE` (`js/config.js`)
+  - **NBA** (`#/nba`): KHC NBA League · National Burgundy Association, liga nova em 2026/27 (6 times). Mesma tabela, com V–D; antes do draft mostra só os times que já entraram
 - **Rodada:** confrontos e placar da semana por série (‹ semana ›), rótulos de playoff (Final, 3º lugar, Semifinal…) e exportação em PNG; destaques da semana (maior pontuação, maior vitória, jogo mais apertado)
 - **App na tela inicial:** manifest + ícones (`assets/app/`) — Android instala pelo Chrome, iPhone pelo Safari (Compartilhar → Adicionar à Tela de Início)
 - **Top Scorers:** filtro por série e "Incluir Elite" (desligado por padrão, evita time duplicado)
