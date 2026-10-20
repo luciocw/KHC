@@ -1,0 +1,540 @@
+{
+ "season": "2026",
+ "league": "KHC Guilhotina",
+ "chopped": 6,
+ "alive": 17,
+ "commissioner": "Caipiracicaba",
+ "teams": [
+  {
+   "name": "RobsonF90",
+   "owner": "RobsonF90",
+   "user_id": "1004801178061877248",
+   "avatar": "assets/avatars/guilhotina-1004801178061877248.jpg",
+   "fpts": 793.46,
+   "faab": 96,
+   "weeks": [
+    120.1,
+    179.48,
+    151.84,
+    126.62,
+    106.36,
+    109.06
+   ],
+   "cut": null
+  },
+  {
+   "name": "BigFieldMS",
+   "owner": "BigFieldMS",
+   "user_id": "1242576183174889472",
+   "avatar": "assets/avatars/guilhotina-1242576183174889472.jpg",
+   "fpts": 727.5,
+   "faab": 199,
+   "weeks": [
+    126.2,
+    106.4,
+    147.46,
+    110.16,
+    134.54,
+    102.74
+   ],
+   "cut": null
+  },
+  {
+   "name": "Correia49 GTN",
+   "owner": "RafaCorreia49",
+   "user_id": "1131362553956913152",
+   "avatar": "assets/avatars/guilhotina-1131362553956913152.jpg",
+   "fpts": 722.84,
+   "faab": 182,
+   "weeks": [
+    166.1,
+    122.78,
+    89.38,
+    154.54,
+    91.9,
+    98.14
+   ],
+   "cut": null
+  },
+  {
+   "name": "YuriSpethmann",
+   "owner": "YuriSpethmann",
+   "user_id": "1003459236413714432",
+   "avatar": "assets/avatars/guilhotina-1003459236413714432.jpg",
+   "fpts": 684.9,
+   "faab": 12,
+   "weeks": [
+    63.0,
+    137.08,
+    130.5,
+    93.82,
+    140.3,
+    120.2
+   ],
+   "cut": null
+  },
+  {
+   "name": "ferpetucco",
+   "owner": "ferpetucco",
+   "user_id": "1125183919432884224",
+   "avatar": "assets/avatars/guilhotina-1125183919432884224.jpg",
+   "fpts": 672.68,
+   "faab": 157,
+   "weeks": [
+    97.04,
+    100.64,
+    119.56,
+    148.84,
+    95.34,
+    111.26
+   ],
+   "cut": null
+  },
+  {
+   "name": "alb2106",
+   "owner": "alb2106",
+   "user_id": "1093392871799058432",
+   "avatar": "assets/avatars/guilhotina-1093392871799058432.jpg",
+   "fpts": 671.12,
+   "faab": 129,
+   "weeks": [
+    101.06,
+    102.8,
+    71.12,
+    152.04,
+    143.2,
+    100.9
+   ],
+   "cut": null
+  },
+  {
+   "name": "markinhosfc11",
+   "owner": "markinhosfc11",
+   "user_id": "472652687993729024",
+   "avatar": "assets/avatars/guilhotina-472652687993729024.jpg",
+   "fpts": 666.72,
+   "faab": 46,
+   "weeks": [
+    90.22,
+    76.68,
+    145.88,
+    151.22,
+    124.8,
+    77.92
+   ],
+   "cut": null
+  },
+  {
+   "name": "Caipiracicaba",
+   "owner": "Caipiracicaba",
+   "user_id": "1134198414360940544",
+   "avatar": "assets/avatars/guilhotina-1134198414360940544.jpg",
+   "fpts": 660.66,
+   "faab": 80,
+   "weeks": [
+    145.1,
+    78.16,
+    92.42,
+    107.48,
+    142.3,
+    95.2
+   ],
+   "cut": null
+  },
+  {
+   "name": "Gumagol971",
+   "owner": "Gumagol971",
+   "user_id": "1008965235240140800",
+   "avatar": "assets/avatars/guilhotina-1008965235240140800.jpg",
+   "fpts": 650.32,
+   "faab": 42,
+   "weeks": [
+    99.82,
+    111.34,
+    128.24,
+    109.5,
+    107.44,
+    93.98
+   ],
+   "cut": null
+  },
+  {
+   "name": "New England Patriotas",
+   "owner": "Rodolfo92",
+   "user_id": "1351675581627891712",
+   "avatar": "assets/avatars/guilhotina-1351675581627891712.jpg",
+   "fpts": 644.26,
+   "faab": 73,
+   "weeks": [
+    94.22,
+    82.6,
+    111.88,
+    108.0,
+    138.26,
+    109.3
+   ],
+   "cut": null
+  },
+  {
+   "name": "Claudianosilva",
+   "owner": "Claudianosilva",
+   "user_id": "1129485724543410176",
+   "avatar": "assets/avatars/guilhotina-1129485724543410176.jpg",
+   "fpts": 640.82,
+   "faab": 106,
+   "weeks": [
+    108.1,
+    79.74,
+    131.42,
+    102.18,
+    147.1,
+    72.28
+   ],
+   "cut": null
+  },
+  {
+   "name": "Mangue Chiefs 🦀",
+   "owner": "DCMShow",
+   "user_id": "1257002122994532352",
+   "avatar": "assets/avatars/guilhotina-1257002122994532352.jpg",
+   "fpts": 630.5,
+   "faab": 28,
+   "weeks": [
+    101.56,
+    109.24,
+    131.48,
+    108.86,
+    83.58,
+    95.78
+   ],
+   "cut": null
+  },
+  {
+   "name": "Condenado",
+   "owner": "LucioWagner",
+   "user_id": "1172908891022290944",
+   "avatar": "assets/avatars/guilhotina-1172908891022290944.jpg",
+   "fpts": 617.26,
+   "faab": 89,
+   "weeks": [
+    90.26,
+    71.24,
+    70.32,
+    109.9,
+    133.64,
+    141.9
+   ],
+   "cut": null
+  },
+  {
+   "name": "joaoW7",
+   "owner": "joaoW7",
+   "user_id": "1259716461769789440",
+   "avatar": "assets/avatars/guilhotina-1259716461769789440.jpg",
+   "fpts": 613.98,
+   "faab": 143,
+   "weeks": [
+    97.4,
+    66.9,
+    125.12,
+    113.52,
+    89.12,
+    121.92
+   ],
+   "cut": null
+  },
+  {
+   "name": "SiaraBigheads",
+   "owner": "SiaraBigheads",
+   "user_id": "1216557076579356672",
+   "avatar": "assets/avatars/guilhotina-1216557076579356672.jpg",
+   "fpts": 575.96,
+   "faab": 143,
+   "weeks": [
+    89.84,
+    75.2,
+    83.58,
+    86.12,
+    125.26,
+    115.96
+   ],
+   "cut": null
+  },
+  {
+   "name": "Elieser",
+   "owner": "Elieser",
+   "user_id": "339070586716180480",
+   "avatar": "assets/avatars/guilhotina-339070586716180480.jpg",
+   "fpts": 556.44,
+   "faab": 147,
+   "weeks": [
+    81.6,
+    117.98,
+    85.74,
+    99.26,
+    69.18,
+    102.68
+   ],
+   "cut": null
+  },
+  {
+   "name": "ACosta13",
+   "owner": "ACosta13",
+   "user_id": "604443673312174080",
+   "avatar": "assets/avatars/guilhotina-604443673312174080.jpg",
+   "fpts": 501.12,
+   "faab": 0,
+   "weeks": [
+    93.2,
+    65.62,
+    98.44,
+    102.68,
+    80.0,
+    61.18
+   ],
+   "cut": null
+  },
+  {
+   "name": "Ceara16",
+   "owner": "Ceara16",
+   "user_id": "1266770865278693376",
+   "avatar": "assets/avatars/guilhotina-1266770865278693376.jpg",
+   "fpts": 574.28,
+   "faab": 250,
+   "weeks": [
+    136.72,
+    117.94,
+    90.02,
+    85.92,
+    85.18,
+    58.5
+   ],
+   "cut": 6
+  },
+  {
+   "name": "Inaciombn18",
+   "owner": "Inaciombn18",
+   "user_id": "1125728355766157312",
+   "avatar": "assets/avatars/guilhotina-1125728355766157312.jpg",
+   "fpts": 442.48,
+   "faab": 0,
+   "weeks": [
+    88.76,
+    106.28,
+    106.14,
+    90.6,
+    50.7,
+    0
+   ],
+   "cut": 5
+  },
+  {
+   "name": "RegisCarrara",
+   "owner": "RegisCarrara",
+   "user_id": "1136697134088196096",
+   "avatar": "assets/avatars/guilhotina-1136697134088196096.jpg",
+   "fpts": 381.06,
+   "faab": 11,
+   "weeks": [
+    122.2,
+    85.3,
+    103.02,
+    70.54,
+    0,
+    0
+   ],
+   "cut": 4
+  },
+  {
+   "name": "Pandemônio FC",
+   "owner": "HadesX",
+   "user_id": "1074880168604299264",
+   "avatar": "assets/avatars/guilhotina-1074880168604299264.jpg",
+   "fpts": 271.76,
+   "faab": 5,
+   "weeks": [
+    114.12,
+    93.74,
+    63.9,
+    0,
+    0,
+    0
+   ],
+   "cut": 3
+  },
+  {
+   "name": "Quack Attack",
+   "owner": "Caofarejador",
+   "user_id": "1132703483456651264",
+   "avatar": "assets/avatars/guilhotina-1132703483456651264.jpg",
+   "fpts": 198.7,
+   "faab": 46,
+   "weeks": [
+    139.98,
+    58.72,
+    0,
+    0,
+    0,
+    0
+   ],
+   "cut": 2
+  },
+  {
+   "name": "pedrocestaro",
+   "owner": "pedrocestaro",
+   "user_id": "463033785022148608",
+   "avatar": "assets/avatars/guilhotina-463033785022148608.jpg",
+   "fpts": 44.78,
+   "faab": 0,
+   "weeks": [
+    44.78,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "cut": 1
+  }
+ ],
+ "weeks": [
+  {
+   "week": 1,
+   "cut": "pedrocestaro",
+   "cut_pts": 44.78,
+   "escaped": [
+    {
+     "name": "YuriSpethmann",
+     "pts": 63.0
+    },
+    {
+     "name": "Elieser",
+     "pts": 81.6
+    },
+    {
+     "name": "Inaciombn18",
+     "pts": 88.76
+    }
+   ],
+   "top": "Correia49 GTN",
+   "top_pts": 166.1
+  },
+  {
+   "week": 2,
+   "cut": "Quack Attack",
+   "cut_pts": 58.72,
+   "escaped": [
+    {
+     "name": "ACosta13",
+     "pts": 65.62
+    },
+    {
+     "name": "joaoW7",
+     "pts": 66.9
+    },
+    {
+     "name": "Condenado",
+     "pts": 71.24
+    }
+   ],
+   "top": "RobsonF90",
+   "top_pts": 179.48
+  },
+  {
+   "week": 3,
+   "cut": "Pandemônio FC",
+   "cut_pts": 63.9,
+   "escaped": [
+    {
+     "name": "Condenado",
+     "pts": 70.32
+    },
+    {
+     "name": "alb2106",
+     "pts": 71.12
+    },
+    {
+     "name": "SiaraBigheads",
+     "pts": 83.58
+    }
+   ],
+   "top": "RobsonF90",
+   "top_pts": 151.84
+  },
+  {
+   "week": 4,
+   "cut": "RegisCarrara",
+   "cut_pts": 70.54,
+   "escaped": [
+    {
+     "name": "Ceara16",
+     "pts": 85.92
+    },
+    {
+     "name": "SiaraBigheads",
+     "pts": 86.12
+    },
+    {
+     "name": "Inaciombn18",
+     "pts": 90.6
+    }
+   ],
+   "top": "Correia49 GTN",
+   "top_pts": 154.54
+  },
+  {
+   "week": 5,
+   "cut": "Inaciombn18",
+   "cut_pts": 50.7,
+   "escaped": [
+    {
+     "name": "Elieser",
+     "pts": 69.18
+    },
+    {
+     "name": "ACosta13",
+     "pts": 80.0
+    },
+    {
+     "name": "Mangue Chiefs 🦀",
+     "pts": 83.58
+    }
+   ],
+   "top": "Claudianosilva",
+   "top_pts": 147.1
+  },
+  {
+   "week": 6,
+   "cut": "Ceara16",
+   "cut_pts": 58.5,
+   "escaped": [
+    {
+     "name": "ACosta13",
+     "pts": 61.18
+    },
+    {
+     "name": "Claudianosilva",
+     "pts": 72.28
+    },
+    {
+     "name": "markinhosfc11",
+     "pts": 77.92
+    }
+   ],
+   "top": "Condenado",
+   "top_pts": 141.9
+  }
+ ],
+ "absent": [
+  {
+   "name": "Imperius Rex FC",
+   "owner": "RiqueSantos",
+   "avatar": "assets/avatars/serie-a-1133956049855578112.jpg"
+  },
+  {
+   "name": "Public Enemy #1",
+   "owner": "Khrstxn",
+   "avatar": "assets/avatars/elite-1134186504622018560.jpg"
+  }
+ ]
+}

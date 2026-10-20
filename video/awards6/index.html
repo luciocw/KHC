@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>KHC Awards · Semana 6</title>
+<link rel="stylesheet" href="../engine.css">
+<style>
+:root { --blood: #B3121B; }
+.boot { position: absolute; inset: 0; background: #fff; transform-origin: center; }
+.big-logo { position: absolute; left: 50%; top: 230px; width: 380px; height: 380px; margin-left: -190px; object-fit: contain;
+    filter: drop-shadow(0 30px 60px rgba(0,0,0,.6)); }
+.awards-px { position: absolute; left: 0; right: 0; top: 660px; text-align: center; font-family: Pixel; font-size: 46px; color: #F2B705;
+    text-shadow: 5px 5px 0 #000; }
+.open-l { position: absolute; left: 60px; right: 60px; font-weight: 900; font-size: 112px; line-height: .95; letter-spacing: -2px; text-transform: uppercase; }
+.open-l.o { color: var(--orange); }
+.week-chip { position: absolute; left: 60px; top: 1290px; font-family: Mono; font-size: 46px; letter-spacing: 4px; background: var(--orange);
+    color: #120a05; padding: 14px 26px; border-radius: 10px; }
+.open-sub { position: absolute; left: 60px; right: 60px; top: 1420px; font-weight: 600; font-size: 50px; line-height: 1.15; color: var(--text-2); }
+
+.award { position: absolute; left: 60px; right: 60px; top: 230px; }
+.award .n { font-weight: 800; font-size: 32px; letter-spacing: 6px; color: var(--text-2); display: flex; align-items: center; gap: 18px; }
+.award .n::before { content: ''; width: 60px; height: 5px; background: var(--orange); }
+.award .t { font-weight: 900; font-size: 96px; line-height: .98; letter-spacing: -1px; color: var(--orange); margin-top: 14px; text-transform: uppercase; font-stretch: 108%; }
+.award .px { font-family: Mono; font-size: 32px; letter-spacing: 3px; color: #F2B705; margin-top: 18px; }
+.award.red .t { color: var(--blood); } .award.red .n::before { background: var(--blood); }
+
+.group { position: absolute; left: 50px; right: 50px; display: flex; flex-direction: column; gap: 14px; }
+.glabel { font-family: Mono; font-size: 30px; letter-spacing: 2px; margin: 0 0 6px 6px; }
+.good { color: var(--success); } .bad { color: var(--danger); }
+.trow.win { border-color: var(--success); box-shadow: 0 0 40px rgba(61,214,140,.25); }
+.trow.lose { border-color: var(--danger); }
+.trow.hot { border-color: var(--orange); }
+.tsub .q { color: var(--danger); } .nick { color: #F2B705; }
+.crown { position: absolute; right: 26px; top: -22px; z-index: 5; font-family: Pixel; font-size: 22px; background: #F2B705; color: #120a05; padding: 8px 12px; border-radius: 6px; opacity: 0; }
+.diff { position: absolute; left: 0; right: 0; top: 1010px; text-align: center; }
+.diff .lbl { font-family: Pixel; font-size: 30px; color: var(--text-2); }
+.diff .num { font-family: Mono; font-size: 200px; line-height: 1; color: var(--orange); }
+.flag { height: 44px; margin: 18px 60px; border-radius: 6px; background: repeating-conic-gradient(#fff 0 25%, #111 0 50%) 0 0 / 44px 44px; }
+
+/* "na Prévia, prometemos" */
+.quote { position: absolute; left: 60px; right: 60px; top: 1010px; padding: 30px 34px; border-radius: 22px; background: #0b0b0b; border: 3px solid #3A322C; }
+.quote .k { font-family: Mono; font-size: 30px; letter-spacing: 3px; color: var(--text-3); }
+.quote .q { font-weight: 800; font-size: 54px; line-height: 1.1; color: var(--text); margin-top: 12px; }
+.quote .r { font-family: Pixel; font-size: 34px; color: var(--danger); margin-top: 22px; }
+
+/* enquete da semana passada */
+.recap { position: absolute; left: 60px; right: 60px; top: 1060px; padding: 26px 30px; border-radius: 22px; background: #0b0b0b; border: 3px dashed #4a3f37; }
+.recap .k { font-family: Mono; font-size: 30px; letter-spacing: 3px; color: var(--text-3); }
+.recap .opts { display: flex; gap: 16px; margin-top: 18px; }
+.recap .o { position: relative; flex: 1; text-align: center; font-weight: 800; font-size: 30px; color: var(--text-2); }
+.recap .o img { display: block; width: 96px; height: 96px; border-radius: 18px; margin: 0 auto 10px; object-fit: cover; }
+.recap .x { position: absolute; left: 50%; top: -30px; margin-left: -60px; width: 120px; text-align: center; font-weight: 900; font-size: 150px; line-height: 1; color: var(--danger);
+    text-shadow: 0 6px 20px rgba(0,0,0,.7); opacity: 0; }
+.recap .res { font-weight: 900; font-size: 40px; letter-spacing: 2px; color: var(--danger); text-align: center; margin-top: 18px; opacity: 0; }
+
+.stat { position: absolute; left: 0; right: 0; top: 1000px; text-align: center; }
+.stat .num { font-family: Mono; font-size: 210px; line-height: 1; color: var(--orange); }
+.stat .num small { font-size: 90px; color: var(--text-3); }
+.stat .lbl { font-weight: 800; font-size: 44px; color: var(--text-2); margin-top: 6px; }
+
+/* guilhotina */
+.redbg { position: absolute; inset: 0; background: radial-gradient(1100px 700px at 50% -5%, rgba(179,18,27,.35), transparent 65%); }
+.flash { position: absolute; inset: 0; background: var(--blood); opacity: 0; pointer-events: none; z-index: 20; mix-blend-mode: screen; }
+.blade { position: absolute; left: 0; width: 980px; height: 190px; z-index: 10; pointer-events: none; }
+.blade svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 18px 30px rgba(0,0,0,.6)); }
+.slot { position: relative; height: 118px; }
+.half { position: absolute; inset: 0; }
+.half.top { clip-path: polygon(-5% -50%, 105% -50%, 105% 44%, -5% 62%); }
+.half.bot { clip-path: polygon(-5% 62%, 105% 44%, 105% 150%, -5% 150%); }
+.half .trow { position: absolute; inset: 0; }
+.cutl { position: absolute; left: -20px; right: -20px; top: 52%; height: 6px; margin-top: -3px; background: #fff; transform-origin: left center;
+    box-shadow: 0 0 18px #ff3b3b, 0 0 40px var(--blood); opacity: 0; z-index: 4; }
+.roast { position: absolute; left: 0; right: 0; top: 150px; text-align: center; font-weight: 800; font-size: 44px; color: var(--orange); opacity: 0; }
+.rip { position: absolute; left: 6px; top: -18px; z-index: 6; font-family: Pixel; font-size: 20px; color: #fff; background: var(--blood);
+    padding: 6px 10px; border-radius: 4px; opacity: 0; }
+.nocut { position: absolute; left: 50px; right: 50px; top: 1080px; display: flex; gap: 18px; }
+.nocut div { flex: 1; text-align: center; font-family: Mono; font-size: 30px; letter-spacing: 2px; color: #ff4d4d; padding: 22px 10px;
+    border: 3px solid var(--blood); border-radius: 16px; background: rgba(179,18,27,.12); opacity: 0; }
+.nocut b { display: block; font-family: Archivo; font-weight: 800; font-size: 38px; letter-spacing: 0; color: var(--text); margin-bottom: 6px; }
+
+.poll-q { position: absolute; left: 60px; right: 60px; top: 520px; font-weight: 900; font-size: 84px; line-height: 1.02; }
+.poll-q span { color: var(--blood); }
+.opt { position: absolute; left: 60px; right: 60px; height: 150px; display: flex; align-items: center; gap: 30px; padding: 0 30px;
+    background: rgba(22,19,17,.94); border: 2px solid var(--border); border-radius: 24px; }
+.opt .k { font-family: Pixel; font-size: 60px; color: var(--orange); width: 90px; text-align: center; }
+.opt .av { width: 100px; height: 100px; border-radius: 20px; }
+.opt .nm { font-weight: 800; font-size: 52px; }
+.opt .pf { margin-left: auto; font-family: Mono; font-size: 34px; color: var(--text-3); }
+.reply { position: absolute; left: 0; right: 0; top: 1640px; text-align: center; font-family: Pixel; font-size: 34px; color: var(--text); }
+.end-k { position: absolute; left: 60px; top: 520px; font-family: Pixel; font-size: 40px; color: var(--orange); }
+.end-1 { position: absolute; left: 60px; right: 60px; top: 610px; font-weight: 900; font-size: 130px; line-height: .95; letter-spacing: -2px; }
+.end-2 { position: absolute; left: 60px; right: 60px; top: 1000px; font-weight: 900; font-size: 130px; line-height: .95; letter-spacing: -2px; color: var(--orange); }
+.end-logo { position: absolute; left: 50%; top: 1420px; width: 240px; height: 240px; margin-left: -120px; object-fit: contain; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="fx"></div>
+<script src="../engine.js"></script>
+<script>
+(async () => {
+const data = await (await fetch('data.json')).json();
+const G = await (await fetch('guilhotina.json')).json();
+const { el, set, prog, lerp, ease, enter, blink, shake, LEAGUE } = KHC;
+const ALL = data.leagues.flatMap(l => l.matchups.flat().map(t => ({ ...t, tier: l.tier })));
+const T = (name, tier) => ALL.find(t => t.name.trim() === name && (!tier || t.tier === tier)) || {};
+const GT = name => G.teams.find(t => t.name === name);
+const br = v => v.toFixed(2).replace('.', ',');
+const W6 = G.weeks[G.weeks.length - 1];
+
+// ------------------------------------------------------------ helpers locais
+function head(root, n, title, px, cls = '') {
+    KHC.hud(root, 'KHC AWARDS · S6', []);
+    const a = el('div', 'award ' + cls, root);
+    el('div', 'n', a, `PRÊMIO Nº ${String(n).padStart(2, '0')}`);
+    const t = el('div', 't', a, title);
+    const p = el('div', 'px', a, px);
+    return { a, t, p };
+}
+function drawHead(h, lt) {
+    const p = enter(lt, .1, .45, ease.back);
+    set(h.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    set(h.p, { o: lt > .4 ? (lt < 1.2 ? blink(lt, .15) : 1) : 0 });
+}
+function row(parent, name, tier, sub, value, cls = '') {
+    const r = KHC.teamRow(parent, { name, avatar: T(name, tier).avatar, sub, value });
+    if (cls) r.row.classList.add(...cls.split(' '));
+    return r;
+}
+function slideIn(r, t, a, from = 1100) { const p = enter(t, a, .35); set(r.row, { o: Math.min(1, p * 1.6), x: (1 - p) * from }); }
+function count(elm, t, a, b, v, digits = 2, suffix = '') {
+    elm.textContent = (v * ease.out(prog(t, a, b))).toFixed(digits) + suffix;
+}
+const pts = (name, tier) => T(name, tier).points;
+
+// lâmina e corte (as mesmas peças do vídeo da Guilhotina)
+const BLADE = `<svg viewBox="0 0 1000 200" preserveAspectRatio="none">
+  <defs><linearGradient id="st" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a948e"/><stop offset=".7" stop-color="#5d5853"/><stop offset="1" stop-color="#3c3835"/></linearGradient></defs>
+  <rect x="470" y="0" width="60" height="40" fill="#2b2724"/>
+  <polygon points="0,30 1000,30 1000,110 0,200" fill="url(#st)"/>
+  <polygon points="0,182 1000,96 1000,110 0,200" fill="#B3121B"/></svg>`;
+function sliced(parent, fill) {
+    const s = el('div', 'slot', parent);
+    const top = el('div', 'half top', s), bot = el('div', 'half bot', s);
+    fill(top); fill(bot);
+    const line = el('div', 'cutl', s);
+    const bl = el('div', 'blade', s, BLADE); bl.style.top = '-130px';
+    return { s, top, bot, line, bl };
+}
+function drawSlice(sl, t, a) {
+    const p = enter(t, a, .3, ease.back), g = prog(t, a, a + .3);
+    const f = `grayscale(${g}) brightness(${1 - .4 * g})`;
+    set(sl.top, { x: -p * 16, y: -p * 10, r: -p * 1.2, f });
+    set(sl.bot, { x: p * 16, y: p * 10, r: p * 1.4, f });
+    sl.line.style.opacity = t < a - .08 ? 0 : 1 - prog(t, a + .05, a + .45);
+    sl.line.style.transform = `rotate(-1.4deg) scaleX(${prog(t, a - .08, a)})`;
+    const d = ease.inOut(prog(t, a - .2, a)), up = prog(t, a + .1, a + .45);
+    set(sl.bl, { o: t < a - .2 || t > a + .45 ? 0 : 1 - up, y: lerp(-800, 0, d) - up * 60 });
+}
+
+// ================================================================ CENAS
+// 0–3 · Abertura
+KHC.scene(0, 3, root => {
+    const s = root.s = {};
+    s.logo = el('img', 'big-logo', root); s.logo.src = LEAGUE.khc.crest;
+    s.px = el('div', 'awards-px', root, 'KHC AWARDS');
+    s.l1 = el('div', 'open-l', root, 'Prêmios que'); s.l1.style.top = '800px';
+    s.l2 = el('div', 'open-l', root, 'ninguém'); s.l2.style.top = '910px';
+    s.l3 = el('div', 'open-l o', root, 'queria'); s.l3.style.top = '1020px';
+    s.l4 = el('div', 'open-l o', root, 'ganhar.'); s.l4.style.top = '1130px';
+    s.chip = el('div', 'week-chip', root, 'SEMANA 6');
+    s.sub = el('div', 'open-sub', root, 'Agora com a Guilhotina. <b style="color:#B3121B">Vai rolar cabeça.</b>');
+    s.boot = el('div', 'boot', root);
+}, (lt, t, root) => {
+    const s = root.s;
+    const b = prog(lt, 0, .16);
+    set(s.boot, { o: 1 - b, sy: lerp(.004, 1, ease.out(b)) });
+    const lp = enter(lt, .05, .6, ease.elastic);
+    set(s.logo, { s: lp, r: (1 - lp) * 20 });
+    set(s.px, { o: lt < 1.2 ? blink(lt, .15) : 1 });
+    [s.l1, s.l2, s.l3, s.l4].forEach((e, i) => {
+        const p = enter(lt, .25 + i * .16, .35, ease.back);
+        set(e, { o: Math.min(1, p * 2), y: (1 - p) * 80 });
+    });
+    const c = enter(lt, 1.2, .3, ease.back);
+    set(s.chip, { o: c, s: lerp(1.6, 1, c) });
+    const sb = enter(lt, 1.7, .4);
+    set(s.sub, { o: sb, y: (1 - sb) * 30 });
+});
+
+// 3–7,5 · Complô Desmontado: a "vítima" bate o dono da liga
+KHC.scene(3, 7.5, root => {
+    const s = root.s = {};
+    s.h = head(root, 1, 'Complô Desmontado', 'SÉRIE A · A VÍTIMA REVIDOU');
+    const g = el('div', 'group', root); g.style.top = '640px'; g.style.gap = '40px';
+    s.a = row(g, 'Los Pollos Hermanos', 'serie-a', 'a "vítima" · venceu', '0.00', 'win');
+    s.b = row(g, 'Imperius Rex FC', 'serie-a', '<span class="q">DONO DA LIGA</span> · perdeu', '0.00', 'lose');
+    s.st = KHC.stamp(s.b.row, 'Dono da liga, 35 atrás', { top: -56, right: 24, rot: -3 });
+    s.cap = KHC.caption(root, 'Teoria do complô: arquivada.', 'O dono da liga levou 35 de diferença.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    slideIn(s.a, t, 3.4); slideIn(s.b, t, 3.55, -1100);
+    count(s.a.val, t, 3.6, 4.5, pts('Los Pollos Hermanos', 'serie-a'));
+    count(s.b.val, t, 3.6, 4.5, pts('Imperius Rex FC', 'serie-a'));
+    const [x, y] = shake(t, 4.6, .35, 18); s.b.row.style.translate = `${x}px ${y}px`;
+    KHC.drawStamp(s.st, t, 4.6);
+    KHC.drawCaption(s.cap, t, 5.2);
+});
+
+// 7,5–12 · Promessa é Dívida: o Vigarista tinha que ganhar no campo
+KHC.scene(7.5, 12, root => {
+    const s = root.s = {};
+    s.h = head(root, 2, 'Promessa é Dívida', 'O VIGARISTA · SÉRIE A');
+    const g = el('div', 'group', root); g.style.top = '600px'; g.style.gap = '40px';
+    s.a = row(g, 'Caipiracicaba', 'serie-a', '<span class="nick">"o Vigarista"</span> · perdeu · 2–4', '0.00', 'lose');
+    s.b = row(g, 'Fofura e Fé', 'serie-a', 'venceu · 3–3', '0.00', 'win');
+    s.qt = el('div', 'quote', root, '<div class="k">NA PRÉVIA S6, AVISAMOS:</div><div class="q">"Desta vez, vai ter que<br>ganhar no campo."</div><div class="r">NO CAMPO: PERDEU.</div>');
+    s.r = s.qt.querySelector('.r');
+    s.st = KHC.stamp(s.a.row, 'Sem edição, sem vitória', { top: -56, right: 24, rot: -3 });
+    s.cap = KHC.caption(root, 'Perdeu por 22.', 'E agora tem 65% de chance de queda.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    slideIn(s.a, t, 7.85); slideIn(s.b, t, 8.0, -1100);
+    count(s.a.val, t, 8.1, 9.0, pts('Caipiracicaba', 'serie-a'));
+    count(s.b.val, t, 8.1, 9.0, pts('Fofura e Fé', 'serie-a'));
+    const q = enter(t, 8.6, .35); set(s.qt, { o: q, y: (1 - q) * 30 });
+    set(s.r, { o: t < 9.2 ? 0 : (t < 9.7 ? blink(t, .1) : 1) });
+    KHC.drawStamp(s.st, t, 9.4);
+    KHC.drawCaption(s.cap, t, 9.8);
+});
+
+// 12–16,5 · Foto-chegada: o Bob Marley não tem paz
+KHC.scene(12, 16.5, root => {
+    const s = root.s = {};
+    s.h = head(root, 3, 'Foto-chegada', 'SÉRIE D · MENOR DIFERENÇA');
+    const g = el('div', 'group', root); g.style.top = '600px'; g.style.gap = '40px';
+    s.a = row(g, 'Claudianosilva', 'serie-d', 'venceu · 2–4', '0.00', 'win');
+    s.b = row(g, 'Green N Gold', 'serie-d', 'pedrocestaro · perdeu', '0.00', 'lose');
+    s.d = el('div', 'diff', root, '<div class="lbl">DIFERENÇA</div><div class="flag"></div><div class="num">1.06</div><div class="flag"></div>');
+    s.st = KHC.stamp(s.b.row, '1º cortado da Guilhotina', { top: -56, right: 24, rot: -3 });
+    s.cap = KHC.caption(root, 'Perdeu por 1.06.', 'O Bob Marley não tem um dia de paz.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    slideIn(s.a, t, 12.4); slideIn(s.b, t, 12.55, -1100);
+    count(s.a.val, t, 12.6, 13.5, pts('Claudianosilva', 'serie-d'));
+    count(s.b.val, t, 12.6, 13.5, pts('Green N Gold', 'serie-d'));
+    const d = enter(t, 13.6, .35, ease.back);
+    set(s.d, { o: d > 0 ? 1 : 0, s: lerp(2.2, 1, d), r: Math.sin(prog(t, 13.6, 14.2) * 20) * 3 * (1 - prog(t, 13.6, 14.2)) });
+    KHC.drawStamp(s.st, t, 13.9);
+    KHC.drawCaption(s.cap, t, 14.4);
+});
+
+// 16,5–21,5 · Milagre e Bola Murcha, no mesmo jogo
+KHC.scene(16.5, 21.5, root => {
+    const s = root.s = {};
+    s.h = head(root, 4, 'Milagre da Semana', 'SÉRIE D · E A BOLA MURCHA');
+    const g = el('div', 'group', root); g.style.top = '560px';
+    el('div', 'glabel good', g, '✝ 1ª VITÓRIA DO ANO');
+    s.a = row(g, 'Elieser', 'serie-d', 'venceu · agora 1–5', '0.00', 'win');
+    const g2 = el('div', 'group', root); g2.style.top = '840px';
+    el('div', 'glabel bad', g2, '☠ BOLA MURCHA · MENOR PLACAR');
+    s.b = row(g2, 'DH8 Red&Gold', 'serie-d', 'perdeu pro Elieser', '0.00', 'lose');
+    s.st = KHC.stamp(s.a.row, 'A Prévia disse "não vai"', { top: -56, right: 24, rot: -3 });
+    const rc = el('div', 'recap', root);
+    el('div', 'k', rc, 'NOSSA ENQUETE DA S5 APOSTOU EM:');
+    const op = el('div', 'opts', rc);
+    s.x = [['Kelce Gremista', 'serie-c'], ['WI Redentor', 'serie-c'], ['romanerinha', 'serie-c']].map(([n, tier]) => {
+        const o = el('div', 'o', op);
+        el('img', '', o).src = T(n, tier).avatar;
+        el('span', '', o, KHC.esc(n));
+        return el('div', 'x', o, 'X');
+    });
+    s.res = el('div', 'res', rc, 'NINGUÉM ACERTOU');
+    s.rc = rc;
+    s.cap = KHC.caption(root, 'Fez 92 e perdeu pro Elieser.', 'Nem a nossa enquete previu isso.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    slideIn(s.a, t, 16.9); slideIn(s.b, t, 17.1, -1100);
+    count(s.a.val, t, 17.2, 18.1, pts('Elieser', 'serie-d'));
+    count(s.b.val, t, 17.2, 18.1, pts('DH8 Red&Gold', 'serie-d'));
+    KHC.drawStamp(s.st, t, 18.2);
+    const r = enter(t, 18.6, .35); set(s.rc, { o: r, y: (1 - r) * 30 });
+    s.x.forEach((x, i) => { const p = enter(t, 18.95 + i * .15, .2, ease.back); set(x, { o: p, s: lerp(2.4, 1, p) }); });
+    set(s.res, { o: t < 19.5 ? 0 : (t < 19.9 ? blink(t, .1) : 1) });
+    KHC.drawCaption(s.cap, t, 19.7);
+});
+
+// 21,5–26 · Perdeu com Dignidade: 0–6 com 142 pontos
+KHC.scene(21.5, 26, root => {
+    const s = root.s = {};
+    s.h = head(root, 5, 'Perdeu com Dignidade', 'SÉRIE C · 0–6 COM 142 PONTOS');
+    const g = el('div', 'group', root); g.style.top = '600px'; g.style.gap = '40px';
+    s.a = row(g, 'WI Redentor', 'serie-c', 'perdeu · 0–6 · 88% de queda', '0.00', 'lose');
+    s.b = row(g, 'joaoW7', 'serie-c', 'venceu · 5–1', '0.00', 'win');
+    s.stat = el('div', 'stat', root, '<div class="num">0<small>/48</small></div><div class="lbl">placares da semana que ele venceria</div>');
+    s.n = s.stat.querySelector('.num');
+    const all = ALL.map(t => t.points), mine = pts('WI Redentor', 'serie-c');
+    s.beat = all.filter(p => p < mine).length; s.tot = all.length;
+    s.st = KHC.stamp(s.a.row, 'Azar nível 0–6', { top: -56, right: 24, rot: -3 });
+    s.cap = KHC.caption(root, `Ganharia de ${s.beat} dos ${s.tot} placares.`, 'Pegou justo um dos outros.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    slideIn(s.a, t, 21.9); slideIn(s.b, t, 22.05, -1100);
+    count(s.a.val, t, 22.1, 23.0, pts('WI Redentor', 'serie-c'));
+    count(s.b.val, t, 22.1, 23.0, pts('joaoW7', 'serie-c'));
+    set(s.stat, { o: enter(t, 23.1, .3) });
+    s.n.innerHTML = `${Math.round(s.beat * ease.out(prog(t, 23.2, 24.0)))}<small>/${s.tot}</small>`;
+    KHC.drawStamp(s.st, t, 23.9);
+    KHC.drawCaption(s.cap, t, 24.2);
+});
+
+// 26–31,5 · Guilhotina · rodada 6
+KHC.scene(26, 31.5, root => {
+    const s = root.s = {};
+    el('div', 'redbg', root);
+    s.h = head(root, 6, 'Guilhotina', `RODADA 6 · ${G.alive} VIVOS`, 'red');
+    const g = el('div', 'group', root); g.style.top = '620px'; g.style.gap = '0';
+    const cut = GT(W6.cut);
+    s.cut = sliced(g, h => {
+        const r = KHC.teamRow(h, { name: cut.name, avatar: cut.avatar, sub: 'S6 · menor dos vivos', value: br(W6.cut_pts) });
+        r.row.classList.add('lose');
+    });
+    s.rip = el('div', 'rip', s.cut.s, 'CORTADO');
+    s.roast = el('div', 'roast', g, `${br(T('Ceará Dolphins', 'serie-b').points)} na Série B. ${br(W6.cut_pts)} aqui.`);
+    s.roast.style.position = 'relative'; s.roast.style.top = '0'; s.roast.style.margin = '26px 0 70px';
+    const esc = W6.escaped[0], et = GT(esc.name);
+    s.esc = KHC.teamRow(g, { name: esc.name, avatar: et.avatar, sub: `escapou por ${br(esc.pts - W6.cut_pts)}`, value: br(esc.pts) });
+    s.esc.row.classList.add('hot');
+    s.st = KHC.stamp(s.esc.row, 'Na beira pela 3ª vez', { top: -56, right: 24, rot: -3 });
+    s.fl = el('div', 'flash', root);
+    s.cap = KHC.caption(root, 'Venceu o clássico da zona na B', 'e perdeu a cabeça na Guilhotina.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    const e = enter(t, 26.4, .35); set(s.cut.s, { o: Math.min(1, e * 1.6), x: (1 - e) * -1100 });
+    drawSlice(s.cut, t, 27.3);
+    const q = enter(t, 27.35, .2); set(s.rip, { o: q, s: lerp(2, 1, q), r: -6 });
+    const r = enter(t, 27.6, .35, ease.back); set(s.roast, { o: r, s: lerp(1.4, 1, r) });
+    slideIn(s.esc, t, 28.0);
+    KHC.drawStamp(s.st, t, 28.6);
+    s.fl.style.opacity = t >= 27.3 ? .55 * (1 - prog(t, 27.3, 27.6)) : 0;
+    const [x, y] = shake(t, 27.3, .3, 16); root.style.transform = `translate(${x}px, ${y}px)`;
+    KHC.drawCaption(s.cap, t, 29.4);
+});
+
+// 31,5–36 · Coragem Seletiva: os donos ganham onde mandam e fogem da lâmina
+KHC.scene(31.5, 36, root => {
+    const s = root.s = {};
+    s.h = head(root, 7, 'Coragem Seletiva', 'OS DONOS DA KHC');
+    const g = el('div', 'group', root); g.style.top = '600px'; g.style.gap = '40px';
+    s.a = row(g, 'Public Enemy #1', 'elite', '<span class="q">DONO</span> · venceu na Elite e na A', '2–0', 'win');
+    s.b = row(g, 'Imperius Rex FC', 'serie-a', '<span class="q">DONO</span> · perdeu pros Pollos', '0–1', 'lose');
+    const nc = el('div', 'nocut', root);
+    s.nc = G.absent.map(o => el('div', '', nc, `<b>${KHC.esc(o.name)}</b>GUILHOTINA: NÃO INSCRITO`));
+    s.st = KHC.stamp(s.a.row, 'Valente onde é dono', { top: -56, right: 24, rot: -3 });
+    s.cap = KHC.caption(root, 'Ganham onde mandam.', 'Onde tem lâmina, somem.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    slideIn(s.a, t, 31.85); slideIn(s.b, t, 32.0, -1100);
+    KHC.drawStamp(s.st, t, 32.6);
+    s.nc.forEach((n, i) => { const p = enter(t, 33.0 + i * .2, .3, ease.back); set(n, { o: p, s: lerp(1.6, 1, p), r: (i ? 2 : -2) * p }); });
+    KHC.drawCaption(s.cap, t, 33.8);
+});
+
+// 36–39,5 · Enquete: quem perde a cabeça na semana 7?
+KHC.scene(36, 39.5, root => {
+    const s = root.s = {};
+    KHC.hud(root, 'KHC AWARDS · S6', []);
+    s.q = el('div', 'poll-q', root, 'Quem perde a<br><span>cabeça</span> na<br>semana 7?');
+    const low = G.teams.filter(x => !x.cut).sort((a, b) => a.fpts - b.fpts).slice(0, 3);
+    s.opts = low.map((tm, i) => {
+        const o = el('div', 'opt', root); o.style.top = (900 + i * 180) + 'px';
+        el('div', 'k', o, String(i + 1));
+        const a = el('div', 'av', o); el('img', '', a).src = tm.avatar;
+        el('div', 'nm', o, KHC.esc(tm.name));
+        el('div', 'pf', o, `${Math.round(tm.fpts)} PF`);
+        return o;
+    });
+    s.reply = el('div', 'reply', root, 'RESPONDA COM 1, 2 OU 3');
+}, (lt, t, root) => {
+    const s = root.s;
+    const q = enter(t, 36.2, .4, ease.back);
+    set(s.q, { o: Math.min(1, q * 2), y: (1 - q) * 60 });
+    s.opts.forEach((o, i) => { const p = enter(t, 36.7 + i * .3, .3, ease.back); set(o, { o: Math.min(1, p * 2), x: (1 - p) * 1100 }); });
+    set(s.reply, { o: t >= 37.8 ? blink(t, .25) : 0 });
+});
+
+// 39,5–43 · Fim
+KHC.scene(39.5, 43, root => {
+    const s = root.s = {};
+    KHC.hud(root, 'KHC AWARDS · S6', []);
+    s.k = el('div', 'end-k', root, 'SEMANA 7');
+    s.l1 = el('div', 'end-1', root, 'Se o Elieser<br>ganhou,');
+    s.l2 = el('div', 'end-2', root, 'até o Imperius<br>pode ganhar.');
+    s.logo = el('img', 'end-logo', root); s.logo.src = LEAGUE.khc.crest;
+}, (lt, t, root) => {
+    const s = root.s;
+    set(s.k, { o: enter(t, 39.6, .3) });
+    const a = enter(t, 39.9, .4, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
+    const b = enter(t, 40.8, .3, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
+    const l = enter(t, 41.6, .5, ease.elastic); set(s.logo, { s: l });
+});
+
+[[3, 'serie-a'], [7.5, 'serie-a'], [12, 'serie-d'], [16.5, 'serie-d'], [21.5, 'serie-c'], [26, 'guilhotina'],
+ [31.5, 'khc'], [36, 'guilhotina'], [39.5, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
+KHC.fadeOut(42.55, 43);
+
+// Pausas de leitura (tempo da timeline, duração): legenda inteira antes de
+// cada troca. A mesma lista está em scripts/trilha/awards6.py.
+KHC.hold([[6.1, 0.7], [10.7, 0.7], [15.2, 0.7], [20.5, 0.8], [25.1, 0.7], [30.3, 0.8], [34.9, 0.7], [38.6, 0.6], [42.2, 0.4]]);
+
+KHC.start(43);
+await window.ready();
+window.loaded = true;
+})();
+</script>
+</body>
+</html>
