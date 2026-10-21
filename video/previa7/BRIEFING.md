@@ -47,6 +47,10 @@ Ganchos para a zoeira:
 - O Cruise vem de derrota e pega o Arena do Grêmio, do LucioWagner.
 - O ThreeColor, que derrubou o invicto, é azarão (22%).
 
+## Dossiê do Imperius: só um flash, CENSURADO
+
+O vídeo do Dossiê **não entra inteiro** na Prévia. Entra só um flash rápido do card do Ditador (`video/imperius/assets/avatars/card.jpg`, fora do git: copiar da pasta do Dossiê ou pedir o card de novo), coberto por uma faixa **CENSURADO**. Tem cerca de 1 s e serve de piada: "o dossiê foi censurado pelo dono da liga".
+
 ## Falta (o usuário manda depois)
 
 - Os demais confrontos, as imagens de classificação e as chances.
