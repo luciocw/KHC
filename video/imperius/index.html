@@ -56,12 +56,17 @@
     text-shadow: 0 0 60px rgba(120,150,255,.35); }
 .sp-3 { position: absolute; left: 60px; right: 60px; top: 1060px; font-weight: 800; font-size: 60px; line-height: 1.1; color: var(--text-2); }
 .sp-3 b { color: var(--gold); }
+.epl { position: absolute; left: 50px; right: 50px; top: 1330px; height: 170px; display: flex; align-items: center; gap: 28px; padding: 0 30px;
+    border-radius: 24px; background: rgba(12,22,64,.9); border: 3px solid #4a5ea8; }
+.epl img { width: 120px; height: 120px; object-fit: contain; }
+.epl .a { font-family: Mono; font-size: 28px; letter-spacing: 2px; color: #aab6e8; }
+.epl .b { font-weight: 900; font-size: 58px; color: #fff; margin-top: 6px; white-space: nowrap; }
 .rain { position: absolute; top: 0; width: 3px; height: 70px; background: linear-gradient(transparent, rgba(160,180,255,.55)); }
 
 .end-1 { position: absolute; left: 60px; right: 60px; top: 560px; font-weight: 900; font-size: 140px; line-height: .95; letter-spacing: -2px; }
-.end-2 { position: absolute; left: 60px; right: 60px; top: 900px; font-weight: 900; font-size: 140px; line-height: .95; letter-spacing: -2px; color: var(--orange); }
+.end-2 { position: absolute; left: 60px; right: 60px; top: 860px; font-weight: 900; font-size: 124px; line-height: .95; letter-spacing: -2px; color: var(--orange); }
 .crown { position: absolute; left: 50%; top: 1330px; width: 300px; margin-left: -150px; height: 170px; }
-.end-logo { position: absolute; left: 50%; top: 1560px; width: 180px; height: 180px; margin-left: -90px; object-fit: contain; }
+.end-logo { position: absolute; left: 50%; top: 1580px; width: 180px; height: 180px; margin-left: -90px; object-fit: contain; }
 </style>
 </head>
 <body>
@@ -143,12 +148,12 @@ KHC.scene(7, 11, root => {
         const r = el('div', 'run', box);
         if (img) el('img', '', r).src = img; else el('div', 'ball', r);
         const w = el('div', '', r); el('div', 'nm', w, nm); el('div', 'sb', w, sb);
-        r.no = el('div', 'no', r, 'FUGIU');
+        r.no = el('div', 'no', r, img && img.includes('nba') ? 'SEM TIME' : 'FUGIU');
         return r;
     };
-    s.r = [mk(LEAGUE.guilhotina.crest, 'KHC Guilhotina', 'medo da lâmina'),
-           mk(null, 'Burgundy Basquete', 'medo da cesta')];
-    s.cap = KHC.caption(root, 'Na lâmina, não.', 'Na cesta, também não.');
+    s.r = [mk(LEAGUE.guilhotina.crest, 'KHC Guilhotina', 'nem se inscreveu'),
+           mk('../../assets/logo/png/ui/escudo-nba.png', 'Burgundy Basquete', 'é comissário · time: nenhum')];
+    s.cap = KHC.caption(root, 'Na lâmina, não.', 'No basquete, manda mas não joga.');
 }, (lt, t, root) => {
     const s = root.s;
     const p = enter(t, 7.1, .4, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
@@ -169,6 +174,8 @@ KHC.scene(11, 14.5, root => {
     s.l1 = el('div', 'sp-1', root, 'E pra fechar,<br>torce pro');
     s.l2 = el('div', 'sp-2', root, 'Tottenham.');
     s.l3 = el('div', 'sp-3', root, 'Tudo explicado:<br><b>sofrer é estilo de vida.</b>');
+    s.epl = el('div', 'epl', root, '<img src="../../assets/logo/png/ui/escudo-premier.png"><div><div class="a">COCORICÓ PREMIER LEAGUE · 5º · 4–3</div><div class="b">North London Dictator</div></div>');
+    s.eplst = KHC.stamp(s.epl, 'O ditador é ele', { top: -54, right: 24, rot: -3 });
 }, (lt, t, root, wall) => {
     const s = root.s;
     set(s.bg, { o: enter(t, 11.0, .5) });
@@ -176,23 +183,24 @@ KHC.scene(11, 14.5, root => {
     const a = enter(t, 11.15, .4, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 60 });
     const b = enter(t, 11.7, .3, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(2, 1, b), r: (1 - b) * -6 });
     const c = enter(t, 12.4, .4); set(s.l3, { o: c, y: (1 - c) * 30 });
+    const e = enter(t, 12.9, .35); set(s.epl, { o: Math.min(1, e * 1.6), x: (1 - e) * 1100 });
+    KHC.drawStamp(s.eplst, t, 13.3);
 });
 
-// 14,5–18 · Fim: rei sem coroa
+// 14,5–18 · Fim: o apelido
 KHC.scene(14.5, 18, root => {
     const s = root.s = {};
     hud(root);
     s.l1 = el('div', 'end-1', root, 'Imperius<br>Rex FC.');
-    s.l2 = el('div', 'end-2', root, 'Um rei<br>sem coroa.');
-    s.cr = el('div', 'crown', root, `<svg viewBox="0 0 300 170"><polygon points="20,150 280,150 260,40 200,100 150,20 100,100 40,40" fill="#F2B705" stroke="#120a05" stroke-width="6"/></svg>`);
+    s.l2 = el('div', 'end-2', root, 'Ditador<br>Rique<br>Infantinno.');
+    s.st = el('div', 'big-stamp', root, '<span>Manda em tudo. Joga nada.</span>');
+    s.st.style.top = '1370px'; s.st.firstChild.style.cssText = 'font-size:56px;white-space:nowrap';
     s.logo = el('img', 'end-logo', root); s.logo.src = LEAGUE.khc.crest;
 }, (lt, t, root) => {
     const s = root.s;
     const a = enter(t, 14.6, .4, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
     const b = enter(t, 15.3, .3, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
-    // a coroa aparece e cai
-    const c = enter(t, 15.7, .3, ease.back), fall = ease.inOut(prog(t, 16.3, 16.9));
-    set(s.cr, { o: c * (1 - prog(t, 16.7, 16.95)), s: c, y: fall * 500, r: fall * 70 });
+    const c = enter(t, 16.0, .22); set(s.st, { o: c > 0 ? 1 : 0, s: lerp(2.6, 1, c), r: -5 });
     const l = enter(t, 17.0, .4, ease.elastic); set(s.logo, { s: l });
 });
 
@@ -200,7 +208,7 @@ KHC.scene(14.5, 18, root => {
 KHC.fadeOut(17.6, 18);
 
 // Pausas de leitura. A mesma lista está em scripts/trilha/imperius.py.
-KHC.hold([[2.4, 0.6], [5.9, 0.6], [10.0, 0.5], [13.5, 0.5]]);
+KHC.hold([[2.4, 0.6], [5.9, 0.6], [10.0, 0.5], [13.6, 1.0]]);
 
 KHC.start(18);
 await window.ready();
