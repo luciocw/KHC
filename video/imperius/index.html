@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Dossiê Imperius Rex FC</title>
+<link rel="stylesheet" href="../engine.css">
+<style>
+:root { --gold: #F2B705; --navy: #132257; }
+.boot { position: absolute; inset: 0; background: #fff; }
+.k { position: absolute; left: 60px; right: 60px; top: 250px; font-family: Pixel; font-size: 30px; color: var(--gold); }
+.t { position: absolute; left: 60px; right: 60px; top: 310px; font-weight: 900; font-size: 112px; line-height: .95; letter-spacing: -2px; text-transform: uppercase; color: var(--orange); }
+
+/* abertura: a carta do dono */
+.card { position: absolute; left: 50%; top: 470px; width: 700px; height: 991px; margin-left: -350px; border-radius: 18px;
+    box-shadow: 0 40px 90px rgba(0,0,0,.7); }
+.ring { position: absolute; left: 270px; top: 520px; width: 250px; height: 200px; border: 9px solid var(--danger); border-radius: 50%;
+    transform: rotate(-8deg); opacity: 0; }
+.big-stamp { position: absolute; left: 0; right: 0; top: 1290px; text-align: center; z-index: 6; opacity: 0; }
+.big-stamp span { display: inline-block; font-weight: 900; font-size: 74px; color: var(--danger); border: 10px solid var(--danger); padding: 4px 26px;
+    border-radius: 14px; text-transform: uppercase; letter-spacing: 2px; background: rgba(14,12,11,.85); }
+
+/* tabela 2025 */
+.tbl { position: absolute; left: 50px; right: 50px; top: 640px; display: flex; flex-direction: column; gap: 12px; }
+.tr { display: flex; align-items: center; gap: 24px; height: 104px; padding: 0 28px; border-radius: 20px; background: rgba(22,19,17,.94);
+    border: 2px solid var(--border); }
+.tr .p { font-family: Mono; font-size: 48px; width: 70px; color: var(--text-3); }
+.tr .n { flex: 1; font-weight: 800; font-size: 46px; white-space: nowrap; }
+.tr .r { font-family: Mono; font-size: 46px; color: var(--text-2); }
+.tr .av { width: 76px; height: 76px; border-radius: 16px; }
+.tr.me { border: 3px solid var(--danger); background: rgba(235,64,52,.14); }
+.tr.me .p, .tr.me .r { color: var(--danger); }
+.zone { position: relative; height: 0; border-top: 5px dashed var(--danger); margin: 18px 0 8px; }
+.zone span { position: absolute; left: 50%; top: -24px; transform: translateX(-50%); background: var(--bg); padding: 0 16px; font-family: Mono;
+    font-size: 30px; letter-spacing: 3px; color: var(--danger); white-space: nowrap; }
+.note { position: absolute; left: 60px; right: 60px; top: 1170px; font-family: Mono; font-size: 34px; line-height: 1.5; color: var(--text-3); }
+.note b { color: var(--text); }
+
+/* fugas */
+.runs { position: absolute; left: 50px; right: 50px; top: 600px; display: flex; flex-direction: column; gap: 40px; }
+.run { position: relative; display: flex; align-items: center; gap: 30px; height: 190px; padding: 0 36px; border-radius: 24px;
+    background: rgba(22,19,17,.94); border: 3px solid var(--border); }
+.run img, .run .ball { width: 130px; height: 130px; flex: none; object-fit: contain; }
+.run .ball { border-radius: 50%; background:
+    radial-gradient(circle at 50% 50%, transparent 0 62px, #1a0e05 62px 66px, transparent 66px),
+    linear-gradient(90deg, transparent 0 62px, #1a0e05 62px 68px, transparent 68px),
+    linear-gradient(0deg, transparent 0 62px, #1a0e05 62px 68px, transparent 68px), #e3741f; }
+.run .nm { font-weight: 900; font-size: 58px; line-height: 1; }
+.run .sb { font-family: Mono; font-size: 32px; color: var(--text-3); margin-top: 10px; }
+.run .no { position: absolute; right: 24px; top: -30px; font-weight: 900; font-size: 38px; background: var(--bg); color: var(--danger);
+    border: 6px solid var(--danger); border-radius: 10px; padding: 6px 16px; opacity: 0; }
+
+/* Tottenham */
+.spurs { position: absolute; inset: 0; background: linear-gradient(180deg, #0c1640 0%, #0E0C0B 75%); opacity: 0; }
+.sp-1 { position: absolute; left: 60px; right: 60px; top: 520px; font-weight: 900; font-size: 120px; line-height: .95; letter-spacing: -2px; }
+.sp-2 { position: absolute; left: 60px; right: 60px; top: 790px; font-weight: 900; font-size: 150px; line-height: .95; letter-spacing: -3px; color: #fff;
+    text-shadow: 0 0 60px rgba(120,150,255,.35); }
+.sp-3 { position: absolute; left: 60px; right: 60px; top: 1060px; font-weight: 800; font-size: 60px; line-height: 1.1; color: var(--text-2); }
+.sp-3 b { color: var(--gold); }
+.epl { position: absolute; left: 50px; right: 50px; top: 1330px; height: 170px; display: flex; align-items: center; gap: 28px; padding: 0 30px;
+    border-radius: 24px; background: rgba(12,22,64,.9); border: 3px solid #4a5ea8; }
+.epl img { width: 120px; height: 120px; object-fit: contain; }
+.epl .a { font-family: Mono; font-size: 28px; letter-spacing: 2px; color: #aab6e8; }
+.epl .b { font-weight: 900; font-size: 58px; color: #fff; margin-top: 6px; white-space: nowrap; }
+.rain { position: absolute; top: 0; width: 3px; height: 70px; background: linear-gradient(transparent, rgba(160,180,255,.55)); }
+
+.end-1 { position: absolute; left: 60px; right: 60px; top: 560px; font-weight: 900; font-size: 140px; line-height: .95; letter-spacing: -2px; }
+.end-2 { position: absolute; left: 60px; right: 60px; top: 860px; font-weight: 900; font-size: 124px; line-height: .95; letter-spacing: -2px; color: var(--orange); }
+.crown { position: absolute; left: 50%; top: 1330px; width: 300px; margin-left: -150px; height: 170px; }
+.end-logo { position: absolute; left: 50%; top: 1580px; width: 180px; height: 180px; margin-left: -90px; object-fit: contain; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="fx"></div>
+<script src="../engine.js"></script>
+<script>
+(async () => {
+const { el, set, prog, lerp, ease, enter, blink, shake, LEAGUE } = KHC;
+const AV = 'assets/avatars/imperius.jpg';
+// Série A 2025, classificação final (Sleeper, liga 1245850693172998144)
+const S25 = [[8, 'BigFieldMS', '5–9'], [9, 'Caipiracicaba', '4–10'], [10, 'FAITHFUL RIQUE', '3–11']];
+const hud = root => KHC.hud(root, 'DOSSIÊ', []);
+
+// 0–3 · Abertura: o dossiê, com a carta "99" dele
+KHC.scene(0, 3, root => {
+    const s = root.s = {};
+    hud(root);
+    s.k = el('div', 'k', root, 'ARQUIVO CONFIDENCIAL');
+    s.t = el('div', 't', root, 'Dossiê');
+    s.card = el('img', 'card', root); s.card.src = 'assets/avatars/card.jpg';
+    s.ring = el('div', 'ring', root);
+    s.st = el('div', 'big-stamp', root, '<span>99? Em 2025: 3–11</span>');
+    s.boot = el('div', 'boot', root);
+}, (lt, t, root) => {
+    const s = root.s;
+    set(s.boot, { o: 1 - prog(lt, 0, .16) });
+    set(s.k, { o: lt < 1 ? blink(lt, .12) : 1 });
+    const p = enter(lt, .1, .4, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    const f = enter(lt, .25, .5, ease.back); set(s.card, { o: Math.min(1, f * 2), y: (1 - f) * 1000, r: lerp(10, -2, f) });
+    // círculo de caneta vermelha no "99"
+    const r = prog(lt, 1.0, 1.35);
+    s.ring.style.opacity = r > 0 ? 1 : 0;
+    s.ring.style.clipPath = `inset(0 ${100 - r * 100}% 0 0)`;
+    const st = enter(lt, 1.5, .22);
+    set(s.st, { o: st > 0 ? 1 : 0, s: lerp(2.6, 1, st), r: -7 });
+    const [x, y] = shake(lt, 1.72, .3, 16); root.style.transform = `translate(${x}px, ${y}px)`;
+});
+
+// 3–7 · Fora da Elite e lanterna em 2025
+KHC.scene(3, 7, root => {
+    const s = root.s = {};
+    hud(root);
+    s.k = el('div', 'k', root, 'PROVA Nº 1');
+    s.t = el('div', 't', root, 'Dono da KHC.<br>Fora da Elite.');
+    s.t.style.fontSize = '96px';
+    const tb = el('div', 'tbl', root);
+    s.zone = el('div', 'zone', tb, '<span>ZONA DE QUEDA DE HOJE (3)</span>');
+    s.rows = S25.map(([p, n, r]) => {
+        const row = el('div', 'tr' + (p === 10 ? ' me' : ''), tb);
+        el('div', 'p', row, p + 'º');
+        if (p === 10) { const a = el('div', 'av', row); el('img', '', a).src = AV; }
+        el('div', 'n', row, KHC.esc(n));
+        el('div', 'r', row, r);
+        return row;
+    });
+    s.note = el('div', 'note', root, 'SÉRIE A 2025 · FINAL<br><b>FAITHFUL RIQUE = Imperius Rex FC</b>');
+    s.st = KHC.stamp(s.rows[2], 'Lanterna. E continuou na A.', { top: -60, right: 24, rot: -3 });
+    s.cap = KHC.caption(root, 'Pelas regras de hoje, caía.', 'Ser dono tem suas vantagens.');
+}, (lt, t, root) => {
+    const s = root.s;
+    const p = enter(t, 3.1, .4, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    set(s.zone, { o: enter(t, 3.5, .3) });
+    s.rows.forEach((r, i) => { const e = enter(t, 3.6 + i * .15, .35); set(r, { o: Math.min(1, e * 1.6), x: (1 - e) * 1100 }); });
+    set(s.note, { o: enter(t, 4.1, .3) });
+    KHC.drawStamp(s.st, t, 4.4);
+    KHC.drawCaption(s.cap, t, 4.9);
+});
+
+// 7–11 · Fugiu da Guilhotina e da Burgundy Basquete
+KHC.scene(7, 11, root => {
+    const s = root.s = {};
+    hud(root);
+    s.k = el('div', 'k', root, 'PROVA Nº 2');
+    s.t = el('div', 't', root, 'Onde tem<br>risco, some.');
+    s.t.style.fontSize = '104px';
+    const box = el('div', 'runs', root);
+    const mk = (img, nm, sb) => {
+        const r = el('div', 'run', box);
+        if (img) el('img', '', r).src = img; else el('div', 'ball', r);
+        const w = el('div', '', r); el('div', 'nm', w, nm); el('div', 'sb', w, sb);
+        r.no = el('div', 'no', r, img && img.includes('nba') ? 'SEM TIME' : 'FUGIU');
+        return r;
+    };
+    s.r = [mk(LEAGUE.guilhotina.crest, 'KHC Guilhotina', 'nem se inscreveu'),
+           mk('../../assets/logo/png/ui/escudo-nba.png', 'Burgundy Basquete', 'é comissário · time: nenhum')];
+    s.cap = KHC.caption(root, 'Na lâmina, não.', 'No basquete, manda mas não joga.');
+}, (lt, t, root) => {
+    const s = root.s;
+    const p = enter(t, 7.1, .4, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    s.r.forEach((r, i) => {
+        const e = enter(t, 7.5 + i * .25, .35); set(r, { o: Math.min(1, e * 1.6), x: (1 - e) * (i ? 1100 : -1100) });
+        const n = enter(t, 8.3 + i * .35, .22); set(r.no, { o: n > 0 ? 1 : 0, s: lerp(2.4, 1, n), r: -6 });
+    });
+    KHC.drawCaption(s.cap, t, 9.2);
+});
+
+// 11–14,5 · E torce pro Tottenham
+KHC.scene(11, 14.5, root => {
+    const s = root.s = {};
+    s.bg = el('div', 'spurs', root);
+    s.rain = Array.from({ length: 26 }, (_, i) => { const d = el('div', 'rain', root); d.style.left = ((i * 41) % 1080) + 'px'; return d; });
+    hud(root);
+    s.k = el('div', 'k', root, 'PROVA Nº 3');
+    s.l1 = el('div', 'sp-1', root, 'E pra fechar,<br>torce pro');
+    s.l2 = el('div', 'sp-2', root, 'Tottenham.');
+    s.l3 = el('div', 'sp-3', root, 'Tudo explicado:<br><b>sofrer é estilo de vida.</b>');
+    s.epl = el('div', 'epl', root, '<img src="../../assets/logo/png/ui/escudo-premier.png"><div><div class="a">COCORICÓ PREMIER LEAGUE · 5º · 4–3</div><div class="b">North London Dictator</div></div>');
+    s.eplst = KHC.stamp(s.epl, 'O ditador é ele', { top: -54, right: 24, rot: -3 });
+}, (lt, t, root, wall) => {
+    const s = root.s;
+    set(s.bg, { o: enter(t, 11.0, .5) });
+    s.rain.forEach((d, i) => { d.style.transform = `translateY(${((wall * 1400 + i * 173) % 2100) - 100}px)`; d.style.opacity = enter(t, 11.2, .5) * .8; });
+    const a = enter(t, 11.15, .4, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 60 });
+    const b = enter(t, 11.7, .3, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(2, 1, b), r: (1 - b) * -6 });
+    const c = enter(t, 12.4, .4); set(s.l3, { o: c, y: (1 - c) * 30 });
+    const e = enter(t, 12.9, .35); set(s.epl, { o: Math.min(1, e * 1.6), x: (1 - e) * 1100 });
+    KHC.drawStamp(s.eplst, t, 13.3);
+});
+
+// 14,5–18 · Fim: o apelido
+KHC.scene(14.5, 18, root => {
+    const s = root.s = {};
+    hud(root);
+    s.l1 = el('div', 'end-1', root, 'Imperius<br>Rex FC.');
+    s.l2 = el('div', 'end-2', root, 'Ditador<br>Rique<br>Infantinno.');
+    s.st = el('div', 'big-stamp', root, '<span>Manda em tudo. Joga nada.</span>');
+    s.st.style.top = '1370px'; s.st.firstChild.style.cssText = 'font-size:56px;white-space:nowrap';
+    s.logo = el('img', 'end-logo', root); s.logo.src = LEAGUE.khc.crest;
+}, (lt, t, root) => {
+    const s = root.s;
+    const a = enter(t, 14.6, .4, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
+    const b = enter(t, 15.3, .3, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
+    const c = enter(t, 16.0, .22); set(s.st, { o: c > 0 ? 1 : 0, s: lerp(2.6, 1, c), r: -5 });
+    const l = enter(t, 17.0, .4, ease.elastic); set(s.logo, { s: l });
+});
+
+[[3, 'serie-a'], [7, 'guilhotina'], [11, 'khc'], [14.5, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
+KHC.fadeOut(17.6, 18);
+
+// Pausas de leitura. A mesma lista está em scripts/trilha/imperius.py.
+KHC.hold([[2.4, 0.6], [5.9, 0.6], [10.0, 0.5], [13.6, 1.0]]);
+
+KHC.start(18);
+await window.ready();
+window.loaded = true;
+})();
+</script>
+</body>
+</html>
