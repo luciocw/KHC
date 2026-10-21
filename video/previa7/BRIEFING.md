@@ -31,6 +31,22 @@ O logo é `assets/logo/png/ui/escudo-premier.png`.
 
 Antes de montar, rodar o `fetch_tambem.py` de novo para atualizar os dados.
 
+### Rodada 8 da Cocoricó PL (print do usuário, projeção e chance de vitória da Sleeper)
+
+| Casa | Proj. | Chance | × | Chance | Proj. | Fora |
+|---|---|---|---|---|---|---|
+| Arena do Grêmio (LucioWagner, 3–4, 7º) | 64.61 | 33% | × | 67% | 77.75 | Cruise Sport Club (Rodolfo92, 6–1, 1º) |
+| Team Caipiracicaba (1–6, 10º) | 70.01 | 77% | × | 23% | 50.66 | Team Inaciombn18 (2–5, 9º) |
+| Team Gumagol971 (2–5, 8º) | 54.67 | 42% | × | 58% | 59.88 | Alvinegro Praiano (markinhosfc11, 4–3, 4º) |
+| ThreeColor dos Pampas (RobsonF90, 5–2, 3º) | 53.91 | 22% | × | 78% | 75.41 | Up the Irons!! (ferpetucco, 3–4, 6º) |
+| North London Dictator (RiqueSantos) | 40.48 | **7%** | × | 93% | 79.47 | Forest Ceará (Ceara16) |
+
+Ganchos para a zoeira:
+- **O Ditador Rique tem 7% de chance**, a pior projeção da rodada (40.48).
+- O Vigarista, lanterna, é favorito (77%) contra o Inaciombn18, que já foi cortado na Guilhotina.
+- O Cruise vem de derrota e pega o Arena do Grêmio, do LucioWagner.
+- O ThreeColor, que derrubou o invicto, é azarão (22%).
+
 ## Falta (o usuário manda depois)
 
 - Os demais confrontos, as imagens de classificação e as chances.
