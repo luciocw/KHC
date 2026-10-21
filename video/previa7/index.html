@@ -78,9 +78,15 @@
 .cens .band { position: absolute; left: -100px; right: -100px; top: 860px; height: 220px; background: #000; transform: rotate(-10deg);
     display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 128px; letter-spacing: 6px; color: var(--danger);
     border-top: 10px solid var(--danger); border-bottom: 10px solid var(--danger); }
-.cens .why { position: absolute; left: 0; right: 0; top: 1620px; text-align: center; font-family: Mono; font-size: 34px; letter-spacing: 2px; color: var(--text-2); }
+.cens .why { position: absolute; left: 0; right: 0; top: 1610px; text-align: center; font-weight: 900; font-size: 84px; letter-spacing: -1px; color: var(--danger); text-shadow: 6px 6px 0 #000; }
 .cens .noise { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255,255,255,.07) 0 3px, transparent 3px 7px); }
 
+.pe { position: absolute; left: 50px; right: 50px; top: 1330px; display: flex; align-items: center; gap: 30px; padding: 30px 34px; z-index: 5;
+    border-radius: 24px; background: #0b0908; border: 4px solid var(--orange); box-shadow: 0 30px 60px rgba(0,0,0,.7); opacity: 0; }
+.pe img { width: 170px; height: 170px; border-radius: 30px; object-fit: cover; filter: grayscale(1) contrast(1.2); }
+.pe .a { font-weight: 800; font-size: 46px; color: var(--text-2); }
+.pe .b { font-weight: 900; font-size: 66px; line-height: 1; color: var(--text); white-space: nowrap; }
+.pe .c { font-weight: 900; font-size: 60px; color: var(--orange); margin-top: 6px; }
 .end-k { position: absolute; left: 60px; top: 520px; font-family: Pixel; font-size: 40px; color: var(--orange); }
 .end-1 { position: absolute; left: 60px; right: 60px; top: 610px; font-weight: 900; font-size: 140px; line-height: .95; letter-spacing: -2px; }
 .end-2 { position: absolute; left: 60px; right: 60px; top: 1050px; font-weight: 900; font-size: 116px; line-height: .95; letter-spacing: -2px; color: var(--orange); }
@@ -359,24 +365,28 @@ KHC.scene(37.3, 42.3, root => {
     KHC.drawCaption(s.cap, t, 40.1);
 });
 
-// 42,3–43,5 · flash: o dossiê do Ditador foi censurado
-KHC.scene(42.3, 43.5, root => {
+// 42,3–44,3 · flash: o dossiê do Ditador foi censurado. E o do Public Enemy?
+KHC.scene(42.3, 44.3, root => {
     const s = root.s = {};
     s.c = el('div', 'cens', root);
     el('img', '', s.c).src = 'assets/avatars/card.jpg';
     el('div', 'noise', s.c);
     s.band = el('div', 'band', s.c, 'CENSURADO');
-    el('div', 'why', s.c, 'DOSSIÊ REMOVIDO A PEDIDO DO DITADOR');
+    s.why = el('div', 'why', s.c, 'Quem mandou sumir?!');
+    s.pe = el('div', 'pe', root, `<img src="${team('elite', 'Public Enemy #1').avatar}"><div><div class="a">E o dossiê do</div><div class="b">Public Enemy #1?</div><div class="c">Onde estará?</div></div>`);
 }, (lt, t, root) => {
     const s = root.s;
     const b = enter(lt, .12, .14);
     set(s.band, { o: b > 0 ? 1 : 0, sx: lerp(2.5, 1, b), r: -10 });
     s.c.style.filter = lt < .1 || (lt > .55 && lt < .62) ? 'invert(1)' : 'none';
     const [x, y] = shake(lt, .26, .3, 22); s.c.style.transform = `translate(${x}px, ${y}px)`;
+    const q = enter(lt, 1.0, .3, ease.back);
+    set(s.pe, { o: Math.min(1, q * 2), y: (1 - q) * 300 });
+    s.c.style.opacity = 1 - .45 * prog(lt, 1.0, 1.3);
 });
 
-// 43,5–47 · Fim
-KHC.scene(43.5, 47, root => {
+// 44,3–47,8 · Fim
+KHC.scene(44.3, 47.8, root => {
     const s = root.s = {};
     hud0(root);
     s.k = el('div', 'end-k', root, 'SEMANA 7');
@@ -385,21 +395,21 @@ KHC.scene(43.5, 47, root => {
     s.logo = el('img', 'end-logo', root); s.logo.src = LEAGUE.khc.crest;
 }, (lt, t, root) => {
     const s = root.s;
-    set(s.k, { o: enter(t, 43.6, .3) });
-    const a = enter(t, 43.8, .45, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
-    const b = enter(t, 44.8, .35, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
-    const l = enter(t, 45.6, .5, ease.elastic); set(s.logo, { s: l });
+    set(s.k, { o: enter(t, 44.4, .3) });
+    const a = enter(t, 44.6, .45, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
+    const b = enter(t, 45.6, .35, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
+    const l = enter(t, 46.4, .5, ease.elastic); set(s.logo, { s: l });
 });
 
 [[2.8, 'elite'], [7.8, 'serie-a'], [12.8, 'serie-b'], [17.8, 'serie-c'], [24.3, 'serie-d'], [29.3, 'guilhotina'],
- [33.3, 'nba'], [37.3, 'premier'], [43.5, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
-KHC.fadeOut(46.55, 47);
+ [33.3, 'nba'], [37.3, 'premier'], [44.3, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
+KHC.fadeOut(47.35, 47.8);
 
 // Pausas de leitura (tempo da timeline, duração). A mesma lista está em
 // scripts/trilha/previa7.py.
-KHC.hold([[6.1, 0.5], [11.1, 0.5], [16.1, 0.5], [22.9, 0.8], [27.6, 0.5], [32.2, 0.5], [36.4, 0.5], [41.4, 0.7], [46.3, 0.3]]);
+KHC.hold([[6.1, 0.5], [11.1, 0.5], [16.1, 0.5], [22.9, 0.8], [27.6, 0.5], [32.2, 0.5], [36.4, 0.5], [41.4, 0.7], [43.5, 0.3], [47.1, 0.3]]);
 
-KHC.start(47);
+KHC.start(47.8);
 await window.ready();
 window.loaded = true;
 })();

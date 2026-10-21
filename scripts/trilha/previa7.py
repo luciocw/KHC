@@ -9,10 +9,10 @@ Uso: python3 scripts/trilha/previa7.py SAIDA [--video VIDEO.mp4]
 """
 from chiptune import Track, note, notes, remap, run
 
-HOLDS = [(6.1, 0.5), (11.1, 0.5), (16.1, 0.5), (22.9, 0.8), (27.6, 0.5), (32.2, 0.5), (36.4, 0.5), (41.4, 0.7), (46.3, 0.3)]
+HOLDS = [(6.1, 0.5), (11.1, 0.5), (16.1, 0.5), (22.9, 0.8), (27.6, 0.5), (32.2, 0.5), (36.4, 0.5), (41.4, 0.7), (43.5, 0.3), (47.1, 0.3)]
 R = remap(HOLDS)
 
-t = Track(dur=R(47.0), bpm=168, grid=1.2, seed=77, swing=0.12)
+t = Track(dur=R(47.8), bpm=168, grid=1.2, seed=77, swing=0.12)
 
 # Abertura
 t.console_on(0.0)
@@ -50,7 +50,7 @@ t.toll(R(29.4), "E2")
 t.stamp(R(30.5))
 
 # KHC NBA · Burgundy
-t.play(R(33.3), R(43.5), "plataforma")
+t.play(R(33.3), R(44.3), "plataforma")
 t.blips(R(33.7), R(34.2), 8, base="C5", step=1, vel=0.5)
 t.stamp(R(34.8))
 # Cocoricó PL
@@ -58,17 +58,19 @@ t.coins(R(37.9), R(38.7))
 t.stamp(R(38.8))
 t.low_life(R(39.5), R(40.1))  # 7%
 
-# Flash CENSURADO
+# Flash CENSURADO (2 s) e a pergunta sobre o dossiê do Public Enemy
 t.glitch(R(42.3))
 t.stamp(R(42.42))
+t.blip(R(43.3), note("E5"))  # E o dossiê do Public Enemy #1?
+t.cricket(R(43.75))  # Onde estará?
 
 # Fim
-t.play(R(43.5), R(47.0), "heroi")
-t.stage_clear(R(43.8))
-t.ba_dum_tss(R(44.8))  # "Ou quem o Ditador deixar."
-t.save_beep(R(45.6))
+t.play(R(44.3), R(47.8), "heroi")
+t.stage_clear(R(44.6))
+t.ba_dum_tss(R(45.6))  # "Ou quem o Ditador deixar."
+t.save_beep(R(46.4))
 
-for p in (2.8, 7.8, 12.8, 17.8, 24.3, 29.3, 33.3, 37.3, 43.5):
+for p in (2.8, 7.8, 12.8, 17.8, 24.3, 29.3, 33.3, 37.3, 44.3):
     t.warp(R(p))
 
 run(t)
