@@ -25,7 +25,7 @@ O logo é `assets/logo/png/ui/escudo-premier.png`.
 
 - **Cruise Sport Club** (Rodolfo92) está em 6–0–1 e segue líder. A derrota veio na rodada 7.
 - **Quem derrubou:** ThreeColor dos Pampas (@RobsonF90, então 5–2, 3º) venceu por **114.75 × 80.75** o Cruise Sport Club (6–1, 1º), uma diferença de 34. Pela projeção da Sleeper, o Cruise era o favorito: 74.03 contra 68.04 do ThreeColor. Fonte: print do usuário, porque a API não traz esse placar.
-- O RobsonF90 é o mesmo do líder da Guilhotina (793.5 PF na S6) e do Fofura e Fé.
+- O RobsonF90 também é dono do Fofura e Fé e segue vivo na Guilhotina.
 - Tabela: Cruise 6–0–1 · Forest Ceará 5–0–2 · ThreeColor dos Pampas 5–0–2 · Alvinegro Praiano 4–0–3 · **North London Dictator (Rique) 4–0–3** · Up the Irons!! 3–0–4 · Arena do Grêmio (LucioWagner) 3–0–4 · Gumagol971 2–0–5 · Inaciombn18 2–0–5 · **Caipiracicaba 1–0–6, lanterna**.
 - O Rodolfo92 é dono do Cruise nas duas ligas (Sport Club e Basketball).
 
