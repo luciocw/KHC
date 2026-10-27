@@ -130,6 +130,12 @@ PHASES = {
                 "C6 B5 Bb5 A5 - F5 A5 -", "G#5 - B5 - E5 - E5 -"),
         ch=chords("A3 C4 E4", "G#3 B3 D4", "A3 C4 F4", "G#3 B3 E4"),
         roots=["A1", "E2", "F2", "E2"], bass="pedal", drums="boss"),
+    # policial de plantão/investigação, Dó menor: stabs secos, baixo correndo
+    "policial": dict(
+        mel=seq("C5 - C5 Eb5 - C5 G5 -", "F5 - Eb5 - D5 - Bb4 -",
+                "C5 - C5 Eb5 - G5 Ab5 -", "G5 - F5 - D5 - B4 -"),
+        ch=chords("C4 Eb4 G4", "Ab3 C4 Eb4", "C4 Eb4 G4", "B3 D4 G4"),
+        roots=["C2", "Ab1", "C2", "G1"], bass="ostinato", drums="boss", duty=0.25),
     # caixinha de música assombrada, Mi menor com cromatismo, sem bateria
     "assombrada": dict(
         mel=seq("E5 . . G5 . . F#5 .", "F5 . . . E5 . . .",
