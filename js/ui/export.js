@@ -18,6 +18,7 @@
 const EXPORT_W = 814;          // largura em px CSS (igual ao card no desktop)
 const EXPORT_SCALE = 2;        // PNG em 2× para ficar nítido no celular
 const EXPORT_IMG_TIMEOUT = 4000;
+const TOP_EXPORT_LIMIT = 20;   // Top Scorers em "Todas": só os 20 primeiros na imagem
 
 /** Valor de um token CSS do :root. */
 function cssToken(name) {
@@ -1050,11 +1051,17 @@ async function drawAlsoCanvas(cfg, data) {
 /**
  * Desenha o Top Scorers com o filtro atual: posição, time, série · dono ·
  * V–D e pontos. Acento da série filtrada (ou laranja KHC em "Todas").
+ * "Todas" sai só com o Top 20 (a lista inteira ficaria comprida demais).
  * @returns {Promise<HTMLCanvasElement>}
  */
 async function drawTopCanvas() {
     const m = topScorersModel();
-    const meta = appState.topFilter === 'all' ? null : SERIES_META[appState.topFilter];
+    const all = appState.topFilter === 'all';
+    const meta = all ? null : SERIES_META[appState.topFilter];
+    if (all && m.list.length > TOP_EXPORT_LIMIT) {
+        m.subtitle = m.subtitle.replace(`${m.list.length} times`, `Top ${TOP_EXPORT_LIMIT} de ${m.list.length} times`);
+        m.list = m.list.slice(0, TOP_EXPORT_LIMIT);
+    }
     const c = exportPalette(meta);
     const { crest, avatars } = await loadExportAssets(meta, m.list.map(t => t.avatar));
     const THEAD_H = 34, ROW_H = 57;
