@@ -7,6 +7,8 @@ Dados em `data.json`, `guilhotina.json` e `tambem.json`, baixados da Sleeper.
 - **Série C, a rivalidade da Prévia:** joaoW7 130.72 × 118.66 San Andreas Chiefs (ferpetucco). Caiu a invencibilidade. A desculpa é o **LAG**, como em jogo online: simular lag com ping de 999 ms, placar travando e voltando (rubber-band), "Reconectando…" e chat com "foi lag!!" × "gg ez". O San Andreas fez 50 pontos abaixo da média (168.98).
 - **Cocoricó PL, rodada 8:** vitória do **Arena do Grêmio** (LucioWagner) sobre o **ex-invicto Cruise Sport Club**, que chegou à **segunda derrota seguida**. A Sleeper não traz o placar; usar um print se vier.
 
+- **Cocoricó PL, piada com o North London Dictator (Ditador Rique, torcedor do Tottenham):** o Harry Kane, eterno ídolo dos Spurs, teve que sair de Londres para ser campeão: ganhou a Bundesliga pelo Bayern e, em 26/10/2026, a **Bola de Ouro 2026** (cerimônia em Londres, a primeira de um inglês desde Michael Owen em 2001). Enquanto isso, o North London Dictator perdeu de novo e caiu para 4–4. Ideia: "Até o Kane precisou sair do Tottenham pra ganhar alguma coisa." Fontes: UEFA, ESPN e Bundesliga.com.
+
 ## Outros ganchos (Sleeper)
 
 - **Diogoashura na dupla jornada contra os donos:** venceu o Public Enemy #1 na Elite por 172.30 × 120.50 (+51.8) e perdeu para o Imperius (Ditador) na A por 126.92 × 101.18.
