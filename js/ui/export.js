@@ -1,7 +1,7 @@
 // =============================================================================
 // UI / EXPORT — Exporta como imagem (PNG): a classificação (Ligas), os
-// confrontos (Rodada) ou o chaveamento de uma série, o Power Ranking ou o
-// perfil de um jogador.
+// confrontos (Rodada) ou o chaveamento de uma série, o Top Scorers, o Power
+// Ranking ou o perfil de um jogador.
 //
 // A tabela é redesenhada num <canvas> com largura fixa (sempre com a coluna
 // PC, mesmo no celular), no visual do card da aba Ligas. Cores lidas dos
@@ -1047,6 +1047,76 @@ async function drawAlsoCanvas(cfg, data) {
     return canvas;
 }
 
+/**
+ * Desenha o Top Scorers com o filtro atual: posição, time, série · dono ·
+ * V–D e pontos. Acento da série filtrada (ou laranja KHC em "Todas").
+ * @returns {Promise<HTMLCanvasElement>}
+ */
+async function drawTopCanvas() {
+    const m = topScorersModel();
+    const meta = appState.topFilter === 'all' ? null : SERIES_META[appState.topFilter];
+    const c = exportPalette(meta);
+    const { crest, avatars } = await loadExportAssets(meta, m.list.map(t => t.avatar));
+    const THEAD_H = 34, ROW_H = 57;
+    const n = m.list.length;
+    const H = EXPORT_HEAD_H + THEAD_H + n * ROW_H;
+    const { canvas, ctx } = startExportCard(H, c, crest, m.title, m.subtitle);
+    const colPts = EXPORT_W - 14, colTeam = 56;
+    const spaced = s => s.toUpperCase().split('').join('\u200A');
+
+    let y = EXPORT_HEAD_H;
+    hLine(ctx, 0, EXPORT_W, y + THEAD_H - 1, c.border);
+    ctx.fillStyle = c.text3;
+    setFont(ctx, 800, 12, 'condensed');
+    ctx.fillText('#', 14, y + THEAD_H / 2);
+    ctx.fillText(spaced('Time'), colTeam, y + THEAD_H / 2);
+    ctx.textAlign = 'right';
+    ctx.fillText(spaced('Pontos'), colPts, y + THEAD_H / 2);
+    ctx.textAlign = 'left';
+    y += THEAD_H;
+
+    m.list.forEach((t, i) => {
+        const top = y + i * ROW_H, mid = top + ROW_H / 2;
+        if (i % 2 === 1) {
+            ctx.fillStyle = c.surface2;
+            ctx.fillRect(0, top, EXPORT_W, ROW_H);
+        }
+        if (i < n - 1) hLine(ctx, 0, EXPORT_W, top + ROW_H - 1, c.border);
+        ctx.fillStyle = i < 3 ? c.text : c.text2;
+        setFont(ctx, 900, 16, 'condensed');
+        ctx.fillText(String(i + 1), 14, mid);
+        drawAvatar(ctx, colTeam, mid - 17, avatars[i], t.teamName || t.ownerName, c);
+        const nx = colTeam + 34 + 10;
+        const maxW = colPts - 110 - nx;
+        ctx.fillStyle = c.text;
+        setFont(ctx, 700, 15);
+        ctx.fillText(fitText(ctx, t.teamName || '', maxW), nx, mid - 8);
+
+        // Série (na cor da liga) · dono · V–D
+        const sm = SERIES_META[t.leagueTier];
+        let x = nx;
+        setFont(ctx, 800, 11, 'condensed');
+        if (sm) {
+            const label = spaced(sm.short);
+            ctx.fillStyle = cssToken(`--league-${sm.league}`) || c.text2;
+            ctx.fillText(label, x, mid + 11);
+            x += ctx.measureText(label).width + 8;
+        }
+        ctx.fillStyle = c.text3;
+        setFont(ctx, 400, 12);
+        ctx.fillText(fitText(ctx, `${t.ownerName || ''} · ${t.wins}–${t.losses}`, maxW - (x - nx)), x, mid + 11);
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = c.text;
+        setFont(ctx, 900, 18, 'condensed');
+        ctx.fillText(fmtPts(t.fpts), colPts, mid);
+        ctx.textAlign = 'left';
+    });
+
+    finishExportCard(ctx, H, c);
+    return canvas;
+}
+
 let _exportCache = null;   // { key, blob } da última imagem gerada
 
 /**
@@ -1078,6 +1148,15 @@ function exportTarget() {
             name: `khc-perfil-${slug}.png`,
             title: `${user} · Ultimate League KHC`,
             draw: () => drawProfileCanvas(user)
+        };
+    }
+    if (appState.tab === 'top') {
+        const f = appState.topFilter === 'all' ? 'todas' : (SERIES_META[appState.topFilter] || {}).league || 'todas';
+        return {
+            key: `top|${appState.season}|${appState.topFilter}|${appState.includeElite}|${appState.lastUpdated || ''}`,
+            name: `khc-${appState.season}-top-scorers-${f}${appState.includeElite && appState.topFilter === 'all' ? '-com-elite' : ''}.png`,
+            title: `Top Scorers · ${appState.season}`,
+            draw: () => drawTopCanvas()
         };
     }
     if (appState.tab === 'power') {
