@@ -16,7 +16,7 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
   - **NBA** (`#/nba`): KHC NBA League · National Burgundy Association, liga nova em 2026/27 (6 times). Mesma tabela, com V–D, e Rodada (`#/nba/rodada/<semana>`) com destaques e exportar, como a da NFL; antes do draft mostra só os times que já entraram
 - **Rodada:** confrontos e placar da semana por série (‹ semana ›), rótulos de playoff (Final, 3º lugar, Semifinal…) e exportação em PNG; destaques da semana (maior pontuação, maior vitória, jogo mais apertado)
 - **App na tela inicial:** manifest + ícones (`assets/app/`) — Android instala pelo Chrome, iPhone pelo Safari (Compartilhar → Adicionar à Tela de Início)
-- **Top Scorers:** filtro por série e "Incluir Elite" (desligado por padrão, evita time duplicado)
+- **Top Scorers:** filtro por série e "Incluir Elite" (desligado por padrão, evita time duplicado); Baixar / Compartilhar geram PNG da lista com o filtro atual
 - **Power Ranking:** tiers S Favoritos · A Candidatos · B Meio de tabela · C Pressionados · D Lanternas por posição (10/20/40/20/10%). PWR = 50% força (all-play semana a semana contra as Séries A–D) + 30% aproveitamento + 20% fase (últimas 3 semanas); sem Elite. Exporta PNG
 - **Lendas:** Hall da Fama ordenado por títulos (ouro → prata → bronze → 4º)
 - **Perfil do jogador:** lateral no desktop, bottom sheet no celular

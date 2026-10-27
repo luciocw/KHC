@@ -6,6 +6,7 @@
 //     duplica o time (com outra pontuação).
 //   - Linha: posição | avatar | time + pill da série + dono · V–D | pontos.
 //   - Sem animação em cascata.
+//   - Botões Baixar / Compartilhar: a lista filtrada vira PNG (ui/export.js).
 //
 // Lê: appState.rosterData, appState.topFilter, appState.includeElite
 // Depende de: config, sanitize, ui/helpers
@@ -30,10 +31,10 @@ function buildTopRow(t, i) {
 }
 
 /**
- * Renderiza a aba Top Scorers.
- * @returns {string} HTML
+ * Lista da aba com o filtro atual (usada pela aba e pela exportação).
+ * @returns {{list: Array, tiers: Array<string>, hasElite: boolean, title: string, subtitle: string}}
  */
-function renderTopScorers() {
+function topScorersModel() {
     const tiers = TIER_ORDER.filter(tier =>
         !isGuillotine(tier) &&
         appState.rosterData.some(t => t.leagueTier === tier) &&
@@ -49,6 +50,23 @@ function renderTopScorers() {
         .slice()
         .sort((a, b) => b.fpts - a.fpts);
 
+    const series = appState.topFilter === 'all' ? null : SERIES_META[appState.topFilter];
+    const when = isSeasonFinalized() ? `temporada ${appState.season}` : (weekLabel() || `temporada ${appState.season}`);
+    const scope = series ? series.name : appState.includeElite ? 'Todas as séries, com Elite' : 'Todas as séries';
+    return {
+        list, tiers, hasElite,
+        title: 'Top Scorers',
+        subtitle: `${scope} · ${list.length} times · ${when}`
+    };
+}
+
+/**
+ * Renderiza a aba Top Scorers.
+ * @returns {string} HTML
+ */
+function renderTopScorers() {
+    const { list, tiers, hasElite } = topScorersModel();
+
     const chips = [['all', 'Todas'], ...tiers.map(t => [t, SERIES_META[t].short])]
         .map(([k, label]) => `<button type="button" data-top-filter="${k}" aria-pressed="${appState.topFilter === k}">${escapeHtml(label)}</button>`)
         .join('');
@@ -61,8 +79,17 @@ function renderTopScorers() {
         ? `<div class="card">${list.map(buildTopRow).join('')}</div>`
         : stateHTML({ icon: 'chart', title: 'Nada por aqui ainda' });
 
+    const actions = list.length ? `<div class="export-actions" role="group" aria-label="Exportar Top Scorers como imagem">
+            <button type="button" class="export-btn" data-action="export-download" aria-label="Baixar Top Scorers como imagem">
+                <span data-icon="download" data-size="18"></span><span class="export-btn__label">Baixar</span>
+            </button>
+            ${canShareFiles() ? `<button type="button" class="export-btn" data-action="export-share" aria-label="Compartilhar Top Scorers como imagem">
+                <span data-icon="share" data-size="18"></span><span class="export-btn__label">Compartilhar</span>
+            </button>` : ''}
+        </div>` : '';
+
     return `
         ${partialWarningHTML()}
-        <div class="chips" role="group" aria-label="Filtrar por série">${chips}<span class="spacer"></span>${toggle}</div>
+        <div class="chips" role="group" aria-label="Filtrar por série">${chips}<span class="spacer"></span>${toggle}${actions}</div>
         ${body}`;
 }
