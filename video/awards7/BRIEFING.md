@@ -9,6 +9,34 @@ Dados em `data.json`, `guilhotina.json` e `tambem.json`, baixados da Sleeper.
 
 - **Cocoricó PL, piada com o North London Dictator (Ditador Rique, torcedor do Tottenham):** o Harry Kane, eterno ídolo dos Spurs, teve que sair de Londres para ser campeão: ganhou a Bundesliga pelo Bayern e, em 26/10/2026, a **Bola de Ouro 2026** (cerimônia em Londres, a primeira de um inglês desde Michael Owen em 2001). Enquanto isso, o North London Dictator perdeu de novo e caiu para 4–4. Ideia: "Até o Kane precisou sair do Tottenham pra ganhar alguma coisa." Fontes: UEFA, ESPN e Bundesliga.com.
 
+### Cocoricó PL: tabela após a rodada 8 (print do usuário)
+
+1. Forest Ceará 6–2 (3V seguidas)
+2. ThreeColor dos Pampas 6–2 (4V)
+3. **Cruise Sport Club 6–2 (2D seguidas)**, que caiu do 1º para o 3º
+4. Alvinegro Praiano 5–3
+5. North London Dictator 4–4 (1D)
+6. **Arena do Grêmio 4–4 (1V)**
+7. Up the Irons!! 3–5 (3D)
+8. Gumagol971 2–6
+9. Caipiracicaba 2–6 (1V)
+10. Inaciombn18 2–6
+
+### Cocoricó PL: rodada 9 (projeção e chance da Sleeper)
+
+| Casa | Proj. | Chance | × | Chance | Proj. | Fora |
+|---|---|---|---|---|---|---|
+| Arena do Grêmio (4–4, 6º) | 58.67 | 27% | × | 73% | 76.53 | Forest Ceará (6–2, 1º) |
+| Caipiracicaba (2–6, 9º) | 68.22 | 68% | × | 32% | 55.85 | Gumagol971 (2–6, 8º) |
+| ThreeColor dos Pampas (6–2, 2º) | 60.66 | 33% | × | 67% | 72.86 | Alvinegro Praiano (5–3, 4º) |
+| North London Dictator (4–4, 5º) | 57.65 | 63% | × | 37% | 49.84 | Inaciombn18 (2–6, 10º) |
+| **Up the Irons!! (ferpetucco, 3–5)** | 73.99 | **89%** | × | **11%** | 42.17 | **Cruise Sport Club (6–2, 3º)** |
+
+Ganchos:
+- O Cruise tem 11% e pode chegar à 3ª derrota seguida.
+- Quem tem 89% é o ferpetucco: "se não der lag".
+- O placar Arena × Cruise da rodada 8 ainda não veio. Sem ele, falar só da vitória.
+
 ## Outros ganchos (Sleeper)
 
 - **Diogoashura na dupla jornada contra os donos:** venceu o Public Enemy #1 na Elite por 172.30 × 120.50 (+51.8) e perdeu para o Imperius (Ditador) na A por 126.92 × 101.18.
