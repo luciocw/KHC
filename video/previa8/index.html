@@ -301,8 +301,9 @@ KHC.scene(18.5, 24.5, root => {
         return r;
     });
     s.hit = s.rows.find(r => r.classList.contains('hit'));
-    s.st = KHC.stamp(s.hit, 'Só o Lucio apontou o líder', { top: 62, right: 20, rot: -3 });
+    s.st = KHC.stamp(root, 'Só o Lucio apontou o líder', { top: 1478, right: 60, rot: -2 }); s.st.style.fontSize = '36px';
     s.cap = KHC.caption(root, 'Três apontaram o 9º colocado.', 'Só o Lucio viu o VoliBEARS.');
+    s.cap.c.style.top = '1580px';
 }, (lt, t, root) => {
     const s = root.s;
     const p = enter(t, 18.6, .4, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
