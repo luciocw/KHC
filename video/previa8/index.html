@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>KHC Prévia · Semana 8</title>
+<link rel="stylesheet" href="../engine.css">
+<style>
+:root { --blood: #B3121B; --gold: #F2B705; }
+.boot { position: absolute; inset: 0; background: #fff; transform-origin: center; }
+.big-logo { position: absolute; left: 50%; top: 230px; width: 380px; height: 380px; margin-left: -190px; object-fit: contain;
+    filter: drop-shadow(0 30px 60px rgba(0,0,0,.6)); }
+.press { position: absolute; left: 0; right: 0; top: 660px; text-align: center; font-family: Pixel; font-size: 40px; color: var(--gold); text-shadow: 5px 5px 0 #000; }
+.open-l { position: absolute; left: 60px; right: 60px; font-weight: 900; font-size: 120px; line-height: .95; letter-spacing: -2px; text-transform: uppercase; }
+.open-l.o { color: var(--orange); }
+.open-sub { position: absolute; left: 60px; right: 60px; top: 1260px; font-weight: 700; font-size: 56px; line-height: 1.1; color: var(--text-2); }
+.open-sub b { color: var(--orange); }
+.half-bar { position: absolute; left: 60px; right: 60px; top: 1480px; height: 40px; border-radius: 10px; background: #1d1916; overflow: hidden; border: 3px solid #3A322C; }
+.half-bar i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--orange) 0 30px, #ff8a45 30px 36px); }
+.half-lb { position: absolute; left: 60px; right: 60px; top: 1540px; display: flex; justify-content: space-between; font-family: Mono; font-size: 30px; color: var(--text-3); }
+
+/* tabela da divisão */
+.world { font-family: Mono !important; font-size: 30px !important; letter-spacing: 3px; }
+.tbl-h { position: absolute; left: 60px; right: 60px; top: 468px; display: grid; grid-template-columns: 50px 62px 1fr 84px 196px 96px; gap: 12px;
+    font-family: Mono; font-size: 22px; letter-spacing: 2px; color: var(--text-3); }
+.tbl { position: absolute; left: 44px; right: 44px; top: 506px; display: flex; flex-direction: column; gap: 6px; }
+.sr { position: relative; display: grid; grid-template-columns: 50px 62px 1fr 84px 196px 96px; gap: 12px; align-items: center; height: 88px;
+    padding: 0 16px; border-radius: 16px; background: rgba(22,19,17,.94); border: 2px solid #2a2420; }
+.sr .p { font-family: Mono; font-size: 38px; color: var(--text-3); text-align: center; }
+.sr .av { width: 60px; height: 60px; border-radius: 13px; }
+.sr .n { font-weight: 800; font-size: 40px; font-stretch: 78%; letter-spacing: -.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sr .r { font-family: Mono; font-size: 34px; color: var(--text-2); text-align: center; }
+.sr .po { display: flex; align-items: center; gap: 10px; }
+.sr .po .bar { flex: 1; height: 16px; border-radius: 8px; background: #2a2420; overflow: hidden; }
+.sr .po .bar i { display: block; height: 100%; width: 0; background: var(--c); }
+.sr .po b { font-family: Mono; font-size: 32px; font-weight: 700; width: 88px; text-align: right; color: var(--text); }
+.sr .q { font-family: Mono; font-size: 32px; text-align: right; color: var(--text-3); }
+.sr .q.hot { color: #ff5a4e; }
+.sr.zone { background: rgba(60,14,14,.9); border-color: #5a1d1a; }
+.sr.zone .p { color: #ff5a4e; }
+.sr.on { border: 3px solid var(--orange); box-shadow: 0 0 0 3px rgba(242,106,27,.25), 0 18px 40px rgba(0,0,0,.5); z-index: 2; }
+.cut { position: relative; height: 0; border-top: 4px dashed var(--c); margin: 6px 0; }
+.cut span { position: absolute; right: 12px; top: -15px; background: var(--bg); padding: 0 10px; font-family: Mono; font-size: 22px; letter-spacing: 2px; color: var(--c); }
+.cut.red { border-color: var(--danger); } .cut.red span { color: var(--danger); }
+.vs-chip { position: absolute; left: -10px; top: 50%; margin-top: -24px; width: 48px; height: 48px; border-radius: 50%; background: var(--orange);
+    color: #120a05; font-family: Pixel; font-size: 16px; display: flex; align-items: center; justify-content: center; z-index: 3; opacity: 0; }
+
+/* guilhotina */
+.redbg { position: absolute; inset: 0; background: radial-gradient(1100px 700px at 50% -5%, rgba(179,18,27,.35), transparent 65%); }
+.g-k { position: absolute; left: 60px; top: 240px; font-family: Mono; font-size: 32px; letter-spacing: 3px; color: var(--gold); }
+.g-t { position: absolute; left: 60px; right: 270px; top: 300px; font-weight: 900; font-size: 84px; line-height: .95; letter-spacing: -2px; color: var(--blood); text-transform: uppercase; }
+.g-crest { position: absolute; right: 60px; top: 230px; width: 190px; height: 220px; object-fit: contain; }
+.blade { position: absolute; left: 50px; width: 980px; height: 190px; z-index: 4; }
+.blade svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 18px 30px rgba(0,0,0,.6)); }
+.rope { position: absolute; left: 536px; top: 0; width: 8px; background: #8c6a43; z-index: 3; }
+.group { position: absolute; left: 50px; right: 50px; display: flex; flex-direction: column; gap: 14px; }
+.lbl { font-family: Mono; font-size: 28px; letter-spacing: 3px; margin: 0 0 4px 6px; }
+.lbl.bad { color: var(--danger); } .lbl.good { color: var(--success); } .lbl.gold { color: var(--gold); }
+.trow.win { border-color: var(--success); } .trow.lose { border-color: var(--danger); } .trow.hot { border-color: var(--orange); }
+
+/* também na KHC */
+.also-k { position: absolute; left: 60px; top: 240px; font-family: Mono; font-size: 32px; letter-spacing: 3px; color: var(--gold); }
+.also-t { position: absolute; left: 60px; right: 300px; top: 300px; font-weight: 900; font-size: 92px; line-height: .95; letter-spacing: -2px; text-transform: uppercase; }
+.also-crest { position: absolute; right: 60px; top: 240px; width: 200px; height: 220px; object-fit: contain; }
+
+.end-k { position: absolute; left: 60px; top: 520px; font-family: Pixel; font-size: 40px; color: var(--orange); }
+.end-1 { position: absolute; left: 60px; right: 60px; top: 610px; font-weight: 900; font-size: 130px; line-height: .95; letter-spacing: -2px; }
+.end-2 { position: absolute; left: 60px; right: 60px; top: 1000px; font-weight: 900; font-size: 116px; line-height: .95; letter-spacing: -2px; color: var(--orange); }
+.end-logo { position: absolute; left: 50%; top: 1480px; width: 220px; height: 220px; margin-left: -110px; object-fit: contain; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="fx"></div>
+<script src="../engine.js"></script>
+<script>
+(async () => {
+const data = await (await fetch('data.json')).json();
+const G = await (await fetch('guilhotina.json')).json();
+const A = await (await fetch('tambem.json')).json();
+const { el, set, prog, lerp, ease, enter, blink, shake, LEAGUE } = KHC;
+LEAGUE.nba = { color: '#7A1F3D', crest: '../../assets/logo/png/ui/escudo-nba.png' };
+LEAGUE.premier = { color: '#D4A017', crest: '../../assets/logo/png/ui/escudo-premier.png' };
+const L = Object.fromEntries(data.leagues.map(l => [l.tier, l]));
+const TIERS = ['elite', 'serie-a', 'serie-b', 'serie-c', 'serie-d'];
+// regras de 2026: playoffs top 4 na Elite e top 6 nas séries; caem 3 (A, B e C; D é a última)
+const PO = { elite: 4, 'serie-a': 6, 'serie-b': 6, 'serie-c': 6, 'serie-d': 6 };
+const REL = { 'serie-a': 3, 'serie-b': 3, 'serie-c': 3 };
+
+function hudFor(root, tier) {
+    const h = KHC.hud(root, 'PRÉVIA · SEMANA 8', TIERS);
+    const i = TIERS.indexOf(tier);
+    h.segs.forEach((s, k) => { if (k < i) s.classList.add('on'); if (k === i) s.classList.add('now'); });
+}
+const hud0 = root => KHC.hud(root, 'PRÉVIA · SEMANA 8', []);
+const pct = v => (v >= 99 ? '>99%' : v <= 0 ? '<1%' : v + '%');
+
+/** Tabela da divisão (após a rodada 7) com o confronto da semana em destaque. */
+function standScene(a, tier, cfg) {
+    const D = 5.5;
+    KHC.scene(a, a + D, root => {
+        const s = root.s = {};
+        const c = LEAGUE[tier].color;
+        root.style.setProperty('--c', c);
+        hudFor(root, tier);
+        const hd = el('div', 'phase-head', root);
+        hd.style.setProperty('--c', c);
+        el('div', 'kicker', hd, 'APÓS A RODADA 7');
+        el('div', 'league-name', hd, L[tier].label);
+        s.w = el('div', 'world', hd, cfg.world);
+        s.cr = el('img', 'crest', hd); s.cr.src = LEAGUE[tier].crest;
+        const rel = REL[tier];
+        el('div', 'tbl-h', root, `<span>#</span><span></span><span>TIME</span><span>V–D</span><span>PLAYOFFS</span><span>${rel ? 'QUEDA' : ''}</span>`);
+        const teams = L[tier].matchups.flat().sort((x, y) => x.pos - y.pos);
+        const box = el('div', 'tbl', root);
+        s.rows = [];
+        teams.forEach(tm => {
+            if (tm.pos === PO[tier] + 1) el('div', 'cut', box, '<span>PLAYOFFS ▲</span>');
+            if (rel && tm.pos === teams.length - rel + 1) el('div', 'cut red', box, '<span>ZONA DE QUEDA ▼</span>');
+            const r = el('div', 'sr' + (rel && tm.pos > teams.length - rel ? ' zone' : ''), box);
+            el('div', 'p', r, tm.pos);
+            const av = el('div', 'av', r); if (tm.avatar) el('img', '', av).src = tm.avatar;
+            el('div', 'n', r, KHC.esc(tm.name));
+            el('div', 'r', r, tm.record.replace('-', '–'));
+            const po = el('div', 'po', r, '<div class="bar"><i></i></div><b>0%</b>');
+            r.bar = po.querySelector('i'); r.val = po.querySelector('b');
+            el('div', 'q' + (tm.queda >= 40 ? ' hot' : ''), r, rel ? pct(tm.queda) : '');
+            r.tm = tm;
+            if (cfg.on.includes(tm.name)) { r.classList.add('on'); r.chip = el('div', 'vs-chip', r, 'VS'); }
+            s.rows.push(r);
+        });
+        const hot = s.rows.filter(r => cfg.on.includes(r.tm.name));
+        s.st = KHC.stamp(root, cfg.stamp, { top: 1478, right: 60, rot: -2 }); s.st.style.fontSize = '36px';
+        s.cap = KHC.caption(root, cfg.caption[0], cfg.caption[1]);
+        s.cap.c.style.top = '1580px';
+    }, (lt, t, root) => {
+        const s = root.s;
+        const p = enter(lt, .05, .45, ease.back); set(s.cr, { s: p, r: (1 - p) * -30 });
+        set(s.w, { o: lt < 1.2 ? blink(lt, .15) : 1 });
+        s.rows.forEach((r, i) => {
+            const e = enter(t, a + .35 + i * .05, .3);
+            set(r, { o: Math.min(1, e * 1.6), x: (1 - e) * (i % 2 ? 600 : -600) });
+            const q = ease.out(prog(t, a + .9, a + 1.6));
+            r.bar.style.width = (r.tm.playoffs * q) + '%';
+            r.val.textContent = q >= 1 ? pct(r.tm.playoffs) : Math.round(r.tm.playoffs * q) + '%';
+            if (r.chip) { const c = enter(t, a + 1.8, .25, ease.back); set(r.chip, { o: c, s: lerp(2, 1, c) }); }
+        });
+        KHC.drawStamp(s.st, t, a + 2.1);
+        KHC.drawCaption(s.cap, t, a + 2.6);
+    });
+}
+
+// ================================================================ CENAS
+// 0–3 · Abertura: metade da temporada
+KHC.scene(0, 3, root => {
+    const s = root.s = {};
+    s.logo = el('img', 'big-logo', root); s.logo.src = LEAGUE.khc.crest;
+    s.press = el('div', 'press', root, 'PRESS START');
+    s.l1 = el('div', 'open-l', root, 'Prévia'); s.l1.style.top = '800px';
+    s.l2 = el('div', 'open-l o', root, 'Semana 8'); s.l2.style.top = '920px';
+    s.sub = el('div', 'open-sub', root, 'Passamos da metade.<br><b>Hora de ver quem está onde.</b>');
+    s.bar = el('div', 'half-bar', root, '<i></i>');
+    s.lb = el('div', 'half-lb', root, '<span>TEMPORADA REGULAR</span><span>7 DE 14</span>');
+    s.boot = el('div', 'boot', root);
+}, (lt, t, root) => {
+    const s = root.s;
+    const b = prog(lt, 0, .16);
+    set(s.boot, { o: 1 - b, sy: lerp(.004, 1, ease.out(b)) });
+    const lp = enter(lt, .05, .6, ease.elastic); set(s.logo, { s: lp, r: (1 - lp) * 20 });
+    s.press.textContent = lt < 1.0 ? 'PRESS START' : '▶ START!';
+    set(s.press, { o: lt < 1.0 ? blink(lt, .2) : 1 });
+    [s.l1, s.l2].forEach((e, i) => { const p = enter(lt, .25 + i * .18, .4, ease.back); set(e, { o: Math.min(1, p * 2), y: (1 - p) * 80 }); });
+    const sb = enter(lt, 1.1, .4); set(s.sub, { o: sb, y: (1 - sb) * 40 });
+    set(s.bar, { o: enter(lt, 1.4, .3) }); set(s.lb, { o: enter(lt, 1.4, .3) });
+    s.bar.firstChild.style.width = (50 * ease.out(prog(lt, 1.5, 2.3))) + '%';
+});
+
+standScene(3, 'elite', {
+    world: 'TOP 4 VAI AOS PLAYOFFS', on: ['Public Enemy #1', 'GORDINHAS AJEITADAS'], stampOn: 1,
+    stamp: 'Dono fora do G4 pega o líder',
+    caption: ['Public Enemy (44%) × Gordinhas (99%).', 'O dono precisa de um milagre.'],
+});
+standScene(8.5, 'serie-a', {
+    world: 'TOP 6 · CAEM 3', on: ['Imperius Rex FC', 'Caipiracicaba'],
+    stamp: '2º na tabela. #13 no Power Ranking.',
+    caption: ['O Ditador pega o 9º colocado.', 'Se perder, nem a censura esconde.'],
+});
+standScene(14, 'serie-b', {
+    world: 'TOP 6 · CAEM 3', on: ['RegisCarrara', 'GORDINHAS AJEITADAS'], stampOn: 1,
+    stamp: 'Clássico do topo',
+    caption: ['Gordinhas: >99% aqui, 99% na Elite.', 'O RegisCarrara vai tentar parar isso.'],
+});
+standScene(19.5, 'serie-c', {
+    world: 'TOP 6 · CAEM 3', on: ['San Andreas Chiefs', 'WI Redentor'],
+    stamp: 'Internet consertada?',
+    caption: ['San Andreas × WI Redentor (1–6).', 'Sem lag, sem desculpa.'],
+});
+standScene(25, 'serie-d', {
+    world: 'TOP 6 · NÃO HÁ QUEDA', on: ['Green N Gold', 'LeandroGaucho'],
+    stamp: 'O Bob Marley encara o líder',
+    caption: ['Green N Gold × LeandroGaucho (6–1).', 'Será que a paz dura duas semanas?'],
+});
+
+// 30,5–34,5 · Guilhotina · rodada 8
+KHC.scene(30.5, 34.5, root => {
+    const s = root.s = {};
+    el('div', 'redbg', root);
+    hud0(root);
+    el('div', 'g-k', root, 'RODADA 8');
+    el('div', 'g-t', root, `${G.alive} pescoços`);
+    s.cr = el('img', 'g-crest', root); s.cr.src = LEAGUE.guilhotina.crest;
+    const low = G.teams.filter(x => !x.cut).sort((a, b) => a.fpts - b.fpts).slice(0, 2);
+    s.rope = el('div', 'rope', root);
+    s.bl = el('div', 'blade', root, `<svg viewBox="0 0 1000 200" preserveAspectRatio="none"><rect x="470" y="0" width="60" height="40" fill="#2b2724"/>
+      <polygon points="0,30 1000,30 1000,110 0,200" fill="#6d6762"/><polygon points="0,182 1000,96 1000,110 0,200" fill="#B3121B"/></svg>`);
+    const g = el('div', 'group', root); g.style.top = '960px'; g.style.gap = '24px';
+    el('div', 'lbl bad', g, 'MENOS PONTOS ENTRE OS VIVOS');
+    s.rows = low.map((tm, i) => {
+        const r = KHC.teamRow(g, { name: tm.name, avatar: tm.avatar, sub: `${Math.round(tm.fpts)} PF${i ? ' · escapou por 2,84 na S7' : ' · escapou 3 vezes'}`, value: '' });
+        r.row.classList.add('lose'); return r;
+    });
+    s.st = KHC.stamp(s.rows[0].row, 'A lâmina tem memória', { top: -56, right: 24, rot: -3 });
+    s.cap = KHC.caption(root, 'Menor pontuação da rodada?', 'Cabeça rola. Sem exceção.');
+}, (lt, t, root, wall) => {
+    const s = root.s;
+    const c = enter(lt, .05, .45, ease.back); set(s.cr, { s: c, r: (1 - c) * -30 });
+    const y = 560 + Math.sin(wall * 3) * 24;
+    const by = lerp(-400, y, enter(t, 30.7, .5, ease.back));
+    s.bl.style.top = '0px'; set(s.bl, { y: by });
+    s.rope.style.height = Math.max(0, by + 20) + 'px';
+    s.rows.forEach((r, i) => { const a = enter(t, 31.1 + i * .15, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i ? 1100 : -1100), r: Math.sin(wall * 9 + i) * .6 }); });
+    KHC.drawStamp(s.st, t, 31.7);
+    KHC.drawCaption(s.cap, t, 32.1);
+});
+
+// 34,5–39,5 · Também na KHC: NBA e Cocoricó PL
+KHC.scene(34.5, 39.5, root => {
+    const s = root.s = {};
+    hud0(root);
+    el('div', 'also-k', root, 'TAMBÉM NA KHC');
+    s.t = el('div', 'also-t', root, 'NBA e<br><span style="color:var(--gold)">Cocoricó</span>');
+    s.cr = el('img', 'also-crest', root); s.cr.src = LEAGUE.premier.crest;
+    const P = n => A.premier.teams.find(x => x.name === n);
+    const pe = A.nba.teams[0];
+    const g = el('div', 'group', root); g.style.top = '560px';
+    el('div', 'lbl gold', g, 'KHC NBA · RODADA 2');
+    s.n = KHC.teamRow(g, { name: pe.name, avatar: pe.avatar, sub: 'dono da KHC · maior total da estreia', value: `${pe.w}–${pe.l}` }); s.n.row.classList.add('win');
+    const g2 = el('div', 'group', root); g2.style.top = '860px';
+    el('div', 'lbl bad', g2, 'COCORICÓ · RODADA 9 · CHANCE DE VITÓRIA');
+    s.c = KHC.teamRow(g2, { name: 'Cruise Sport Club', avatar: P('Cruise Sport Club').avatar, sub: '2 derrotas seguidas · × Up the Irons!!', value: '11%' }); s.c.row.classList.add('lose');
+    s.u = KHC.teamRow(g2, { name: 'Up the Irons!!', avatar: P('Up the Irons!!').avatar, sub: 'ferpetucco · se não der lag', value: '89%' }); s.u.row.classList.add('win');
+    s.st = KHC.stamp(s.c.row, 'A 3ª derrota seguida?', { top: -56, right: 24, rot: -3 });
+    s.cap = KHC.caption(root, 'O Cruise tem 11%.', 'O ferpetucco tem 89%. Se o Wi-Fi deixar.');
+}, (lt, t, root) => {
+    const s = root.s;
+    const p = enter(t, 34.6, .4, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    const c = enter(t, 34.65, .5, ease.elastic); set(s.cr, { s: c });
+    [s.n, s.c, s.u].forEach((r, i) => { const a = enter(t, 34.9 + i * .2, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i % 2 ? 1100 : -1100) }); });
+    KHC.drawStamp(s.st, t, 35.9);
+    KHC.drawCaption(s.cap, t, 36.6);
+});
+
+// 39,5–43 · Fim
+KHC.scene(39.5, 43, root => {
+    const s = root.s = {};
+    hud0(root);
+    s.k = el('div', 'end-k', root, 'SEMANA 8');
+    s.l1 = el('div', 'end-1', root, 'Metade da<br>temporada.');
+    s.l2 = el('div', 'end-2', root, 'Metade das<br>desculpas.');
+    s.logo = el('img', 'end-logo', root); s.logo.src = LEAGUE.khc.crest;
+}, (lt, t, root) => {
+    const s = root.s;
+    set(s.k, { o: enter(t, 39.6, .3) });
+    const a = enter(t, 39.8, .45, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
+    const b = enter(t, 40.8, .35, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
+    const l = enter(t, 41.6, .5, ease.elastic); set(s.logo, { s: l });
+});
+
+[[3, 'elite'], [8.5, 'serie-a'], [14, 'serie-b'], [19.5, 'serie-c'], [25, 'serie-d'], [30.5, 'guilhotina'],
+ [34.5, 'premier'], [39.5, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
+KHC.fadeOut(42.55, 43);
+
+// Pausas de leitura (tempo da timeline, duração): a tabela inteira e a
+// legenda antes de cada troca. A mesma lista está em scripts/trilha/previa8.py.
+KHC.hold([[6.4, 1.2], [11.9, 1.2], [17.4, 1.2], [22.9, 1.2], [28.4, 1.2], [33.4, 0.6], [38.4, 0.7], [42.3, 0.3]]);
+
+KHC.start(43);
+await window.ready();
+window.loaded = true;
+})();
+</script>
+</body>
+</html>
