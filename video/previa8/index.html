@@ -44,6 +44,27 @@
 .vs-chip { position: absolute; left: -10px; top: 50%; margin-top: -24px; width: 48px; height: 48px; border-radius: 50%; background: var(--orange);
     color: #120a05; font-family: Pixel; font-size: 16px; display: flex; align-items: center; justify-content: center; z-index: 3; opacity: 0; }
 
+/* modo furtivo */
+.mg-bg { position: absolute; inset: 0; background: radial-gradient(900px 800px at 50% 40%, #0d2a17, #050a06 75%); }
+.mg-k { position: absolute; left: 0; right: 0; top: 240px; text-align: center; font-family: Pixel; font-size: 54px; color: #4dff88; text-shadow: 0 0 24px rgba(77,255,136,.5), 5px 5px 0 #000; }
+.mg-sub { position: absolute; left: 0; right: 0; top: 320px; text-align: center; font-family: Mono; font-size: 30px; letter-spacing: 3px; color: #9fe8b5; }
+.radar { position: absolute; left: 240px; top: 400px; width: 600px; height: 600px; border-radius: 50%; overflow: hidden;
+    background: radial-gradient(circle, rgba(77,255,136,.10), rgba(0,0,0,.4) 70%); border: 4px solid #2f8f52; box-shadow: 0 0 60px rgba(77,255,136,.2); }
+.radar .ring { position: absolute; border: 2px solid rgba(77,255,136,.25); border-radius: 50%; }
+.radar .r1 { inset: 100px; } .radar .r2 { inset: 200px; }
+.radar .cross { position: absolute; inset: 0; background: linear-gradient(90deg, transparent 49.8%, rgba(77,255,136,.25) 50%, transparent 50.2%), linear-gradient(0deg, transparent 49.8%, rgba(77,255,136,.25) 50%, transparent 50.2%); }
+.sweep { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(77,255,136,.55), rgba(77,255,136,0) 50deg, transparent 360deg); }
+.blip { position: absolute; width: 84px; text-align: center; margin: -42px 0 0 -42px; }
+.blip img { width: 84px; height: 84px; border-radius: 50%; border: 4px solid #4dff88; object-fit: cover; }
+.blip .tg { font-family: Mono; font-size: 18px; letter-spacing: 2px; color: #4dff88; margin-top: 2px; }
+.hidden { position: absolute; width: 110px; height: 110px; }
+.hidden .vb { position: absolute; inset: 0; width: 110px; height: 110px; border-radius: 22px; border: 5px solid #fff; object-fit: cover; opacity: 0; }
+.box { position: absolute; left: -10px; top: -6px; width: 130px; height: 120px; border-radius: 6px; background: linear-gradient(180deg, #b98a52, #8f6534);
+    box-shadow: inset 0 -10px 0 rgba(0,0,0,.18), 0 10px 20px rgba(0,0,0,.5); }
+.box i { position: absolute; left: 56px; top: 0; bottom: 0; width: 18px; background: #d9c39a; }
+.excl { position: absolute; left: 30px; top: -96px; width: 50px; text-align: center; font-family: Pixel; font-size: 76px; color: #ff3b30; text-shadow: 4px 4px 0 #000; opacity: 0; }
+.mg-alert { position: absolute; left: 80px; right: 80px; top: 1040px; text-align: center; font-family: Mono; font-size: 52px; font-weight: 700; letter-spacing: 6px;
+    color: #fff; background: #c4161c; border-radius: 12px; padding: 10px 0; opacity: 0; }
 /* guilhotina */
 .redbg { position: absolute; inset: 0; background: radial-gradient(1100px 700px at 50% -5%, rgba(179,18,27,.35), transparent 65%); }
 .g-k { position: absolute; left: 60px; top: 240px; font-family: Mono; font-size: 32px; letter-spacing: 3px; color: var(--gold); }
@@ -184,24 +205,75 @@ standScene(8.5, 'serie-a', {
     stamp: '2º na tabela. #13 no Power Ranking.',
     caption: ['O Ditador pega o 9º colocado.', 'Se perder, nem a censura esconde.'],
 });
-standScene(14, 'serie-b', {
+// 14–18,5 · Modo Furtivo: o líder da Série A que ninguém viu (VoliBEARS)
+KHC.scene(14, 18.5, root => {
+    const s = root.s = {};
+    el('div', 'mg-bg', root);
+    hudFor(root, 'serie-a');
+    el('div', 'mg-k', root, 'MODO FURTIVO');
+    el('div', 'mg-sub', root, 'SÉRIE A · O LÍDER QUE NINGUÉM VIU');
+    const rd = el('div', 'radar', root);
+    s.sweep = el('div', 'sweep', rd);
+    el('div', 'ring r1', rd); el('div', 'ring r2', rd); el('div', 'cross', rd);
+    const T = n => L['serie-a'].matchups.flat().find(x => x.name === n);
+    // os "alvos" que a KHC sempre vê: os donos e quem dá assunto
+    s.blips = [['Imperius Rex FC', 210, 150, 60], ['Public Enemy #1', 430, 200, 150], ['Los Pollos Hermanos', 120, 400, 250], ['Caipiracicaba', 420, 430, 320]]
+        .map(([n, x, y, ang]) => {
+            const b = el('div', 'blip', rd);
+            b.style.left = x + 'px'; b.style.top = y + 'px';
+            el('img', '', b).src = T(n).avatar;
+            el('div', 'tg', b, 'VISTO');
+            b.ang = ang; return b;
+        });
+    const vb = T('VoliBEARS');
+    s.hid = el('div', 'hidden', rd);
+    s.av = el('img', 'vb', s.hid); s.av.src = vb.avatar;
+    s.box = el('div', 'box', s.hid, '<i></i>');
+    s.ex = el('div', 'excl', s.hid, '!');
+    s.alert = el('div', 'mg-alert', root, 'LÍDER DETECTADO');
+    const g = el('div', 'group', root); g.style.top = '1220px';
+    s.row = KHC.teamRow(g, { name: 'VoliBEARS', avatar: vb.avatar, sub: '1º · 5 vitórias seguidas · 99% playoffs', value: vb.record.replace('-', '–') });
+    s.row.row.classList.add('win');
+    s.st = KHC.stamp(s.row.row, 'Só Los Pollos Hermanos venceu ele', { top: -56, right: 24, rot: -3 });
+    s.cap = KHC.caption(root, '6–1, 5 vitórias seguidas', 'e ninguém viu.');
+}, (lt, t, root, wall) => {
+    const s = root.s;
+    const ang = (lt * 260) % 360;
+    s.sweep.style.transform = `rotate(${ang}deg)`;
+    s.blips.forEach(b => { const d = (ang - b.ang + 360) % 360; const seen = lt * 260 >= b.ang; set(b, { o: seen ? 1 : .15, s: seen && d < 40 ? 1.12 : 1 }); b.lastChild.style.opacity = seen ? 1 : 0; });
+    // a caixa avança aos pulinhos, parando quando o radar passa
+    const hop = Math.floor(Math.min(lt, 1.8) / .3);
+    const pp = Math.min(1, (hop + ease.out((Math.min(lt, 1.8) % .3) / .3)) / 6);
+    s.hid.style.left = lerp(30, 245, pp) + 'px'; s.hid.style.top = lerp(470, 245, pp) + 'px';
+    s.hid.style.transform = `scale(${lerp(1, 1.6, enter(lt, 2.0, .3, ease.back))})`;
+    const up = ease.out(prog(lt, 1.9, 2.15));
+    set(s.box, { y: -up * 260, r: up * -25, o: 1 - prog(lt, 2.0, 2.2) });
+    set(s.av, { o: lt >= 1.95 ? 1 : 0, s: lerp(.6, 1, enter(lt, 1.95, .25, ease.back)) });
+    const e = enter(lt, 2.0, .18, ease.back); set(s.ex, { o: e, s: lerp(2.6, 1, e), y: -Math.abs(Math.sin(wall * 12)) * 8 });
+    set(s.alert, { o: lt < 2.0 ? 0 : (lt < 2.6 ? blink(lt, .1) : 1) });
+    const r = enter(t, 16.25, .35); set(s.row.row, { o: Math.min(1, r * 1.6), x: (1 - r) * -1100 });
+    KHC.drawStamp(s.st, t, 16.6);
+    KHC.drawCaption(s.cap, t, 16.95);
+});
+
+standScene(18.5, 'serie-b', {
     world: 'TOP 6 · CAEM 3', on: ['RegisCarrara', 'GORDINHAS AJEITADAS'], stampOn: 1,
     stamp: 'Clássico do topo',
     caption: ['Gordinhas: >99% aqui, 99% na Elite.', 'O RegisCarrara vai tentar parar isso.'],
 });
-standScene(19.5, 'serie-c', {
+standScene(24, 'serie-c', {
     world: 'TOP 6 · CAEM 3', on: ['San Andreas Chiefs', 'WI Redentor'],
     stamp: 'Internet consertada?',
     caption: ['San Andreas × WI Redentor (1–6).', 'Sem lag, sem desculpa.'],
 });
-standScene(25, 'serie-d', {
+standScene(29.5, 'serie-d', {
     world: 'TOP 6 · NÃO HÁ QUEDA', on: ['Green N Gold', 'LeandroGaucho'],
     stamp: 'O Bob Marley encara o líder',
     caption: ['Green N Gold × LeandroGaucho (6–1).', 'Será que a paz dura duas semanas?'],
 });
 
-// 30,5–34,5 · Guilhotina · rodada 8
-KHC.scene(30.5, 34.5, root => {
+// 35–39 · Guilhotina · rodada 8
+KHC.scene(35, 39, root => {
     const s = root.s = {};
     el('div', 'redbg', root);
     hud0(root);
@@ -234,17 +306,17 @@ KHC.scene(30.5, 34.5, root => {
     const s = root.s;
     const c = enter(lt, .05, .45, ease.back); set(s.cr, { s: c, r: (1 - c) * -30 });
     const y = 440 + Math.sin(wall * 3) * 20;
-    const by = lerp(-400, y, enter(t, 30.7, .5, ease.back));
+    const by = lerp(-400, y, enter(t, 35.2, .5, ease.back));
     s.bl.style.top = '0px'; set(s.bl, { y: by });
     s.rope.style.height = Math.max(0, by + 20) + 'px';
-    s.rows.forEach((r, i) => { const a = enter(t, 31.0 + i * .2, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i % 2 ? 1100 : -1100), r: i === 2 ? Math.sin(wall * 9) * .6 : 0 }); });
-    KHC.drawStamp(s.cutTag, t, 31.3);
-    KHC.drawStamp(s.st, t, 31.8);
-    KHC.drawCaption(s.cap, t, 32.1);
+    s.rows.forEach((r, i) => { const a = enter(t, 35.5 + i * .2, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i % 2 ? 1100 : -1100), r: i === 2 ? Math.sin(wall * 9) * .6 : 0 }); });
+    KHC.drawStamp(s.cutTag, t, 35.8);
+    KHC.drawStamp(s.st, t, 36.3);
+    KHC.drawCaption(s.cap, t, 36.6);
 });
 
-// 34,5–39,5 · Também na KHC: NBA e Cocoricó PL
-KHC.scene(34.5, 39.5, root => {
+// 39–44 · Também na KHC: NBA e Cocoricó PL
+KHC.scene(39, 44, root => {
     const s = root.s = {};
     hud0(root);
     el('div', 'also-k', root, 'TAMBÉM NA KHC');
@@ -263,15 +335,15 @@ KHC.scene(34.5, 39.5, root => {
     s.cap = KHC.caption(root, 'O Cruise tem 11%.', 'O ferpetucco tem 89%. Se o Wi-Fi deixar.');
 }, (lt, t, root) => {
     const s = root.s;
-    const p = enter(t, 34.6, .4, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
-    const c = enter(t, 34.65, .5, ease.elastic); set(s.cr, { s: c });
-    [s.n, s.c, s.u].forEach((r, i) => { const a = enter(t, 34.9 + i * .2, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i % 2 ? 1100 : -1100) }); });
-    KHC.drawStamp(s.st, t, 35.9);
-    KHC.drawCaption(s.cap, t, 36.6);
+    const p = enter(t, 39.1, .4, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    const c = enter(t, 39.15, .5, ease.elastic); set(s.cr, { s: c });
+    [s.n, s.c, s.u].forEach((r, i) => { const a = enter(t, 39.4 + i * .2, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i % 2 ? 1100 : -1100) }); });
+    KHC.drawStamp(s.st, t, 40.4);
+    KHC.drawCaption(s.cap, t, 41.1);
 });
 
 // 39,5–43 · Fim
-KHC.scene(39.5, 43, root => {
+KHC.scene(44, 47.5, root => {
     const s = root.s = {};
     hud0(root);
     s.k = el('div', 'end-k', root, 'SEMANA 8');
@@ -280,21 +352,21 @@ KHC.scene(39.5, 43, root => {
     s.logo = el('img', 'end-logo', root); s.logo.src = LEAGUE.khc.crest;
 }, (lt, t, root) => {
     const s = root.s;
-    set(s.k, { o: enter(t, 39.6, .3) });
-    const a = enter(t, 39.8, .45, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
-    const b = enter(t, 40.8, .35, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
-    const l = enter(t, 41.6, .5, ease.elastic); set(s.logo, { s: l });
+    set(s.k, { o: enter(t, 44.1, .3) });
+    const a = enter(t, 44.3, .45, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
+    const b = enter(t, 45.3, .35, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
+    const l = enter(t, 46.1, .5, ease.elastic); set(s.logo, { s: l });
 });
 
-[[3, 'elite'], [8.5, 'serie-a'], [14, 'serie-b'], [19.5, 'serie-c'], [25, 'serie-d'], [30.5, 'guilhotina'],
- [34.5, 'premier'], [39.5, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
-KHC.fadeOut(42.55, 43);
+[[3, 'elite'], [8.5, 'serie-a'], [14, 'serie-a'], [18.5, 'serie-b'], [24, 'serie-c'], [29.5, 'serie-d'], [35, 'guilhotina'],
+ [39, 'premier'], [44, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
+KHC.fadeOut(47.05, 47.5);
 
 // Pausas de leitura (tempo da timeline, duração): a tabela inteira e a
 // legenda antes de cada troca. A mesma lista está em scripts/trilha/previa8.py.
-KHC.hold([[6.4, 1.2], [11.9, 1.2], [17.4, 1.2], [22.9, 1.2], [28.4, 1.2], [33.4, 1.0], [38.4, 0.7], [42.3, 0.3]]);
+KHC.hold([[6.4, 1.2], [11.9, 1.2], [17.9, 0.7], [21.9, 1.2], [27.4, 1.2], [32.9, 1.2], [37.9, 1.0], [42.9, 0.7], [46.8, 0.3]]);
 
-KHC.start(43);
+KHC.start(47.5);
 await window.ready();
 window.loaded = true;
 })();
