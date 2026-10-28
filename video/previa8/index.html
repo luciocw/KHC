@@ -212,23 +212,34 @@ KHC.scene(30.5, 34.5, root => {
     s.rope = el('div', 'rope', root);
     s.bl = el('div', 'blade', root, `<svg viewBox="0 0 1000 200" preserveAspectRatio="none"><rect x="470" y="0" width="60" height="40" fill="#2b2724"/>
       <polygon points="0,30 1000,30 1000,110 0,200" fill="#6d6762"/><polygon points="0,182 1000,96 1000,110 0,200" fill="#B3121B"/></svg>`);
-    const g = el('div', 'group', root); g.style.top = '960px'; g.style.gap = '24px';
-    el('div', 'lbl bad', g, 'MENOS PONTOS ENTRE OS VIVOS');
-    s.rows = low.map((tm, i) => {
-        const r = KHC.teamRow(g, { name: tm.name, avatar: tm.avatar, sub: `${Math.round(tm.fpts)} PF${i ? ' · escapou por 2,84 na S7' : ' · escapou 3 vezes'}`, value: '' });
-        r.row.classList.add('lose'); return r;
-    });
-    s.st = KHC.stamp(s.rows[0].row, 'A lâmina tem memória', { top: -56, right: 24, rot: -3 });
+    // os dois últimos da rodada 7 e quem está na mira (menos pontos entre os vivos)
+    const W7 = G.weeks[G.weeks.length - 1], GT = n => G.teams.find(x => x.name === n);
+    const br = v => v.toFixed(2).replace('.', ',');
+    const g = el('div', 'group', root); g.style.top = '690px'; g.style.gap = '18px';
+    el('div', 'lbl bad', g, 'RODADA 7 · OS DOIS ÚLTIMOS');
+    const c7 = KHC.teamRow(g, { name: W7.cut, avatar: GT(W7.cut).avatar, sub: 'CORTADO · tinha a 4ª maior pontuação', value: br(W7.cut_pts) });
+    c7.row.classList.add('lose'); c7.av.style.filter = 'grayscale(1)';
+    const e7 = W7.escaped[0];
+    const s7 = KHC.teamRow(g, { name: e7.name, avatar: GT(e7.name).avatar, sub: `escapou por ${br(e7.pts - W7.cut_pts)}`, value: br(e7.pts) });
+    s7.row.classList.add('hot');
+    const g2 = el('div', 'group', root); g2.style.top = '1110px';
+    el('div', 'lbl gold', g2, 'NA MIRA · MENOS PF');
+    const m = KHC.teamRow(g2, { name: low[0].name, avatar: low[0].avatar, sub: `${Math.round(low[0].fpts)} PF · na beira 3 vezes`, value: '' });
+    m.row.classList.add('lose');
+    s.rows = [c7, s7, m];
+    s.cutTag = KHC.stamp(c7.row, 'Cabeça rolou', { top: -50, right: 24, rot: -3 });
+    s.st = KHC.stamp(m.row, 'A lâmina tem memória', { top: -56, right: 24, rot: -3 });
     s.cap = KHC.caption(root, 'Menor pontuação da rodada?', 'Cabeça rola. Sem exceção.');
 }, (lt, t, root, wall) => {
     const s = root.s;
     const c = enter(lt, .05, .45, ease.back); set(s.cr, { s: c, r: (1 - c) * -30 });
-    const y = 560 + Math.sin(wall * 3) * 24;
+    const y = 440 + Math.sin(wall * 3) * 20;
     const by = lerp(-400, y, enter(t, 30.7, .5, ease.back));
     s.bl.style.top = '0px'; set(s.bl, { y: by });
     s.rope.style.height = Math.max(0, by + 20) + 'px';
-    s.rows.forEach((r, i) => { const a = enter(t, 31.1 + i * .15, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i ? 1100 : -1100), r: Math.sin(wall * 9 + i) * .6 }); });
-    KHC.drawStamp(s.st, t, 31.7);
+    s.rows.forEach((r, i) => { const a = enter(t, 31.0 + i * .2, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i % 2 ? 1100 : -1100), r: i === 2 ? Math.sin(wall * 9) * .6 : 0 }); });
+    KHC.drawStamp(s.cutTag, t, 31.3);
+    KHC.drawStamp(s.st, t, 31.8);
     KHC.drawCaption(s.cap, t, 32.1);
 });
 
@@ -281,7 +292,7 @@ KHC.fadeOut(42.55, 43);
 
 // Pausas de leitura (tempo da timeline, duração): a tabela inteira e a
 // legenda antes de cada troca. A mesma lista está em scripts/trilha/previa8.py.
-KHC.hold([[6.4, 1.2], [11.9, 1.2], [17.4, 1.2], [22.9, 1.2], [28.4, 1.2], [33.4, 0.6], [38.4, 0.7], [42.3, 0.3]]);
+KHC.hold([[6.4, 1.2], [11.9, 1.2], [17.4, 1.2], [22.9, 1.2], [28.4, 1.2], [33.4, 1.0], [38.4, 0.7], [42.3, 0.3]]);
 
 KHC.start(43);
 await window.ready();
