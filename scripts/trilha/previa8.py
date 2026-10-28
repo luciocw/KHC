@@ -47,7 +47,7 @@ t.stamp(R(16.6))  # Só Los Pollos Hermanos venceu ele
 # Cards da Série A: os 10 votos de "adversário mais forte"
 t.play(R(18.5), R(41), "plataforma")
 t.blips(R(18.9), R(19.8), 10, base="C5", step=1, vel=0.45)
-t.one_up(R(20.6))  # Só o Lucio apontou o líder
+t.one_up(R(20.6))  # Só Los Pollos Hermanos apontou o líder
 
 tabela(24.5, t.power_up)  # Série B: Gordinhas
 tabela(30, t.glitch)  # Série C: internet consertada?
