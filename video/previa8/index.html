@@ -44,6 +44,23 @@
 .vs-chip { position: absolute; left: -10px; top: 50%; margin-top: -24px; width: 48px; height: 48px; border-radius: 50%; background: var(--orange);
     color: #120a05; font-family: Pixel; font-size: 16px; display: flex; align-items: center; justify-content: center; z-index: 3; opacity: 0; }
 
+/* cards da Série A */
+.cd-k { position: absolute; left: 60px; top: 240px; font-family: Mono; font-size: 30px; letter-spacing: 3px; color: var(--gold); }
+.cd-t { position: absolute; left: 60px; right: 60px; top: 290px; font-weight: 900; font-size: 96px; line-height: .95; letter-spacing: -2px; text-transform: uppercase; }
+.cd-t span { color: var(--orange); }
+.cd-h { position: absolute; left: 60px; right: 60px; top: 505px; display: flex; justify-content: space-between; font-family: Mono; font-size: 22px; letter-spacing: 2px; color: var(--text-3); }
+.fear { position: absolute; left: 44px; right: 44px; top: 540px; display: flex; flex-direction: column; gap: 8px; }
+.fr { position: relative; display: grid; grid-template-columns: 44px 60px 1fr 50px 60px 70px; gap: 12px; align-items: center; height: 84px; padding: 0 16px;
+    border-radius: 16px; background: rgba(22,19,17,.94); border: 2px solid #2a2420; }
+.fr .p { font-family: Mono; font-size: 32px; color: var(--text-3); text-align: center; }
+.fr .av { width: 58px; height: 58px; border-radius: 13px; }
+.fr .nm { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.fr .nm b { font-weight: 800; font-size: 36px; font-stretch: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fr .nm i { font-style: normal; font-family: Mono; font-size: 20px; letter-spacing: 1px; color: #fff; padding: 4px 8px; border-radius: 6px; flex: none; }
+.fr .ar { font-family: Pixel; font-size: 30px; color: var(--orange); text-align: center; }
+.fr .fp { font-family: Mono; font-size: 32px; color: var(--text-2); }
+.fr.hit { border: 3px solid var(--success); box-shadow: 0 0 40px rgba(61,214,140,.25); }
+.fr.hit .ar, .fr.hit .fp { color: var(--success); }
 /* modo furtivo */
 .mg-bg { position: absolute; inset: 0; background: radial-gradient(900px 800px at 50% 40%, #0d2a17, #050a06 75%); }
 .mg-k { position: absolute; left: 0; right: 0; top: 240px; text-align: center; font-family: Pixel; font-size: 54px; color: #4dff88; text-shadow: 0 0 24px rgba(77,255,136,.5), 5px 5px 0 #000; }
@@ -256,24 +273,62 @@ KHC.scene(14, 18.5, root => {
     KHC.drawCaption(s.cap, t, 16.95);
 });
 
-standScene(18.5, 'serie-b', {
+// 18,5–24,5 · Os cards da Série A: franquia de torcida e o "adversário mais forte"
+// de cada um (cards enviados pelo usuário; posição após a rodada 7)
+const CARDS = [['VoliBEARS', 'BEARS', 'Caipiracicaba'], ['Imperius Rex FC', '49ERS', 'Caipiracicaba'],
+    ['Public Enemy #1', '49ERS', 'Imperius Rex FC'], ['Timbatível', '49ERS', 'Public Enemy #1'],
+    ['Los Pollos Hermanos', 'STEELERS', 'VoliBEARS'], ['Fofura e Fé', '49ERS', 'Los Pollos Hermanos'],
+    ['سانتا کروز', 'SEAHAWKS', 'Caipiracicaba'], ['Cruzeiro do Neymar SFC', 'PATRIOTS', 'سانتا کروز'],
+    ['Caipiracicaba', '49ERS', 'Imperius Rex FC'], ['Diogoashura', 'BEARS', 'Public Enemy #1']];
+const NFL = { BEARS: '#C83803', '49ERS': '#AA0000', STEELERS: '#FFB612', SEAHAWKS: '#69BE28', PATRIOTS: '#2a4a9a' };
+KHC.scene(18.5, 24.5, root => {
+    const s = root.s = {};
+    hudFor(root, 'serie-a');
+    el('div', 'cd-k', root, 'SÉRIE A · OS CARDS DOS PARTICIPANTES');
+    s.t = el('div', 'cd-t', root, 'Quem é o mais<br><span>forte?</span>');
+    const T = n => L['serie-a'].matchups.flat().find(x => x.name === n);
+    el('div', 'cd-h', root, '<span>TIME · TORCE PARA</span><span>ACHA MAIS FORTE</span>');
+    const box = el('div', 'fear', root);
+    s.rows = CARDS.map(([who, nfl, fear]) => {
+        const me = T(who), f = T(fear), hit = fear === 'VoliBEARS';
+        const r = el('div', 'fr' + (hit ? ' hit' : ''), box);
+        el('div', 'p', r, me.pos);
+        const av = el('div', 'av', r); el('img', '', av).src = me.avatar;
+        el('div', 'nm', r, `<b>${KHC.esc(who)}</b><i style="background:${NFL[nfl]}">${nfl}</i>`);
+        el('div', 'ar', r, '→');
+        const fv = el('div', 'av', r); el('img', '', fv).src = f.avatar;
+        el('div', 'fp', r, `${f.pos}º`);
+        return r;
+    });
+    s.hit = s.rows.find(r => r.classList.contains('hit'));
+    s.st = KHC.stamp(s.hit, 'Só o Lucio apontou o líder', { top: 62, right: 20, rot: -3 });
+    s.cap = KHC.caption(root, 'Três apontaram o 9º colocado.', 'Só o Lucio viu o VoliBEARS.');
+}, (lt, t, root) => {
+    const s = root.s;
+    const p = enter(t, 18.6, .4, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    s.rows.forEach((r, i) => { const e = enter(t, 18.9 + i * .1, .3); set(r, { o: Math.min(1, e * 1.6), x: (1 - e) * (i % 2 ? 900 : -900) }); });
+    KHC.drawStamp(s.st, t, 20.6);
+    KHC.drawCaption(s.cap, t, 21.1);
+});
+
+standScene(24.5, 'serie-b', {
     world: 'TOP 6 · CAEM 3', on: ['RegisCarrara', 'GORDINHAS AJEITADAS'], stampOn: 1,
     stamp: 'Clássico do topo',
     caption: ['Gordinhas: >99% aqui, 99% na Elite.', 'O RegisCarrara vai tentar parar isso.'],
 });
-standScene(24, 'serie-c', {
+standScene(30, 'serie-c', {
     world: 'TOP 6 · CAEM 3', on: ['San Andreas Chiefs', 'WI Redentor'],
     stamp: 'Internet consertada?',
     caption: ['San Andreas × WI Redentor (1–6).', 'Sem lag, sem desculpa.'],
 });
-standScene(29.5, 'serie-d', {
+standScene(35.5, 'serie-d', {
     world: 'TOP 6 · NÃO HÁ QUEDA', on: ['Green N Gold', 'LeandroGaucho'],
     stamp: 'O Bob Marley encara o líder',
     caption: ['Green N Gold × LeandroGaucho (6–1).', 'Será que a paz dura duas semanas?'],
 });
 
 // 35–39 · Guilhotina · rodada 8
-KHC.scene(35, 39, root => {
+KHC.scene(41, 45, root => {
     const s = root.s = {};
     el('div', 'redbg', root);
     hud0(root);
@@ -306,17 +361,17 @@ KHC.scene(35, 39, root => {
     const s = root.s;
     const c = enter(lt, .05, .45, ease.back); set(s.cr, { s: c, r: (1 - c) * -30 });
     const y = 440 + Math.sin(wall * 3) * 20;
-    const by = lerp(-400, y, enter(t, 35.2, .5, ease.back));
+    const by = lerp(-400, y, enter(t, 41.2, .5, ease.back));
     s.bl.style.top = '0px'; set(s.bl, { y: by });
     s.rope.style.height = Math.max(0, by + 20) + 'px';
-    s.rows.forEach((r, i) => { const a = enter(t, 35.5 + i * .2, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i % 2 ? 1100 : -1100), r: i === 2 ? Math.sin(wall * 9) * .6 : 0 }); });
-    KHC.drawStamp(s.cutTag, t, 35.8);
-    KHC.drawStamp(s.st, t, 36.3);
-    KHC.drawCaption(s.cap, t, 36.6);
+    s.rows.forEach((r, i) => { const a = enter(t, 41.5 + i * .2, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i % 2 ? 1100 : -1100), r: i === 2 ? Math.sin(wall * 9) * .6 : 0 }); });
+    KHC.drawStamp(s.cutTag, t, 41.8);
+    KHC.drawStamp(s.st, t, 42.3);
+    KHC.drawCaption(s.cap, t, 42.6);
 });
 
 // 39–44 · Também na KHC: NBA e Cocoricó PL
-KHC.scene(39, 44, root => {
+KHC.scene(45, 50, root => {
     const s = root.s = {};
     hud0(root);
     el('div', 'also-k', root, 'TAMBÉM NA KHC');
@@ -335,15 +390,15 @@ KHC.scene(39, 44, root => {
     s.cap = KHC.caption(root, 'O Cruise tem 11%.', 'O ferpetucco tem 89%. Se o Wi-Fi deixar.');
 }, (lt, t, root) => {
     const s = root.s;
-    const p = enter(t, 39.1, .4, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
-    const c = enter(t, 39.15, .5, ease.elastic); set(s.cr, { s: c });
-    [s.n, s.c, s.u].forEach((r, i) => { const a = enter(t, 39.4 + i * .2, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i % 2 ? 1100 : -1100) }); });
-    KHC.drawStamp(s.st, t, 40.4);
-    KHC.drawCaption(s.cap, t, 41.1);
+    const p = enter(t, 45.1, .4, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    const c = enter(t, 45.15, .5, ease.elastic); set(s.cr, { s: c });
+    [s.n, s.c, s.u].forEach((r, i) => { const a = enter(t, 45.4 + i * .2, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i % 2 ? 1100 : -1100) }); });
+    KHC.drawStamp(s.st, t, 46.4);
+    KHC.drawCaption(s.cap, t, 47.1);
 });
 
 // 39,5–43 · Fim
-KHC.scene(44, 47.5, root => {
+KHC.scene(50, 53.5, root => {
     const s = root.s = {};
     hud0(root);
     s.k = el('div', 'end-k', root, 'SEMANA 8');
@@ -352,21 +407,21 @@ KHC.scene(44, 47.5, root => {
     s.logo = el('img', 'end-logo', root); s.logo.src = LEAGUE.khc.crest;
 }, (lt, t, root) => {
     const s = root.s;
-    set(s.k, { o: enter(t, 44.1, .3) });
-    const a = enter(t, 44.3, .45, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
-    const b = enter(t, 45.3, .35, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
-    const l = enter(t, 46.1, .5, ease.elastic); set(s.logo, { s: l });
+    set(s.k, { o: enter(t, 50.1, .3) });
+    const a = enter(t, 50.3, .45, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
+    const b = enter(t, 51.3, .35, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
+    const l = enter(t, 52.1, .5, ease.elastic); set(s.logo, { s: l });
 });
 
-[[3, 'elite'], [8.5, 'serie-a'], [14, 'serie-a'], [18.5, 'serie-b'], [24, 'serie-c'], [29.5, 'serie-d'], [35, 'guilhotina'],
- [39, 'premier'], [44, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
-KHC.fadeOut(47.05, 47.5);
+[[3, 'elite'], [8.5, 'serie-a'], [14, 'serie-a'], [18.5, 'serie-a'], [24.5, 'serie-b'], [30, 'serie-c'], [35.5, 'serie-d'], [41, 'guilhotina'],
+ [45, 'premier'], [50, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
+KHC.fadeOut(53.05, 53.5);
 
 // Pausas de leitura (tempo da timeline, duração): a tabela inteira e a
 // legenda antes de cada troca. A mesma lista está em scripts/trilha/previa8.py.
-KHC.hold([[6.4, 1.2], [11.9, 1.2], [17.9, 0.7], [21.9, 1.2], [27.4, 1.2], [32.9, 1.2], [37.9, 1.0], [42.9, 0.7], [46.8, 0.3]]);
+KHC.hold([[6.4, 1.2], [11.9, 1.2], [17.9, 0.7], [23.9, 1.2], [27.9, 1.2], [33.4, 1.2], [38.9, 1.2], [43.9, 1.0], [48.9, 0.7], [52.8, 0.3]]);
 
-KHC.start(47.5);
+KHC.start(53.5);
 await window.ready();
 window.loaded = true;
 })();
