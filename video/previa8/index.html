@@ -56,7 +56,7 @@
 .fr .av { width: 58px; height: 58px; border-radius: 13px; }
 .fr .nm { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .fr .nm b { font-weight: 800; font-size: 36px; font-stretch: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fr .nm i { font-style: normal; font-family: Mono; font-size: 20px; letter-spacing: 1px; color: #fff; padding: 4px 8px; border-radius: 6px; flex: none; }
+.fr .nm .nfl { width: 56px; height: 56px; object-fit: contain; flex: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
 .fr .ar { font-family: Pixel; font-size: 30px; color: var(--orange); text-align: center; }
 .fr .fp { font-family: Mono; font-size: 32px; color: var(--text-2); }
 .fr.hit { border: 3px solid var(--success); box-shadow: 0 0 40px rgba(61,214,140,.25); }
@@ -280,7 +280,7 @@ const CARDS = [['VoliBEARS', 'BEARS', 'Caipiracicaba'], ['Imperius Rex FC', '49E
     ['Los Pollos Hermanos', 'STEELERS', 'VoliBEARS'], ['Fofura e Fé', '49ERS', 'Los Pollos Hermanos'],
     ['سانتا کروز', 'SEAHAWKS', 'Caipiracicaba'], ['Cruzeiro do Neymar SFC', 'PATRIOTS', 'سانتا کروز'],
     ['Caipiracicaba', '49ERS', 'Imperius Rex FC'], ['Diogoashura', 'BEARS', 'Public Enemy #1']];
-const NFL = { BEARS: '#C83803', '49ERS': '#AA0000', STEELERS: '#FFB612', SEAHAWKS: '#69BE28', PATRIOTS: '#2a4a9a' };
+const NFL = { BEARS: 'chi', '49ERS': 'sf', STEELERS: 'pit', SEAHAWKS: 'sea', PATRIOTS: 'ne' };  // logos da Sleeper CDN
 KHC.scene(18.5, 24.5, root => {
     const s = root.s = {};
     hudFor(root, 'serie-a');
@@ -294,7 +294,7 @@ KHC.scene(18.5, 24.5, root => {
         const r = el('div', 'fr' + (hit ? ' hit' : ''), box);
         el('div', 'p', r, me.pos);
         const av = el('div', 'av', r); el('img', '', av).src = me.avatar;
-        el('div', 'nm', r, `<b>${KHC.esc(who)}</b><i style="background:${NFL[nfl]}">${nfl}</i>`);
+        el('div', 'nm', r, `<b>${KHC.esc(who)}</b><img class="nfl" src="assets/avatars/nfl/${NFL[nfl]}.png">`);
         el('div', 'ar', r, '→');
         const fv = el('div', 'av', r); el('img', '', fv).src = f.avatar;
         el('div', 'fp', r, `${f.pos}º`);
