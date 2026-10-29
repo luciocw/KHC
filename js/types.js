@@ -81,7 +81,10 @@
  * @property {string} user             Username
  * @property {string|null} avatarId
  * @property {TrophyCount} trophies    Contagem por tipo
- * @property {{trophy: Trophy, seriesId: SeriesId, season: number}|null} best  Melhor resultado
+ * @property {number} points           Pontos KHC (KHC_POINTS)
+ * @property {number} winPct           Aproveitamento V–D na carreira (desempate)
+ * @property {number} lastTitle        Ano do título mais recente (0 = nenhum)
+ * @property {{trophy: Trophy, seriesId: SeriesId, season: number, points: number}|null} best  Resultado que mais vale
  */
 
 /**

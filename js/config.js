@@ -77,6 +77,33 @@ function regularSeriesLabel(season) {
     return ids.length === 1 ? `Série ${ids[0]}` : `Séries ${ids[0]}–${ids[ids.length - 1]}`;
 }
 
+// --- PONTOS KHC (Lendas) ---
+// EM DISCUSSÃO: valores e critérios podem mudar; serão definidos antes da
+// temporada 2027 (KHC_POINTS_DRAFT mostra o aviso nas Lendas e em Regras).
+// Séries A–F valem igual: surgiram por ordem de inscrição, não por nível.
+// Elite: só classificados. Copa: semi e final (formato em definição).
+// Guilhotina: liga avulsa, pontuação simbólica. 5º e 6º não pontuam.
+// Premier League e NBA ficam fora (não estão no histórico).
+const KHC_POINTS = {
+    elite:      { gold: 15, silver: 8, bronze: 5, fourth: 3 },
+    serie:      { gold: 10, silver: 6, bronze: 4, fourth: 2 },
+    copa:       { gold: 8,  silver: 6, bronze: 4, fourth: 2 },
+    guilhotina: { gold: 4,  silver: 3, bronze: 2, fourth: 1 }
+};
+const KHC_POINTS_DRAFT = true;
+
+/**
+ * Tipo de competição de uma série do histórico, para os Pontos KHC.
+ * @param {{id: string, kind?: string}} series
+ * @returns {('elite'|'serie'|'copa'|'guilhotina')}
+ */
+function pointsKindOf(series) {
+    if (series.kind === 'guillotine') return 'guilhotina';
+    if (series.kind === 'cup' || series.id === 'Copa') return 'copa';
+    if (series.id === 'Elite') return 'elite';
+    return 'serie';
+}
+
 // --- PREMIER LEAGUE (fantasy de futebol, fora das séries) ---
 // Página "Também na KHC" (#/premier), fora da navegação; destaque só na entressafra
 // da NFL. O Sleeper não entrega placares por rodada desta liga (só a tabela).
