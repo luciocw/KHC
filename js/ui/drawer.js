@@ -58,7 +58,7 @@
                         avatar: t.avatar,
                         // guilhotina: sem V–D; mostra se segue vivo
                         guillotine: isGuillotine(league.info.tier),
-                        alive: t.rosterSize !== 0
+                        alive: !isChopped(t)
                     });
                 });
             });

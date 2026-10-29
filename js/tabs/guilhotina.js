@@ -6,12 +6,20 @@
 //   - Vivos: ordenados pelos pontos da rodada em andamento (ao vivo) ou, antes
 //     de a rodada começar, pelos pontos da temporada. O último fica na
 //     "zona de corte" (só depois que todos os vivos pontuaram na semana).
-//   - Cortados: rodada do corte e pontos naquela rodada. O time cortado fica
-//     com o elenco vazio (rosterSize 0); a rodada é a última em que pontuou.
+//   - Cortados: rodada do corte e pontos naquela rodada. O Sleeper marca a
+//     rodada em settings.eliminated (o elenco nem sempre fica vazio: pode
+//     sobrar jogador). Dados antigos em cache, sem o campo: elenco vazio e
+//     a última rodada em que pontuou.
 //   - Sem V–D: fica fora de Rodada, Top Scorers, Power Ranking e Chances.
 //
 // Lê: appState.lastUpdated · Depende de: config, api, ui/helpers
 // =============================================================================
+
+/** Time cortado na guilhotina? */
+function isChopped(t) {
+    if (t.eliminated !== undefined) return t.eliminated > 0;
+    return t.rosterSize === 0;
+}
 
 const _guillotine = {};   // `${leagueId}|${lastUpdated}` → { status, data }
 
@@ -58,12 +66,12 @@ function guillotineData(league) {
  */
 function guillotineModel(league, data) {
     const teams = league.teams;
-    const isCut = t => t.rosterSize === 0;
+    const isCut = isChopped;
     const weekPts = (w, t) => (data.done[w - 1] && data.done[w - 1][t.teamId]) || 0;
 
     const cut = teams.filter(isCut).map(t => {
-        let week = 0;
-        for (let w = data.chopped; w >= 1; w--) {
+        let week = t.eliminated || 0;
+        for (let w = data.chopped; !week && w >= 1; w--) {
             if (weekPts(w, t) > 0) { week = w; break; }
         }
         return { team: t, week: week || 1, pts: week ? weekPts(week, t) : 0 };
