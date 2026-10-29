@@ -5,6 +5,7 @@
 //   - Ordem: Pontos KHC (KHC_POINTS em config.js; desempate em
 //     legendsAggregator). Aviso enquanto os pontos estão em discussão.
 //   - Pódio top 3 (2º · 1º · 3º) com anel na cor da medalha e os pontos.
+//   - Botões Baixar / Compartilhar: o top 10 vira PNG (ui/export.js).
 //   - Tabela: # | manager (aproveitamento %) + melhor resultado | ouro · prata
 //     · bronze | pts. O aproveitamento V–D (temporada regular das
 //     divisões, sem Elite e Copa) é o desempate.
@@ -46,7 +47,7 @@ function buildPodiumCol(entry, place) {
         <b class="podium__name" dir="auto">${safeUser}</b>
         <small class="podium__label">${escapeHtml(bestResultLabel(entry))}</small>
         <span class="podium__pts num">${entry.points} pts</span>
-        <small class="podium__pct" title="Aproveitamento V–D na temporada regular das divisões (sem Elite e Copa)">${fmtWinPct(entry.winPct)} de aproveitamento</small>
+        <small class="podium__pct" title="Aproveitamento V–D na temporada regular das divisões (sem Elite e Copa)">${fmtWinPct(entry.winPct)} aproveitamento</small>
         <span class="podium__base">${medalHTML(place + 1)}</span>
     </button>`;
 }
@@ -80,7 +81,7 @@ function renderLegends() {
         }).join('');
         return `<button type="button" class="legends-row" data-user="${safeUser}" aria-label="${i + 1}º: ${safeUser}, ${e.points} Pontos KHC. Abrir perfil">
             <span class="pos">${i + 1}</span>
-            <span class="legends-row__who"><b dir="auto">${safeUser}<span class="legends-row__pct num" title="Aproveitamento V–D na temporada regular das divisões (sem Elite e Copa)">${fmtWinPct(e.winPct)}</span></b><small>${escapeHtml(bestResultLabel(e))}</small></span>
+            <span class="legends-row__who"><b class="legends-row__name"><span class="legends-row__user" dir="auto">${safeUser}</span><span class="legends-row__pct" title="Aproveitamento V–D na temporada regular das divisões (sem Elite e Copa)">${fmtWinPct(e.winPct)} aproveitamento</span></b><small>${escapeHtml(bestResultLabel(e))}</small><small class="legends-row__pct-sm">${fmtWinPct(e.winPct)} aproveitamento</small></span>
             ${counts}
             <span class="num legends-row__pts">${e.points}</span>
         </button>`;
@@ -91,8 +92,20 @@ function renderLegends() {
             <span>Pontos KHC em discussão: valores e critérios podem mudar e serão definidos antes da temporada 2027. <a href="#/regras">Como funciona</a></span>
         </div>` : '';
 
+    const actions = `<div class="view-actions">
+            <div class="export-actions" role="group" aria-label="Exportar Hall da Fama como imagem">
+                <button type="button" class="export-btn" data-action="export-download" aria-label="Baixar o top 10 do Hall da Fama como imagem">
+                    <span data-icon="download" data-size="18"></span><span class="export-btn__label">Baixar</span>
+                </button>
+                ${canShareFiles() ? `<button type="button" class="export-btn" data-action="export-share" aria-label="Compartilhar o top 10 do Hall da Fama como imagem">
+                    <span data-icon="share" data-size="18"></span><span class="export-btn__label">Compartilhar</span>
+                </button>` : ''}
+            </div>
+        </div>`;
+
     return `
         ${draft}
+        ${actions}
         <section class="card hall" aria-label="Pódio do Hall da Fama">
             <div class="eyebrow hall__eyebrow">Hall da Fama · Pontos KHC</div>
             <div class="podium">${podium}</div>
