@@ -7,9 +7,10 @@
 //     winners_bracket), 5º+ pela temporada regular (vitórias, depois pontos).
 //     Troféus gold / silver / bronze / fourth para o top 4.
 //   - Guilhotina (kind: 'guillotine'): o último sobrevivente em 1º, depois
-//     quem caiu mais tarde (settings.eliminated). O sobrevivente leva o
-//     título (gold, conta nas Lendas); sem V–D; `cut` = rodada do corte
-//     (0 = sobrevivente). Premier League e NBA não entram aqui.
+//     quem caiu mais tarde (settings.eliminated). Top 4 com troféu (o
+//     sobrevivente leva o título, conta nas Lendas com os Pontos KHC da
+//     Guilhotina); sem V–D; `cut` = rodada do corte (0 = sobrevivente).
+//     Premier League e NBA não entram aqui.
 // Para se a temporada não acabou (final ou 3º lugar sem vencedor).
 //
 // Saída: { id, status: 'final', series: [ { id, name, kind?, teams: [
@@ -101,7 +102,7 @@ async function deriveLeague(league) {
             teams: ranked.map((r, i) => {
                 const { w, l, t, ...rest } = clean(r);
                 const row = { rank: i + 1, ...rest, cut: r.eliminated || 0 };
-                if (i === 0) row.trophy = 'gold';   // título da Guilhotina
+                if (i < 4) row.trophy = TROPHIES[i];   // sobrevivente e os 3 últimos cortados
                 return row;
             })
         };
@@ -147,7 +148,8 @@ async function main() {
     for (const s of series) {
         console.log(`\n${s.name}:`);
         for (const t of s.teams) {
-            const tag = s.kind ? (t.cut ? ` [cortado R${t.cut}]` : ' [sobrevivente · gold]') : t.trophy ? ` [${t.trophy}]` : '';
+            const cut = s.kind ? (t.cut ? ` [cortado R${t.cut}]` : ' [sobrevivente]') : '';
+            const tag = `${cut}${t.trophy ? ` [${t.trophy}]` : ''}`;
             const rec = s.kind ? '     ' : `${String(t.w).padStart(2)}-${String(t.l).padStart(2)}`;
             console.log(`  ${String(t.rank).padStart(2)}. ${t.user.padEnd(18)} ${rec}  ${t.pts.toFixed(2).padStart(8)}${tag}`);
         }

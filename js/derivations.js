@@ -291,17 +291,16 @@ function buildOddsInput(rosterIds, scores, pairs, scored) {
 
 // --- LENDAS (cross-season trophy aggregation) ---
 
-const TROPHY_ORDER = ['gold', 'silver', 'bronze', 'fourth'];
-
 /**
- * Agrega troféus de todas as temporadas finalizadas. Temporadas ativas
- * são ignoradas (ainda sem campeão definido).
+ * Hall da Fama: Pontos KHC somados de todas as temporadas finalizadas
+ * (temporadas ativas ficam de fora, ainda sem campeão).
  *
- * Ordenação: títulos sempre na frente — mais ouros; empate → mais pratas;
- * depois bronzes; depois 4ºs (decisão da liga).
+ * Pontos por colocação e tipo de competição em KHC_POINTS (config.js).
+ * Ordem: mais pontos → mais títulos (ouros) → melhor aproveitamento V–D na
+ * carreira (Guilhotina fora) → título mais recente → nome.
  *
- * `best` guarda o melhor resultado do jogador (maior troféu; empate → mais
- * recente), usado no rótulo "Campeão Série A 2025".
+ * `best` guarda o resultado que mais vale (empate → mais recente), usado no
+ * rótulo "Campeão Série A 2025".
  *
  * @param {Season[]} seasons
  * @returns {LegendEntry[]}
@@ -309,40 +308,55 @@ const TROPHY_ORDER = ['gold', 'silver', 'bronze', 'fourth'];
 function legendsAggregator(seasons) {
     /** @type {Object<string, LegendEntry>} */
     const byUser = {};
+    const record = {};   // user → { w, l } da carreira (desempate)
 
     seasons.forEach(season => {
         if (season.status !== 'final') return;
         season.series.forEach(s => {
+            const kind = pointsKindOf(s);
+            const table = KHC_POINTS[kind] || {};
             s.teams.forEach(t => {
+                if (kind !== 'guilhotina') {
+                    const r = record[t.user] || (record[t.user] = { w: 0, l: 0 });
+                    r.w += t.w || 0;
+                    r.l += t.l || 0;
+                }
                 if (!t.trophy) return;
                 if (!byUser[t.user]) {
                     byUser[t.user] = {
                         user: t.user,
                         avatarId: t.avatarId || null,
                         trophies: { gold: 0, silver: 0, bronze: 0, fourth: 0 },
+                        points: 0,
+                        lastTitle: 0,
                         best: null
                     };
                 }
                 const entry = byUser[t.user];
+                const pts = table[t.trophy] || 0;
                 entry.trophies[t.trophy]++;
-                const cand = { trophy: t.trophy, seriesId: s.id, season: season.id };
-                const rank = TROPHY_ORDER.indexOf(t.trophy);
-                if (!entry.best ||
-                    rank < TROPHY_ORDER.indexOf(entry.best.trophy) ||
-                    (rank === TROPHY_ORDER.indexOf(entry.best.trophy) && cand.season > entry.best.season)) {
+                entry.points += pts;
+                if (t.trophy === 'gold') entry.lastTitle = Math.max(entry.lastTitle, season.id);
+                const cand = { trophy: t.trophy, seriesId: s.id, season: season.id, points: pts };
+                if (!entry.best || pts > entry.best.points || (pts === entry.best.points && cand.season > entry.best.season)) {
                     entry.best = cand;
                 }
             });
         });
     });
 
+    const winPct = u => {
+        const r = record[u];
+        return r && r.w + r.l ? r.w / (r.w + r.l) : 0;
+    };
     const list = Object.values(byUser);
-    list.sort((a, b) => {
-        for (const k of TROPHY_ORDER) {
-            if (b.trophies[k] !== a.trophies[k]) return b.trophies[k] - a.trophies[k];
-        }
-        return a.user.localeCompare(b.user);
-    });
+    list.forEach(e => { e.winPct = winPct(e.user); });
+    list.sort((a, b) =>
+        (b.points - a.points) ||
+        (b.trophies.gold - a.trophies.gold) ||
+        (b.winPct - a.winPct) ||
+        (b.lastTitle - a.lastTitle) ||
+        a.user.localeCompare(b.user));
     return list;
 }
 

@@ -18,7 +18,7 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 - **App na tela inicial:** manifest + ícones (`assets/app/`) — Android instala pelo Chrome, iPhone pelo Safari (Compartilhar → Adicionar à Tela de Início)
 - **Top Scorers:** filtro por série e "Incluir Elite" (desligado por padrão, evita time duplicado); Baixar / Compartilhar geram PNG da lista com o filtro atual (em "Todas", só o Top 20)
 - **Power Ranking:** tiers S Favoritos · A Candidatos · B Meio de tabela · C Pressionados · D Lanternas por posição (10/20/40/20/10%). PWR = 50% força (all-play semana a semana contra as Séries A–D) + 30% aproveitamento + 20% fase (últimas 3 semanas); sem Elite. Exporta PNG
-- **Lendas:** Hall da Fama ordenado por títulos (ouro → prata → bronze → 4º)
+- **Lendas:** Hall da Fama por **Pontos KHC** (`KHC_POINTS` em `js/config.js`, em discussão até 2027): Séries A–F 10/6/4/2 (todas iguais), Elite 15/8/5/3, Copa 8/6/4/2, Guilhotina 4/3/2/1; 5º+ não pontua, Premier e NBA fora. Desempate: títulos → aproveitamento V–D → título mais recente
 - **Perfil do jogador:** lateral no desktop, bottom sheet no celular
 - **Modelo de dados híbrido:** temporadas finalizadas vêm de JSON estático (`data/<ano>.json`); temporada ativa vem da Sleeper API em tempo real
 - **Estados:** carregando (skeleton), erro com "Tentar de novo", cache, falha parcial, vazio

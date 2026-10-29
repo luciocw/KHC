@@ -6,6 +6,12 @@
 // nas configurações das ligas na Sleeper (playoff_teams / playoff_week_start).
 // =============================================================================
 
+/** "campeão 10 · vice 6 · 3º 4 · 4º 2" a partir de KHC_POINTS. */
+function pointsLine(kind, labels = ['campeão', 'vice', '3º', '4º']) {
+    const t = KHC_POINTS[kind];
+    return ['gold', 'silver', 'bronze', 'fourth'].map((k, i) => `${labels[i]} ${t[k]}`).join(' · ');
+}
+
 const RULES = [
     {
         icon: 'layers',
@@ -40,6 +46,19 @@ const RULES = [
             'Liga <b>paralela</b>, não um tier: premia os melhores da temporada anterior, que competem em duas ligas ao mesmo tempo.',
             '2027: campeão e vice de cada série (A, B, C e D) — 8 participantes.',
             'Playoffs com 4 classificados. Não rebaixa.',
+        ]
+    },
+    {
+        icon: 'crown',
+        title: 'Pontos KHC (Lendas)',
+        lead: KHC_POINTS_DRAFT ? '<b>Em discussão:</b> valores e critérios podem mudar e serão definidos antes da temporada 2027.' : '',
+        items: [
+            `<b>Séries A–F:</b> ${pointsLine('serie')}. Todas valem igual: as divisões surgiram por ordem de inscrição, não por nível.`,
+            `<b>KHC Elite:</b> ${pointsLine('elite')} (liga só de classificados).`,
+            `<b>Copa KHC</b> (2027, formato em definição): ${pointsLine('copa')}.`,
+            `<b>KHC Guilhotina:</b> ${pointsLine('guilhotina', ['sobrevivente', 'último cortado', 'penúltimo', 'antepenúltimo'])} (liga avulsa, simbólica).`,
+            '5º e 6º não pontuam. Premier League e NBA ficam fora.',
+            '<b>Desempate:</b> mais títulos, depois melhor aproveitamento V–D na carreira, depois título mais recente.',
         ]
     },
     {

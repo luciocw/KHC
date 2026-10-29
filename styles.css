@@ -1290,7 +1290,7 @@ abbr[title] { text-decoration: none; cursor: help; }
 
 .legends-row {
     display: grid;
-    grid-template-columns: 40px minmax(0, 1fr) repeat(4, 44px);
+    grid-template-columns: 40px minmax(0, 1fr) repeat(4, 44px) 52px;
     align-items: center;
     width: 100%;
     min-height: 52px;
@@ -1326,6 +1326,9 @@ abbr[title] { text-decoration: none; cursor: help; }
 .legends-row__count.is-silver { color: var(--silver); }
 .legends-row__count.is-bronze { color: var(--bronze); }
 .legends-row__count.is-fourth { color: var(--fourth); }
+.legends-row__pts { text-align: right; font-size: var(--fs-20); color: var(--text); }
+.legends-row--head .legends-row__pts { font-size: inherit; color: inherit; }
+.podium__pts { font-weight: 900; font-stretch: 75%; font-size: var(--fs-16); color: var(--text); }
 
 .dot-medal { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
 .dot-medal--gold { background: var(--gold); }
@@ -1334,7 +1337,7 @@ abbr[title] { text-decoration: none; cursor: help; }
 .dot-medal--fourth { background: var(--fourth); }
 
 @media (max-width: 420px) {
-    .legends-row { grid-template-columns: 32px minmax(0, 1fr) repeat(4, 34px); padding: var(--s-8) 10px; }
+    .legends-row { grid-template-columns: 32px minmax(0, 1fr) repeat(4, 30px) 40px; padding: var(--s-8) 10px; }
 }
 
 /* === TEMPORADAS === */
