@@ -6,10 +6,9 @@
 // nas configurações das ligas na Sleeper (playoff_teams / playoff_week_start).
 // =============================================================================
 
-/** "campeão 10 · vice 6 · 3º 4 · 4º 2" a partir de KHC_POINTS. */
-function pointsLine(kind, labels = ['campeão', 'vice', '3º', '4º']) {
-    const t = KHC_POINTS[kind];
-    return ['gold', 'silver', 'bronze', 'fourth'].map((k, i) => `${labels[i]} ${t[k]}`).join(' · ');
+/** "campeão 12 · vice 8 · 3º 6 · …" a partir de KHC_POINTS. */
+function pointsLine(kind) {
+    return KHC_POINTS[kind].map((p, i) => `${i === 0 ? 'campeão' : i === 1 ? 'vice' : `${i + 1}º`} ${p}`).join(' · ');
 }
 
 const RULES = [
@@ -53,11 +52,12 @@ const RULES = [
         title: 'Pontos KHC (Lendas)',
         lead: KHC_POINTS_DRAFT ? '<b>Em discussão:</b> valores e critérios podem mudar e serão definidos antes da temporada 2027.' : '',
         items: [
-            `<b>Séries A–F:</b> ${pointsLine('serie')}. Todas valem igual: as divisões surgiram por ordem de inscrição, não por nível.`,
-            `<b>KHC Elite:</b> ${pointsLine('elite')} (liga só de classificados).`,
-            `<b>Copa KHC</b> (2027, formato em definição): ${pointsLine('copa')}.`,
-            `<b>KHC Guilhotina:</b> ${pointsLine('guilhotina', ['sobrevivente', 'último cortado', 'penúltimo', 'antepenúltimo'])} (liga avulsa, simbólica).`,
-            '5º e 6º não pontuam. Premier League e NBA ficam fora.',
+            'Pontos pela colocação final de cada temporada, somados no Hall da Fama (Lendas).',
+            `<b>Séries A–F</b> (do 1º ao ${KHC_POINTS.serie.length}º, quem não é rebaixado): ${pointsLine('serie')}. Todas valem igual: as divisões surgiram por ordem de inscrição, não por nível.`,
+            `<b>KHC Elite</b> (liga só de classificados, acima das divisões): ${pointsLine('elite')}.`,
+            `<b>Copa KHC</b> (2027, com semifinal e final): ${pointsLine('copa')}.`,
+            '<b>Colocação final:</b> 1º ao 4º pelos playoffs (final e disputa do 3º), 5º e 6º pela disputa do 5º lugar, 7º em diante pela temporada regular.',
+            'KHC Guilhotina (liga avulsa), Premier League e NBA não pontuam.',
             '<b>Desempate:</b> mais títulos, depois melhor aproveitamento V–D na carreira, depois título mais recente.',
         ]
     },

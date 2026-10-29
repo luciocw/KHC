@@ -56,17 +56,6 @@
         },
         {
           "rank": 5,
-          "user": "VoliBEARS",
-          "team": "VoliBEARS",
-          "avatarId": "febae4b21b231a9e4714ba454fd71b29",
-          "w": 7,
-          "l": 7,
-          "pts": 1971.5,
-          "ptsAgainst": 1993.68,
-          "ppts": 2293.38
-        },
-        {
-          "rank": 6,
           "user": "ACosta13",
           "team": "ACosta13",
           "avatarId": "057b6b501c476f303eecac265ebc220b",
@@ -75,6 +64,17 @@
           "pts": 1992.18,
           "ptsAgainst": 1943.94,
           "ppts": 2256.74
+        },
+        {
+          "rank": 6,
+          "user": "VoliBEARS",
+          "team": "VoliBEARS",
+          "avatarId": "febae4b21b231a9e4714ba454fd71b29",
+          "w": 7,
+          "l": 7,
+          "pts": 1971.5,
+          "ptsAgainst": 1993.68,
+          "ppts": 2293.38
         },
         {
           "rank": 7,
@@ -176,17 +176,6 @@
         },
         {
           "rank": 5,
-          "user": "alb2106",
-          "team": "21 Saints",
-          "avatarId": "889698b8d789845c8f6c445c08a32d8c",
-          "w": 11,
-          "l": 3,
-          "pts": 2013.14,
-          "ptsAgainst": 1711.9,
-          "ppts": 2220.88
-        },
-        {
-          "rank": 6,
           "user": "lucianooliveira21",
           "team": "lucianooliveira21",
           "avatarId": "605aeddc58667c51735fd1a2a9e9d59e",
@@ -195,6 +184,17 @@
           "pts": 1868.28,
           "ptsAgainst": 1837.16,
           "ppts": 2176.44
+        },
+        {
+          "rank": 6,
+          "user": "alb2106",
+          "team": "21 Saints",
+          "avatarId": "889698b8d789845c8f6c445c08a32d8c",
+          "w": 11,
+          "l": 3,
+          "pts": 2013.14,
+          "ptsAgainst": 1711.9,
+          "ppts": 2220.88
         },
         {
           "rank": 7,

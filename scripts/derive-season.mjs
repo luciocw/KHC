@@ -4,12 +4,12 @@
 // Lê as ligas do próprio site (js/config.js: KHC_CONFIG[ano]) e, de cada
 // uma, usuários, elencos e o chaveamento do Sleeper:
 //   - Séries e Elite: 1º–4º pelos playoffs (final e disputa do 3º no
-//     winners_bracket), 5º+ pela temporada regular (vitórias, depois pontos).
-//     Troféus gold / silver / bronze / fourth para o top 4.
+//     winners_bracket), 5º e 6º pela disputa do 5º lugar (se houver), o resto
+//     pela temporada regular (vitórias, depois pontos). Troféus gold /
+//     silver / bronze / fourth para o top 4.
 //   - Guilhotina (kind: 'guillotine'): o último sobrevivente em 1º, depois
-//     quem caiu mais tarde (settings.eliminated). Top 4 com troféu (o
-//     sobrevivente leva o título, conta nas Lendas com os Pontos KHC da
-//     Guilhotina); sem V–D; `cut` = rodada do corte (0 = sobrevivente).
+//     quem caiu mais tarde (settings.eliminated). Sem troféu nem Pontos KHC
+//     (liga avulsa); sem V–D; `cut` = rodada do corte (0 = sobrevivente).
 //     Premier League e NBA não entram aqui.
 // Para se a temporada não acabou (final ou 3º lugar sem vencedor).
 //
@@ -101,9 +101,7 @@ async function deriveLeague(league) {
             id: meta.id, name: league.name, kind: 'guillotine',
             teams: ranked.map((r, i) => {
                 const { w, l, t, ...rest } = clean(r);
-                const row = { rank: i + 1, ...rest, cut: r.eliminated || 0 };
-                if (i < 4) row.trophy = TROPHIES[i];   // sobrevivente e os 3 últimos cortados
-                return row;
+                return { rank: i + 1, ...rest, cut: r.eliminated || 0 };
             })
         };
     }
@@ -115,11 +113,16 @@ async function deriveLeague(league) {
         if (!row) throw new Error(`${league.name}: roster ${rid} do chaveamento não está nos elencos`);
         return { rank: i + 1, ...clean(row), trophy: TROPHIES[i] };
     });
+    // 5º e 6º pela disputa do 5º lugar (quando o chaveamento tem); o resto
+    // pela temporada regular (vitórias, depois pontos)
+    const fifth = bracket.find(g => g.p === 5 && Number.isInteger(g.w) && Number.isInteger(g.l));
+    const placed = fifth ? [fifth.w, fifth.l] : [];
+    const mid = placed.map((rid, i) => ({ rank: 5 + i, ...clean(byRoster.get(rid)) }));
     const rest = rows
-        .filter(r => !podium.includes(r.rosterId))
+        .filter(r => !podium.includes(r.rosterId) && !placed.includes(r.rosterId))
         .sort((a, b) => (b.w - a.w) || (b.pts - a.pts))
-        .map((r, i) => ({ rank: 5 + i, ...clean(r) }));
-    return { id: meta.id, name: league.name, teams: [...top, ...rest] };
+        .map((r, i) => ({ rank: 5 + placed.length + i, ...clean(r) }));
+    return { id: meta.id, name: league.name, teams: [...top, ...mid, ...rest] };
 }
 
 async function main() {

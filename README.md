@@ -18,7 +18,7 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 - **App na tela inicial:** manifest + ícones (`assets/app/`) — Android instala pelo Chrome, iPhone pelo Safari (Compartilhar → Adicionar à Tela de Início)
 - **Top Scorers:** filtro por série e "Incluir Elite" (desligado por padrão, evita time duplicado); Baixar / Compartilhar geram PNG da lista com o filtro atual (em "Todas", só o Top 20)
 - **Power Ranking:** tiers S Favoritos · A Candidatos · B Meio de tabela · C Pressionados · D Lanternas por posição (10/20/40/20/10%). PWR = 50% força (all-play semana a semana contra as Séries A–D) + 30% aproveitamento + 20% fase (últimas 3 semanas); sem Elite. Exporta PNG
-- **Lendas:** Hall da Fama por **Pontos KHC** (`KHC_POINTS` em `js/config.js`, em discussão até 2027): Séries A–F 10/6/4/2 (todas iguais), Elite 15/8/5/3, Copa 8/6/4/2, Guilhotina 4/3/2/1; 5º+ não pontua, Premier e NBA fora. Desempate: títulos → aproveitamento V–D → título mais recente
+- **Lendas:** Hall da Fama por **Pontos KHC** (`KHC_POINTS` em `js/config.js`, em discussão até 2027), pela colocação final: Séries A–F 12/8/6/4/3/2/1 (1º ao 7º, todas iguais), Elite 14/10/7/5, Copa 10/7/5/2; Guilhotina, Premier e NBA não pontuam. 5º e 6º pela disputa do 5º lugar. Desempate: títulos → aproveitamento V–D → título mais recente
 - **Perfil do jogador:** lateral no desktop, bottom sheet no celular
 - **Modelo de dados híbrido:** temporadas finalizadas vêm de JSON estático (`data/<ano>.json`); temporada ativa vem da Sleeper API em tempo real
 - **Estados:** carregando (skeleton), erro com "Tentar de novo", cache, falha parcial, vazio
@@ -104,7 +104,7 @@ Quando a final e a disputa do 3º lugar terminam (semana 17), o site já mostra 
    ```bash
    node scripts/derive-season.mjs 2026
    ```
-   O script lê as ligas de `js/config.js` e o chaveamento do Sleeper: 1º–4º pelos playoffs (troféus), 5º+ pela temporada regular; a Guilhotina sai pela ordem de corte, e o último sobrevivente leva o título (conta nas Lendas; Premier League e NBA não entram). Se alguma final ainda não tiver vencedor, ele para e avisa. Gera `data/2026.json`.
+   O script lê as ligas de `js/config.js` e o chaveamento do Sleeper: 1º–4º pelos playoffs (troféus), 5º e 6º pela disputa do 5º lugar, o resto pela temporada regular; a Guilhotina sai pela ordem de corte, sem troféu nem Pontos KHC (Premier League e NBA não entram). Se alguma final ainda não tiver vencedor, ele para e avisa. Gera `data/2026.json`.
 
 2. **Commit + push.** O site passa a tratar 2026 como finalizada (status: 'final'), mostra medalhas, contribui pra Lendas e Career.
 
