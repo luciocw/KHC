@@ -126,7 +126,7 @@
         let badge;
         if (h.guillotine) badge = `<span class="chip ${h.alive ? 'chip--alive' : 'chip--final'}">${guillotineStatusLabel(h)}</span>`;
         else if (h.active) badge = '<span class="chip chip--live-soft">Em andamento</span>';
-        else if (h.rank >= 1 && h.rank <= 4) badge = medalHTML(h.rank);
+        else if (h.rank >= 1 && h.rank <= 3) badge = medalHTML(h.rank);
         else if (h.rank) badge = `<span class="chip chip--final">${h.rank}º</span>`;
         else badge = '';
         return `<div class="history-row">
@@ -207,7 +207,7 @@
             </header>
             <div class="drawer__body">
                 <section aria-labelledby="drawer-conq"><h3 class="eyebrow" id="drawer-conq">Conquistas</h3>
-                    <div class="tiles tiles--4">${trophyTiles}</div></section>
+                    <div class="tiles tiles--3">${trophyTiles}</div></section>
                 <section aria-labelledby="drawer-car"><h3 class="eyebrow" id="drawer-car">Carreira</h3>
                     <div class="tiles">${statTiles}</div></section>
                 ${history.length ? `<section aria-labelledby="drawer-hist"><h3 class="eyebrow" id="drawer-hist">Histórico</h3>

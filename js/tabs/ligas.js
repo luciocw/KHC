@@ -213,7 +213,7 @@ function promotedLabel(n) {
  */
 function zoneLegendItems(z, finalized) {
     const items = [];
-    if (finalized) items.push({ mark: 'medal', text: 'Top 4 pelos playoffs' });
+    if (finalized) items.push({ mark: 'medal', text: 'Pódio pelos playoffs' });
     if (z.up) items.push({ mark: 'promo', text: `Subiram · ${z.up}` });
     const sobem = !finalized && z.promote ? ` · ${promotedLabel(z.promote)} sobem` : '';
     items.push({ mark: 'playoff', text: `Playoffs · top ${z.playoff}${sobem}` });

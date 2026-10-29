@@ -297,7 +297,8 @@ function buildOddsInput(rosterIds, scores, pairs, scored) {
  *
  * Pontos por colocação final e tipo de competição em KHC_POINTS
  * (config.js); a Guilhotina não entra. Ordem: mais pontos → mais títulos
- * (ouros) → melhor aproveitamento V–D na carreira → título mais recente → nome.
+ * (ouros) → melhor aproveitamento V–D na temporada regular das divisões →
+ * título mais recente → nome.
  *
  * `best` guarda o resultado que mais vale (empate → mais recente), usado no
  * rótulo "Campeão Série A 2025" / "5º Série B 2025".
@@ -316,9 +317,13 @@ function legendsAggregator(seasons) {
             const kind = pointsKindOf(s);
             if (kind === 'guilhotina') return;   // liga avulsa: fora das Lendas
             s.teams.forEach(t => {
-                const r = record[t.user] || (record[t.user] = { w: 0, l: 0 });
-                r.w += t.w || 0;
-                r.l += t.l || 0;
+                // aproveitamento: só a temporada regular das divisões (14 jogos
+                // por ano para todos; Elite e Copa não entram, playoffs nunca)
+                if (kind === 'serie') {
+                    const r = record[t.user] || (record[t.user] = { w: 0, l: 0 });
+                    r.w += t.w || 0;
+                    r.l += t.l || 0;
+                }
                 const pts = pointsFor(kind, t.rank);
                 if (!t.trophy && !pts) return;
                 if (!byUser[t.user]) {

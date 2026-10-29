@@ -1,7 +1,7 @@
 // =============================================================================
 // UI / EXPORT — Exporta como imagem (PNG): a classificação (Ligas), os
 // confrontos (Rodada) ou o chaveamento de uma série, o Top Scorers, o Power
-// Ranking ou o perfil de um jogador.
+// Ranking, o Hall da Fama (top 10) ou o perfil de um jogador.
 //
 // A tabela é redesenhada num <canvas> com largura fixa (sempre com a coluna
 // PC, mesmo no celular), no visual do card da aba Ligas. Cores lidas dos
@@ -291,7 +291,7 @@ async function drawStandingsCanvas(league) {
         // Posição (medalha na temporada finalizada)
         const pos = i + 1;
         const entry = m.seriesIdx ? m.seriesIdx[t.ownerName] : null;
-        if (entry && entry.trophy && pos <= 4) {
+        if (entry && entry.trophy && pos <= 3) {
             drawMedal(ctx, 14 + 13, mid, pos, c);
         } else {
             ctx.fillStyle = zone === 'promo' ? c.promo : zone === 'releg' ? c.releg : c.text2;
@@ -701,7 +701,7 @@ async function drawProfileCanvas(username) {
     // Conquistas
     drawEyebrow(ctx, 'Conquistas', PAD, y + LABEL_H / 2 + 2, c);
     y += LABEL_H;
-    const mw = tileW(4);
+    const mw = tileW(MEDAL_KEYS.length);
     MEDAL_KEYS.forEach((k, i) => {
         const v = p.trophies[k] || 0;
         const x = PAD + i * (mw + GAP);
@@ -766,7 +766,7 @@ async function drawProfileCanvas(username) {
             const xr = EXPORT_W - PAD;
             if (h.guillotine) drawChip(ctx, xr, cy, guillotineStatusLabel(h), h.alive ? 'rgba(61, 214, 140, .15)' : c.surface3, h.alive ? c.promo : c.text);
             else if (h.active) drawChip(ctx, xr, cy, 'Em andamento', 'rgba(235, 64, 52, .15)', '#FF7A6E');
-            else if (h.rank >= 1 && h.rank <= 4) drawMedal(ctx, xr - 13, cy, h.rank, c);
+            else if (h.rank >= 1 && h.rank <= 3) drawMedal(ctx, xr - 13, cy, h.rank, c);
             else if (h.rank) drawChip(ctx, xr, cy, `${h.rank}º`, c.surface3, c.text);
         });
     }
@@ -1124,6 +1124,104 @@ async function drawTopCanvas() {
     return canvas;
 }
 
+const LEGENDS_EXPORT_LIMIT = 10;   // Hall da Fama: só o top 10 na imagem
+
+/**
+ * Desenha o top 10 do Hall da Fama: posição (medalha no 1º–3º), manager com
+ * aproveitamento e melhor resultado, ouro · prata · bronze e Pontos KHC.
+ * @returns {Promise<HTMLCanvasElement>}
+ */
+async function drawLegendsCanvas() {
+    const all = legendsAggregator(getFinalizedSeasons());
+    const list = all.slice(0, LEGENDS_EXPORT_LIMIT);
+    const c = exportPalette(null);
+    const { crest, avatars } = await loadExportAssets(null, list.map(e => e.avatarId));
+    const THEAD_H = 34, ROW_H = 57, NOTE_H = KHC_POINTS_DRAFT ? 44 : 0;
+    const n = list.length;
+    const H = EXPORT_HEAD_H + THEAD_H + n * ROW_H + NOTE_H;
+    const years = getFinalizedSeasons().map(s => s.id).sort();
+    const span = years.length > 1 ? `${years[0]}–${years[years.length - 1]}` : String(years[0] || '');
+    const subtitle = `Pontos KHC · top ${Math.min(n, LEGENDS_EXPORT_LIMIT)} de ${all.length} · ${span}`;
+    const { canvas, ctx } = startExportCard(H, c, crest, 'Hall da Fama', subtitle);
+    const colPts = EXPORT_W - 14;
+    const medalCols = [colPts - 84, colPts - 134, colPts - 184].reverse();   // ouro, prata, bronze
+    const colTeam = 56;
+    const spaced = s => s.toUpperCase().split('').join('\u200A');
+
+    let y = EXPORT_HEAD_H;
+    hLine(ctx, 0, EXPORT_W, y + THEAD_H - 1, c.border);
+    ctx.fillStyle = c.text3;
+    setFont(ctx, 800, 12, 'condensed');
+    ctx.fillText('#', 14, y + THEAD_H / 2);
+    ctx.fillText(spaced('Manager'), colTeam, y + THEAD_H / 2);
+    MEDAL_KEYS.forEach((k, i) => {
+        const g = ctx.createRadialGradient(medalCols[i] - 2, y + THEAD_H / 2 - 2, 1, medalCols[i], y + THEAD_H / 2, 7);
+        g.addColorStop(0, c.medals[i][0]);
+        g.addColorStop(1, c.medals[i][1]);
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(medalCols[i], y + THEAD_H / 2, 6, 0, Math.PI * 2);
+        ctx.fill();
+    });
+    ctx.fillStyle = c.text3;
+    ctx.textAlign = 'right';
+    ctx.fillText(spaced('Pts'), colPts, y + THEAD_H / 2);
+    ctx.textAlign = 'left';
+    y += THEAD_H;
+
+    list.forEach((e, i) => {
+        const top = y + i * ROW_H, mid = top + ROW_H / 2;
+        if (i % 2 === 1) {
+            ctx.fillStyle = c.surface2;
+            ctx.fillRect(0, top, EXPORT_W, ROW_H);
+        }
+        if (i < n - 1) hLine(ctx, 0, EXPORT_W, top + ROW_H - 1, c.border);
+        if (i < 3) drawMedal(ctx, 14 + 13, mid, i + 1, c);
+        else {
+            ctx.fillStyle = c.text2;
+            setFont(ctx, 900, 16, 'condensed');
+            ctx.fillText(String(i + 1), 14, mid);
+        }
+        drawAvatar(ctx, colTeam, mid - 17, avatars[i], e.user, c);
+        const nx = colTeam + 34 + 10;
+        const maxW = medalCols[0] - 30 - nx;
+        ctx.fillStyle = c.text;
+        setFont(ctx, 700, 15);
+        const name = fitText(ctx, e.user, maxW - 130);
+        ctx.fillText(name, nx, mid - 8);
+        const nw = ctx.measureText(name).width;
+        ctx.fillStyle = c.text3;
+        setFont(ctx, 800, 12);
+        ctx.fillText(`${fmtWinPct(e.winPct)} aproveitamento`, nx + nw + 8, mid - 8);
+        setFont(ctx, 400, 12);
+        ctx.fillText(fitText(ctx, bestResultLabel(e), maxW), nx, mid + 11);
+
+        ctx.textAlign = 'center';
+        setFont(ctx, 900, 18, 'condensed');
+        MEDAL_KEYS.forEach((k, j) => {
+            const v = e.trophies[k];
+            ctx.fillStyle = v ? c.medals[j][0] : c.text3;
+            ctx.fillText(v ? String(v) : '–', medalCols[j], mid);
+        });
+        ctx.textAlign = 'right';
+        ctx.fillStyle = c.text;
+        setFont(ctx, 900, 20, 'condensed');
+        ctx.fillText(String(e.points), colPts, mid);
+        ctx.textAlign = 'left';
+    });
+    y += n * ROW_H;
+
+    if (NOTE_H) {
+        hLine(ctx, 0, EXPORT_W, y, c.border);
+        ctx.fillStyle = c.text3;
+        setFont(ctx, 400, 12);
+        ctx.fillText(fitText(ctx, 'Pontos KHC em discussão: valores e critérios podem mudar até a temporada 2027. Aproveitamento: temporada regular das divisões.', EXPORT_W - 28), 14, y + NOTE_H / 2);
+    }
+
+    finishExportCard(ctx, H, c);
+    return canvas;
+}
+
 let _exportCache = null;   // { key, blob } da última imagem gerada
 
 /**
@@ -1155,6 +1253,15 @@ function exportTarget() {
             name: `khc-perfil-${slug}.png`,
             title: `${user} · Ultimate League KHC`,
             draw: () => drawProfileCanvas(user)
+        };
+    }
+    if (appState.tab === 'lendas') {
+        const years = getFinalizedSeasons().map(s => s.id).join('-');
+        return {
+            key: `lendas|${years}`,
+            name: 'khc-hall-da-fama-top10.png',
+            title: 'Hall da Fama · Ultimate League KHC',
+            draw: () => drawLegendsCanvas()
         };
     }
     if (appState.tab === 'top') {

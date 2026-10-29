@@ -1290,7 +1290,7 @@ abbr[title] { text-decoration: none; cursor: help; }
 
 .legends-row {
     display: grid;
-    grid-template-columns: 40px minmax(0, 1fr) repeat(4, 44px) 52px;
+    grid-template-columns: 40px minmax(0, 1fr) repeat(3, 44px) 52px;
     align-items: center;
     width: 100%;
     min-height: 52px;
@@ -1328,6 +1328,17 @@ abbr[title] { text-decoration: none; cursor: help; }
 .legends-row__count.is-fourth { color: var(--fourth); }
 .legends-row__pts { text-align: right; font-size: var(--fs-20); color: var(--text); }
 .legends-row--head .legends-row__pts { font-size: inherit; color: inherit; }
+.legends-row__who b.legends-row__name { display: flex; align-items: baseline; gap: 8px; min-width: 0; overflow: visible; }
+.legends-row__user { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.legends-row__pct { flex-shrink: 0; font-size: var(--fs-12); font-weight: 700; color: var(--text-3); }
+.legends-row__pct-sm { display: none; }
+/* celular: a % vai para a 2ª linha, o nome fica inteiro */
+@media (max-width: 480px) {
+    .legends-row__pct { display: none; }
+    .legends-row__who small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .legends-row__who small.legends-row__pct-sm { display: block; }
+}
+.podium__pct { font-size: var(--fs-12); color: var(--text-3); }
 .podium__pts { font-weight: 900; font-stretch: 75%; font-size: var(--fs-16); color: var(--text); }
 
 .dot-medal { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
@@ -1337,7 +1348,7 @@ abbr[title] { text-decoration: none; cursor: help; }
 .dot-medal--fourth { background: var(--fourth); }
 
 @media (max-width: 420px) {
-    .legends-row { grid-template-columns: 32px minmax(0, 1fr) repeat(4, 30px) 40px; padding: var(--s-8) 10px; }
+    .legends-row { grid-template-columns: 32px minmax(0, 1fr) repeat(3, 30px) 40px; padding: var(--s-8) 10px; }
 }
 
 /* === TEMPORADAS === */
@@ -1489,6 +1500,7 @@ abbr[title] { text-decoration: none; cursor: help; }
 
 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-8); }
 .tiles--4 { grid-template-columns: repeat(4, 1fr); }
+.tiles--3 { grid-template-columns: repeat(3, 1fr); }
 .tile { padding: var(--s-12); background: var(--surface-2); border-radius: 6px; }
 .tile .num { font-size: var(--fs-28); margin-top: 6px; }
 .tile--medal {
