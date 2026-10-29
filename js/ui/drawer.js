@@ -184,9 +184,11 @@
         const statTiles = [
             ['Temporadas', stats.seasons],
             ['V–D', `${stats.wins}–${stats.losses}`],
-            ['Aproveitamento', winRate],
+            // geral: inclui a temporada em andamento e a Elite (as Lendas usam
+            // só temporadas fechadas e só as divisões)
+            ['Aproveitamento geral', winRate, 'Inclui a temporada atual e a Elite'],
             ['Pontos totais', fmtPts(stats.pts)],
-        ].map(([k, v]) => `<div class="tile"><div class="eyebrow">${k}</div><div class="num">${v}</div></div>`).join('');
+        ].map(([k, v, note]) => `<div class="tile"><div class="eyebrow">${k}</div><div class="num">${v}</div>${note ? `<small class="tile__note">${note}</small>` : ''}</div>`).join('');
 
         return `
             <header class="drawer__hd">

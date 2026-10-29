@@ -52,13 +52,13 @@ const RULES = [
         title: 'Pontos KHC (Lendas)',
         lead: KHC_POINTS_DRAFT ? '<b>Em discussão:</b> valores e critérios podem mudar e serão definidos antes da temporada 2027.' : '',
         items: [
-            'Pontos pela colocação final de cada temporada, somados no Hall da Fama (Lendas).',
+            'Pontos pela colocação final de cada temporada, somados no Hall da Fama (Lendas). Só entram temporadas fechadas: a atual entra depois da final.',
             `<b>Séries A–F</b> (do 1º ao ${KHC_POINTS.serie.length}º, quem não é rebaixado): ${pointsLine('serie')}. Todas valem igual: as divisões surgiram por ordem de inscrição, não por nível.`,
             `<b>KHC Elite</b> (liga só de classificados, acima das divisões): ${pointsLine('elite')}.`,
             `<b>Copa KHC</b> (2027, com semifinal e final): ${pointsLine('copa')}.`,
             '<b>Colocação final:</b> 1º ao 4º pelos playoffs (final e disputa do 3º), 5º e 6º pela disputa do 5º lugar, 7º em diante pela temporada regular.',
             'KHC Guilhotina (liga avulsa), Premier League e NBA não pontuam.',
-            '<b>Desempate:</b> mais títulos, depois melhor aproveitamento V–D, depois título mais recente. O aproveitamento (a % ao lado do nome nas Lendas) conta só a temporada regular das divisões: 14 jogos por ano para todos; playoffs, Elite e Copa não entram.',
+            '<b>Desempate:</b> mais títulos, depois melhor aproveitamento V–D, depois título mais recente. O aproveitamento (a % ao lado do nome nas Lendas) conta só a temporada regular das divisões nas temporadas fechadas: 14 jogos por ano para todos; playoffs, Elite e Copa não entram. O "aproveitamento geral" do perfil é outro número: inclui a temporada atual e a Elite.',
         ]
     },
     {

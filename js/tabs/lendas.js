@@ -29,6 +29,19 @@ function bestResultLabel(entry) {
     return `${PLACE_LABELS[b.rank - 1] || `${b.rank}º`} ${seriesNameById(b.seriesId)} ${b.season}`;
 }
 
+/**
+ * "Temporadas fechadas: 2025 · 2026 entra após a final" (as Lendas só
+ * contam temporadas fechadas, com data/<ano>.json).
+ * @returns {string}
+ */
+function closedSeasonsNote() {
+    const closed = getFinalizedSeasons().map(s => String(s.id)).sort();
+    const open = Object.keys(KHC_CONFIG).sort().filter(y => !closed.includes(y));
+    const label = closed.length > 1 ? 'Temporadas fechadas' : 'Temporada fechada';
+    const next = open.length ? ` · ${open[open.length - 1]} entra após a final` : '';
+    return `${label}: ${closed.join(', ')}${next}`;
+}
+
 /** "79%" (aproveitamento V–D). */
 function fmtWinPct(p) {
     return `${Math.round((p || 0) * 100)}%`;
@@ -108,6 +121,7 @@ function renderLegends() {
         ${actions}
         <section class="card hall" aria-label="Pódio do Hall da Fama">
             <div class="eyebrow hall__eyebrow">Hall da Fama · Pontos KHC</div>
+            <p class="hall__seasons">${escapeHtml(closedSeasonsNote())}</p>
             <div class="podium">${podium}</div>
         </section>
         <div class="card legends">${head}${rows}</div>`;

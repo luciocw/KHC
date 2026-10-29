@@ -735,7 +735,7 @@ async function drawProfileCanvas(username) {
     y += LABEL_H - 4;
     const sw = tileW(4);
     [['Temporadas', String(p.stats.seasons)], ['V–D', `${p.stats.wins}–${p.stats.losses}`],
-     ['Aproveitamento', p.winRate], ['Pontos totais', fmtPts(p.stats.pts)]].forEach(([k, v], i) => {
+     ['Aproveitamento geral', p.winRate], ['Pontos totais', fmtPts(p.stats.pts)]].forEach(([k, v], i) => {
         const x = PAD + i * (sw + GAP);
         tile(x, y, sw, STAT_H - 8);
         drawEyebrow(ctx, k, x + 14, y + 20, c);
