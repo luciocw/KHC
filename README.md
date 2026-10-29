@@ -104,7 +104,7 @@ Quando a final e a disputa do 3º lugar terminam (semana 17), o site já mostra 
    ```bash
    node scripts/derive-season.mjs 2026
    ```
-   O script lê as ligas de `js/config.js` e o chaveamento do Sleeper: 1º–4º pelos playoffs (troféus), 5º+ pela temporada regular; a Guilhotina sai pela ordem de corte (sem troféu). Se alguma final ainda não tiver vencedor, ele para e avisa. Gera `data/2026.json`.
+   O script lê as ligas de `js/config.js` e o chaveamento do Sleeper: 1º–4º pelos playoffs (troféus), 5º+ pela temporada regular; a Guilhotina sai pela ordem de corte, e o último sobrevivente leva o título (conta nas Lendas; Premier League e NBA não entram). Se alguma final ainda não tiver vencedor, ele para e avisa. Gera `data/2026.json`.
 
 2. **Commit + push.** O site passa a tratar 2026 como finalizada (status: 'final'), mostra medalhas, contribui pra Lendas e Career.
 
