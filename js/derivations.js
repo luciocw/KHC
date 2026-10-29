@@ -295,12 +295,12 @@ function buildOddsInput(rosterIds, scores, pairs, scored) {
  * Hall da Fama: Pontos KHC somados de todas as temporadas finalizadas
  * (temporadas ativas ficam de fora, ainda sem campeão).
  *
- * Pontos por colocação e tipo de competição em KHC_POINTS (config.js).
- * Ordem: mais pontos → mais títulos (ouros) → melhor aproveitamento V–D na
- * carreira (Guilhotina fora) → título mais recente → nome.
+ * Pontos por colocação final e tipo de competição em KHC_POINTS
+ * (config.js); a Guilhotina não entra. Ordem: mais pontos → mais títulos
+ * (ouros) → melhor aproveitamento V–D na carreira → título mais recente → nome.
  *
  * `best` guarda o resultado que mais vale (empate → mais recente), usado no
- * rótulo "Campeão Série A 2025".
+ * rótulo "Campeão Série A 2025" / "5º Série B 2025".
  *
  * @param {Season[]} seasons
  * @returns {LegendEntry[]}
@@ -314,14 +314,13 @@ function legendsAggregator(seasons) {
         if (season.status !== 'final') return;
         season.series.forEach(s => {
             const kind = pointsKindOf(s);
-            const table = KHC_POINTS[kind] || {};
+            if (kind === 'guilhotina') return;   // liga avulsa: fora das Lendas
             s.teams.forEach(t => {
-                if (kind !== 'guilhotina') {
-                    const r = record[t.user] || (record[t.user] = { w: 0, l: 0 });
-                    r.w += t.w || 0;
-                    r.l += t.l || 0;
-                }
-                if (!t.trophy) return;
+                const r = record[t.user] || (record[t.user] = { w: 0, l: 0 });
+                r.w += t.w || 0;
+                r.l += t.l || 0;
+                const pts = pointsFor(kind, t.rank);
+                if (!t.trophy && !pts) return;
                 if (!byUser[t.user]) {
                     byUser[t.user] = {
                         user: t.user,
@@ -333,11 +332,10 @@ function legendsAggregator(seasons) {
                     };
                 }
                 const entry = byUser[t.user];
-                const pts = table[t.trophy] || 0;
-                entry.trophies[t.trophy]++;
+                if (t.trophy) entry.trophies[t.trophy]++;
                 entry.points += pts;
                 if (t.trophy === 'gold') entry.lastTitle = Math.max(entry.lastTitle, season.id);
-                const cand = { trophy: t.trophy, seriesId: s.id, season: season.id, points: pts };
+                const cand = { rank: t.rank, seriesId: s.id, season: season.id, points: pts };
                 if (!entry.best || pts > entry.best.points || (pts === entry.best.points && cand.season > entry.best.season)) {
                     entry.best = cand;
                 }

@@ -12,7 +12,7 @@
 
 const MEDAL_KEYS = ['gold', 'silver', 'bronze', 'fourth'];
 const MEDAL_LABELS = { gold: 'Ouro', silver: 'Prata', bronze: 'Bronze', fourth: '4º lugar' };
-const PLACE_LABELS = { gold: 'Campeão', silver: 'Vice', bronze: '3º', fourth: '4º' };
+const PLACE_LABELS = ['Campeão', 'Vice'];   // 3º em diante: "3º", "5º"…
 
 /**
  * "Campeão Série A 2025" a partir do melhor resultado.
@@ -22,7 +22,7 @@ const PLACE_LABELS = { gold: 'Campeão', silver: 'Vice', bronze: '3º', fourth: 
 function bestResultLabel(entry) {
     const b = entry.best;
     if (!b) return '';
-    return `${PLACE_LABELS[b.trophy]} ${seriesNameById(b.seriesId)} ${b.season}`;
+    return `${PLACE_LABELS[b.rank - 1] || `${b.rank}º`} ${seriesNameById(b.seriesId)} ${b.season}`;
 }
 
 /**

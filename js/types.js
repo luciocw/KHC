@@ -84,7 +84,7 @@
  * @property {number} points           Pontos KHC (KHC_POINTS)
  * @property {number} winPct           Aproveitamento V–D na carreira (desempate)
  * @property {number} lastTitle        Ano do título mais recente (0 = nenhum)
- * @property {{trophy: Trophy, seriesId: SeriesId, season: number, points: number}|null} best  Resultado que mais vale
+ * @property {{rank: number, seriesId: SeriesId, season: number, points: number}|null} best  Resultado que mais vale
  */
 
 /**

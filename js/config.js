@@ -80,17 +80,24 @@ function regularSeriesLabel(season) {
 // --- PONTOS KHC (Lendas) ---
 // EM DISCUSSÃO: valores e critérios podem mudar; serão definidos antes da
 // temporada 2027 (KHC_POINTS_DRAFT mostra o aviso nas Lendas e em Regras).
-// Séries A–F valem igual: surgiram por ordem de inscrição, não por nível.
-// Elite: só classificados. Copa: semi e final (formato em definição).
-// Guilhotina: liga avulsa, pontuação simbólica. 5º e 6º não pontuam.
-// Premier League e NBA ficam fora (não estão no histórico).
+// Pontos por colocação final (1º, 2º, 3º…). Séries A–F valem igual:
+// surgiram por ordem de inscrição, não por nível; pontuam do 1º ao 7º (quem
+// não é rebaixado; 5º e 6º pela disputa do 5º lugar). Elite (só
+// classificados): acima das divisões, 1º ao 4º. Copa: semi e final, 1º ao 4º.
+// Guilhotina, Premier League e NBA não pontuam.
 const KHC_POINTS = {
-    elite:      { gold: 15, silver: 8, bronze: 5, fourth: 3 },
-    serie:      { gold: 10, silver: 6, bronze: 4, fourth: 2 },
-    copa:       { gold: 8,  silver: 6, bronze: 4, fourth: 2 },
-    guilhotina: { gold: 4,  silver: 3, bronze: 2, fourth: 1 }
+    elite: [14, 10, 7, 5],
+    serie: [12, 8, 6, 4, 3, 2, 1],
+    copa:  [10, 7, 5, 2],
+    guilhotina: []
 };
 const KHC_POINTS_DRAFT = true;
+
+/** Pontos KHC de uma colocação (0 se não pontua). */
+function pointsFor(kind, rank) {
+    const table = KHC_POINTS[kind] || [];
+    return Number.isInteger(rank) && rank >= 1 ? (table[rank - 1] || 0) : 0;
+}
 
 /**
  * Tipo de competição de uma série do histórico, para os Pontos KHC.
