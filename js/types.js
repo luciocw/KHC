@@ -82,7 +82,7 @@
  * @property {string|null} avatarId
  * @property {TrophyCount} trophies    Contagem por tipo
  * @property {number} points           Pontos KHC (KHC_POINTS)
- * @property {number} winPct           Aproveitamento V–D na carreira (desempate)
+ * @property {number} winPct           Aproveitamento V–D na temporada regular das divisões (desempate)
  * @property {number} lastTitle        Ano do título mais recente (0 = nenhum)
  * @property {{rank: number, seriesId: SeriesId, season: number, points: number}|null} best  Resultado que mais vale
  */

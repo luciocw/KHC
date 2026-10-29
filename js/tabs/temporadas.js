@@ -1,7 +1,7 @@
 // =============================================================================
 // TAB / TEMPORADAS — Um card por ano, do mais recente ao mais antigo.
 //
-//   - Finalizada (data/<ano>.json): pódio top 4 por série, com medalha e
+//   - Finalizada (data/<ano>.json): pódio top 3 por série, com medalha e
 //     pontos rotulados ("2198.0 · pontos · 10–4").
 //   - Em andamento: líderes (top 2) de cada série, se a temporada já foi
 //     carregada nesta sessão (appState.leaguesBySeason); senão, só a lista.
@@ -78,10 +78,10 @@ function renderFinalizedSeason(season) {
     const tiers = series.map(s => seriesIdToTier(s.id));
 
     const cols = series.map(s => {
-        const top4 = s.teams.filter(t => t.rank >= 1 && t.rank <= 4).sort((a, b) => a.rank - b.rank);
+        const podium = s.teams.filter(t => t.rank >= 1 && t.rank <= 3).sort((a, b) => a.rank - b.rank);
         return `<div class="season-col">
             ${seasonColHead(seriesIdToTier(s.id), 'Pódio final')}
-            ${top4.map(t => seasonRow({
+            ${podium.map(t => seasonRow({
                 user: t.user, team: t.team,
                 badge: medalHTML(t.rank),
                 main: fmtPts(t.pts),

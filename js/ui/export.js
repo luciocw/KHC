@@ -291,7 +291,7 @@ async function drawStandingsCanvas(league) {
         // Posição (medalha na temporada finalizada)
         const pos = i + 1;
         const entry = m.seriesIdx ? m.seriesIdx[t.ownerName] : null;
-        if (entry && entry.trophy && pos <= 4) {
+        if (entry && entry.trophy && pos <= 3) {
             drawMedal(ctx, 14 + 13, mid, pos, c);
         } else {
             ctx.fillStyle = zone === 'promo' ? c.promo : zone === 'releg' ? c.releg : c.text2;
@@ -701,7 +701,7 @@ async function drawProfileCanvas(username) {
     // Conquistas
     drawEyebrow(ctx, 'Conquistas', PAD, y + LABEL_H / 2 + 2, c);
     y += LABEL_H;
-    const mw = tileW(4);
+    const mw = tileW(MEDAL_KEYS.length);
     MEDAL_KEYS.forEach((k, i) => {
         const v = p.trophies[k] || 0;
         const x = PAD + i * (mw + GAP);
@@ -766,7 +766,7 @@ async function drawProfileCanvas(username) {
             const xr = EXPORT_W - PAD;
             if (h.guillotine) drawChip(ctx, xr, cy, guillotineStatusLabel(h), h.alive ? 'rgba(61, 214, 140, .15)' : c.surface3, h.alive ? c.promo : c.text);
             else if (h.active) drawChip(ctx, xr, cy, 'Em andamento', 'rgba(235, 64, 52, .15)', '#FF7A6E');
-            else if (h.rank >= 1 && h.rank <= 4) drawMedal(ctx, xr - 13, cy, h.rank, c);
+            else if (h.rank >= 1 && h.rank <= 3) drawMedal(ctx, xr - 13, cy, h.rank, c);
             else if (h.rank) drawChip(ctx, xr, cy, `${h.rank}º`, c.surface3, c.text);
         });
     }

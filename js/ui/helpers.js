@@ -77,11 +77,13 @@ function seriesPillHTML(tier) {
 }
 
 /**
- * Medalha com o número dentro (nunca substitui a posição).
- * @param {number} pos 1–4
+ * Medalha com o número dentro (nunca substitui a posição). Só 1º–3º têm
+ * medalha; do 4º em diante, o número sem cor.
+ * @param {number} pos
  * @returns {string}
  */
 function medalHTML(pos) {
+    if (pos > 3) return `<span class="medal medal--plain" aria-label="${pos}º lugar">${pos}</span>`;
     return `<span class="medal medal--${pos}" role="img" aria-label="${pos}º lugar">${pos}</span>`;
 }
 

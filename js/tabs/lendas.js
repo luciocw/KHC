@@ -5,13 +5,16 @@
 //   - Ordem: Pontos KHC (KHC_POINTS em config.js; desempate em
 //     legendsAggregator). Aviso enquanto os pontos estão em discussão.
 //   - Pódio top 3 (2º · 1º · 3º) com anel na cor da medalha e os pontos.
-//   - Tabela: # | manager + melhor resultado | ouro · prata · bronze · 4º | pts.
+//   - Tabela: # | manager (aproveitamento %) + melhor resultado | ouro · prata
+//     · bronze | pts. O aproveitamento V–D (temporada regular das
+//     divisões, sem Elite e Copa) é o desempate.
 //
 // Depende de: config, sanitize, data, derivations, ui/helpers
 // =============================================================================
 
-const MEDAL_KEYS = ['gold', 'silver', 'bronze', 'fourth'];
-const MEDAL_LABELS = { gold: 'Ouro', silver: 'Prata', bronze: 'Bronze', fourth: '4º lugar' };
+// Medalhas: só 1º, 2º e 3º (o 4º soma Pontos KHC, mas sem medalha)
+const MEDAL_KEYS = ['gold', 'silver', 'bronze'];
+const MEDAL_LABELS = { gold: 'Ouro', silver: 'Prata', bronze: 'Bronze' };
 const PLACE_LABELS = ['Campeão', 'Vice'];   // 3º em diante: "3º", "5º"…
 
 /**
@@ -23,6 +26,11 @@ function bestResultLabel(entry) {
     const b = entry.best;
     if (!b) return '';
     return `${PLACE_LABELS[b.rank - 1] || `${b.rank}º`} ${seriesNameById(b.seriesId)} ${b.season}`;
+}
+
+/** "79%" (aproveitamento V–D). */
+function fmtWinPct(p) {
+    return `${Math.round((p || 0) * 100)}%`;
 }
 
 /**
@@ -38,6 +46,7 @@ function buildPodiumCol(entry, place) {
         <b class="podium__name" dir="auto">${safeUser}</b>
         <small class="podium__label">${escapeHtml(bestResultLabel(entry))}</small>
         <span class="podium__pts num">${entry.points} pts</span>
+        <small class="podium__pct" title="Aproveitamento V–D na temporada regular das divisões (sem Elite e Copa)">${fmtWinPct(entry.winPct)} de aproveitamento</small>
         <span class="podium__base">${medalHTML(place + 1)}</span>
     </button>`;
 }
@@ -71,7 +80,7 @@ function renderLegends() {
         }).join('');
         return `<button type="button" class="legends-row" data-user="${safeUser}" aria-label="${i + 1}º: ${safeUser}, ${e.points} Pontos KHC. Abrir perfil">
             <span class="pos">${i + 1}</span>
-            <span class="legends-row__who"><b dir="auto">${safeUser}</b><small>${escapeHtml(bestResultLabel(e))}</small></span>
+            <span class="legends-row__who"><b dir="auto">${safeUser}<span class="legends-row__pct num" title="Aproveitamento V–D na temporada regular das divisões (sem Elite e Copa)">${fmtWinPct(e.winPct)}</span></b><small>${escapeHtml(bestResultLabel(e))}</small></span>
             ${counts}
             <span class="num legends-row__pts">${e.points}</span>
         </button>`;
