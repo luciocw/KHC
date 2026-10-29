@@ -124,7 +124,7 @@
     function renderHistoryRow(h) {
         const tier = seriesIdToTier(h.serie);
         let badge;
-        if (h.guillotine) badge = h.alive ? '<span class="chip chip--alive">Vivo</span>' : '<span class="chip chip--final">Cortado</span>';
+        if (h.guillotine) badge = `<span class="chip ${h.alive ? 'chip--alive' : 'chip--final'}">${guillotineStatusLabel(h)}</span>`;
         else if (h.active) badge = '<span class="chip chip--live-soft">Em andamento</span>';
         else if (h.rank >= 1 && h.rank <= 4) badge = medalHTML(h.rank);
         else if (h.rank) badge = `<span class="chip chip--final">${h.rank}º</span>`;

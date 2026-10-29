@@ -1,6 +1,6 @@
 // =============================================================================
 // API — Camada de rede e cache.
-// Fetch com retry/backoff, cache em localStorage com TTL, e o fetchLeagueData
+// Fetch com retry/backoff, cache de reserva em localStorage, e o fetchLeagueData
 // que combina /rosters + /users do Sleeper em objetos normalizados.
 // Depende de: js/config.js, js/sanitize.js
 // =============================================================================
@@ -30,10 +30,10 @@ async function fetchWithRetry(url, maxRetries = MAX_RETRIES) {
         try {
             const response = await fetch(url);
 
-            // Se rate limited, aguarda e tenta novamente
-            if (response.status === 429) {
+            // Rate limit (429) ou falha do servidor (5xx): aguarda e tenta de novo
+            if ((response.status === 429 || response.status >= 500) && attempt < maxRetries - 1) {
                 const waitTime = RETRY_BASE_MS * Math.pow(2, attempt);
-                console.warn(`Rate limited. Aguardando ${waitTime}ms antes de retry ${attempt + 1}/${maxRetries}`);
+                console.warn(`Sleeper respondeu ${response.status}. Retry ${attempt + 1}/${maxRetries} em ${waitTime}ms`);
                 await sleep(waitTime);
                 continue;
             }
@@ -80,14 +80,10 @@ function getFromCache(season) {
         const cached = localStorage.getItem(getCacheKey(season));
         if (!cached) return null;
 
+        // Reserva para quando o Sleeper falha: vale qualquer idade (a pílula
+        // de status mostra "Dados em cache" e há quanto tempo)
         const { timestamp, data } = JSON.parse(cached);
-        const age = Date.now() - timestamp;
-
-        if (age > CACHE_DURATION_MS) {
-            return { data, isExpired: true, age };
-        }
-
-        return { data, isExpired: false, age };
+        return { data, age: Date.now() - timestamp };
     } catch (e) {
         console.warn('Falha ao ler cache:', e);
         return null;
@@ -102,14 +98,18 @@ function cleanOldCache() {
     try {
         const validSeasons = Object.keys(KHC_CONFIG);
         const validKeys = validSeasons.map(s => getCacheKey(s));
+        // placares e confrontos de semanas encerradas: só das ligas configuradas
+        const validIds = new Set(validSeasons.flatMap(s => KHC_CONFIG[s].leagues.map(l => l.id)));
+        const weekKey = /^khc_(?:wk|pairs)_(\d+)_\d+$/;
 
         // Encontra e remove chaves de cache obsoletas
         const keysToRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            if (key && key.startsWith(CACHE_KEY) && !validKeys.includes(key)) {
-                keysToRemove.push(key);
-            }
+            if (!key) continue;
+            if (key.startsWith(CACHE_KEY) && !validKeys.includes(key)) keysToRemove.push(key);
+            const m = key.match(weekKey);
+            if (m && !validIds.has(m[1])) keysToRemove.push(key);
         }
 
         keysToRemove.forEach(key => {
@@ -199,12 +199,13 @@ async function fetchRoundData(leagueId, week) {
     const base = `https://api.sleeper.app/v1/league/${leagueId}`;
     const [matchRes, bracketRes] = await Promise.all([
         fetchWithRetry(`${base}/matchups/${week}`),
-        fetchWithRetry(`${base}/winners_bracket`)
+        // chaveamento é opcional (só rotula os jogos de playoff)
+        fetchWithRetry(`${base}/winners_bracket`).catch(() => null)
     ]);
     if (!matchRes.ok) throw new Error(getErrorMessage(matchRes.status));
 
     const raw = await matchRes.json();
-    const bracketRaw = bracketRes.ok ? await bracketRes.json() : [];
+    const bracketRaw = bracketRes && bracketRes.ok ? await bracketRes.json().catch(() => []) : [];
 
     return {
         week,

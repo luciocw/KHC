@@ -187,8 +187,10 @@ function chancesNote(tier, odds) {
     if (odds.status === 'loading') return 'Calculando chances…';
     if (odds.status === 'error') return 'Não deu pra calcular as chances agora. Tente atualizar.';
     const after = odds.data.afterWeek ? `após a rodada ${odds.data.afterWeek}` : 'antes da rodada 1';
+    const league = appState.leagues.find(l => l.info.tier === tier);
+    const n = league ? league.teams.length : 0;
     const base = tier === 'elite'
-        ? 'estimativa do modelo (ainda sem histórico do formato 8 times / 4 vagas)'
+        ? `estimativa do modelo (ainda sem histórico do formato ${n} times / ${odds.data.spots} vagas)`
         : 'calibradas com o histórico de ligas 10 times / 6 vagas do Sleeper';
     return `Chances ${after} · ${ODDS_PARAMS.sims / 1000} mil simulações do resto da temporada regular, ${base}. Atualiza quando a rodada fecha.`;
 }
@@ -267,14 +269,16 @@ function standingsModel(league) {
     // Visão Chances: só com temporada regular em andamento.
     const odds = finalized ? { status: 'off' } : leagueOdds(league);
     const chancesAvailable = !finalized && !(odds.status === 'ready' && !odds.data.active);
-    // Playoffs (semanas 15–17): abre no Chaveamento até a pessoa escolher outra visão
-    const want = !finalized && weekLabel() === 'Playoffs' && !appState.ligasViewChosen ? 'chaveamento' : appState.ligasView;
+    // Playoffs (semanas 15–17): abre no Chaveamento até a pessoa escolher outra visão,
+    // e depois da final, até o fechamento (pódio no Chaveamento)
+    const decided = !finalized && (weekLabel() === 'Playoffs' || isSeasonOver());
+    const want = decided && !appState.ligasViewChosen ? 'chaveamento' : appState.ligasView;
     const view = want === 'chaveamento' ? 'chaveamento' : chancesAvailable && want === 'chances' ? 'chances' : 'tabela';
     const seriesIdx = finalized ? getFinalStandingsIndex()[league.info.name] : undefined;
     const teams = sortByFinalStandings(league.teams, seriesIdx);
     const subtitle = finalized
         ? `${teams.length} times · classificação final ${appState.season}`
-        : `${teams.length} times · ${weekLabel() || 'Temporada em andamento'} · PPR`;
+        : `${teams.length} times · ${weekLabel() || (isSeasonOver() ? 'Temporada encerrada' : 'Temporada em andamento')} · PPR`;
     return { tier, meta: SERIES_META[tier], teams, z: zonesFor(tier, finalized), finalized, seriesIdx, subtitle, view, odds, chancesAvailable };
 }
 

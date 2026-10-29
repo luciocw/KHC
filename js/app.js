@@ -192,6 +192,10 @@ function renderStatus() {
     } else if (finalized) {
         cls += ' is-final';
         html = '<i class="dot"></i><b>Temporada encerrada</b>';
+    } else if (isSeasonOver()) {
+        // acabou no campo, falta gravar o histórico (derive-season.mjs)
+        cls += ' is-final';
+        html = `<i class="dot"></i><b>Temporada encerrada</b><small>${ago}</small>${refresh}`;
     } else if (appState.isFromCache) {
         cls += ' is-stale';
         html = `<i class="dot"></i><b>Dados em cache</b><small>${ago}</small>${refresh}`;
@@ -263,7 +267,6 @@ async function loadData() {
     const season = appState.season;
     const config = KHC_CONFIG[season];
 
-    appState.isLoading = true;
     appState.loadState = 'loading';
     appState.leagues = [];
     appState.rosterData = [];
@@ -292,7 +295,8 @@ async function loadData() {
     let leagues = ok;
     if (ok.length) {
         appState.lastUpdated = Date.now();
-        saveToCache(season, ok);
+        // só guarda carga completa: uma parcial apagaria séries do cache
+        if (!failed.length) saveToCache(season, ok);
     } else {
         const cached = getFromCache(season);
         if (cached && Array.isArray(cached.data) && cached.data.length) {
@@ -307,7 +311,6 @@ async function loadData() {
     appState.leaguesBySeason[season] = leagues;
     appState.failedLeagues = leagues.length && !appState.isFromCache ? failed : [];
     appState.loadState = leagues.length ? 'ready' : 'error';
-    appState.isLoading = false;
     render();
 
     if (appState.pendingPlayer) {

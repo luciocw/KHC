@@ -20,7 +20,7 @@
 /**
  * Pesos do Power Score (0–100):
  *   força         50% — all-play: em cada semana, de quantos times da liga
- *                       inteira (Séries A–D) a pontuação venceria. Tira a
+ *                       inteira (séries regulares) a pontuação venceria. Tira a
  *                       sorte do adversário e compara séries de forma justa.
  *   aproveitamento 30% — V–D real (é o que leva aos playoffs).
  *   fase          20% — média das últimas 3 semanas, em percentil.
@@ -389,6 +389,12 @@ function careerForUser(username, seasons) {
             };
             if (row.trophy) entry.trophy = row.trophy;
             if (season.status === 'active') entry.active = true;
+            // Guilhotina fechada: sem V–D, fica fora dos totais de carreira
+            if (s.kind === 'guillotine') {
+                entry.guillotine = true;
+                entry.alive = !row.cut;
+                entry.cut = row.cut || 0;
+            }
             history.push(entry);
 
             if (row.trophy) {
@@ -398,9 +404,11 @@ function careerForUser(username, seasons) {
                 }
             }
 
-            totalW += row.w;
-            totalL += row.l;
-            totalPts += row.pts;
+            if (s.kind !== 'guillotine') {
+                totalW += row.w || 0;
+                totalL += row.l || 0;
+                totalPts += row.pts;
+            }
 
             if (season.status === 'active') {
                 currentSeriesSet.add(s.id);

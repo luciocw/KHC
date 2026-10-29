@@ -92,6 +92,27 @@ function isSeasonFinalized(seasonId) {
     return _finalizedSeasons.some(s => String(s.id) === id);
 }
 
+/** Última semana de fantasy (final dos playoffs das séries). */
+const LAST_FANTASY_WEEK = REGULAR_SEASON_WEEKS + 3;
+
+/**
+ * A temporada já acabou no campo? Finalizada (data/<ano>.json) ou, antes de
+ * rodar scripts/derive-season.mjs, pelo calendário da NFL no Sleeper: já
+ * passou da semana 17, a NFL está nos playoffs/entressafra ou já virou o ano.
+ * @param {number|string} [seasonId]
+ * @returns {boolean}
+ */
+function isSeasonOver(seasonId) {
+    const id = String(seasonId != null ? seasonId : appState.season);
+    if (isSeasonFinalized(id)) return true;
+    const st = appState.nflState;
+    if (!st || !st.season) return false;
+    if (Number(st.season) > Number(id)) return true;
+    if (String(st.season) !== id) return false;
+    const week = sanitizeNumber(st.display_week, 0, 30, 0);
+    return st.season_type === 'post' || st.season_type === 'off' || week > LAST_FANTASY_WEEK;
+}
+
 /**
  * Season finalizada por ano, ou undefined.
  * @param {number|string} seasonId

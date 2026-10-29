@@ -1,6 +1,7 @@
 // =============================================================================
 // CHAVEAMENTO — Playoffs de uma série (visão "Chaveamento" da aba Ligas).
 //
+//   - Tamanho pelas vagas do Sleeper (playoff_teams): 4, 6 ou 8 times.
 //   - Elite (4 times): semis 1º×4º e 2º×3º na semana 15; final e 3º lugar
 //     na 16.
 //   - Séries A–D (6 times): 1º e 2º folgam nas quartas. Quartas 4º×5º e
@@ -43,6 +44,17 @@ const BRACKET_TEMPLATES = {
         { m: 5, r: 2, t1_from: { l: 1 }, t2_from: { l: 2 }, p: 5 },
         { m: 6, r: 3, t1_from: { w: 3 }, t2_from: { w: 4 }, p: 1 },
         { m: 7, r: 3, t1_from: { l: 3 }, t2_from: { l: 4 }, p: 3 }
+    ],
+    // 8 times (ex.: Elite 2027): quartas 1×8, 4×5, 2×7, 3×6
+    8: [
+        { m: 1, r: 1, t1: 1, t2: 8 },
+        { m: 2, r: 1, t1: 4, t2: 5 },
+        { m: 3, r: 1, t1: 2, t2: 7 },
+        { m: 4, r: 1, t1: 3, t2: 6 },
+        { m: 5, r: 2, t1_from: { w: 1 }, t2_from: { w: 2 } },
+        { m: 6, r: 2, t1_from: { w: 3 }, t2_from: { w: 4 } },
+        { m: 7, r: 3, t1_from: { w: 5 }, t2_from: { w: 6 }, p: 1 },
+        { m: 8, r: 3, t1_from: { l: 5 }, t2_from: { l: 6 }, p: 3 }
     ]
 };
 
@@ -118,7 +130,8 @@ function bracketWeekOf(settings, r) {
  */
 function bracketModel(league, data) {
     const { settings } = data;
-    const spots = league.info.tier === 'elite' ? 4 : 6;
+    // vagas do Sleeper (playoff_teams); sem elas, o formato atual da KHC
+    const spots = BRACKET_TEMPLATES[settings.playoffTeams] ? settings.playoffTeams : (league.info.tier === 'elite' ? 4 : 6);
     const seedOf = {};
     league.teams.forEach((t, i) => { seedOf[t.teamId] = i + 1; });
     const byRoster = {};
@@ -147,6 +160,11 @@ function bracketModel(league, data) {
         const known = g.t1 || g.t2;
         const label = playoffLabel(g, totalRounds);
         if (known && label === 'Semifinal') return `semi do ${seedOf[known]}º`;
+        if (!g.p) {
+            // chave sem time definido ainda (8 times): "semifinal 1", "semifinal 2"
+            const same = games.filter(x => x.r === g.r && !x.p).sort((a, b) => a.m - b.m);
+            if (same.length > 1) return `${label.toLowerCase()} ${same.indexOf(g) + 1}`;
+        }
         return label.replace(/^Disputa do /, '');
     };
     const side = (rid, from, g) => {

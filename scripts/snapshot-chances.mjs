@@ -83,6 +83,11 @@ async function main() {
         const { id, tier } = league;
         if (isGuillotine(tier)) continue;   // sem playoffs nem queda
         const [info, users, rosters] = await Promise.all([get(`/league/${id}`), get(`/league/${id}/users`), get(`/league/${id}/rosters`)]);
+        // antes do draft não há elencos nem calendário para simular
+        if (info.status === 'pre_draft' || info.status === 'drafting') {
+            console.log(`${tier}: antes do draft, nada a registrar`);
+            continue;
+        }
         const st = info.settings || {};
         const regWeeks = Math.max(1, (st.playoff_week_start || 15) - 1);
         const scored = Math.max(0, Math.min(st.last_scored_leg || 0, regWeeks));

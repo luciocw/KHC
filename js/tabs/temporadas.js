@@ -18,7 +18,7 @@
 function weekLabel(year) {
     const state = appState.nflState;
     const y = String(year != null ? year : appState.season);
-    if (!state || String(state.season) !== y || state.season_type !== 'regular') return '';
+    if (!state || String(state.season) !== y || state.season_type !== 'regular' || isSeasonOver(y)) return '';
     const week = sanitizeNumber(state.display_week, 0, 30, 0);
     if (week < 1) return '';
     if (week > REGULAR_SEASON_WEEKS) return 'Playoffs';
@@ -72,7 +72,8 @@ function seasonRow({ user, team, badge, main, sub }) {
  * @returns {string}
  */
 function renderFinalizedSeason(season) {
-    const series = season.series.slice().sort((a, b) =>
+    // Guilhotina fica fora do pódio (como na temporada em andamento)
+    const series = season.series.filter(s => s.kind !== 'guillotine').sort((a, b) =>
         TIER_ORDER.indexOf(seriesIdToTier(a.id)) - TIER_ORDER.indexOf(seriesIdToTier(b.id)));
     const tiers = series.map(s => seriesIdToTier(s.id));
 
@@ -126,10 +127,11 @@ function renderActiveSeason(year) {
     }).join('');
 
     const week = weekLabel(year);
-    return `<article class="card season" aria-label="Temporada ${escapeHtml(year)} em andamento">
+    const over = isSeasonOver(year);   // acabou, falta gravar o histórico
+    return `<article class="card season" aria-label="Temporada ${escapeHtml(year)} ${over ? 'encerrada' : 'em andamento'}">
         <header class="season__hd">
             <span class="num season__year">${escapeHtml(year)}</span>
-            <span class="chip chip--live">Em andamento</span>
+            ${over ? '<span class="chip chip--final">Encerrada · pódio em breve</span>' : '<span class="chip chip--live">Em andamento</span>'}
             <span class="spacer"></span>
             <small class="season__meta">${escapeHtml(week || seriesListLabel(tiers))}</small>
         </header>

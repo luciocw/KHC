@@ -64,6 +64,19 @@ function isRegularSeries(tier) {
     return tier !== 'elite' && !isGuillotine(tier);
 }
 
+/**
+ * "Séries A–D" (ou "Série A") com as séries regulares da temporada.
+ * @param {string} season
+ * @returns {string}
+ */
+function regularSeriesLabel(season) {
+    const ids = ((KHC_CONFIG[season] || {}).leagues || []).map(l => l.tier).filter(isRegularSeries)
+        .sort((a, b) => TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b))
+        .map(t => SERIES_META[t].id);
+    if (!ids.length) return 'Séries';
+    return ids.length === 1 ? `Série ${ids[0]}` : `Séries ${ids[0]}–${ids[ids.length - 1]}`;
+}
+
 // --- PREMIER LEAGUE (fantasy de futebol, fora das séries) ---
 // Página "Também na KHC" (#/premier), fora da navegação; destaque só na entressafra
 // da NFL. O Sleeper não entrega placares por rodada desta liga (só a tabela).
@@ -85,11 +98,9 @@ const NBA_LEAGUE = {
 };
 
 const CREST_PATH = 'assets/logo/png/ui/';
-const DEFAULT_AVATAR = 'https://sleepercdn.com/images/v2/icons/player_default.webp';
 
 // --- CONSTANTES ---
 const CACHE_KEY = 'khc_league_cache';
-const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutos
 const REGULAR_SEASON_WEEKS = 14; // temporada regular (ver aba Regras)
 const STATUS_TICK_MS = 60 * 1000; // atualiza o "há X min" da pílula de status
 
@@ -126,7 +137,7 @@ const VALIDATION = {
 const appState = {
     // Navegação (espelhada na URL: #/<aba>/<ano>[/<série>[/<semana>]])
     tab: 'ligas',
-    season: '2026',
+    season: Object.keys(KHC_CONFIG).sort().pop(),   // temporada mais recente configurada
     series: 'serie-a',        // tier selecionado nas abas Ligas e Rodada
     matchWeek: null,          // semana na aba Rodada (null = atual da liga)
     alsoView: 'tabela',       // Também na KHC: 'tabela' | 'rodada' (#/nba/rodada)
@@ -152,7 +163,6 @@ const appState = {
     lastError: null,
     isFromCache: false,
     lastUpdated: null,        // timestamp (ms) dos dados exibidos
-    isLoading: false,
     nflState: null,           // { season, season_type, display_week } da Sleeper
     pendingPlayer: null       // #/jogador/… aberto direto pelo link: abre após carregar
 };
