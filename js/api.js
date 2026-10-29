@@ -367,7 +367,9 @@ async function fetchLeagueData(leagueInfo) {
                 fpts: sanitizeNumber(points, 0, VALIDATION.MAX_POINTS, 0),
                 fptsAgainst: sanitizeNumber(pointsAgainst, 0, VALIDATION.MAX_POINTS, 0),
                 // guilhotina: time cortado fica com o elenco vazio
-                rosterSize: Array.isArray(r.players) ? r.players.length : 0
+                rosterSize: Array.isArray(r.players) ? r.players.length : 0,
+                // guilhotina: rodada do corte (0 = vivo)
+                eliminated: Math.round(sanitizeNumber(settings.eliminated, 0, 30, 0))
             };
 
             return teamObj;
