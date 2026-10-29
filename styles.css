@@ -1338,6 +1338,7 @@ abbr[title] { text-decoration: none; cursor: help; }
     .legends-row__who small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .legends-row__who small.legends-row__pct-sm { display: block; }
 }
+.hall__seasons { margin: 4px 0 0; text-align: center; font-size: var(--fs-12); color: var(--text-3); }
 .podium__pct { font-size: var(--fs-12); color: var(--text-3); }
 .podium__pts { font-weight: 900; font-stretch: 75%; font-size: var(--fs-16); color: var(--text); }
 
@@ -1503,6 +1504,7 @@ abbr[title] { text-decoration: none; cursor: help; }
 .tiles--3 { grid-template-columns: repeat(3, 1fr); }
 .tile { padding: var(--s-12); background: var(--surface-2); border-radius: 6px; }
 .tile .num { font-size: var(--fs-28); margin-top: 6px; }
+.tile__note { display: block; margin-top: 2px; font-size: var(--fs-12); color: var(--text-3); }
 .tile--medal {
     display: flex;
     flex-direction: column;
