@@ -172,7 +172,7 @@ function renderPowerRankings() {
         </div>
         <div class="note">
             <span data-icon="info" data-size="18"></span>
-            <span><b>Como calculamos:</b> PWR = <b>50% força</b> (em cada semana, de quantos times das Séries A–D a sua pontuação ganharia) +
+            <span><b>Como calculamos:</b> PWR = <b>50% força</b> (em cada semana, de quantos times das ${regularSeriesLabel(appState.season)} a sua pontuação ganharia) +
             <b>30% aproveitamento</b> (V–D) + <b>20% fase</b> (média das últimas ${PWR_FORM_WEEKS} semanas comparada à liga).
             Tiers por posição: 10% Favoritos · 20% Candidatos · 40% Meio de tabela · 20% Pressionados · 10% Lanternas.
             A Elite não entra para não contar o mesmo time duas vezes.${preview ? ' <i>Prévia: placares semanais indisponíveis, usando pontos da temporada.</i>' : ''}</span>

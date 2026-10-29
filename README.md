@@ -1,12 +1,12 @@
 # Ultimate League KHC — Hub Oficial
 
-Hub central das ligas KHC (Serie A, B, C, Elite) de Fantasy Football.
+Hub central das ligas KHC (Elite, Séries A–D e Guilhotina) de Fantasy Football, com a Premier League e a NBA da turma em "Também na KHC".
 Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem backend. Deploy direto no GitHub Pages.
 
 ## Funcionalidades
 
 - **Landing (porta de entrada):** na 1ª visita pela raiz do site abre uma apresentação curta da KHC; "Ver as ligas" leva ao hub e, dali em diante, a raiz abre o hub direto. Links com endereço (`#/ligas/…`, compartilhados, app instalado) nunca passam pela landing, e quem já usava o hub também não. `#/inicio` abre a landing a qualquer momento (link de divulgação e botão em Regras). O botão "Quero jogar" ainda não tem destino: entra quando houver link de inscrição
-- **7 abas:** Ligas, Rodada, Top Scorers, Power Ranking, Lendas KHC, Temporadas, Regras
+- **7 abas:** Ligas, Rodada, Top Scorers, Power Ranking, Lendas KHC, Temporadas, Regras (+ Também na KHC, fora do menu)
 - **Endereço por tela** (compartilhável): `#/ligas/2026/a`, `#/top/2026`, `#/jogador/<usuario>`
 - **Ligas:** uma série por vez, com zonas de acesso / playoffs / rebaixamento por temporada e medalhas (número dentro) na classificação final; botões Baixar / Compartilhar geram PNG da tabela; seletor **Tabela | Chances** com Playoffs % e Queda % (simulação do resto da temporada regular, calibrada com o histórico de ligas 10/6 do Sleeper, atualiza quando a rodada fecha)
 - **KHC Guilhotina:** dentro de Ligas (aba Guilhotina): vivos ordenados pela pontuação da semana, zona de corte quando todos já pontuaram, cortados com a rodada do corte; fora de Rodada, Top, Power e Chances; exporta PNG
@@ -46,22 +46,23 @@ styles.css                  tokens + componentes (organizado por === seções ==
 data/
   2025.json                 snapshot da temporada 2025 (classificação final + troféus)
 scripts/
-  derive-season.mjs         derivador de JSON a partir da Sleeper API
+  derive-season.mjs         fecha a temporada: data/<ano>.json a partir da config e do Sleeper
+  snapshot-chances.mjs      registro semanal das chances (GitHub Actions)
 js/
   landing.js                landing da 1ª visita e #/inicio (carregado no <head>)
   config.js                 KHC_CONFIG (ligas + regras por ano), SERIES_META, appState
   sanitize.js               escapeHtml, sanitizeAvatarUrl, sanitizeNumber, etc.
   api.js                    fetch+retry, cache (localStorage), fetchLeagueData, fetchNflState, confrontos
   data.js                   temporadas finalizadas (data/*.json)
-  derivations.js            pwrScore, tierForPwr, legendsAggregator, careerForUser
+  derivations.js            powerRanking, tierForRank, simulateOdds, legendsAggregator, careerForUser
   icons.js                  IconRegistry (SVG line 24px) + renderIcons()
   types.js                  JSDoc typedefs
   ui/
     helpers.js              avatar, botão de time, escudo, medalha, pílula, scroll lock
     drawer.js               perfil do jogador (focus trap, Esc, URL #/jogador/…)
-    export.js               classificação / confrontos em PNG (canvas), baixar e compartilhar
+    export.js               imagens PNG (canvas) de cada tela, baixar e compartilhar
   tabs/
-    ligas.js · chances.js · guilhotina.js · premier.js · rodada.js · top-scorers.js · power-ranking.js · lendas.js · temporadas.js · regras.js
+    ligas.js · chances.js · chaveamento.js · guilhotina.js · tambem.js · rodada.js · top-scorers.js · power-ranking.js · lendas.js · temporadas.js · regras.js
   app.js                    roteamento por hash, loadData, render
 assets/
   logo/svg/                 escudos oficiais em vetor (KHC, Elite, Séries A–F, Copa)
@@ -80,43 +81,32 @@ A cada ano, novos league IDs são gerados. Pra adicionar um novo ano:
 1. **Configurar a temporada nova** em `js/config.js` (ligas + regras):
    ```js
    '2027': {
-     rules: { promote: 3, relegate: 3, playoffTeams: 6, elitePlayoffTeams: 4 },
+     rules: { promote: 3, relegate: 3, playoffTeams: 6, elitePlayoffTeams: 8 },
      leagues: [
-       { id: '123...', name: 'KHC Serie A', tier: 'serie-a' },
-       { id: '456...', name: 'KHC Serie B', tier: 'serie-b' },
-       { id: '789...', name: 'KHC Serie C', tier: 'serie-c' },
-       { id: '012...', name: 'KHC Elite',   tier: 'elite' },
+       { id: '...', name: 'KHC Elite',      tier: 'elite' },
+       { id: '...', name: 'KHC Serie A',    tier: 'serie-a' },
+       { id: '...', name: 'KHC Serie B',    tier: 'serie-b' },
+       { id: '...', name: 'KHC Serie C',    tier: 'serie-c' },
+       { id: '...', name: 'KHC Serie D',    tier: 'serie-d' },
+       { id: '...', name: 'KHC Guilhotina', tier: 'guilhotina' },
      ],
    }
    ```
-2. O seletor de temporada, as abas de série e as zonas saem da config automaticamente. Séries novas (E, F) já têm cor e escudo em `SERIES_META` — use `tier: 'serie-e'` / `'serie-f'`.
+2. O seletor de temporada, as abas de série e as zonas saem da config automaticamente, e o site passa a abrir no ano mais recente. Séries novas (E, F) já têm cor e escudo em `SERIES_META` — use `tier: 'serie-e'` / `'serie-f'`. O chaveamento segue as vagas de playoff do Sleeper (4, 6 ou 8 times).
 3. Durante a temporada, o site puxa tudo da Sleeper API automaticamente.
+4. **Textos a revisar à mão:** as regras do ano (`js/tabs/regras.js`) e a landing (`index.html`, "Temporada 2026 em andamento").
 
 ## Como "fechar" uma temporada (snapshot final)
 
-Quando o playoff termina e os campeões são definidos:
+Quando a final e a disputa do 3º lugar terminam (semana 17), o site já mostra "Temporada encerrada" e abre no Chaveamento (pódio). Para gravar o histórico:
 
-1. **Atualizar `scripts/derive-season.mjs`** — adicionar o bloco do ano em `SEASONS` com os league IDs e o top-4 oficial:
-   ```js
-   '2027': {
-     series: [
-       { id: 'A', name: 'KHC Serie A', leagueId: '123...', top4: [
-         { trophy: 'gold',   user: 'fulano' },
-         { trophy: 'silver', user: 'cicrano' },
-         { trophy: 'bronze', user: 'beltrano' },
-         { trophy: 'fourth', user: 'tertano' },
-       ]},
-       // ... B, C, Elite ...
-     ]
-   }
-   ```
-2. **Rodar:**
+1. **Rodar:**
    ```bash
-   node scripts/derive-season.mjs 2027
+   node scripts/derive-season.mjs 2026
    ```
-   Gera `data/2027.json`.
+   O script lê as ligas de `js/config.js` e o chaveamento do Sleeper: 1º–4º pelos playoffs (troféus), 5º+ pela temporada regular; a Guilhotina sai pela ordem de corte, e o último sobrevivente leva o título (conta nas Lendas; Premier League e NBA não entram). Se alguma final ainda não tiver vencedor, ele para e avisa. Gera `data/2026.json`.
 
-3. **Commit + push.** O site agora trata 2027 como finalizada (status: 'final'), mostra medalhas, contribui pra Lendas e Career.
+2. **Commit + push.** O site passa a tratar 2026 como finalizada (status: 'final'), mostra medalhas, contribui pra Lendas e Career.
 
 ## Como rodar localmente
 
@@ -133,7 +123,7 @@ GitHub Pages serve diretamente da branch `main`. Commits pra `main` ficam no ar 
 
 ## Decisões de arquitetura
 
-- **Vanilla por escolha consciente** — o site é read-only, 5 tabs, ~5 funções de render. Não há benefício em React/Vue/Next aqui. Bundle zero, dev server zero, deploy trivial.
+- **Vanilla por escolha consciente** — o site é read-only, poucas abas, uma função de render por aba. Não há benefício em React/Vue/Next aqui. Bundle zero, dev server zero, deploy trivial.
 - **Sem `type="module"`** — script tags em ordem global. Funciona em qualquer browser, sem CORS fricção, sem build step.
 - **Híbrido JSON + live** — temporadas finalizadas são fato histórico imutável (JSON congelado, fast load). Ativa é dinâmica (Sleeper live, source of truth). O loader em `js/data.js` esconde a diferença.
 - **JSDoc em vez de TypeScript** — IDE pega autocomplete sem precisar de build. Tipos vivem em `js/types.js`.

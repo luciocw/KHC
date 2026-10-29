@@ -21,6 +21,17 @@ function isChopped(t) {
     return t.rosterSize === 0;
 }
 
+/**
+ * Chip da guilhotina no perfil: "Vivo" / "Cortado" na temporada em
+ * andamento; "Sobrevivente" / "Cortado R7" na temporada fechada.
+ * @param {{active?: boolean, alive: boolean, cut?: number}} h
+ * @returns {string}
+ */
+function guillotineStatusLabel(h) {
+    if (h.active) return h.alive ? 'Vivo' : 'Cortado';
+    return h.alive ? 'Sobrevivente' : (h.cut ? `Cortado R${h.cut}` : 'Cortado');
+}
+
 const _guillotine = {};   // `${leagueId}|${lastUpdated}` → { status, data }
 
 /**

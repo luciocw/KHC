@@ -30,11 +30,6 @@ function escapeHtml(str) {
 }
 
 /**
- * Valida e sanitiza uma URL de avatar
- * @param {string} avatarId - ID do avatar do Sleeper
- * @returns {string} - URL segura ou URL padrão
- */
-/**
  * Avatar aceito: id da foto da conta ou URL do logo do time na liga.
  * @param {*} avatar
  * @returns {boolean}

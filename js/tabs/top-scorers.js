@@ -51,7 +51,7 @@ function topScorersModel() {
         .sort((a, b) => b.fpts - a.fpts);
 
     const series = appState.topFilter === 'all' ? null : SERIES_META[appState.topFilter];
-    const when = isSeasonFinalized() ? `temporada ${appState.season}` : (weekLabel() || `temporada ${appState.season}`);
+    const when = isSeasonOver() ? `temporada ${appState.season}` : (weekLabel() || `temporada ${appState.season}`);
     const scope = series ? series.name : appState.includeElite ? 'Todas as séries, com Elite' : 'Todas as séries';
     return {
         list, tiers, hasElite,

@@ -764,7 +764,7 @@ async function drawProfileCanvas(username) {
             ctx.fillText(fitText(ctx, `${h.team} · ${h.guillotine ? '' : `${h.w}–${h.l} · `}${fmtPts(h.pts)} pts`, EXPORT_W - PAD * 2 - 44 - 150), PAD + 44, cy + 11);
 
             const xr = EXPORT_W - PAD;
-            if (h.guillotine) drawChip(ctx, xr, cy, h.alive ? 'Vivo' : 'Cortado', h.alive ? 'rgba(61, 214, 140, .15)' : c.surface3, h.alive ? c.promo : c.text);
+            if (h.guillotine) drawChip(ctx, xr, cy, guillotineStatusLabel(h), h.alive ? 'rgba(61, 214, 140, .15)' : c.surface3, h.alive ? c.promo : c.text);
             else if (h.active) drawChip(ctx, xr, cy, 'Em andamento', 'rgba(235, 64, 52, .15)', '#FF7A6E');
             else if (h.rank >= 1 && h.rank <= 4) drawMedal(ctx, xr - 13, cy, h.rank, c);
             else if (h.rank) drawChip(ctx, xr, cy, `${h.rank}º`, c.surface3, c.text);
@@ -793,7 +793,7 @@ async function drawPowerCanvas() {
     const series = [...new Set(rows.map(r => r.team._leagueTier))]
         .sort((a, b) => TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b))
         .map(t => SERIES_META[t].id);
-    const subtitle = `Temporada ${appState.season} · ${weekLabel() || (isSeasonFinalized() ? 'Temporada encerrada' : 'Em andamento')} · Séries ${series[0]}–${series[series.length - 1]}`;
+    const subtitle = `Temporada ${appState.season} · ${weekLabel() || (isSeasonOver() ? 'Temporada encerrada' : 'Em andamento')} · Séries ${series[0]}–${series[series.length - 1]}`;
     const { canvas, ctx } = startExportCard(H, c, crest, 'Power Ranking', subtitle, null, W);
     hLine(ctx, 0, W, EXPORT_HEAD_H - 1, c.border);
 
