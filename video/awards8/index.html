@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>KHC Awards · Semana 8</title>
+<link rel="stylesheet" href="../engine.css">
+<style>
+:root { --blood: #B3121B; --gold: #F2B705; --ok: #3DD68C; }
+.boot { position: absolute; inset: 0; background: #fff; transform-origin: center; }
+.big-logo { position: absolute; left: 50%; top: 230px; width: 380px; height: 380px; margin-left: -190px; object-fit: contain;
+    filter: drop-shadow(0 30px 60px rgba(0,0,0,.6)); }
+.awards-px { position: absolute; left: 0; right: 0; top: 660px; text-align: center; font-family: Pixel; font-size: 46px; color: var(--gold); text-shadow: 5px 5px 0 #000; }
+.open-l { position: absolute; left: 60px; right: 60px; font-weight: 900; font-size: 112px; line-height: .95; letter-spacing: -2px; text-transform: uppercase; }
+.open-l.o { color: var(--orange); }
+.week-chip { position: absolute; left: 60px; top: 1290px; font-family: Mono; font-size: 46px; letter-spacing: 4px; background: var(--orange);
+    color: #120a05; padding: 14px 26px; border-radius: 10px; }
+.open-sub { position: absolute; left: 60px; right: 60px; top: 1420px; font-weight: 600; font-size: 50px; line-height: 1.15; color: var(--text-2); }
+
+.award { position: absolute; left: 60px; right: 60px; top: 230px; }
+.award .n { font-weight: 800; font-size: 32px; letter-spacing: 6px; color: var(--text-2); display: flex; align-items: center; gap: 18px; }
+.award .n::before { content: ''; width: 60px; height: 5px; background: var(--orange); }
+.award .t { font-weight: 900; font-size: 96px; line-height: .98; letter-spacing: -1px; color: var(--orange); margin-top: 14px; text-transform: uppercase; font-stretch: 108%; }
+.award .px { font-family: Mono; font-size: 32px; letter-spacing: 3px; color: var(--gold); margin-top: 18px; }
+.award.red .t { color: var(--blood); } .award.red .n::before { background: var(--blood); }
+.group { position: absolute; left: 50px; right: 50px; display: flex; flex-direction: column; gap: 14px; }
+.glabel { font-family: Mono; font-size: 30px; letter-spacing: 2px; margin: 0 0 6px 6px; }
+.good { color: var(--success); } .bad { color: var(--danger); } .gold { color: var(--gold); }
+.trow.win { border-color: var(--success); box-shadow: 0 0 40px rgba(61,214,140,.25); }
+.trow.lose { border-color: var(--danger); } .trow.hot { border-color: var(--orange); }
+.tsub .q { color: var(--danger); } .nick { color: var(--gold); }
+
+/* ===== LAG ===== */
+.game { position: absolute; inset: 0; background: radial-gradient(900px 700px at 50% 40%, #10204a, #05070d 75%); }
+.g-top { position: absolute; left: 50px; right: 50px; top: 90px; display: flex; justify-content: space-between; align-items: center; }
+.g-live { font-family: Mono; font-size: 30px; letter-spacing: 3px; color: #fff; background: var(--danger); padding: 10px 18px; border-radius: 8px; }
+.ping { display: flex; align-items: center; gap: 16px; font-family: Mono; font-size: 40px; color: var(--ok); }
+.wifi { display: flex; align-items: flex-end; gap: 6px; height: 44px; }
+.wifi i { width: 12px; background: currentColor; border-radius: 3px; }
+.g-title { position: absolute; left: 0; right: 0; top: 205px; text-align: center; font-weight: 900; font-style: italic; font-size: 70px; color: var(--gold); text-shadow: 5px 5px 0 #000; }
+.g-sub { position: absolute; left: 0; right: 0; top: 290px; text-align: center; font-family: Mono; font-size: 28px; letter-spacing: 3px; color: var(--text-2); }
+.board { position: absolute; left: 40px; right: 40px; top: 380px; height: 560px; }
+.side { position: absolute; top: 0; width: 470px; text-align: center; }
+.side.l { left: 0; } .side.r { right: 0; }
+.side img { width: 250px; height: 250px; border-radius: 34px; object-fit: cover; border: 7px solid #fff; }
+.side .nm { font-weight: 900; font-size: 50px; margin-top: 18px; white-space: nowrap; }
+.side .sc { font-family: Mono; font-size: 104px; line-height: 1; margin-top: 16px; color: #fff; }
+.side .tag { display: inline-block; margin-top: 16px; font-family: Pixel; font-size: 26px; padding: 10px 16px; border-radius: 6px; opacity: 0; }
+.side.l .tag { background: var(--danger); color: #fff; } .side.r .tag { background: var(--ok); color: #05210f; }
+.g-vs { position: absolute; left: 0; right: 0; top: 100px; text-align: center; font-family: Pixel; font-size: 70px; color: var(--orange); text-shadow: 6px 6px 0 #000; }
+.warn { position: absolute; left: 50px; right: 50px; top: 960px; height: 120px; display: flex; align-items: center; justify-content: center; gap: 22px;
+    background: rgba(235,64,52,.15); border: 4px solid var(--danger); border-radius: 18px; font-weight: 900; font-size: 52px; color: #ff6b5e; opacity: 0; }
+.spin { width: 60px; height: 60px; border-radius: 50%; border: 9px solid rgba(255,255,255,.2); border-top-color: #fff; }
+.reco { position: absolute; left: 50px; right: 50px; top: 1110px; opacity: 0; }
+.reco .lb { font-family: Mono; font-size: 30px; letter-spacing: 3px; color: var(--text-2); }
+.reco .bar { margin-top: 12px; height: 34px; border-radius: 8px; background: #1d1916; overflow: hidden; border: 3px solid #333; }
+.reco .bar i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(90deg, #3B82F6 0 26px, #6aa2ff 26px 32px); }
+.chat { position: absolute; left: 50px; right: 50px; top: 1170px; display: flex; flex-direction: column; gap: 10px; }
+.msg { font-family: Mono; font-size: 30px; white-space: nowrap; color: #fff; background: rgba(0,0,0,.55); padding: 10px 16px; border-radius: 10px; opacity: 0; }
+.msg b { color: var(--orange); } .msg b.j { color: #6aa2ff; }
+.pix { position: absolute; inset: 0; opacity: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.35) 0 6px, transparent 6px 14px), repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 6px, transparent 6px 14px); }
+.tear { position: absolute; left: 0; right: 0; height: 70px; opacity: 0; mix-blend-mode: difference; background: #3cf; pointer-events: none; }
+
+/* Kane / Bola de Ouro */
+.kane { position: absolute; left: 50px; right: 50px; top: 930px; display: flex; align-items: center; gap: 28px; padding: 26px 30px; border-radius: 24px;
+    background: linear-gradient(90deg, rgba(242,183,5,.18), rgba(22,19,17,.94)); border: 3px solid var(--gold); opacity: 0; }
+.ball { width: 130px; height: 130px; flex: none; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff6c8 0 8%, #f7d24a 22%, #c99a06 60%, #7a5a00 100%); box-shadow: 0 0 50px rgba(242,183,5,.6); }
+.kane .a { font-family: Mono; font-size: 26px; letter-spacing: 2px; color: var(--gold); }
+.kane .b { font-weight: 900; font-size: 46px; line-height: 1.05; margin-top: 6px; }
+.kane .b span { color: var(--gold); }
+
+/* NBA */
+.ghost { position: absolute; left: 50px; right: 50px; top: 1150px; height: 140px; display: flex; align-items: center; gap: 26px; padding: 0 30px;
+    border: 4px dashed var(--danger); border-radius: 24px; background: rgba(235,64,52,.08); }
+.ghost .qq { width: 96px; height: 96px; border-radius: 22px; background: #1d1916; display: flex; align-items: center; justify-content: center;
+    font-family: Pixel; font-size: 54px; color: var(--danger); }
+.ghost .nm { font-weight: 900; font-size: 44px; } .ghost .sb { font-family: Mono; font-size: 28px; color: var(--text-3); margin-top: 6px; }
+.crest-r { position: absolute; right: 60px; top: 230px; width: 190px; height: 210px; object-fit: contain; }
+
+/* guilhotina */
+.redbg { position: absolute; inset: 0; background: radial-gradient(1100px 700px at 50% -5%, rgba(179,18,27,.35), transparent 65%); }
+.flash { position: absolute; inset: 0; background: var(--blood); opacity: 0; pointer-events: none; z-index: 20; mix-blend-mode: screen; }
+.blade { position: absolute; left: 0; width: 980px; height: 190px; z-index: 10; pointer-events: none; }
+.blade svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 18px 30px rgba(0,0,0,.6)); }
+.slot { position: relative; height: 118px; }
+.half { position: absolute; inset: 0; }
+.half.top { clip-path: polygon(-5% -50%, 105% -50%, 105% 44%, -5% 62%); }
+.half.bot { clip-path: polygon(-5% 62%, 105% 44%, 105% 150%, -5% 150%); }
+.half .trow { position: absolute; inset: 0; }
+.cutl { position: absolute; left: -20px; right: -20px; top: 52%; height: 6px; margin-top: -3px; background: #fff; transform-origin: left center;
+    box-shadow: 0 0 18px #ff3b3b, 0 0 40px var(--blood); opacity: 0; z-index: 4; }
+.rip { position: absolute; left: 6px; top: -18px; z-index: 6; font-family: Pixel; font-size: 20px; color: #fff; background: var(--blood); padding: 6px 10px; border-radius: 4px; opacity: 0; }
+.roast { font-weight: 800; font-size: 40px; color: var(--orange); text-align: center; margin: 24px 0 86px; opacity: 0; }
+
+.end-k { position: absolute; left: 60px; top: 540px; font-family: Pixel; font-size: 40px; color: var(--orange); }
+.end-1 { position: absolute; left: 60px; right: 60px; top: 630px; font-weight: 900; font-size: 130px; line-height: .95; letter-spacing: -2px; }
+.end-2 { position: absolute; left: 60px; right: 60px; top: 1010px; font-weight: 900; font-size: 116px; line-height: .95; letter-spacing: -2px; color: var(--orange); }
+.end-logo { position: absolute; left: 50%; top: 1460px; width: 220px; height: 220px; margin-left: -110px; object-fit: contain; }
+/* vaca (vídeo enviado pelo usuário, em quadros) */
+.cw-cards { position: absolute; left: 50px; right: 50px; top: 560px; display: flex; gap: 20px; }
+.cw { flex: 1; display: flex; align-items: center; gap: 16px; padding: 18px 20px; border-radius: 20px; background: rgba(22,19,17,.94); border: 2px solid var(--border); }
+.cw img { width: 90px; height: 90px; object-fit: contain; flex: none; }
+.cw .a { font-family: Mono; font-size: 24px; letter-spacing: 2px; color: var(--text-3); }
+.cw .b { font-weight: 900; font-size: 64px; line-height: 1; margin-top: 4px; }
+.cw .c { font-weight: 800; font-size: 28px; margin-top: 6px; }
+.cw.up .b, .cw.up .c { color: var(--success); } .cw.dn .b, .cw.dn .c { color: #ff6b5e; }
+.clip { position: absolute; left: 40px; right: 40px; top: 800px; height: 545px; border-radius: 24px; overflow: hidden; border: 4px solid var(--gold);
+    box-shadow: 0 30px 70px rgba(0,0,0,.7); background: #000; }
+.clip img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+.clip .tagc { position: absolute; left: 20px; top: 18px; font-family: Mono; font-size: 26px; letter-spacing: 2px; color: #fff; background: rgba(0,0,0,.6); padding: 6px 12px; border-radius: 8px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="fx"></div>
+<script src="../engine.js"></script>
+<script>
+(async () => {
+const data = await (await fetch('data.json')).json();
+const G = await (await fetch('guilhotina.json')).json();
+const A = await (await fetch('tambem.json')).json();
+const { el, set, prog, lerp, ease, enter, blink, shake, LEAGUE } = KHC;
+LEAGUE.nba = { color: '#7A1F3D', crest: '../../assets/logo/png/ui/escudo-nba.png' };
+LEAGUE.premier = { color: '#D4A017', crest: '../../assets/logo/png/ui/escudo-premier.png' };
+const ALL = data.leagues.flatMap(l => l.matchups.flat().map(t => ({ ...t, tier: l.tier })));
+const T = (name, tier) => ALL.find(t => t.name.trim() === name && (!tier || t.tier === tier)) || {};
+const pts = (n, tier) => T(n, tier).points;
+const rec = (n, tier) => T(n, tier).record.replace('-', '–');
+const GT = n => G.teams.find(t => t.name === n);
+const PT = n => A.premier.teams.find(t => t.name === n);
+const br = v => v.toFixed(2).replace('.', ',');
+const W8 = G.weeks[G.weeks.length - 1];
+
+// ------------------------------------------------------------ helpers locais
+function head(root, n, title, px, cls = '') {
+    KHC.hud(root, 'KHC AWARDS · S8', []);
+    const a = el('div', 'award ' + cls, root);
+    el('div', 'n', a, `PRÊMIO Nº ${String(n).padStart(2, '0')}`);
+    const t = el('div', 't', a, title);
+    const p = el('div', 'px', a, px);
+    return { a, t, p };
+}
+function drawHead(h, lt) {
+    const p = enter(lt, .1, .45, ease.back);
+    set(h.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    set(h.p, { o: lt > .4 ? (lt < 1.2 ? blink(lt, .15) : 1) : 0 });
+}
+function row(parent, name, tier, sub, value, cls = '') {
+    const r = KHC.teamRow(parent, { name, avatar: T(name, tier).avatar, sub, value });
+    if (cls) r.row.classList.add(...cls.split(' '));
+    return r;
+}
+function slideIn(r, t, a, from = 1100) { const p = enter(t, a, .35); set(r.row, { o: Math.min(1, p * 1.6), x: (1 - p) * from }); }
+function count(elm, t, a, b, v, digits = 2) { elm.textContent = (v * ease.out(prog(t, a, b))).toFixed(digits); }
+
+/** Prêmio de 4 s com dois times: entram (+.35), placares (+.4→1.2), selo (+1.4), legenda (+1.8). */
+function duel(a, n, title, px, A1, B1, cfg) {
+    KHC.scene(a, a + 4, root => {
+        const s = root.s = {};
+        s.h = head(root, n, title, px);
+        const g = el('div', 'group', root); g.style.top = (cfg.top || 620) + 'px'; g.style.gap = '40px';
+        s.a = row(g, ...A1); s.b = row(g, ...B1);
+        s.st = KHC.stamp((cfg.stampOn === 'b' ? s.b : s.a).row, cfg.stamp, { top: -56, right: 24, rot: -3 });
+        if (cfg.extra) cfg.extra(root, s);
+        s.cap = KHC.caption(root, cfg.caption[0], cfg.caption[1]);
+    }, (lt, t, root) => {
+        const s = root.s;
+        drawHead(s.h, lt);
+        slideIn(s.a, t, a + .35); slideIn(s.b, t, a + .5, -1100);
+        if (cfg.va !== undefined) count(s.a.val, t, a + .4, a + 1.2, cfg.va);
+        if (cfg.vb !== undefined) count(s.b.val, t, a + .4, a + 1.2, cfg.vb);
+        KHC.drawStamp(s.st, t, a + 1.4);
+        if (cfg.drawExtra) cfg.drawExtra(t, s);
+        KHC.drawCaption(s.cap, t, a + 1.8);
+    });
+}
+
+
+// ================================================================ CENAS
+// 0–3 · Abertura
+KHC.scene(0, 3, root => {
+    const s = root.s = {};
+    s.logo = el('img', 'big-logo', root); s.logo.src = LEAGUE.khc.crest;
+    s.px = el('div', 'awards-px', root, 'KHC AWARDS');
+    s.l1 = el('div', 'open-l', root, 'Prêmios que'); s.l1.style.top = '800px';
+    s.l2 = el('div', 'open-l', root, 'ninguém'); s.l2.style.top = '910px';
+    s.l3 = el('div', 'open-l o', root, 'queria'); s.l3.style.top = '1020px';
+    s.l4 = el('div', 'open-l o', root, 'ganhar.'); s.l4.style.top = '1130px';
+    s.chip = el('div', 'week-chip', root, 'SEMANA 8');
+    s.sub = el('div', 'open-sub', root, 'Teve lag de novo, dono derrubado e uma vaca na árvore.');
+    s.boot = el('div', 'boot', root);
+}, (lt, t, root) => {
+    const s = root.s;
+    const b = prog(lt, 0, .16);
+    set(s.boot, { o: 1 - b, sy: lerp(.004, 1, ease.out(b)) });
+    const lp = enter(lt, .05, .6, ease.elastic); set(s.logo, { s: lp, r: (1 - lp) * 20 });
+    set(s.px, { o: lt < 1.2 ? blink(lt, .15) : 1 });
+    [s.l1, s.l2, s.l3, s.l4].forEach((e, i) => { const p = enter(lt, .25 + i * .16, .35, ease.back); set(e, { o: Math.min(1, p * 2), y: (1 - p) * 80 }); });
+    const c = enter(lt, 1.2, .3, ease.back); set(s.chip, { o: c, s: lerp(1.6, 1, c) });
+    const sb = enter(lt, 1.7, .4); set(s.sub, { o: sb, y: (1 - sb) * 30 });
+});
+
+// 3–9,5 · Lag em Dobro: San Andreas perde pro 2–6 por 2.58 (e o Up the Irons!!, com 89%, perde na Cocoricó)
+const SA = pts('San Andreas Chiefs', 'serie-c'), WI = pts('WI Redentor', 'serie-c');
+function lagScore(lt, fin, lead, rubber) {
+    if (lt < .35) return 0;
+    if (lt < 1.0) return lead * ease.out(prog(lt, .35, 1.0));
+    if (lt < 2.65) {
+        if (rubber && lt > 1.45 && lt < 1.85) return lead + 52;   // rubber-band: parecia que ia ganhar
+        return lead + (Math.floor(lt / .18) * .18 - 1.0) * 3;
+    }
+    return fin;
+}
+KHC.scene(3, 9.5, root => {
+    const s = root.s = {};
+    s.g = el('div', 'game', root);
+    const top = el('div', 'g-top', s.g);
+    el('div', 'g-live', top, 'AO VIVO · RANKED');
+    s.ping = el('div', 'ping', top, '<div class="wifi"><i style="height:25%"></i><i style="height:50%"></i><i style="height:75%"></i><i style="height:100%"></i></div><span>38 ms</span>');
+    s.pingT = s.ping.querySelector('span'); s.bars = [...s.ping.querySelectorAll('i')];
+    el('div', 'g-title', s.g, 'LAG EM DOBRO');
+    el('div', 'g-sub', s.g, 'PRÊMIO Nº 01 · SÉRIE C · 1º × 9º');
+    const bd = el('div', 'board', s.g);
+    const side = (cls, n, nm) => {
+        const d = el('div', 'side ' + cls, bd);
+        el('img', '', d).src = T(n, 'serie-c').avatar;
+        el('div', 'nm', d, nm);
+        d.sc = el('div', 'sc', d, '0.00');
+        d.tag = el('div', 'tag', d, cls === 'l' ? 'DERROTA' : 'VITÓRIA');
+        return d;
+    };
+    s.l = side('l', 'San Andreas Chiefs', 'San Andreas'); s.r = side('r', 'WI Redentor', 'WI Redentor');
+    el('div', 'g-vs', bd, 'VS');
+    s.warn = el('div', 'warn', s.g, '<div class="spin"></div>CONEXÃO INSTÁVEL · DE NOVO');
+    s.spin = s.warn.querySelector('.spin');
+    s.reco = el('div', 'reco', s.g, '<div class="lb">RECONECTANDO…</div><div class="bar"><i></i></div>');
+    s.recoI = s.reco.querySelector('i'); s.recoL = s.reco.querySelector('.lb');
+    const chat = el('div', 'chat', s.g);
+    s.msgs = [[1.2, '<b>San Andreas:</b> NÃO É POSSÍVEL'], [1.65, '<b>San Andreas:</b> lag de novo, 2ª semana'],
+              [2.95, '<b class="j">WI Redentor:</b> 2–6 e ganhei kkk'], [3.3, '<b>Up the Irons!!:</b> aqui também caiu (89%)']].map(([at, h]) => {
+        const m = el('div', 'msg', chat, h); m.at = at; return m;
+    });
+    s.pix = el('div', 'pix', s.g);
+    s.tears = [0, 1, 2].map(() => el('div', 'tear', s.g));
+    s.st = KHC.stamp(s.g, 'Lag em dobro', { top: 990, right: 300, rot: -4 }); s.st.style.fontSize = '44px';
+    s.cap = KHC.caption(root, 'Perdeu pro 9º colocado por 2.58.', 'E com 89% na Cocoricó, perdeu também.');
+    s.cap.c.style.top = '1610px';
+}, (lt, t, root, wall) => {
+    const s = root.s;
+    const lag = lt > 1.0 && lt < 2.65, done = lt >= 2.65;
+    s.pingT.textContent = (lt < 1.0 ? 38 + Math.round(Math.sin(wall * 9) * 4) : lag ? 999 : 41) + ' ms';
+    s.ping.style.color = lag ? (blink(wall, .15) ? '#ff4d4d' : '#ffb3ab') : 'var(--ok)';
+    s.bars.forEach((b, i) => { b.style.opacity = lag ? (i === 0 ? 1 : .15) : 1; });
+    s.l.sc.textContent = lagScore(lt, SA, 104, true).toFixed(2);
+    s.r.sc.textContent = lagScore(lt, WI, 102, false).toFixed(2);
+    s.l.sc.style.color = done ? '#ff6b5e' : '#fff'; s.r.sc.style.color = done ? 'var(--ok)' : '#fff';
+    [s.l.tag, s.r.tag].forEach(tg => { const p = enter(lt, 2.7, .22, ease.back); set(tg, { o: p, s: lerp(2, 1, p) }); });
+    set(s.warn, { o: lag ? 1 : (done ? 1 - prog(lt, 2.65, 2.9) : 0) });
+    s.spin.style.transform = `rotate(${wall * 720}deg)`;
+    set(s.reco, { o: lt > 1.3 && lt < 2.9 ? 1 : 0 });
+    const rc = Math.min(99, 99 * ease.out(prog(lt, 1.3, 2.1)));
+    s.recoI.style.width = rc + '%';
+    s.recoL.textContent = lt < 2.65 ? `RECONECTANDO… ${Math.round(rc)}%` : 'CONECTADO · PARTIDA ENCERRADA';
+    s.msgs.forEach(m => { const p = enter(lt, m.at, .2); set(m, { o: p, x: (1 - p) * -60 }); });
+    const j = lag ? Math.floor(lt / .09) : 0;
+    const bd = s.g.querySelector('.board');
+    bd.style.transform = lag ? `translate(${(j * 37 % 23) - 11}px, ${(j * 53 % 15) - 7}px)` : 'none';
+    bd.style.filter = lag ? `blur(${(j % 3) * 1.5}px) contrast(1.3) ${j % 4 === 0 ? 'hue-rotate(120deg)' : ''}` : 'none';
+    s.pix.style.opacity = lag ? .5 + (j % 2) * .3 : 0;
+    s.tears.forEach((tr, i) => { tr.style.opacity = lag && (j + i) % 3 === 0 ? .8 : 0; tr.style.top = (420 + ((j * 131 + i * 241) % 560)) + 'px'; });
+    KHC.drawStamp(s.st, t, 6.4);
+    KHC.drawCaption(s.cap, t, 6.7);
+});
+
+// 9,5–13,5 · O Vigarista Acordou: venceu o Ditador por 43 (fato marcante)
+duel(9.5, 2, 'O Vigarista Acordou', 'SÉRIE A · DERRUBOU O DONO',
+    ['Caipiracicaba', 'serie-a', `<span class="nick">"o Vigarista"</span> · venceu · ${rec('Caipiracicaba', 'serie-a')}`, '0.00', 'win'],
+    ['Imperius Rex FC', 'serie-a', `<span class="q">o Ditador</span> · perdeu · ${rec('Imperius Rex FC', 'serie-a')}`, '0.00', 'lose'],
+    { va: pts('Caipiracicaba', 'serie-a'), vb: pts('Imperius Rex FC', 'serie-a'), stampOn: 'b',
+      stamp: 'O Ditador levou 43', caption: ['O Vigarista venceu o dono por 43.', 'Sem edição. Dessa vez, de verdade.'] });
+
+// 13,5–17,5 · Detectado e Abatido: o VoliBEARS saiu do modo furtivo e perdeu
+duel(13.5, 3, 'Detectado e Abatido', 'SÉRIE A · O LÍDER QUE NINGUÉM VIA',
+    ['Timbatível', 'serie-a', `venceu · ${rec('Timbatível', 'serie-a')}`, '0.00', 'win'],
+    ['VoliBEARS', 'serie-a', `líder · perdeu · ${rec('VoliBEARS', 'serie-a')}`, '0.00', 'lose'],
+    { va: pts('Timbatível', 'serie-a'), vb: pts('VoliBEARS', 'serie-a'), stampOn: 'b',
+      stamp: 'Mostramos e ele caiu', caption: ['Na Prévia, todo mundo viu o líder.', 'Na rodada, o Timbatível também. Por 2.68.'] });
+
+// 17,5–21,5 · Dono de Duas Caras: maior placar da semana na A, derrota na Elite
+duel(17.5, 4, 'Dono de Duas Caras', 'PUBLIC ENEMY #1 · SÉRIE A E ELITE',
+    ['Public Enemy #1', 'serie-a', `Série A · ${rec('Public Enemy #1', 'serie-a')}`, '0.00', 'win'],
+    ['Public Enemy #1', 'elite', `Elite · ${rec('Public Enemy #1', 'elite')} · fora do G4`, '0.00', 'lose'],
+    { va: pts('Public Enemy #1', 'serie-a'), vb: pts('Public Enemy #1', 'elite'), stampOn: 'b',
+      stamp: 'Forte onde vale menos', caption: ['192 na Série A.', 'Na Elite, 118 e 3–5.'] });
+
+// 21,5–25,5 · Bola Murcha: Correia49 KHC (a mesma família cortada na Guilhotina na S7)
+duel(21.5, 5, 'Bola Murcha', 'SÉRIE D · MENOR PLACAR DA SEMANA',
+    ['Correia49 KHC', 'serie-d', `perdeu · ${rec('Correia49 KHC', 'serie-d')}`, '0.00', 'lose'],
+    ['VitorM05', 'serie-d', `venceu · ${rec('VitorM05', 'serie-d')}`, '0.00', 'win'],
+    { va: pts('Correia49 KHC', 'serie-d'), vb: pts('VitorM05', 'serie-d'),
+      stamp: '81 pontos', caption: ['Semana passada, a cabeça na Guilhotina.', 'Nesta, a bola murcha. Fase difícil.'] });
+
+const BLADE = `<svg viewBox="0 0 1000 200" preserveAspectRatio="none"><rect x="470" y="0" width="60" height="40" fill="#2b2724"/>
+  <polygon points="0,30 1000,30 1000,110 0,200" fill="#6d6762"/><polygon points="0,182 1000,96 1000,110 0,200" fill="#B3121B"/></svg>`;
+function sliced(parent, fill) {
+    const s = el('div', 'slot', parent);
+    const top = el('div', 'half top', s), bot = el('div', 'half bot', s);
+    fill(top); fill(bot);
+    const line = el('div', 'cutl', s);
+    const bl = el('div', 'blade', s, BLADE); bl.style.top = '-130px';
+    return { s, top, bot, line, bl };
+}
+function drawSlice(sl, t, a) {
+    const p = enter(t, a, .3, ease.back), g = prog(t, a, a + .3);
+    const f = `grayscale(${g}) brightness(${1 - .4 * g})`;
+    set(sl.top, { x: -p * 16, y: -p * 10, r: -p * 1.2, f }); set(sl.bot, { x: p * 16, y: p * 10, r: p * 1.4, f });
+    sl.line.style.opacity = t < a - .08 ? 0 : 1 - prog(t, a + .05, a + .45);
+    sl.line.style.transform = `rotate(-1.4deg) scaleX(${prog(t, a - .08, a)})`;
+    const d = ease.inOut(prog(t, a - .2, a)), up = prog(t, a + .1, a + .45);
+    set(sl.bl, { o: t < a - .2 || t > a + .45 ? 0 : 1 - up, y: lerp(-800, 0, d) - up * 60 });
+}
+// 25,5–30,5 · Guilhotina · rodada 8
+KHC.scene(25.5, 30.5, root => {
+    const s = root.s = {};
+    el('div', 'redbg', root);
+    s.h = head(root, 6, 'Guilhotina', `RODADA 8 · ${G.alive} VIVOS`, 'red');
+    const g = el('div', 'group', root); g.style.top = '600px'; g.style.gap = '0';
+    const cut = GT(W8.cut);
+    s.cut = sliced(g, h => { const r = KHC.teamRow(h, { name: cut.name, avatar: cut.avatar, sub: 'venceu na Série D', value: br(W8.cut_pts) }); r.row.classList.add('lose'); });
+    s.rip = el('div', 'rip', s.cut.s, 'CORTADO');
+    s.roast = el('div', 'roast', g, 'Ganhou o jogo. Perdeu a cabeça.');
+    const esc = W8.escaped[0];
+    s.esc = KHC.teamRow(g, { name: esc.name, avatar: GT(esc.name).avatar, sub: `escapou por ${br(esc.pts - W8.cut_pts)} · 2ª seguida`, value: br(esc.pts) });
+    s.esc.row.classList.add('hot');
+    s.st = KHC.stamp(s.esc.row, 'Na B, fez 178 e goleou', { top: -56, right: 24, rot: -3 });
+    s.fl = el('div', 'flash', root);
+    s.cap = KHC.caption(root, 'SiaraBigheads: goleada na B', 'e a lâmina passando raspando.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    const e = enter(t, 25.9, .35); set(s.cut.s, { o: Math.min(1, e * 1.6), x: (1 - e) * -1100 });
+    drawSlice(s.cut, t, 26.8);
+    const q = enter(t, 26.85, .2); set(s.rip, { o: q, s: lerp(2, 1, q), r: -6 });
+    const r = enter(t, 27.1, .35, ease.back); set(s.roast, { o: r, s: lerp(1.4, 1, r) });
+    slideIn(s.esc, t, 27.5);
+    KHC.drawStamp(s.st, t, 28.0);
+    s.fl.style.opacity = t >= 26.8 ? .55 * (1 - prog(t, 26.8, 27.1)) : 0;
+    const [x, y] = shake(t, 26.8, .3, 16); root.style.transform = `translate(${x}px, ${y}px)`;
+    KHC.drawCaption(s.cap, t, 28.4);
+});
+
+// 30,5–38,5 · Cruise: invicto na NBA, já tropeçando na Cocoricó. E a vaca (vídeo do usuário)
+const VACA = { a: 32.0, n: 145, fps: 24 };
+KHC.scene(30.5, 38.5, root => {
+    const s = root.s = {};
+    s.h = head(root, 7, 'A Vaca Subiu', 'CRUISE · KHC NBA E COCORICÓ PL');
+    const nba = A.nba.teams.find(x => x.name === 'Cruise Basketball'), epl = PT('Cruise Sport Club');
+    const nbaPos = A.nba.teams.indexOf(nba) + 1, eplPos = A.premier.teams.indexOf(epl) + 1;
+    const cc = el('div', 'cw-cards', root);
+    s.c1 = el('div', 'cw up', cc, `<img src="../../assets/logo/png/ui/escudo-nba.png"><div><div class="a">KHC NBA</div><div class="b">${nba.w}–${nba.l}</div><div class="c">${nbaPos}º · invicto</div></div>`);
+    s.c2 = el('div', 'cw dn', cc, `<img src="../../assets/logo/png/ui/escudo-premier.png"><div><div class="a">COCORICÓ</div><div class="b">${epl.w}–${epl.l}</div><div class="c">${eplPos}º · já caiu 2 vezes</div></div>`);
+    const clip = el('div', 'clip', root);
+    s.frames = Array.from({ length: VACA.n }, (_, i) => { const im = el('img', '', clip); im.src = `assets/avatars/vaca/${String(i + 1).padStart(3, '0')}.jpg`; return im; });
+    el('div', 'tagc', clip, 'CRUISE AO VIVO');
+    s.clip = clip; s.cur = -1;
+    s.cap = KHC.caption(root, 'A vaca subiu na árvore,', 'mas logo cai de lá.');
+}, (lt, t, root) => {
+    const s = root.s;
+    drawHead(s.h, lt);
+    [s.c1, s.c2].forEach((c, i) => { const p = enter(t, 30.85 + i * .2, .35); set(c, { o: Math.min(1, p * 1.6), x: (1 - p) * (i ? 1100 : -1100) }); });
+    const cp = enter(t, 31.6, .35, ease.back); set(s.clip, { o: Math.min(1, cp * 2), s: lerp(.85, 1, cp) });
+    const k = Math.max(0, Math.min(VACA.n - 1, Math.floor((t - VACA.a) * VACA.fps)));
+    if (k !== s.cur) { if (s.cur >= 0) s.frames[s.cur].style.display = 'none'; s.frames[k].style.display = 'block'; s.cur = k; }
+    KHC.drawCaption(s.cap, t, 33.0, .9);
+});
+
+// 38,5–42 · Fim
+KHC.scene(38.5, 42, root => {
+    const s = root.s = {};
+    KHC.hud(root, 'KHC AWARDS · S8', []);
+    s.k = el('div', 'end-k', root, 'SEMANA 9');
+    s.l1 = el('div', 'end-1', root, 'Segura<br>a vaca.');
+    s.l2 = el('div', 'end-2', root, 'E o Wi-Fi<br>do San Andreas.');
+    s.logo = el('img', 'end-logo', root); s.logo.src = LEAGUE.khc.crest;
+}, (lt, t, root) => {
+    const s = root.s;
+    set(s.k, { o: enter(t, 38.6, .3) });
+    const a = enter(t, 38.8, .4, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
+    const b = enter(t, 39.7, .3, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
+    const l = enter(t, 40.5, .5, ease.elastic); set(s.logo, { s: l });
+});
+
+[[3, 'serie-c'], [9.5, 'serie-a'], [13.5, 'serie-a'], [17.5, 'elite'], [21.5, 'serie-d'], [25.5, 'guilhotina'],
+ [30.5, 'premier'], [38.5, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
+KHC.fadeOut(41.55, 42);
+
+// Pausas de leitura (tempo da timeline, duração). Nenhuma durante o vídeo da
+// vaca (a pausa congelaria o clipe). A mesma lista está em scripts/trilha/awards8.py.
+KHC.hold([[8.9, 0.8], [12.9, 0.6], [16.9, 0.6], [20.9, 0.6], [24.9, 0.6], [29.9, 0.7], [41.6, 0.3]]);
+
+KHC.start(42);
+await window.ready();
+window.loaded = true;
+})();
+</script>
+</body>
+</html>
