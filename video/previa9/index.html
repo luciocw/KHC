@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>KHC Prévia · Semana 9</title>
+<link rel="stylesheet" href="../engine.css">
+<style>
+:root { --blood: #B3121B; --gold: #F2B705; }
+.boot { position: absolute; inset: 0; background: #fff; transform-origin: center; }
+.big-logo { position: absolute; left: 50%; top: 230px; width: 380px; height: 380px; margin-left: -190px; object-fit: contain;
+    filter: drop-shadow(0 30px 60px rgba(0,0,0,.6)); }
+.press { position: absolute; left: 0; right: 0; top: 660px; text-align: center; font-family: Pixel; font-size: 40px; color: var(--gold); text-shadow: 5px 5px 0 #000; }
+.open-l { position: absolute; left: 60px; right: 60px; font-weight: 900; font-size: 120px; line-height: .95; letter-spacing: -2px; text-transform: uppercase; }
+.open-l.o { color: var(--orange); }
+.open-sub { position: absolute; left: 60px; right: 60px; top: 1260px; font-weight: 700; font-size: 56px; line-height: 1.1; color: var(--text-2); }
+.open-sub b { color: var(--orange); }
+.half-bar { position: absolute; left: 60px; right: 60px; top: 1480px; height: 40px; border-radius: 10px; background: #1d1916; overflow: hidden; border: 3px solid #3A322C; }
+.half-bar i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--orange) 0 30px, #ff8a45 30px 36px); }
+.half-lb { position: absolute; left: 60px; right: 60px; top: 1540px; display: flex; justify-content: space-between; font-family: Mono; font-size: 30px; color: var(--text-3); }
+
+/* tabela da divisão */
+.world { font-family: Mono !important; font-size: 30px !important; letter-spacing: 3px; }
+.tbl-h { position: absolute; left: 60px; right: 60px; top: 468px; display: grid; grid-template-columns: 50px 62px 1fr 84px 196px 96px; gap: 12px;
+    font-family: Mono; font-size: 22px; letter-spacing: 2px; color: var(--text-3); }
+.tbl { position: absolute; left: 44px; right: 44px; top: 506px; display: flex; flex-direction: column; gap: 6px; }
+.sr { position: relative; display: grid; grid-template-columns: 50px 62px 1fr 84px 196px 96px; gap: 12px; align-items: center; height: 88px;
+    padding: 0 16px; border-radius: 16px; background: rgba(22,19,17,.94); border: 2px solid #2a2420; }
+.sr .p { font-family: Mono; font-size: 38px; color: var(--text-3); text-align: center; }
+.sr .av { width: 60px; height: 60px; border-radius: 13px; }
+.sr .n { font-weight: 800; font-size: 40px; font-stretch: 78%; letter-spacing: -.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sr .r { font-family: Mono; font-size: 34px; color: var(--text-2); text-align: center; }
+.sr .po { display: flex; align-items: center; gap: 10px; }
+.sr .po .bar { flex: 1; height: 16px; border-radius: 8px; background: #2a2420; overflow: hidden; }
+.sr .po .bar i { display: block; height: 100%; width: 0; background: var(--c); }
+.sr .po b { font-family: Mono; font-size: 32px; font-weight: 700; width: 88px; text-align: right; color: var(--text); }
+.sr .q { font-family: Mono; font-size: 32px; text-align: right; color: var(--text-3); }
+.sr .q.hot { color: #ff5a4e; }
+.sr.zone { background: rgba(60,14,14,.9); border-color: #5a1d1a; }
+.sr.zone .p { color: #ff5a4e; }
+.sr.on { border: 3px solid var(--orange); box-shadow: 0 0 0 3px rgba(242,106,27,.25), 0 18px 40px rgba(0,0,0,.5); z-index: 2; }
+.cut { position: relative; height: 0; border-top: 4px dashed var(--c); margin: 6px 0; }
+.cut span { position: absolute; right: 12px; top: -15px; background: var(--bg); padding: 0 10px; font-family: Mono; font-size: 22px; letter-spacing: 2px; color: var(--c); }
+.cut.red { border-color: var(--danger); } .cut.red span { color: var(--danger); }
+.vs-chip { position: absolute; left: -10px; top: 50%; margin-top: -24px; width: 48px; height: 48px; border-radius: 50%; background: var(--orange);
+    color: #120a05; font-family: Pixel; font-size: 16px; display: flex; align-items: center; justify-content: center; z-index: 3; opacity: 0; }
+
+/* cards da Série A */
+.cd-k { position: absolute; left: 60px; top: 240px; font-family: Mono; font-size: 30px; letter-spacing: 3px; color: var(--gold); }
+.cd-t { position: absolute; left: 60px; right: 60px; top: 290px; font-weight: 900; font-size: 96px; line-height: .95; letter-spacing: -2px; text-transform: uppercase; }
+.cd-t span { color: var(--orange); }
+.cd-h { position: absolute; left: 60px; right: 60px; top: 505px; display: flex; justify-content: space-between; font-family: Mono; font-size: 22px; letter-spacing: 2px; color: var(--text-3); }
+.fear { position: absolute; left: 44px; right: 44px; top: 540px; display: flex; flex-direction: column; gap: 8px; }
+.fr { position: relative; display: grid; grid-template-columns: 44px 60px 1fr 50px 60px 70px; gap: 12px; align-items: center; height: 84px; padding: 0 16px;
+    border-radius: 16px; background: rgba(22,19,17,.94); border: 2px solid #2a2420; }
+.fr .p { font-family: Mono; font-size: 32px; color: var(--text-3); text-align: center; }
+.fr .av { width: 58px; height: 58px; border-radius: 13px; }
+.fr .nm { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.fr .nm b { font-weight: 800; font-size: 36px; font-stretch: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fr .nm .nfl { width: 56px; height: 56px; object-fit: contain; flex: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
+.fr .ar { font-family: Pixel; font-size: 30px; color: var(--orange); text-align: center; }
+.fr .fp { font-family: Mono; font-size: 32px; color: var(--text-2); }
+.fr.hit { border: 3px solid var(--success); box-shadow: 0 0 40px rgba(61,214,140,.25); }
+.fr.hit .ar, .fr.hit .fp { color: var(--success); }
+/* modo furtivo */
+.mg-bg { position: absolute; inset: 0; background: radial-gradient(900px 800px at 50% 40%, #0d2a17, #050a06 75%); }
+.mg-k { position: absolute; left: 0; right: 0; top: 240px; text-align: center; font-family: Pixel; font-size: 54px; color: #4dff88; text-shadow: 0 0 24px rgba(77,255,136,.5), 5px 5px 0 #000; }
+.mg-sub { position: absolute; left: 0; right: 0; top: 320px; text-align: center; font-family: Mono; font-size: 30px; letter-spacing: 3px; color: #9fe8b5; }
+.radar { position: absolute; left: 240px; top: 400px; width: 600px; height: 600px; border-radius: 50%; overflow: hidden;
+    background: radial-gradient(circle, rgba(77,255,136,.10), rgba(0,0,0,.4) 70%); border: 4px solid #2f8f52; box-shadow: 0 0 60px rgba(77,255,136,.2); }
+.radar .ring { position: absolute; border: 2px solid rgba(77,255,136,.25); border-radius: 50%; }
+.radar .r1 { inset: 100px; } .radar .r2 { inset: 200px; }
+.radar .cross { position: absolute; inset: 0; background: linear-gradient(90deg, transparent 49.8%, rgba(77,255,136,.25) 50%, transparent 50.2%), linear-gradient(0deg, transparent 49.8%, rgba(77,255,136,.25) 50%, transparent 50.2%); }
+.sweep { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(77,255,136,.55), rgba(77,255,136,0) 50deg, transparent 360deg); }
+.blip { position: absolute; width: 84px; text-align: center; margin: -42px 0 0 -42px; }
+.blip img { width: 84px; height: 84px; border-radius: 50%; border: 4px solid #4dff88; object-fit: cover; }
+.blip .tg { font-family: Mono; font-size: 18px; letter-spacing: 2px; color: #4dff88; margin-top: 2px; }
+.hidden { position: absolute; width: 110px; height: 110px; }
+.hidden .vb { position: absolute; inset: 0; width: 110px; height: 110px; border-radius: 22px; border: 5px solid #fff; object-fit: cover; opacity: 0; }
+.box { position: absolute; left: -10px; top: -6px; width: 130px; height: 120px; border-radius: 6px; background: linear-gradient(180deg, #b98a52, #8f6534);
+    box-shadow: inset 0 -10px 0 rgba(0,0,0,.18), 0 10px 20px rgba(0,0,0,.5); }
+.box i { position: absolute; left: 56px; top: 0; bottom: 0; width: 18px; background: #d9c39a; }
+.excl { position: absolute; left: 30px; top: -96px; width: 50px; text-align: center; font-family: Pixel; font-size: 76px; color: #ff3b30; text-shadow: 4px 4px 0 #000; opacity: 0; }
+.mg-alert { position: absolute; left: 80px; right: 80px; top: 1040px; text-align: center; font-family: Mono; font-size: 52px; font-weight: 700; letter-spacing: 6px;
+    color: #fff; background: #c4161c; border-radius: 12px; padding: 10px 0; opacity: 0; }
+/* decreto do Ditador */
+.dec-bg { position: absolute; inset: 0; background: radial-gradient(1000px 800px at 50% 30%, #3a0c0c, #0b0505 75%); }
+.dec-k { position: absolute; left: 0; right: 0; top: 220px; text-align: center; font-family: Mono; font-size: 34px; letter-spacing: 6px; color: var(--gold); }
+.dec-t { position: absolute; left: 40px; right: 40px; top: 280px; text-align: center; font-weight: 900; font-size: 104px; line-height: .95; letter-spacing: -2px; color: #fff; }
+.dec-t span { color: var(--danger); }
+.dec-card { position: absolute; left: 60px; top: 520px; width: 250px; height: 354px; border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,.7); }
+.dec-q { position: absolute; left: 340px; right: 60px; top: 540px; font-weight: 900; font-size: 58px; line-height: 1.05; color: #fff; }
+.dec-q b { color: var(--gold); }
+.rings { position: absolute; left: 50px; right: 50px; top: 920px; display: flex; flex-direction: column; gap: 22px; }
+.ring-row { position: relative; display: flex; align-items: center; gap: 20px; height: 150px; padding: 0 26px; border-radius: 22px; background: rgba(22,19,17,.94); border: 3px solid var(--border); }
+.ring-row .lg { width: 110px; height: 110px; object-fit: contain; flex: none; }
+.ring-row .tro { display: flex; gap: 6px; flex: 1; }
+.ring-row .tro svg { width: 52px; height: 104px; }
+.ring-row .n { font-family: Mono; font-size: 88px; width: 90px; text-align: right; color: #fff; }
+.ring-row.sf { border-color: #AA0000; } .ring-row.big { border-color: var(--gold); box-shadow: 0 0 40px rgba(242,183,5,.25); }
+.ring-row.big .n { color: var(--gold); }
+.dec-but { position: absolute; left: 60px; right: 60px; top: 1290px; font-weight: 900; font-size: 64px; color: var(--orange); opacity: 0; }
+.goat { position: absolute; left: 50px; right: 50px; top: 1390px; display: flex; align-items: center; gap: 18px; padding: 18px 26px; border-radius: 22px;
+    border: 3px dashed #8a7d73; background: rgba(40,34,30,.9); opacity: 0; }
+.goat .e { font-size: 96px; line-height: 1; }
+.goat .tx { flex: 1; font-weight: 800; font-size: 50px; line-height: 1.1; color: var(--text-2); }
+.goat .tx b { color: #fff; }
+.goat .n { font-family: Mono; font-size: 88px; color: #bfb3a8; }
+/* guilhotina */
+.redbg { position: absolute; inset: 0; background: radial-gradient(1100px 700px at 50% -5%, rgba(179,18,27,.35), transparent 65%); }
+.g-k { position: absolute; left: 60px; top: 240px; font-family: Mono; font-size: 32px; letter-spacing: 3px; color: var(--gold); }
+.g-t { position: absolute; left: 60px; right: 270px; top: 300px; font-weight: 900; font-size: 84px; line-height: .95; letter-spacing: -2px; color: var(--blood); text-transform: uppercase; }
+.g-crest { position: absolute; right: 60px; top: 230px; width: 190px; height: 220px; object-fit: contain; }
+.blade { position: absolute; left: 50px; width: 980px; height: 190px; z-index: 4; }
+.blade svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 18px 30px rgba(0,0,0,.6)); }
+.rope { position: absolute; left: 536px; top: 0; width: 8px; background: #8c6a43; z-index: 3; }
+.group { position: absolute; left: 50px; right: 50px; display: flex; flex-direction: column; gap: 14px; }
+.lbl { font-family: Mono; font-size: 28px; letter-spacing: 3px; margin: 0 0 4px 6px; }
+.lbl.bad { color: var(--danger); } .lbl.good { color: var(--success); } .lbl.gold { color: var(--gold); }
+.trow.win { border-color: var(--success); } .trow.lose { border-color: var(--danger); } .trow.hot { border-color: var(--orange); }
+
+/* também na KHC */
+.also-k { position: absolute; left: 60px; top: 240px; font-family: Mono; font-size: 32px; letter-spacing: 3px; color: var(--gold); }
+.also-t { position: absolute; left: 60px; right: 300px; top: 300px; font-weight: 900; font-size: 92px; line-height: .95; letter-spacing: -2px; text-transform: uppercase; }
+.also-crest { position: absolute; right: 60px; top: 240px; width: 200px; height: 220px; object-fit: contain; }
+
+.end-k { position: absolute; left: 60px; top: 520px; font-family: Pixel; font-size: 40px; color: var(--orange); }
+.end-1 { position: absolute; left: 60px; right: 60px; top: 610px; font-weight: 900; font-size: 130px; line-height: .95; letter-spacing: -2px; }
+.end-2 { position: absolute; left: 60px; right: 60px; top: 1000px; font-weight: 900; font-size: 116px; line-height: .95; letter-spacing: -2px; color: var(--orange); }
+.end-logo { position: absolute; left: 50%; top: 1480px; width: 220px; height: 220px; margin-left: -110px; object-fit: contain; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="fx"></div>
+<script src="../engine.js"></script>
+<script>
+(async () => {
+const data = await (await fetch('data.json')).json();
+const G = await (await fetch('guilhotina.json')).json();
+const A = await (await fetch('tambem.json')).json();
+const { el, set, prog, lerp, ease, enter, blink, shake, LEAGUE } = KHC;
+LEAGUE.nba = { color: '#7A1F3D', crest: '../../assets/logo/png/ui/escudo-nba.png' };
+LEAGUE.premier = { color: '#D4A017', crest: '../../assets/logo/png/ui/escudo-premier.png' };
+const L = Object.fromEntries(data.leagues.map(l => [l.tier, l]));
+const TIERS = ['elite', 'serie-a', 'serie-b', 'serie-c', 'serie-d'];
+// regras de 2026: playoffs top 4 na Elite e top 6 nas séries; caem 3 (A, B e C; D é a última)
+const PO = { elite: 4, 'serie-a': 6, 'serie-b': 6, 'serie-c': 6, 'serie-d': 6 };
+const REL = { 'serie-a': 3, 'serie-b': 3, 'serie-c': 3 };
+
+function hudFor(root, tier) {
+    const h = KHC.hud(root, 'PRÉVIA · SEMANA 9', TIERS);
+    const i = TIERS.indexOf(tier);
+    h.segs.forEach((s, k) => { if (k < i) s.classList.add('on'); if (k === i) s.classList.add('now'); });
+}
+const hud0 = root => KHC.hud(root, 'PRÉVIA · SEMANA 9', []);
+const pct = v => (v >= 100 ? '>99%' : v <= 0 ? '<1%' : v + '%');
+
+/** Tabela da divisão (após a rodada 7) com o confronto da semana em destaque. */
+function standScene(a, tier, cfg) {
+    const D = 5.5;
+    KHC.scene(a, a + D, root => {
+        const s = root.s = {};
+        const c = LEAGUE[tier].color;
+        root.style.setProperty('--c', c);
+        hudFor(root, tier);
+        const hd = el('div', 'phase-head', root);
+        hd.style.setProperty('--c', c);
+        el('div', 'kicker', hd, 'APÓS A RODADA 8');
+        el('div', 'league-name', hd, L[tier].label);
+        s.w = el('div', 'world', hd, cfg.world);
+        s.cr = el('img', 'crest', hd); s.cr.src = LEAGUE[tier].crest;
+        const rel = REL[tier];
+        el('div', 'tbl-h', root, `<span>#</span><span></span><span>TIME</span><span>V–D</span><span>PLAYOFFS</span><span>${rel ? 'QUEDA' : ''}</span>`);
+        const teams = L[tier].matchups.flat().sort((x, y) => x.pos - y.pos);
+        const box = el('div', 'tbl', root);
+        s.rows = [];
+        teams.forEach(tm => {
+            if (tm.pos === PO[tier] + 1) el('div', 'cut', box, '<span>PLAYOFFS ▲</span>');
+            if (rel && tm.pos === teams.length - rel + 1) el('div', 'cut red', box, '<span>ZONA DE QUEDA ▼</span>');
+            const r = el('div', 'sr' + (rel && tm.pos > teams.length - rel ? ' zone' : ''), box);
+            el('div', 'p', r, tm.pos);
+            const av = el('div', 'av', r); if (tm.avatar) el('img', '', av).src = tm.avatar;
+            el('div', 'n', r, KHC.esc(tm.name));
+            el('div', 'r', r, tm.record.replace('-', '–'));
+            const po = el('div', 'po', r, '<div class="bar"><i></i></div><b>0%</b>');
+            r.bar = po.querySelector('i'); r.val = po.querySelector('b');
+            el('div', 'q' + (tm.queda >= 40 ? ' hot' : ''), r, rel ? pct(tm.queda) : '');
+            r.tm = tm;
+            if (cfg.on.includes(tm.name)) { r.classList.add('on'); r.chip = el('div', 'vs-chip', r, 'VS'); }
+            s.rows.push(r);
+        });
+        const hot = s.rows.filter(r => cfg.on.includes(r.tm.name));
+        s.st = KHC.stamp(root, cfg.stamp, { top: 1478, right: 60, rot: -2 }); s.st.style.fontSize = '36px';
+        s.cap = KHC.caption(root, cfg.caption[0], cfg.caption[1]);
+        s.cap.c.style.top = '1580px';
+    }, (lt, t, root) => {
+        const s = root.s;
+        const p = enter(lt, .05, .45, ease.back); set(s.cr, { s: p, r: (1 - p) * -30 });
+        set(s.w, { o: lt < 1.2 ? blink(lt, .15) : 1 });
+        s.rows.forEach((r, i) => {
+            const e = enter(t, a + .35 + i * .05, .3);
+            set(r, { o: Math.min(1, e * 1.6), x: (1 - e) * (i % 2 ? 600 : -600) });
+            const q = ease.out(prog(t, a + .9, a + 1.6));
+            r.bar.style.width = (Math.min(100, r.tm.playoffs) * q) + '%';
+            r.val.textContent = q >= 1 ? pct(r.tm.playoffs) : Math.round(r.tm.playoffs * q) + '%';
+            if (r.chip) { const c = enter(t, a + 1.8, .25, ease.back); set(r.chip, { o: c, s: lerp(2, 1, c) }); }
+        });
+        KHC.drawStamp(s.st, t, a + 2.1);
+        KHC.drawCaption(s.cap, t, a + 2.6);
+    });
+}
+
+// ================================================================ CENAS
+// 0–8 · Decreto do Ditador: "só fala o maior campeão". Títulos de Super Bowl:
+// 49ers 5, Steelers 6, Patriots 6 (e o Brady, sozinho, 7).
+const TRO = `<svg viewBox="0 0 26 52"><path d="M13 2 C22 2 24 10 20 16 L15 24 L15 40 L21 44 L21 50 L5 50 L5 44 L11 40 L11 24 L6 16 C2 10 4 2 13 2Z" fill="#d9d4ce" stroke="#8a8580" stroke-width="1.2"/><ellipse cx="10" cy="9" rx="3.5" ry="5" fill="#a39a92"/></svg>`;
+KHC.scene(0, 8, root => {
+    const s = root.s = {};
+    el('div', 'dec-bg', root);
+    hud0(root);
+    s.k = el('div', 'dec-k', root, 'DECRETO OFICIAL · KHC');
+    s.t = el('div', 'dec-t', root, 'Ditador Henrique I<br><span>decreta:</span>');
+    s.card = el('img', 'dec-card', root); s.card.src = 'assets/avatars/card.jpg';
+    s.q = el('div', 'dec-q', root, '“Só fala o maior campeão:<br><b>SF, com 5 títulos.</b>”');
+    const box = el('div', 'rings', root);
+    const mk = (lg, n, cls) => {
+        const r = el('div', 'ring-row ' + cls, box);
+        el('img', 'lg', r).src = `assets/avatars/nfl/${lg}.png`;
+        const tr = el('div', 'tro', r); r.cups = Array.from({ length: n }, () => el('div', '', tr, TRO));
+        r.num = el('div', 'n', r, '0'); r.total = n;
+        return r;
+    };
+    s.sf = mk('sf', 5, 'sf'); s.pit = mk('pit', 6, 'big'); s.ne = mk('ne', 6, 'big');
+    s.but = el('div', 'dec-but', root, 'Mas esquece que existem<br>Pittsburgh e New England com 6!');
+    s.but.style.top = '1430px'; s.but.style.fontSize = '52px'; s.but.style.lineHeight = '1.05';
+    s.st = KHC.stamp(root, '5 < 6', { top: 880, right: 70, rot: -4 }); s.st.style.fontSize = '48px';
+    s.goat = el('div', 'goat', root, '<div class="e">🐐</div><div class="tx">(E surgiu até <b>Bradyzete</b><br>pra dizer que tem 7…)</div><div class="n">7</div>');
+    s.goat.style.top = '1590px';
+}, (lt, t, root, wall) => {
+    const s = root.s;
+    set(s.k, { o: lt < .9 ? blink(lt, .12) : 1 });
+    const p = enter(lt, .1, .45, ease.back); set(s.t, { o: Math.min(1, p * 2), y: (1 - p) * -60 });
+    const c = enter(lt, .5, .45, ease.back); set(s.card, { o: Math.min(1, c * 2), x: (1 - c) * -400, r: lerp(-12, -3, c) });
+    const q = enter(lt, .8, .4); set(s.q, { o: q, y: (1 - q) * 30 });
+    const show = (r, a) => {
+        const e = enter(lt, a, .35); set(r, { o: Math.min(1, e * 1.6), x: (1 - e) * 1100 });
+        r.cups.forEach((cup, i) => { const k = enter(lt, a + .3 + i * .1, .2, ease.back); set(cup, { o: k, s: lerp(2, 1, k) }); });
+        r.num.textContent = Math.min(r.total, Math.floor(prog(lt, a + .3, a + .3 + r.total * .1) * r.total + .0001));
+    };
+    show(s.sf, 1.3);
+    // "Mas esquece...": Pittsburgh e New England chegam com 6
+    show(s.pit, 3.0); show(s.ne, 3.3);
+    s.sf.style.filter = lt > 3.9 ? `grayscale(${prog(lt, 3.9, 4.2)}) brightness(${1 - .3 * prog(lt, 3.9, 4.2)})` : 'none';
+    KHC.drawStamp(s.st, t, 4.1);
+    const b = enter(lt, 2.9, .35); set(s.but, { o: b, y: (1 - b) * 30 });
+    // Bradyzete com 7
+    const g = enter(lt, 5.0, .4, ease.back); set(s.goat, { o: Math.min(1, g * 2), s: lerp(.6, 1, g), r: Math.sin(wall * 6) * (lt > 5.4 ? 1.2 : 0) });
+});
+
+
+standScene(8, 'elite', {
+    world: 'TOP 4 VAI AOS PLAYOFFS', on: ['Los Pollos Hermanos', 'GORDINHAS AJEITADAS'], stampOn: 1,
+    stamp: '1º × 2º na Elite',
+    caption: ['Los Pollos (Steelers, 6 títulos)', 'contra o líder Gordinhas.'],
+});
+standScene(13.5, 'serie-a', {
+    world: 'TOP 6 · CAEM 3', on: ['Imperius Rex FC', 'VoliBEARS'],
+    stamp: 'Decreto × Bear Down',
+    caption: ['O Ditador dos 5 títulos pega o líder.', 'E PE × Timbatível: guerra civil dos 49ers.'],
+});
+standScene(19, 'serie-b', {
+    world: 'TOP 6 · CAEM 3', on: ['Quack Attack', 'GORDINHAS AJEITADAS'], stampOn: 1,
+    stamp: 'Líder nas duas ligas',
+    caption: ['Gordinhas: 1º na Elite e na B.', 'Pegam os dois vices no mesmo fim de semana.'],
+});
+standScene(24.5, 'serie-c', {
+    world: 'TOP 6 · CAEM 3', on: ['Mangue Chiefs 🦀', 'joaoW7'], stampOn: 1,
+    stamp: 'O líder encara o 4º',
+    caption: ['joaoW7 (7–1) × Mangue Chiefs.', 'E o Kelce Gremista: 0–8, >99% de queda.'],
+});
+standScene(30, 'serie-d', {
+    world: 'TOP 6 · NÃO HÁ QUEDA', on: ['VitorM05', 'Elieser'], stampOn: 1,
+    stamp: 'Sem cabeça, pega o líder',
+    caption: ['O Elieser, cortado na Guilhotina,', 'encara o líder VitorM05 (7–1).'],
+});
+
+// 35,5–39,5 · Guilhotina · rodada 9
+KHC.scene(35.5, 39.5, root => {
+    const s = root.s = {};
+    el('div', 'redbg', root);
+    hud0(root);
+    el('div', 'g-k', root, 'RODADA 9');
+    el('div', 'g-t', root, `${G.alive} pescoços`);
+    s.cr = el('img', 'g-crest', root); s.cr.src = LEAGUE.guilhotina.crest;
+    const low = G.teams.filter(x => !x.cut).sort((a, b) => a.fpts - b.fpts);
+    s.rope = el('div', 'rope', root);
+    s.bl = el('div', 'blade', root, `<svg viewBox="0 0 1000 200" preserveAspectRatio="none"><rect x="470" y="0" width="60" height="40" fill="#2b2724"/>
+      <polygon points="0,30 1000,30 1000,110 0,200" fill="#6d6762"/><polygon points="0,182 1000,96 1000,110 0,200" fill="#B3121B"/></svg>`);
+    const W = G.weeks[G.weeks.length - 1], GT = n => G.teams.find(x => x.name === n);
+    const br = v => v.toFixed(2).replace('.', ',');
+    const g = el('div', 'group', root); g.style.top = '690px'; g.style.gap = '18px';
+    el('div', 'lbl bad', g, `RODADA ${W.week} · CORTADO`);
+    const c = KHC.teamRow(g, { name: W.cut, avatar: GT(W.cut).avatar, sub: 'venceu na Série D na mesma semana', value: br(W.cut_pts) });
+    c.row.classList.add('lose'); c.av.style.filter = 'grayscale(1)';
+    const g2 = el('div', 'group', root); g2.style.top = '1000px'; g2.style.gap = '18px';
+    el('div', 'lbl gold', g2, 'NA MIRA · MENOS PF ENTRE OS VIVOS');
+    const m1 = KHC.teamRow(g2, { name: low[0].name, avatar: low[0].avatar, sub: `${Math.round(low[0].fpts)} PF · escapou nas 2 últimas`, value: '' });
+    m1.row.classList.add('lose');
+    const m2 = KHC.teamRow(g2, { name: low[1].name, avatar: low[1].avatar, sub: `${Math.round(low[1].fpts)} PF · 3 vezes na beira`, value: '' });
+    m2.row.classList.add('hot');
+    s.rows = [c, m1, m2];
+    s.cutTag = KHC.stamp(c.row, 'Cabeça rolou', { top: -50, right: 24, rot: -3 });
+    s.st = KHC.stamp(m1.row, 'A 3ª é a da sorte?', { top: -56, right: 24, rot: -3 });
+    s.cap = KHC.caption(root, 'Menor pontuação da rodada?', 'Cabeça rola. Sem exceção.');
+}, (lt, t, root, wall) => {
+    const s = root.s;
+    const c = enter(lt, .05, .45, ease.back); set(s.cr, { s: c, r: (1 - c) * -30 });
+    const y = 440 + Math.sin(wall * 3) * 20;
+    const by = lerp(-400, y, enter(t, 35.7, .5, ease.back));
+    s.bl.style.top = '0px'; set(s.bl, { y: by });
+    s.rope.style.height = Math.max(0, by + 20) + 'px';
+    s.rows.forEach((r, i) => { const a = enter(t, 36.0 + i * .2, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i % 2 ? 1100 : -1100), r: i ? Math.sin(wall * 9 + i) * .6 : 0 }); });
+    KHC.drawStamp(s.cutTag, t, 36.3);
+    KHC.drawStamp(s.st, t, 36.8);
+    KHC.drawCaption(s.cap, t, 37.1);
+});
+
+// 39,5–44 · Também na KHC: NBA (a vaca segue no alto) e Cocoricó
+KHC.scene(39.5, 44, root => {
+    const s = root.s = {};
+    hud0(root);
+    el('div', 'also-k', root, 'TAMBÉM NA KHC');
+    s.t = el('div', 'also-t', root, 'NBA e<br><span style="color:var(--gold)">Cocoricó</span>');
+    s.cr = el('img', 'also-crest', root); s.cr.src = LEAGUE.nba.crest;
+    const nb = A.nba.teams, pl = A.premier.teams;
+    const g = el('div', 'group', root); g.style.top = '560px';
+    el('div', 'lbl gold', g, `KHC NBA · RODADA ${A.nba.week + 1}`);
+    s.n = KHC.teamRow(g, { name: nb[0].name, avatar: nb[0].avatar, sub: 'a vaca segue no alto da árvore', value: `${nb[0].w}–${nb[0].l}` }); s.n.row.classList.add('win');
+    const g2 = el('div', 'group', root); g2.style.top = '860px';
+    el('div', 'lbl gold', g2, `COCORICÓ · APÓS A RODADA ${A.premier.week}`);
+    s.c = pl.slice(0, 3).map((x, i) => { const r = KHC.teamRow(g2, { name: x.name, avatar: x.avatar, sub: `${i + 1}º`, value: `${x.w}–${x.l}` }); if (!i) r.row.classList.add('win'); return r; });
+    s.st = KHC.stamp(s.n.row, 'Invicto. Por enquanto.', { top: -56, right: 24, rot: -3 });
+    s.cap = KHC.caption(root, 'Três empatados com 7–2 no topo.', 'Na NBA, a vaca ainda não caiu.');
+}, (lt, t, root) => {
+    const s = root.s;
+    const p = enter(t, 39.6, .4, ease.back); set(s.t, { o: Math.min(1, p * 2), x: (1 - p) * -200 });
+    const c = enter(t, 39.65, .5, ease.elastic); set(s.cr, { s: c });
+    [s.n, ...s.c].forEach((r, i) => { const a = enter(t, 39.9 + i * .15, .35); set(r.row, { o: Math.min(1, a * 1.6), x: (1 - a) * (i % 2 ? 1100 : -1100) }); });
+    KHC.drawStamp(s.st, t, 40.8);
+    KHC.drawCaption(s.cap, t, 41.4);
+});
+
+// 44–47,5 · Fim
+KHC.scene(44, 47.5, root => {
+    const s = root.s = {};
+    hud0(root);
+    s.k = el('div', 'end-k', root, 'SEMANA 9');
+    s.l1 = el('div', 'end-1', root, 'Decreto<br>publicado.');
+    s.l2 = el('div', 'end-2', root, 'Agora<br>joga, Ditador.');
+    s.logo = el('img', 'end-logo', root); s.logo.src = LEAGUE.khc.crest;
+}, (lt, t, root) => {
+    const s = root.s;
+    set(s.k, { o: enter(t, 44.1, .3) });
+    const a = enter(t, 44.3, .45, ease.back); set(s.l1, { o: Math.min(1, a * 2), y: (1 - a) * 80 });
+    const b = enter(t, 45.3, .35, ease.back); set(s.l2, { o: b > 0 ? 1 : 0, s: lerp(1.8, 1, b), r: (1 - b) * -8 });
+    const l = enter(t, 46.1, .5, ease.elastic); set(s.logo, { s: l });
+});
+
+[[8, 'elite'], [13.5, 'serie-a'], [19, 'serie-b'], [24.5, 'serie-c'], [30, 'serie-d'], [35.5, 'guilhotina'],
+ [39.5, 'nba'], [44, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
+KHC.fadeOut(47.05, 47.5);
+
+// Pausas de leitura (tempo da timeline, duração). A mesma lista está em
+// scripts/trilha/previa9.py.
+KHC.hold([[6.6, 1.2], [11.4, 1.2], [16.9, 1.2], [22.4, 1.2], [27.9, 1.2], [33.4, 1.2], [38.4, 1.0], [42.9, 0.7], [47.2, 0.3]]);
+
+KHC.start(47.5);
+await window.ready();
+window.loaded = true;
+})();
+</script>
+</body>
+</html>
