@@ -241,6 +241,12 @@ function renderView() {
         const bar = active.parentElement;
         bar.scrollLeft = active.offsetLeft - (bar.clientWidth - active.offsetWidth) / 2;
     }
+    // Idem para a fase aberta da Copa KHC.
+    const phase = view.querySelector('.copa-phases [aria-pressed="true"]');
+    if (phase) {
+        const bar = phase.parentElement;
+        bar.scrollLeft = phase.offsetLeft - bar.offsetLeft - (bar.clientWidth - phase.offsetWidth) / 2;
+    }
 }
 
 /** Render completo (shell + aba) e sincroniza a URL. */
@@ -278,6 +284,8 @@ async function loadData() {
     resetChancesCache();
     resetBracketCache();
     resetAlsoCache();
+    resetCopaCache();
+    appState.copaPhase = null;
     Object.keys(_guillotine).forEach(k => delete _guillotine[k]);
     render();
 
@@ -330,6 +338,13 @@ function bindEvents() {
     document.addEventListener('click', (e) => {
         const target = e.target instanceof Element ? e.target : null;
         if (!target) return;
+
+        const copaBtn = target.closest('[data-copa-phase]');
+        if (copaBtn) {
+            appState.copaPhase = Number(copaBtn.getAttribute('data-copa-phase'));
+            renderView();
+            return;
+        }
 
         const hrefBtn = target.closest('button[data-href]');
         if (hrefBtn) {

@@ -53,6 +53,7 @@
     --league-f: #1FC8DB;
     --league-epl: #BE9051;  /* Premier League: dourado do logo Cocoricó PL */
     --league-nba: #C24B66;  /* NBA: bordô do logo, clareado para ler no fundo escuro */
+    --league-copa: #F2B705; /* Copa KHC: dourado do escudo */
     --league-g: #D9D4CE;   /* guilhotina: osso do escudo (o vermelho fica para a zona de corte) */
 
     /* status */
@@ -113,6 +114,7 @@
 [data-league="e"]     { --accent: var(--league-e); }
 [data-league="f"]     { --accent: var(--league-f); }
 [data-league="g"]     { --accent: var(--league-g); }
+[data-league="copa"]  { --accent: var(--league-copa); }
 [data-league="epl"]   { --accent: var(--league-epl); }
 [data-league="nba"]   { --accent: var(--league-nba); }
 
@@ -779,6 +781,16 @@ abbr[title] { text-decoration: none; cursor: help; }
 }
 .view-switch button:hover { color: var(--text); }
 .view-switch button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+
+/* Copa KHC: fases (rolam no celular), campeão e classificatória */
+.copa-phases { display: flex; max-width: calc(100% - 2 * var(--s-16)); overflow-x: auto; scrollbar-width: none; }
+.copa-phases::-webkit-scrollbar { display: none; }
+.copa-phases button { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; padding: 4px 12px; line-height: 1.1; }
+.copa-phases button small { font-size: 10px; font-weight: 700; opacity: .7; letter-spacing: .04em; }
+.copa-champ { display: flex; align-items: center; gap: var(--s-12); margin: 0 var(--s-16) var(--s-12); padding: var(--s-12) var(--s-16); border: 1px solid var(--accent); border-radius: var(--r-md); background: var(--surface-2); }
+.copa-champ b { display: block; font-size: var(--fs-16); }
+.copa-champ small { color: var(--text-3); font-size: var(--fs-12); }
+.copa-q .pill, .copa .match__side .pill { flex-shrink: 0; }
 
 /* Visão Chances: Playoffs % / Queda % (visíveis também no celular) */
 .standings td.pct { font-weight: 800; color: var(--text); }

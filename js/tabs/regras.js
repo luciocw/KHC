@@ -48,6 +48,23 @@ const RULES = [
         ]
     },
     {
+        icon: 'trophy',
+        title: 'Copa KHC',
+        lead: (() => {
+            const y = Object.keys(KHC_CONFIG).sort().reverse().find(k => KHC_CONFIG[k].copa);
+            return y && KHC_CONFIG[y].copa.test ? `<b>Em teste em ${y}:</b> vale a partir de 2027.` : '';
+        })(),
+        items: [
+            'Competição à parte, como uma Copa do Brasil ao lado do Brasileirão: mesmos times, mas <b>não conta</b> para playoffs nem rebaixamento. Roda no site, com a pontuação de cada time na sua liga na semana.',
+            'Participam todos os times das divisões (Séries A–F). Elite e Guilhotina não entram.',
+            '<b>Semana 12 (classificatória):</b> todo mundo joga; os 32 maiores pontuadores avançam.',
+            '<b>Semanas 13 a 17:</b> mata-mata de jogo único (16 avos, oitavas, quartas, semifinal e final na semana 17, junto com as finais das divisões).',
+            '<b>Sorteio livre:</b> qualquer divisão pode cruzar com qualquer outra, até a mesma. Sai com uma semente definida antes; com a mesma semente, o sorteio é sempre igual (dá para conferir).',
+            '<b>Empate:</b> passa quem fez mais pontos na semana anterior.',
+            'Nas semanas 15 a 17, quem já caiu na sua liga continua escalando o time para a Copa.',
+        ]
+    },
+    {
         icon: 'crown',
         title: 'Pontos KHC (Lendas)',
         lead: KHC_POINTS_DRAFT ? '<b>Em discussão:</b> valores e critérios podem mudar e serão definidos antes da temporada 2027.' : '',
