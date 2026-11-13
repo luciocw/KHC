@@ -1,0 +1,516 @@
+{
+ "season": "2026",
+ "week": 10,
+ "leagues": [
+  {
+   "tier": "elite",
+   "label": "Elite",
+   "matchups": [
+    [
+     {
+      "name": "Los Pollos Hermanos",
+      "record": "6-3",
+      "points": 20.3,
+      "avatar": "assets/avatars/elite-1172908891022290944.jpg",
+      "playoffs": 98,
+      "queda": null,
+      "pos": 2
+     },
+     {
+      "name": "Public Enemy #1",
+      "record": "4-5",
+      "points": 0,
+      "avatar": "assets/avatars/elite-1134186504622018560.jpg",
+      "playoffs": 34,
+      "queda": null,
+      "pos": 5
+     }
+    ],
+    [
+     {
+      "name": "Fofura e Fé",
+      "record": "3-6",
+      "points": 0,
+      "avatar": "assets/avatars/elite-1004801178061877248.jpg",
+      "playoffs": 18,
+      "queda": null,
+      "pos": 6
+     },
+     {
+      "name": "GORDINHAS AJEITADAS",
+      "record": "8-1",
+      "points": 6.4,
+      "avatar": "assets/avatars/elite-464634604888780800.jpg",
+      "playoffs": 100,
+      "queda": null,
+      "pos": 1
+     }
+    ],
+    [
+     {
+      "name": "Diogoashura",
+      "record": "6-3",
+      "points": 0,
+      "avatar": "assets/avatars/elite-1130277908171362304.jpg",
+      "playoffs": 81,
+      "queda": null,
+      "pos": 3
+     },
+     {
+      "name": "Poker do Neymar",
+      "record": "5-4",
+      "points": 26.7,
+      "avatar": "assets/avatars/elite-472652687993729024.jpg",
+      "playoffs": 68,
+      "queda": null,
+      "pos": 4
+     }
+    ],
+    [
+     {
+      "name": "Quack Attack",
+      "record": "2-7",
+      "points": 52.96,
+      "avatar": "assets/avatars/elite-1132703483456651264.jpg",
+      "playoffs": 0,
+      "queda": null,
+      "pos": 7
+     },
+     {
+      "name": "Timbatível",
+      "record": "2-7",
+      "points": 0,
+      "avatar": "assets/avatars/elite-999321137395908608.jpg",
+      "playoffs": 0,
+      "queda": null,
+      "pos": 8
+     }
+    ]
+   ]
+  },
+  {
+   "tier": "serie-a",
+   "label": "Série A",
+   "matchups": [
+    [
+     {
+      "name": "Los Pollos Hermanos",
+      "record": "3-6",
+      "points": 20.3,
+      "avatar": "assets/avatars/serie-a-1172908891022290944.jpg",
+      "playoffs": 39,
+      "queda": 43,
+      "pos": 8
+     },
+     {
+      "name": "Caipiracicaba",
+      "record": "3-6",
+      "points": 19.12,
+      "avatar": "assets/avatars/serie-a-1134198414360940544.jpg",
+      "playoffs": 15,
+      "queda": 72,
+      "pos": 9
+     }
+    ],
+    [
+     {
+      "name": "سانتا کروز",
+      "record": "5-4",
+      "points": 0,
+      "avatar": "assets/avatars/serie-a-604443673312174080.jpg",
+      "playoffs": 67,
+      "queda": 20,
+      "pos": 5
+     },
+     {
+      "name": "Fofura e Fé",
+      "record": "4-5",
+      "points": 0,
+      "avatar": "assets/avatars/serie-a-1004801178061877248.jpg",
+      "playoffs": 61,
+      "queda": 23,
+      "pos": 6
+     }
+    ],
+    [
+     {
+      "name": "Diogoashura",
+      "record": "4-5",
+      "points": 34.46,
+      "avatar": "assets/avatars/serie-a-1130277908171362304.jpg",
+      "playoffs": 33,
+      "queda": 50,
+      "pos": 7
+     },
+     {
+      "name": "VoliBEARS",
+      "record": "7-2",
+      "points": 8.2,
+      "avatar": "assets/avatars/serie-a-871897050596487168.jpg",
+      "playoffs": 100,
+      "queda": 0,
+      "pos": 1
+     }
+    ],
+    [
+     {
+      "name": "Cruzeiro do Neymar SFC",
+      "record": "3-6",
+      "points": 29.2,
+      "avatar": "assets/avatars/serie-a-472652687993729024.jpg",
+      "playoffs": 10,
+      "queda": 81,
+      "pos": 10
+     },
+     {
+      "name": "Timbatível",
+      "record": "6-3",
+      "points": 0,
+      "avatar": "assets/avatars/serie-a-999321137395908608.jpg",
+      "playoffs": 98,
+      "queda": 1,
+      "pos": 2
+     }
+    ],
+    [
+     {
+      "name": "Imperius Rex FC",
+      "record": "5-4",
+      "points": 0,
+      "avatar": "assets/avatars/serie-a-1133956049855578112.jpg",
+      "playoffs": 81,
+      "queda": 9,
+      "pos": 4
+     },
+     {
+      "name": "Public Enemy #1",
+      "record": "5-4",
+      "points": 0,
+      "avatar": "assets/avatars/serie-a-1134186504622018560.jpg",
+      "playoffs": 96,
+      "queda": 1,
+      "pos": 3
+     }
+    ]
+   ]
+  },
+  {
+   "tier": "serie-b",
+   "label": "Série B",
+   "matchups": [
+    [
+     {
+      "name": "Explosion Raiders",
+      "record": "5-4",
+      "points": 23.76,
+      "avatar": "assets/avatars/serie-b-1128447767824805888.jpg",
+      "playoffs": 79,
+      "queda": 4,
+      "pos": 5
+     },
+     {
+      "name": "GORDINHAS AJEITADAS",
+      "record": "7-2",
+      "points": 0,
+      "avatar": "assets/avatars/serie-b-464634604888780800.jpg",
+      "playoffs": 100,
+      "queda": 0,
+      "pos": 1
+     }
+    ],
+    [
+     {
+      "name": "Gumagol971",
+      "record": "1-8",
+      "points": 37.72,
+      "avatar": "assets/avatars/serie-b-1008965235240140800.jpg",
+      "playoffs": 0,
+      "queda": 99,
+      "pos": 10
+     },
+     {
+      "name": "wladspfc",
+      "record": "3-6",
+      "points": 0,
+      "avatar": "assets/avatars/serie-b-1128363124643590144.jpg",
+      "playoffs": 7,
+      "queda": 78,
+      "pos": 8
+     }
+    ],
+    [
+     {
+      "name": "Ceará Dolphins",
+      "record": "2-7",
+      "points": 0,
+      "avatar": "assets/avatars/serie-b-1266770865278693376.jpg",
+      "playoffs": 0,
+      "queda": 97,
+      "pos": 9
+     },
+     {
+      "name": "Quack Attack",
+      "record": "6-3",
+      "points": 0,
+      "avatar": "assets/avatars/serie-b-1132703483456651264.jpg",
+      "playoffs": 99,
+      "queda": 0,
+      "pos": 3
+     }
+    ],
+    [
+     {
+      "name": "BigFieldMS",
+      "record": "4-5",
+      "points": 0,
+      "avatar": "assets/avatars/serie-b-1242576183174889472.jpg",
+      "playoffs": 51,
+      "queda": 13,
+      "pos": 7
+     },
+     {
+      "name": "alb2106",
+      "record": "4-5",
+      "points": 26.7,
+      "avatar": "assets/avatars/serie-b-1093392871799058432.jpg",
+      "playoffs": 68,
+      "queda": 8,
+      "pos": 6
+     }
+    ],
+    [
+     {
+      "name": "RegisCarrara",
+      "record": "7-2",
+      "points": 0,
+      "avatar": "assets/avatars/serie-b-1136697134088196096.jpg",
+      "playoffs": 99,
+      "queda": 0,
+      "pos": 2
+     },
+     {
+      "name": "SiaraBigheads",
+      "record": "6-3",
+      "points": 0,
+      "avatar": "assets/avatars/serie-b-1216557076579356672.jpg",
+      "playoffs": 96,
+      "queda": 0,
+      "pos": 4
+     }
+    ]
+   ]
+  },
+  {
+   "tier": "serie-c",
+   "label": "Série C",
+   "matchups": [
+    [
+     {
+      "name": "DMK Steel Curtain",
+      "record": "4-5",
+      "points": 0,
+      "avatar": "assets/avatars/serie-c-1251976799294853120.jpg",
+      "playoffs": 81,
+      "queda": 5,
+      "pos": 6
+     },
+     {
+      "name": "WI Redentor",
+      "record": "2-7",
+      "points": 0,
+      "avatar": "assets/avatars/serie-c-456847853310963712.jpg",
+      "playoffs": 7,
+      "queda": 78,
+      "pos": 9
+     }
+    ],
+    [
+     {
+      "name": "086 Football",
+      "record": "5-4",
+      "points": 0,
+      "avatar": "assets/avatars/serie-c-1266508965466873856.jpg",
+      "playoffs": 82,
+      "queda": 5,
+      "pos": 5
+     },
+     {
+      "name": "Pandemônio FC",
+      "record": "3-6",
+      "points": 0,
+      "avatar": "assets/avatars/serie-c-1074880168604299264.jpg",
+      "playoffs": 30,
+      "queda": 33,
+      "pos": 7
+     }
+    ],
+    [
+     {
+      "name": "San Andreas Chiefs",
+      "record": "7-2",
+      "points": 0,
+      "avatar": "assets/avatars/serie-c-1125183919432884224.jpg",
+      "playoffs": 100,
+      "queda": 0,
+      "pos": 2
+     },
+     {
+      "name": "Mangue Chiefs 🦀",
+      "record": "6-3",
+      "points": 29.2,
+      "avatar": "assets/avatars/serie-c-1257002122994532352.jpg",
+      "playoffs": 97,
+      "queda": 0,
+      "pos": 4
+     }
+    ],
+    [
+     {
+      "name": "romanerinha",
+      "record": "3-6",
+      "points": 0.3,
+      "avatar": "assets/avatars/serie-c-1268330386040033280.jpg",
+      "playoffs": 5,
+      "queda": 78,
+      "pos": 8
+     },
+     {
+      "name": "Kelce Gremista",
+      "record": "1-8",
+      "points": 0,
+      "avatar": "assets/avatars/serie-c-1125728355766157312.jpg",
+      "playoffs": 0,
+      "queda": 100,
+      "pos": 10
+     }
+    ],
+    [
+     {
+      "name": "Fogo na Bomba",
+      "record": "6-3",
+      "points": 50.46,
+      "avatar": "assets/avatars/serie-c-651321577471832064.jpg",
+      "playoffs": 97,
+      "queda": 0,
+      "pos": 3
+     },
+     {
+      "name": "joaoW7",
+      "record": "8-1",
+      "points": 6.4,
+      "avatar": "assets/avatars/serie-c-1259716461769789440.jpg",
+      "playoffs": 100,
+      "queda": 0,
+      "pos": 1
+     }
+    ]
+   ]
+  },
+  {
+   "tier": "serie-d",
+   "label": "Série D",
+   "matchups": [
+    [
+     {
+      "name": "Correia49 KHC",
+      "record": "2-7",
+      "points": 33.1,
+      "avatar": "assets/avatars/serie-d-1131362553956913152.jpg",
+      "playoffs": 4,
+      "queda": null,
+      "pos": 10
+     },
+     {
+      "name": "polvorje",
+      "record": "5-4",
+      "points": 23.76,
+      "avatar": "assets/avatars/serie-d-1130833480188870656.jpg",
+      "playoffs": 81,
+      "queda": null,
+      "pos": 5
+     }
+    ],
+    [
+     {
+      "name": "New England Patriotas",
+      "record": "6-3",
+      "points": 19.12,
+      "avatar": "assets/avatars/serie-d-1351675581627891712.jpg",
+      "playoffs": 92,
+      "queda": null,
+      "pos": 3
+     },
+     {
+      "name": "Claudianosilva",
+      "record": "4-5",
+      "points": 0,
+      "avatar": "assets/avatars/serie-d-1129485724543410176.jpg",
+      "playoffs": 43,
+      "queda": null,
+      "pos": 7
+     }
+    ],
+    [
+     {
+      "name": "Green N Gold",
+      "record": "5-4",
+      "points": 0,
+      "avatar": "assets/avatars/serie-d-463033785022148608.jpg",
+      "playoffs": 96,
+      "queda": null,
+      "pos": 4
+     },
+     {
+      "name": "Elieser",
+      "record": "3-6",
+      "points": 0,
+      "avatar": "assets/avatars/serie-d-339070586716180480.jpg",
+      "playoffs": 29,
+      "queda": null,
+      "pos": 8
+     }
+    ],
+    [
+     {
+      "name": "LeandroGaucho",
+      "record": "7-2",
+      "points": 0,
+      "avatar": "assets/avatars/serie-d-995575257270562816.jpg",
+      "playoffs": 100,
+      "queda": null,
+      "pos": 1
+     },
+     {
+      "name": "Just Maried",
+      "record": "4-5",
+      "points": 0,
+      "avatar": "assets/avatars/serie-d-1003459236413714432.jpg",
+      "playoffs": 52,
+      "queda": null,
+      "pos": 6
+     }
+    ],
+    [
+     {
+      "name": "VitorM05",
+      "record": "7-2",
+      "points": 0,
+      "avatar": "assets/avatars/serie-d-695043304307359744.jpg",
+      "playoffs": 100,
+      "queda": null,
+      "pos": 2
+     },
+     {
+      "name": "DH8 Red&Gold",
+      "record": "2-7",
+      "points": 29.2,
+      "avatar": "assets/avatars/serie-d-999667664312221696.jpg",
+      "playoffs": 4,
+      "queda": null,
+      "pos": 9
+     }
+    ]
+   ]
+  }
+ ]
+}
