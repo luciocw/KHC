@@ -289,6 +289,116 @@ function buildOddsInput(rosterIds, scores, pairs, scored) {
     return { teams, schedule: pairs.slice(scored) };
 }
 
+// --- COPA KHC (mata-mata do site, sorteio livre entre as divisões) ---
+
+/**
+ * Sorteio da Copa: embaralha os times com a semente (mesma semente = mesmo
+ * sorteio) e monta a chave. Com N times e P = maior potência de 2 ≤ N:
+ * N − P jogos na fase preliminar (os primeiros sorteados) e 2P − N folgas;
+ * a chave principal de P vagas mistura, também por sorteio, quem folga e
+ * os vencedores da preliminar. Ex.: 40 times → 8 jogos preliminares, 24
+ * folgas, chave de 32; 60 → 28 jogos, 4 folgas.
+ * @param {string[]} keys  ids dos times
+ * @param {string} seed
+ * @returns {{prelim: Array<[string, string]>, slots: Array<{team?: string, prelim?: number}>}}
+ */
+function drawCup(keys, seed) {
+    const rnd = seededRandom(seedFrom(seed));
+    const shuffle = arr => {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(rnd() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    };
+    const order = shuffle(keys.slice().sort());
+    const n = order.length;
+    let p = 1;
+    while (p * 2 <= n) p *= 2;
+    const games = n - p;
+    const prelim = [];
+    for (let i = 0; i < games; i++) prelim.push([order[2 * i], order[2 * i + 1]]);
+    const byes = order.slice(2 * games).map(team => ({ team }));
+    const slots = shuffle([...byes, ...prelim.map((_, i) => ({ prelim: i }))]);
+    return { prelim, slots };
+}
+
+/** Nome da fase pelo número de times que a disputam. */
+function cupRoundName(teams, isPrelim) {
+    if (isPrelim) return 'Fase preliminar';
+    return { 2: 'Final', 4: 'Semifinal', 8: 'Quartas de final', 16: 'Oitavas de final' }[teams] || `${teams / 2} avos de final`;
+}
+
+/**
+ * Fases da Copa: classificatória + uma fase por semana até a final.
+ * @param {{qualifying: number, bracket: number}} cfg
+ * @returns {Array<{key: string, name: string, short?: string, week: number, teams?: number}>}
+ */
+function cupPhases(cfg) {
+    const phases = [{ key: 'q', name: 'Classificatória', week: cfg.qualifying }];
+    for (let teams = cfg.bracket, w = cfg.qualifying + 1; teams >= 2; teams /= 2, w++) {
+        const short = { 2: 'Final', 4: 'Semi', 8: 'Quartas', 16: 'Oitavas' }[teams] || `${teams / 2} avos`;
+        phases.push({ key: `r${teams}`, name: cupRoundName(teams), short, week: w, teams });
+    }
+    return phases;
+}
+
+/**
+ * Resolve a Copa inteira a partir dos placares (mesma conta no site e no
+ * fechamento da temporada). Classificatória: os `bracket` maiores
+ * pontuadores da semana. Chave: drawCup com a semente. Fase final: final +
+ * disputa do 3º lugar (perdedores das semis). Empate: mais pontos na semana
+ * anterior; depois a ordem do sorteio (ou do nome, no corte).
+ * @param {{qualifying: number, bracket: number, seed: string}} cfg
+ * @param {string[]} keys  todos os participantes
+ * @param {Object<number, Object<string, number>>} scores  semana → id → pontos
+ * @param {{leg: number, lastScored: number}} settings
+ * @returns {{phases: Array, qualifying: Object, rounds: Array, podium: (string[]|null)}}
+ */
+function resolveCup(cfg, keys, scores, settings) {
+    const phases = cupPhases(cfg);
+    const status = w => (w <= settings.lastScored ? 'final' : w === settings.leg ? 'live' : 'upcoming');
+    const pts = (w, k) => (scores[w] && scores[w][k]) || 0;
+    const qw = cfg.qualifying;
+    const ranked = keys.slice().sort().sort((a, b) => (pts(qw, b) - pts(qw, a)) || (pts(qw - 1, b) - pts(qw - 1, a)) || a.localeCompare(b));
+    const qualifying = { week: qw, status: status(qw), cut: Math.min(cfg.bracket, ranked.length), ranked, points: k => pts(qw, k) };
+
+    const rounds = [];
+    let podium = null;
+    if (qualifying.status === 'final') {
+        let slots = drawCup(ranked.slice(0, cfg.bracket), cfg.seed).slots.map(s => s.team);
+        let semiLosers = null;
+        phases.slice(1).forEach(ph => {
+            const st = status(ph.week);
+            const play = (a, b, label) => {
+                const g = { a, b, pa: a ? pts(ph.week, a) : 0, pb: b ? pts(ph.week, b) : 0, winner: '', label };
+                if (st === 'final' && a && b) {
+                    const d = (g.pa - g.pb) || (pts(ph.week - 1, a) - pts(ph.week - 1, b));
+                    g.winner = d >= 0 ? 'a' : 'b';
+                }
+                return g;
+            };
+            const games = [];
+            for (let i = 0; i < slots.length; i += 2) games.push(play(slots[i], slots[i + 1], ph.teams === 2 ? 'Final' : `Jogo ${i / 2 + 1}`));
+            if (ph.teams === 2 && semiLosers) games.push(play(semiLosers[0], semiLosers[1], 'Disputa do 3º lugar'));
+            rounds.push({ ...ph, status: st, games });
+            const winnerOf = g => (g.winner === 'a' ? g.a : g.winner === 'b' ? g.b : null);
+            const loserOf = g => (g.winner === 'a' ? g.b : g.winner === 'b' ? g.a : null);
+            if (ph.teams === 4) semiLosers = games.map(loserOf);
+            slots = games.filter(g => g.label !== 'Disputa do 3º lugar').map(winnerOf);
+        });
+        const fin = rounds[rounds.length - 1];
+        const [f, third] = fin ? fin.games : [];
+        if (f && f.winner) {
+            const order = [f.winner === 'a' ? f.a : f.b, f.winner === 'a' ? f.b : f.a];
+            if (third && third.winner) order.push(third.winner === 'a' ? third.a : third.b, third.winner === 'a' ? third.b : third.a);
+            podium = order;
+        }
+    }
+    return { phases, qualifying, rounds, podium };
+}
+
 // --- LENDAS (cross-season trophy aggregation) ---
 
 /**
@@ -421,7 +531,8 @@ function careerForUser(username, seasons) {
                 }
             }
 
-            if (s.kind !== 'guillotine') {
+            // Guilhotina e Copa: sem V–D próprio, ficam fora dos totais
+            if (s.kind !== 'guillotine' && s.kind !== 'cup') {
                 totalW += row.w || 0;
                 totalL += row.l || 0;
                 totalPts += row.pts;

@@ -1,5 +1,5 @@
 // =============================================================================
-// TAB / LIGAS · GUILHOTINA — "KHC Guilhotina" dentro da aba Ligas.
+// TAB / GUILHOTINA — "KHC Guilhotina", na página Também na KHC (#/guilhotina).
 //
 //   - Regra (Sleeper, liga tipo 3): a cada rodada, quem faz menos pontos
 //     entre os vivos é cortado e o elenco vai para o waiver.
@@ -64,7 +64,7 @@ function guillotineData(league) {
         .then(data => { entry.status = 'ready'; entry.data = data; })
         .catch(() => { entry.status = 'error'; })
         .then(() => {
-            if (appState.tab === 'ligas' && appState.loadState === 'ready' && isGuillotine(appState.series)) renderView();
+            if (appState.tab === 'guilhotina' && appState.loadState === 'ready') renderView();
         });
     return entry;
 }
@@ -194,4 +194,16 @@ function renderGuillotine(league) {
             <h3 class="eyebrow" id="cut-title">Cortados · ${m.cut.length}</h3>
             <ol>${cutRows}</ol>
         </section>` : ''}`);
+}
+
+/**
+ * Página #/guilhotina (Também na KHC): a liga da temporada mais recente.
+ * @returns {string} HTML
+ */
+function renderGuillotinePage() {
+    const league = appState.leagues.find(l => isGuillotine(l.info.tier));
+    const body = league
+        ? renderGuillotine(league)
+        : stateHTML({ icon: 'trophy', title: 'Sem Guilhotina nesta temporada' });
+    return `${backToNflHTML()}${alsoTabsHTML('guilhotina')}${body}`;
 }

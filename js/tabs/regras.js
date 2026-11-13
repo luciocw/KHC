@@ -48,6 +48,23 @@ const RULES = [
         ]
     },
     {
+        icon: 'trophy',
+        title: 'Copa KHC',
+        lead: (() => {
+            const y = Object.keys(KHC_CONFIG).sort().reverse().find(k => KHC_CONFIG[k].copa);
+            return y && KHC_CONFIG[y].copa.test ? `<b>Em teste em ${y}:</b> vale a partir de 2027.` : '';
+        })(),
+        items: [
+            'Competição à parte, como uma Copa do Brasil ao lado do Brasileirão: mesmos times, mas <b>não conta</b> para playoffs nem rebaixamento. Roda no site, com a pontuação de cada time na sua liga na semana.',
+            'Participam todos os times das divisões (Séries A–F). Elite e Guilhotina não entram.',
+            '<b>Semana 12 (classificatória):</b> todo mundo joga; os 32 maiores pontuadores avançam.',
+            '<b>Semanas 13 a 17:</b> mata-mata de jogo único (16 avos, oitavas, quartas, semifinal e, na semana 17, a final e a disputa do 3º lugar, junto com as finais das divisões).',
+            '<b>Sorteio livre:</b> qualquer divisão pode cruzar com qualquer outra, até a mesma. Sai com uma semente definida antes; com a mesma semente, o sorteio é sempre igual (dá para conferir).',
+            '<b>Empate:</b> passa quem fez mais pontos na semana anterior.',
+            'Nas semanas 15 a 17, quem já caiu na sua liga continua escalando o time para a Copa.',
+        ]
+    },
+    {
         icon: 'crown',
         title: 'Pontos KHC (Lendas)',
         lead: KHC_POINTS_DRAFT ? '<b>Em discussão:</b> valores e critérios podem mudar e serão definidos antes da temporada 2027.' : '',
@@ -65,6 +82,7 @@ const RULES = [
         icon: 'trophy',
         title: 'Também na KHC',
         items: [
+            '<a href="#/guilhotina">KHC Guilhotina</a>: liga avulsa (entra quem quer). A cada rodada, quem faz menos pontos entre os vivos é cortado. Não soma Pontos KHC.',
             '<a href="#/premier">Cocoricó Premier League</a>: fantasy de futebol no Sleeper, com a turma da KHC. Para a conversa não parar na entressafra da NFL.',
             '<a href="#/nba">National Burgundy Association</a>: fantasy de basquete no Sleeper, liga nova na temporada 2026/27 da NBA.',
         ]

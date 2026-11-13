@@ -30,7 +30,12 @@ const KHC_CONFIG = {
             { id: '1370036025006505984', name: 'KHC Serie C', tier: 'serie-c' },
             { id: '1370091129751474176', name: 'KHC Serie D', tier: 'serie-d' },
             { id: '1383129184330579968', name: 'KHC Guilhotina', tier: 'guilhotina' },
-        ]
+        ],
+        // Copa KHC (no site, não no Sleeper): teste em 2026, para valer em 2027.
+        // Semana `qualifying`: todos os times das divisões jogam e os `bracket`
+        // maiores pontuadores avançam; chave sorteada com `seed` (mesma semente =
+        // mesmo sorteio); uma fase por semana até a final.
+        copa: { test: true, seed: 'Copa KHC 2026', qualifying: 12, bracket: 32 }
     }
 };
 
@@ -48,11 +53,12 @@ const SERIES_META = {
     'serie-f': { id: 'F',     name: 'Série F',   short: 'Série F', league: 'f',     crest: 'escudo-serie-f.png' },
     // Liga paralela: quem faz menos pontos na semana é cortado (sem V–D)
     'guilhotina': { id: 'G',  name: 'KHC Guilhotina', short: 'Guilhotina', league: 'g', crest: 'escudo-guilhotina.png', kind: 'guillotine' },
+    'copa':    { id: 'Copa', name: 'Copa KHC', short: 'Copa', league: 'copa', crest: 'escudo-copa.png', kind: 'cup' },
 };
 
 // Ordem de exibição (abas, filtros, histórico): ligas paralelas (Elite,
 // Guilhotina) primeiro, depois as séries A → F.
-const TIER_ORDER = ['elite', 'guilhotina', 'serie-a', 'serie-b', 'serie-c', 'serie-d', 'serie-e', 'serie-f'];
+const TIER_ORDER = ['elite', 'guilhotina', 'copa', 'serie-a', 'serie-b', 'serie-c', 'serie-d', 'serie-e', 'serie-f'];
 
 /** Guilhotina: liga paralela sem V–D, fora de Power, Top, Rodada e Chances. */
 function isGuillotine(tier) {
@@ -61,7 +67,12 @@ function isGuillotine(tier) {
 
 /** Série regular (A–F): acesso/rebaixamento, Power Ranking e Chances. */
 function isRegularSeries(tier) {
-    return tier !== 'elite' && !isGuillotine(tier);
+    return tier !== 'elite' && !isGuillotine(tier) && !isCup(tier);
+}
+
+/** Copa KHC: competição do site (não é liga do Sleeper). */
+function isCup(tier) {
+    return !!(SERIES_META[tier] && SERIES_META[tier].kind === 'cup');
 }
 
 /**
@@ -174,6 +185,7 @@ const appState = {
     season: Object.keys(KHC_CONFIG).sort().pop(),   // temporada mais recente configurada
     series: 'serie-a',        // tier selecionado nas abas Ligas e Rodada
     matchWeek: null,          // semana na aba Rodada (null = atual da liga)
+    copaPhase: null,          // fase aberta na Copa KHC (null = a da semana atual)
     alsoView: 'tabela',       // Também na KHC: 'tabela' | 'rodada' (#/nba/rodada)
     alsoWeek: null,           // semana escolhida na Rodada de Também na KHC
     ligasViewChosen: false,   // escolheu a visão nesta sessão (vale sobre o padrão dos playoffs)

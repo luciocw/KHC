@@ -11,6 +11,9 @@
 //     quem caiu mais tarde (settings.eliminated). Sem troféu nem Pontos KHC
 //     (liga avulsa); sem V–D; `cut` = rodada do corte (0 = sobrevivente).
 //     Premier League e NBA não entram aqui.
+//   - Copa KHC (kind: 'cup', quando KHC_CONFIG[ano].copa não é teste): pódio
+//     1º–4º com a mesma conta do site (resolveCup). `--so-copa` só confere a
+//     Copa; `--classificatoria N` simula outra semana classificatória.
 // Para se a temporada não acabou (final ou 3º lugar sem vencedor).
 //
 // Saída: { id, status: 'final', series: [ { id, name, kind?, teams: [
@@ -27,8 +30,9 @@ const API = 'https://api.sleeper.app/v1/league';
 // --- Config do site (scripts globais, sem módulos) ---
 const ctx = vm.createContext({ console });
 vm.runInContext((await readFile(resolve(ROOT, 'js/config.js'), 'utf8'))
-    + '\n;globalThis.__khc = { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, VALIDATION };', ctx);
-const { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, VALIDATION } = ctx.__khc;
+    + '\n' + (await readFile(resolve(ROOT, 'js/derivations.js'), 'utf8'))
+    + '\n;globalThis.__khc = { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases };', ctx);
+const { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases } = ctx.__khc;
 
 async function fetchJson(url) {
     for (let attempt = 0; attempt < 4; attempt++) {
@@ -125,14 +129,63 @@ async function deriveLeague(league) {
     return { id: meta.id, name: league.name, teams: [...top, ...mid, ...rest] };
 }
 
+/**
+ * Copa KHC: pódio (1º–4º) com a mesma conta do site (resolveCup). Só entra
+ * no histórico quando a Copa não é teste (soma Pontos KHC).
+ * @param {Object} cfg  KHC_CONFIG[ano]
+ * @param {Object} copa  cfg.copa (dá para sobrescrever a semana nos testes)
+ */
+async function deriveCup(cfg, copa) {
+    const leagues = cfg.leagues.filter(l => isRegularSeries(l.tier));
+    const last = copa.qualifying + cupPhases(copa).length - 1;
+    const info = await fetchJson(`${API}/${leagues[0].id}`);
+    const settings = { leg: info.settings?.leg ?? 0, lastScored: info.settings?.last_scored_leg ?? 0 };
+    const keys = [], scores = {}, rowByKey = {};
+    for (const l of leagues) {
+        const [users, rosters] = await Promise.all([fetchJson(`${API}/${l.id}/users`), fetchJson(`${API}/${l.id}/rosters`)]);
+        const userById = new Map(users.map(u => [u.user_id, u]));
+        rosters.forEach(r => {
+            const k = `${l.tier}:${r.roster_id}`;
+            keys.push(k);
+            const { rosterId, eliminated, w, l: losses, t, ptsAgainst, ppts, ...row } = rowOf(r, userById);
+            rowByKey[k] = row;
+        });
+        for (let w = copa.qualifying - 1; w <= last; w++) {
+            const raw = await fetchJson(`${API}/${l.id}/matchups/${w}`);
+            scores[w] = scores[w] || {};
+            raw.forEach(m => { if (Number.isInteger(m.roster_id)) scores[w][`${l.tier}:${m.roster_id}`] = Math.max(0, Number(m.points) || 0); });
+        }
+    }
+    const cup = resolveCup(copa, keys, scores, settings);
+    if (!cup.podium || cup.podium.length < 4) throw new Error('Copa KHC: a final ou a disputa do 3º lugar ainda não terminou');
+    return {
+        id: SERIES_META.copa.id, name: SERIES_META.copa.name, kind: 'cup',
+        teams: cup.podium.map((k, i) => {
+            const { pts, ...row } = rowByKey[k];   // pontos da Copa = só o placar de cada jogo; fica fora
+            return { rank: i + 1, ...row, trophy: TROPHIES[i] };
+        })
+    };
+}
+
 async function main() {
     const args = process.argv.slice(2);
     const year = args.find(a => /^\d{4}$/.test(a));
     const outArg = args.indexOf('--saida');
+    const onlyCup = args.includes('--so-copa');                 // conferir a Copa sem fechar a temporada
+    const qArg = args.indexOf('--classificatoria');              // teste: outra semana classificatória
     const cfg = year && KHC_CONFIG[year];
     if (!cfg) {
-        console.error(`Uso: node scripts/derive-season.mjs <ano> [--saida caminho.json]\nAnos em js/config.js: ${Object.keys(KHC_CONFIG).join(', ')}`);
+        console.error(`Uso: node scripts/derive-season.mjs <ano> [--saida caminho.json] [--so-copa [--classificatoria N]]\nAnos em js/config.js: ${Object.keys(KHC_CONFIG).join(', ')}`);
         process.exit(1);
+    }
+
+    if (onlyCup) {
+        if (!cfg.copa) throw new Error(`${year} não tem Copa em js/config.js`);
+        const copa = { ...cfg.copa, ...(qArg >= 0 ? { qualifying: Number(args[qArg + 1]) } : {}) };
+        const s = await deriveCup(cfg, copa);
+        console.log(`Copa KHC ${year}${copa.test ? ' (teste)' : ''}, classificatória na semana ${copa.qualifying}:`);
+        s.teams.forEach(t => console.log(`  ${t.rank}. ${t.user} (${t.team}) [${t.trophy}]`));
+        return;
     }
 
     console.log(`Fechando a temporada ${year}…`);
@@ -141,6 +194,10 @@ async function main() {
     for (const league of leagues) {
         console.log(`  → ${league.name} (${league.id})`);
         series.push(await deriveLeague(league));
+    }
+    if (cfg.copa && !cfg.copa.test) {
+        console.log('  → Copa KHC');
+        series.push(await deriveCup(cfg, cfg.copa));
     }
 
     const snapshot = { id: Number(year), status: 'final', series };
@@ -151,10 +208,11 @@ async function main() {
     for (const s of series) {
         console.log(`\n${s.name}:`);
         for (const t of s.teams) {
-            const cut = s.kind ? (t.cut ? ` [cortado R${t.cut}]` : ' [sobrevivente]') : '';
+            const cut = s.kind === 'guillotine' ? (t.cut ? ` [cortado R${t.cut}]` : ' [sobrevivente]') : '';
             const tag = `${cut}${t.trophy ? ` [${t.trophy}]` : ''}`;
             const rec = s.kind ? '     ' : `${String(t.w).padStart(2)}-${String(t.l).padStart(2)}`;
-            console.log(`  ${String(t.rank).padStart(2)}. ${t.user.padEnd(18)} ${rec}  ${t.pts.toFixed(2).padStart(8)}${tag}`);
+            const pts = t.pts === undefined ? '' : t.pts.toFixed(2).padStart(8);
+            console.log(`  ${String(t.rank).padStart(2)}. ${t.user.padEnd(18)} ${rec}  ${pts}${tag}`);
         }
     }
 }

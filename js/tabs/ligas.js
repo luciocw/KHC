@@ -9,6 +9,7 @@
 //   - Temporada finalizada: ordem e medalhas pela classificação final
 //     (data/<ano>.json — 1º–4º pelos playoffs, 5º+ pela temporada regular).
 //   - Lateral: líderes (ou campeões) das outras séries.
+//   - Aba Copa KHC (tabs/copa.js), quando a temporada tem copa configurada.
 //   - Seletor Tabela | Chances | Chaveamento: Chances troca PF/PC por
 //     Playoffs % e Queda % (tabs/chances.js), só com a temporada regular em
 //     andamento; Chaveamento mostra os playoffs (tabs/chaveamento.js).
@@ -80,8 +81,11 @@ function sortLeagues(leagues) {
  * @returns {string|null}
  */
 function resolveSeriesTier(leagues) {
+    leagues = leagues.filter(l => !isGuillotine(l.info.tier));   // a Guilhotina tem página própria
     if (!leagues.length) return null;
     if (leagues.some(l => l.info.tier === appState.series)) return appState.series;
+    // Copa KHC: aba da Ligas sem liga no Sleeper (só a aba Ligas a mostra)
+    if (isCup(appState.series) && copaConfig() && appState.tab === 'ligas') return appState.series;
     return leagues.some(l => l.info.tier === 'serie-a') ? 'serie-a' : leagues[0].info.tier;
 }
 
@@ -295,14 +299,19 @@ function renderLigas() {
     appState.series = tier;
 
     const league = leagues.find(l => l.info.tier === tier);
-    const tabs = leagues.map(l => {
-        const m = SERIES_META[l.info.tier];
-        const current = l.info.tier === tier;
-        return `<a href="${hashFor('ligas', appState.season, l.info.tier)}" data-league="${m.league}"${current ? ' aria-current="page"' : ''}>
-            ${crestHTML(l.info.tier, 28)}<span>${escapeHtml(m.short)}</span></a>`;
+    // Copa KHC entra nas abas depois da Guilhotina (TIER_ORDER), quando configurada
+    // Guilhotina fica em "Também na KHC" (#/guilhotina): Ligas só com as divisões
+    const tabTiers = leagues.map(l => l.info.tier).filter(t => !isGuillotine(t));
+    if (copaConfig()) tabTiers.push('copa');
+    tabTiers.sort((a, b) => TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b));
+    const tabs = tabTiers.map(t => {
+        const m = SERIES_META[t];
+        const current = t === tier;
+        return `<a href="${hashFor('ligas', appState.season, t)}" data-league="${m.league}"${current ? ' aria-current="page"' : ''}>
+            ${crestHTML(t, 28)}<span>${escapeHtml(m.short)}</span></a>`;
     }).join('');
-    if (isGuillotine(tier)) {
-        return `${partialWarningHTML()}${premierOffseasonCardHTML()}<nav class="series-tabs" aria-label="Séries">${tabs}</nav>${renderGuillotine(league)}`;
+    if (isCup(tier)) {
+        return `${partialWarningHTML()}${premierOffseasonCardHTML()}${copaLineupNoticeHTML()}<nav class="series-tabs" aria-label="Séries">${tabs}</nav>${renderCopa()}`;
     }
 
     const { meta, teams, z, finalized, seriesIdx, subtitle, view, odds, chancesAvailable } = standingsModel(league);
@@ -332,6 +341,7 @@ function renderLigas() {
     return `
         ${partialWarningHTML()}
         ${premierOffseasonCardHTML()}
+        ${copaLineupNoticeHTML()}
         <nav class="series-tabs" aria-label="Séries">${tabs}</nav>
         <div class="${others ? 'grid-2' : ''}">
             <section class="card" data-league="${meta.league}" aria-labelledby="series-title">
