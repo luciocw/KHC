@@ -289,6 +289,47 @@ function buildOddsInput(rosterIds, scores, pairs, scored) {
     return { teams, schedule: pairs.slice(scored) };
 }
 
+// --- COPA KHC (mata-mata do site, sorteio livre entre as divisões) ---
+
+/**
+ * Sorteio da Copa: embaralha os times com a semente (mesma semente = mesmo
+ * sorteio) e monta a chave. Com N times e P = maior potência de 2 ≤ N:
+ * N − P jogos na fase preliminar (os primeiros sorteados) e 2P − N folgas;
+ * a chave principal de P vagas mistura, também por sorteio, quem folga e
+ * os vencedores da preliminar. Ex.: 40 times → 8 jogos preliminares, 24
+ * folgas, chave de 32; 60 → 28 jogos, 4 folgas.
+ * @param {string[]} keys  ids dos times
+ * @param {string} seed
+ * @returns {{prelim: Array<[string, string]>, slots: Array<{team?: string, prelim?: number}>}}
+ */
+function drawCup(keys, seed) {
+    const rnd = seededRandom(seedFrom(seed));
+    const shuffle = arr => {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(rnd() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    };
+    const order = shuffle(keys.slice().sort());
+    const n = order.length;
+    let p = 1;
+    while (p * 2 <= n) p *= 2;
+    const games = n - p;
+    const prelim = [];
+    for (let i = 0; i < games; i++) prelim.push([order[2 * i], order[2 * i + 1]]);
+    const byes = order.slice(2 * games).map(team => ({ team }));
+    const slots = shuffle([...byes, ...prelim.map((_, i) => ({ prelim: i }))]);
+    return { prelim, slots };
+}
+
+/** Nome da fase pelo número de times que a disputam. */
+function cupRoundName(teams, isPrelim) {
+    if (isPrelim) return 'Fase preliminar';
+    return { 2: 'Final', 4: 'Semifinal', 8: 'Quartas de final', 16: 'Oitavas de final' }[teams] || `${teams / 2} avos de final`;
+}
+
 // --- LENDAS (cross-season trophy aggregation) ---
 
 /**
