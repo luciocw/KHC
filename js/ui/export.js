@@ -1196,7 +1196,7 @@ async function drawCopaCanvas(data) {
         return canvas;
     }
 
-    const ROW_H = 72, CHAMP_H = m.champion && ph.teams === 2 ? 56 : 0;
+    const ROW_H = ph.teams === 2 ? 84 : 72, CHAMP_H = m.champion && ph.teams === 2 ? 56 : 0;
     const games = round.games;
     const H = EXPORT_HEAD_H + CHAMP_H + games.length * ROW_H;
     const { canvas, ctx } = startExportCard(H, c, crest, meta.name, subtitle);
@@ -1208,13 +1208,22 @@ async function drawCopaCanvas(data) {
         drawMedal(ctx, PAD + 13, y + CHAMP_H / 2, 1, c);
         ctx.fillStyle = c.text;
         setFont(ctx, 700, 15);
-        ctx.fillText(fitText(ctx, `Campeão: ${m.champion.winner.team.teamName} (${m.champion.winner.team.ownerName})`, EXPORT_W - 80), PAD + 36, y + CHAMP_H / 2);
+        ctx.fillText(fitText(ctx, `Campeão: ${m.champion.winner.team.teamName} (${m.champion.winner.team.ownerName})${m.champion.third ? ` · 3º: ${m.champion.third.team.teamName}` : ''}`, EXPORT_W - 80), PAD + 36, y + CHAMP_H / 2);
         y += CHAMP_H;
         hLine(ctx, 0, EXPORT_W, y - 1, c.border);
     }
     games.forEach((g, gi) => {
-        const top = y + gi * ROW_H, cy = top + ROW_H / 2;
+        const top = y + gi * ROW_H;
+        const labeled = ph.teams === 2;   // fase final: "Final" e "Disputa do 3º lugar"
+        const cy = top + ROW_H / 2 + (labeled ? 8 : 0);
         if (gi % 2 === 1) { ctx.fillStyle = c.surface2; ctx.fillRect(0, top, EXPORT_W, ROW_H); }
+        if (labeled) {
+            ctx.fillStyle = g.label === 'Final' ? c.accent : c.text3;
+            setFont(ctx, 800, 11, 'condensed');
+            ctx.textAlign = 'center';
+            ctx.fillText(g.label.toUpperCase().split('').join('\u200A'), mid, top + 14);
+            ctx.textAlign = 'left';
+        }
         if (gi < games.length - 1) hLine(ctx, 0, EXPORT_W, top + ROW_H - 1, c.border);
         [['a', g.a, avatars[gi * 2]], ['b', g.b, avatars[gi * 2 + 1]]].forEach(([k, sd, img]) => {
             const left = k === 'a';
@@ -1445,10 +1454,9 @@ function exportTarget() {
             draw: () => drawCopaCanvas(cp.data)
         };
     }
-    const league = appState.leagues.find(l => l.info.tier === appState.series);
-    if (!league) return null;
-    const tier = league.info.tier;
-    if (appState.tab === 'ligas' && isGuillotine(tier)) {
+    if (appState.tab === 'guilhotina') {
+        const league = appState.leagues.find(l => isGuillotine(l.info.tier));
+        if (!league) return null;
         const g = guillotineData(league);
         if (g.status !== 'ready') return null;
         return {
@@ -1458,6 +1466,9 @@ function exportTarget() {
             draw: () => drawGuillotineCanvas(league, g.data)
         };
     }
+    const league = appState.leagues.find(l => l.info.tier === appState.series);
+    if (!league) return null;
+    const tier = league.info.tier;
     const seriesName = SERIES_META[tier].name;
     if (appState.tab === 'rodada') {
         const round = currentRound(league);

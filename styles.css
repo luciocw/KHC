@@ -787,6 +787,7 @@ abbr[title] { text-decoration: none; cursor: help; }
 .copa-phases::-webkit-scrollbar { display: none; }
 .copa-phases button { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; padding: 4px 12px; line-height: 1.1; }
 .copa-phases button small { font-size: 10px; font-weight: 700; opacity: .7; letter-spacing: .04em; }
+.copa-notice .crest { height: 20px; width: auto; flex-shrink: 0; }
 .copa-champ { display: flex; align-items: center; gap: var(--s-12); margin: 0 var(--s-16) var(--s-12); padding: var(--s-12) var(--s-16); border: 1px solid var(--accent); border-radius: var(--r-md); background: var(--surface-2); }
 .copa-champ b { display: block; font-size: var(--fs-16); }
 .copa-champ small { color: var(--text-3); font-size: var(--fs-12); }

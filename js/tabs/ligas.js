@@ -81,6 +81,7 @@ function sortLeagues(leagues) {
  * @returns {string|null}
  */
 function resolveSeriesTier(leagues) {
+    leagues = leagues.filter(l => !isGuillotine(l.info.tier));   // a Guilhotina tem página própria
     if (!leagues.length) return null;
     if (leagues.some(l => l.info.tier === appState.series)) return appState.series;
     // Copa KHC: aba da Ligas sem liga no Sleeper (só a aba Ligas a mostra)
@@ -299,7 +300,8 @@ function renderLigas() {
 
     const league = leagues.find(l => l.info.tier === tier);
     // Copa KHC entra nas abas depois da Guilhotina (TIER_ORDER), quando configurada
-    const tabTiers = leagues.map(l => l.info.tier);
+    // Guilhotina fica em "Também na KHC" (#/guilhotina): Ligas só com as divisões
+    const tabTiers = leagues.map(l => l.info.tier).filter(t => !isGuillotine(t));
     if (copaConfig()) tabTiers.push('copa');
     tabTiers.sort((a, b) => TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b));
     const tabs = tabTiers.map(t => {
@@ -309,10 +311,7 @@ function renderLigas() {
             ${crestHTML(t, 28)}<span>${escapeHtml(m.short)}</span></a>`;
     }).join('');
     if (isCup(tier)) {
-        return `${partialWarningHTML()}${premierOffseasonCardHTML()}<nav class="series-tabs" aria-label="Séries">${tabs}</nav>${renderCopa()}`;
-    }
-    if (isGuillotine(tier)) {
-        return `${partialWarningHTML()}${premierOffseasonCardHTML()}<nav class="series-tabs" aria-label="Séries">${tabs}</nav>${renderGuillotine(league)}`;
+        return `${partialWarningHTML()}${premierOffseasonCardHTML()}${copaLineupNoticeHTML()}<nav class="series-tabs" aria-label="Séries">${tabs}</nav>${renderCopa()}`;
     }
 
     const { meta, teams, z, finalized, seriesIdx, subtitle, view, odds, chancesAvailable } = standingsModel(league);
@@ -342,6 +341,7 @@ function renderLigas() {
     return `
         ${partialWarningHTML()}
         ${premierOffseasonCardHTML()}
+        ${copaLineupNoticeHTML()}
         <nav class="series-tabs" aria-label="Séries">${tabs}</nav>
         <div class="${others ? 'grid-2' : ''}">
             <section class="card" data-league="${meta.league}" aria-labelledby="series-title">

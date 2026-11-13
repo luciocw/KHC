@@ -1,6 +1,7 @@
 // =============================================================================
-// TAB / TAMBÉM NA KHC — ligas da turma fora da NFL, no Sleeper.
+// TAB / TAMBÉM NA KHC — ligas avulsas da turma, no Sleeper.
 //
+//   - #/guilhotina: KHC Guilhotina (tabs/guilhotina.js).
 //   - #/premier: Cocoricó Premier League (fantasy de futebol).
 //   - #/nba: KHC NBA League · National Burgundy Association (basquete).
 //   - Fora do menu: entra pelo atalho no topo, por Regras e pelo cartão
@@ -223,9 +224,10 @@ function backToNflHTML() {
     </a>`;
 }
 
-/** Abas Premier League | NBA. */
+/** Abas Guilhotina | Premier League | NBA. */
 function alsoTabsHTML(active) {
-    return `<nav class="series-tabs also-tabs" aria-label="Também na KHC">${Object.values(ALSO_LEAGUES).map(cfg =>
+    const guillotine = { key: 'guilhotina', league: 'g', tab: 'Guilhotina', crest: SERIES_META.guilhotina.crest, round: false };
+    return `<nav class="series-tabs also-tabs" aria-label="Também na KHC">${[guillotine, ...Object.values(ALSO_LEAGUES)].map(cfg =>
         `<a href="#/${cfg.key}" data-league="${cfg.league}"${cfg.key === active ? ' aria-current="page"' : ''}>${alsoCrestHTML(cfg, 28)}<span>${escapeHtml(cfg.tab)}</span></a>`).join('')}</nav>`;
 }
 

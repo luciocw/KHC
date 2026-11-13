@@ -72,8 +72,8 @@ function seasonRow({ user, team, badge, main, sub }) {
  * @returns {string}
  */
 function renderFinalizedSeason(season) {
-    // Guilhotina fica fora do pódio (como na temporada em andamento)
-    const series = season.series.filter(s => s.kind !== 'guillotine').sort((a, b) =>
+    // Guilhotina e Copa ficam fora do pódio (como na temporada em andamento)
+    const series = season.series.filter(s => s.kind !== 'guillotine' && s.kind !== 'cup').sort((a, b) =>
         TIER_ORDER.indexOf(seriesIdToTier(a.id)) - TIER_ORDER.indexOf(seriesIdToTier(b.id)));
     const tiers = series.map(s => seriesIdToTier(s.id));
 

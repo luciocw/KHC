@@ -20,6 +20,7 @@ const TABS = [
     { id: 'regras',     label: 'Regras',      short: 'Regras', title: 'Regras',        icon: 'bookOpen', render: () => renderRules(), mobileInHeader: true },
     // Também na KHC (fora do menu): atalho no topo, Regras e o cartão da entressafra
     { id: 'premier',    label: 'Premier League', short: 'Premier', title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('premier'), hidden: true, also: true },
+    { id: 'guilhotina', label: 'Guilhotina',     short: 'Guilhotina', title: 'Também na KHC', icon: 'trophy', render: () => renderGuillotinePage(), hidden: true, also: true, needsData: true },
     { id: 'nba',        label: 'NBA',            short: 'NBA',     title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('nba'),     hidden: true, also: true },
 ];
 const NAV_TABS = TABS.filter(t => !t.hidden);
@@ -63,6 +64,10 @@ function parseHash() {
         return { tab: null, season: null, tier: null, week: null, player };
     }
     const tab = TAB_BY_ID[parts[0]] ? parts[0] : null;
+    // Link antigo da Guilhotina dentro de Ligas (#/ligas/2026/g) → #/guilhotina
+    if (tab === 'ligas' && isGuillotine(Object.keys(SERIES_META).find(t => SERIES_META[t].league === (parts[2] || '').toLowerCase()))) {
+        return { tab: 'guilhotina', season: null, tier: null, week: null, player: null, alsoView: 'tabela' };
+    }
     // Também na KHC: #/nba/rodada/<semana>
     if (tab && TAB_BY_ID[tab].also) {
         const aw = parseInt(parts[2], 10);
@@ -114,6 +119,11 @@ function applyHash(opts = {}) {
         appState.alsoView = route.alsoView;
         appState.alsoWeek = route.week;
     }
+    // Guilhotina: sempre a da temporada mais recente que tem uma
+    if (appState.tab === 'guilhotina') {
+        const y = Object.keys(KHC_CONFIG).sort().reverse().find(k => KHC_CONFIG[k].leagues.some(l => isGuillotine(l.tier)));
+        if (y) appState.season = y;
+    }
 
     if (prevTab !== appState.tab) window.scrollTo(0, 0);
 
@@ -159,6 +169,7 @@ function renderShell() {
         appState.tab === 'regras' ? 'Como funciona'
         : appState.tab === 'premier' ? `Fantasy de futebol · ${PREMIER_LEAGUE.season}`
         : appState.tab === 'nba' ? `Fantasy de basquete · ${NBA_LEAGUE.season}`
+        : appState.tab === 'guilhotina' ? `Liga avulsa · ${appState.season}`
         : `Temporada ${appState.season}`;
     // Também na KHC: seletor de temporada e pílula da NFL não se aplicam
     document.getElementById(DOM_IDS.SEASON_SELECT).hidden = isAlso;

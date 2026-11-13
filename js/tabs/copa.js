@@ -8,13 +8,14 @@
 //   - Semana classificatória (copa.qualifying): os `bracket` maiores
 //     pontuadores avançam. Depois, sorteio livre da chave (drawCup com a
 //     semente copa.seed: mesma semente = mesmo sorteio, dá para conferir) e
-//     uma fase por semana até a final (32 times: semanas 13 a 17).
+//     uma fase por semana até a final (32 times: semanas 13 a 17); na
+//     semana da final, também a disputa do 3º lugar.
 //   - Empate (no corte ou num jogo): mais pontos na semana anterior; depois
 //     a ordem do sorteio.
 //   - Configuração em KHC_CONFIG[ano].copa (config.js).
 //
 // Lê: appState.season, appState.leagues, appState.copaPhase
-// Depende de: config, api, derivations (drawCup, cupRoundName), ui/helpers
+// Depende de: config, api, derivations (resolveCup, cupPhases), ui/helpers
 // =============================================================================
 
 const _copa = {};   // `${ano}|${lastUpdated}` → { status, data }
@@ -27,15 +28,6 @@ function resetCopaCache() {
 function copaConfig(season) {
     const c = (KHC_CONFIG[season || appState.season] || {}).copa;
     return c && c.qualifying && c.bracket ? c : null;
-}
-
-/** Fases: classificatória + log2(bracket) rodadas, uma por semana. */
-function copaPhases(cfg) {
-    const phases = [{ key: 'q', name: 'Classificatória', week: cfg.qualifying }];
-    for (let teams = cfg.bracket, w = cfg.qualifying + 1; teams >= 2; teams /= 2, w++) {
-        phases.push({ key: `r${teams}`, name: cupRoundName(teams), short: teams === 2 ? 'Final' : teams === 4 ? 'Semi' : teams === 8 ? 'Quartas' : teams === 16 ? 'Oitavas' : `${teams / 2} avos`, week: w, teams });
-    }
-    return phases;
 }
 
 /** Ligas das divisões que entram na Copa. */
@@ -51,7 +43,7 @@ async function loadCopa(cfg) {
     const leagues = copaLeagues();
     if (!leagues.length) throw new Error('sem divisões');
     const settings = await fetchLeagueSettings(leagues[0].info.id);
-    const last = cfg.qualifying + copaPhases(cfg).length - 1;
+    const last = cfg.qualifying + cupPhases(cfg).length - 1;
     const weeks = [];
     for (let w = cfg.qualifying - 1; w <= Math.min(last, settings.leg); w++) if (w >= 1) weeks.push(w);
     const scores = {};
@@ -83,60 +75,48 @@ function copaData() {
 }
 
 /**
- * Tudo resolvido: classificatória, chave sorteada, jogos de cada fase e campeão.
+ * Tudo resolvido (resolveCup em derivations.js, a mesma conta do fechamento
+ * da temporada), com os times de cada id.
  * @returns {{cfg: Object, phases: Array, entrants: Array, qualifying: Object, rounds: Array, champion: (Object|null), current: number}}
  */
 function copaModel(data) {
     const cfg = copaConfig();
     const { settings, scores } = data;
-    const phases = copaPhases(cfg);
-    const status = w => (w <= settings.lastScored ? 'final' : w === settings.leg ? 'live' : 'upcoming');
-    const pts = (w, k) => (scores[w] && scores[w][k]) || 0;
-
-    // Participantes: todos os times das divisões
     const entrants = copaLeagues().flatMap(l => l.teams.map(t => ({ key: `${l.info.tier}:${t.teamId}`, tier: l.info.tier, team: t })));
     const byKey = Object.fromEntries(entrants.map(e => [e.key, e]));
-    const keys = entrants.map(e => e.key).sort();
+    const cup = resolveCup(cfg, entrants.map(e => e.key), scores, settings);
+    const side = (k, p) => (k && byKey[k] ? { entry: byKey[k], points: p } : null);
 
-    // Classificatória: os `bracket` maiores pontuadores da semana
-    const qw = cfg.qualifying;
-    const ranked = keys.slice().sort((a, b) => (pts(qw, b) - pts(qw, a)) || (pts(qw - 1, b) - pts(qw - 1, a)) || a.localeCompare(b));
-    const qStatus = status(qw);
-    const qualifying = {
-        week: qw, status: qStatus, cut: Math.min(cfg.bracket, ranked.length),
-        rows: ranked.map((k, i) => ({ entry: byKey[k], points: pts(qw, k), rank: i + 1 }))
-    };
-
-    // Chave: sorteada só quando a classificatória fecha
-    const rounds = [];
-    let champion = null;
-    if (qStatus === 'final') {
-        let slots = drawCup(ranked.slice(0, cfg.bracket), cfg.seed).slots.map(s => s.team);
-        phases.slice(1).forEach(ph => {
-            const st = status(ph.week);
-            const games = [];
-            for (let i = 0; i < slots.length; i += 2) {
-                const a = slots[i], b = slots[i + 1];
-                const g = { a: a && { entry: byKey[a], points: pts(ph.week, a) }, b: b && { entry: byKey[b], points: pts(ph.week, b) }, winner: '' };
-                if (st === 'final' && a && b) {
-                    const d = (pts(ph.week, a) - pts(ph.week, b)) || (pts(ph.week - 1, a) - pts(ph.week - 1, b));
-                    g.winner = d >= 0 ? 'a' : 'b';   // empate total: ordem do sorteio
-                }
-                games.push(g);
-            }
-            rounds.push({ ...ph, status: st, games });
-            slots = games.map(g => (g.winner === 'a' ? g.a.entry.key : g.winner === 'b' ? g.b.entry.key : null));
-        });
-        const fin = rounds[rounds.length - 1];
-        const g = fin && fin.games[0];
-        if (g && g.winner) champion = { winner: g[g.winner].entry, runnerUp: g[g.winner === 'a' ? 'b' : 'a'].entry };
-    }
+    const q = cup.qualifying;
+    const qualifying = { week: q.week, status: q.status, cut: q.cut, rows: q.ranked.map((k, i) => ({ entry: byKey[k], points: q.points(k), rank: i + 1 })) };
+    const rounds = cup.rounds.map(r => ({ ...r, games: r.games.map(g => ({ label: g.label, winner: g.winner, a: side(g.a, g.pa), b: side(g.b, g.pb) })) }));
+    const podium = cup.podium ? cup.podium.map(k => byKey[k]) : null;
+    const champion = podium ? { winner: podium[0], runnerUp: podium[1], third: podium[2] || null } : null;
 
     // Fase aberta: a escolhida, ou a da semana atual (limitada às fases da Copa)
+    const phases = cup.phases;
     const byWeek = phases.findIndex(p => p.week === settings.leg);
-    const auto = settings.leg < qw ? 0 : byWeek >= 0 ? byWeek : phases.length - 1;
+    const auto = settings.leg < cfg.qualifying ? 0 : byWeek >= 0 ? byWeek : phases.length - 1;
     const current = appState.copaPhase !== null && appState.copaPhase >= 0 && appState.copaPhase < phases.length ? appState.copaPhase : auto;
     return { cfg, phases, entrants, qualifying, rounds, champion, current };
+}
+
+/**
+ * Aviso discreto no topo de Ligas, Rodada e da aba Copa, da pré-temporada
+ * até a final da Copa: datas e o lembrete de continuar escalando (quem cai
+ * nos playoffs da sua liga ainda pode estar vivo na Copa).
+ * @returns {string} HTML ('' fora da época)
+ */
+function copaLineupNoticeHTML() {
+    const cfg = copaConfig();
+    if (!cfg || isSeasonOver()) return '';
+    const last = cfg.qualifying + cupPhases(cfg).length - 1;
+    const week = appState.nflState ? sanitizeNumber(appState.nflState.display_week, 0, 30, 0) : 0;
+    if (week > last) return '';
+    return `<div class="state-inline copa-notice" role="note">
+        ${crestHTML('copa', 20)}
+        <span><b>Copa KHC${cfg.test ? ' (teste)' : ''}:</b> classificatória na semana ${cfg.qualifying} e final na ${last}. Quem cair nos playoffs da sua liga continua escalando o time.</span>
+    </div>`;
 }
 
 /** Subtítulo do card. */
@@ -232,10 +212,12 @@ function renderCopa() {
             const prev = m.current >= 2 ? m.phases[m.current - 1] : null;
             const ph2 = prev ? (prev.short || prev.name).toLowerCase() : '';
             body = `<ul class="matches">${r.games.map((g, i) => {
-                const ph1 = prev ? `Vencedor do jogo ${2 * i + 1} (${ph2})` : 'A definir';
-                const ph1b = prev ? `Vencedor do jogo ${2 * i + 2} (${ph2})` : 'A definir';
-                return `<li class="match${ph.teams === 2 ? ' match--final' : ''}">
-                    <div class="eyebrow match__label${ph.teams === 2 ? ' eyebrow--accent' : ''}">${ph.teams === 2 ? 'Final' : `Jogo ${i + 1}`}</div>
+                const isFinal = g.label === 'Final';
+                const isThird = g.label === 'Disputa do 3º lugar';
+                const ph1 = isThird ? 'Perdedor da semifinal 1' : prev ? `Vencedor do jogo ${2 * i + 1} (${ph2})` : 'A definir';
+                const ph1b = isThird ? 'Perdedor da semifinal 2' : prev ? `Vencedor do jogo ${2 * i + 2} (${ph2})` : 'A definir';
+                return `<li class="match${isFinal ? ' match--final' : ''}">
+                    <div class="eyebrow match__label${isFinal ? ' eyebrow--accent' : ''}">${escapeHtml(g.label)}</div>
                     ${copaSideHTML(g.a, g.winner === 'a' ? 'win' : g.winner === 'b' ? 'lose' : '', r.status, ph1)}
                     ${copaSideHTML(g.b, g.winner === 'b' ? 'win' : g.winner === 'a' ? 'lose' : '', r.status, ph1b)}
                 </li>`;
@@ -247,7 +229,7 @@ function renderCopa() {
     const champ = m.champion ? `<div class="copa-champ">
             <span class="medal medal--1">1</span>
             <span class="grow"><span class="eyebrow eyebrow--accent">Campeão da Copa KHC</span><b dir="auto">${escapeHtml(m.champion.winner.team.teamName)}</b>
-            <small>${escapeHtml(m.champion.winner.team.ownerName)} · vice: ${escapeHtml(m.champion.runnerUp.team.teamName)}</small></span>
+            <small>${escapeHtml(m.champion.winner.team.ownerName)} · vice: ${escapeHtml(m.champion.runnerUp.team.teamName)}${m.champion.third ? ` · 3º: ${escapeHtml(m.champion.third.team.teamName)}` : ''}</small></span>
         </div>` : '';
     const actions = exportable ? `<div class="export-actions" role="group" aria-label="Exportar a fase da Copa como imagem">
             <button type="button" class="export-btn" data-action="export-download" aria-label="Baixar ${escapeHtml(ph.name)} da Copa como imagem">
