@@ -44,9 +44,10 @@
      */
     function activeRowsFor(username) {
         const out = [];
+        const ids = playerIdsFor(username);
         activeYearsLoaded().forEach(year => {
             (appState.leaguesBySeason[year] || []).forEach(league => {
-                league.teams.filter(t => t.ownerName === username).forEach(t => {
+                league.teams.filter(t => t.ownerName === username || (t.ownerId && ids.includes(t.ownerId))).forEach(t => {
                     out.push({
                         season: Number(year),
                         serie: tierToSeriesId(league.info.tier),
@@ -108,9 +109,10 @@
     function findAvatarId(username, activeRows) {
         const live = activeRows.find(r => r.avatar);
         if (live) return live.avatar;
+        const ids = playerIdsFor(username);
         for (const season of getFinalizedSeasons()) {
             for (const s of season.series) {
-                const t = s.teams.find(x => x.user === username && x.avatarId);
+                const t = s.teams.find(x => (x.user === username || (x.userId && ids.includes(String(x.userId)))) && x.avatarId);
                 if (t) return t.avatarId;
             }
         }
@@ -146,7 +148,7 @@
      *            trophies: Object<string, number>, stats: Object, winRate: string, history: Array}}
      */
     function profileModel(username) {
-        const career = careerForUser(username, getFinalizedSeasons());
+        const career = careerForUser(username, getFinalizedSeasons(), playerIdsFor(username));
         const activeRows = activeRowsFor(username);
         const history = buildHistory(career, activeRows);
         const stats = statsFromHistory(history);

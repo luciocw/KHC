@@ -290,7 +290,7 @@ async function drawStandingsCanvas(league) {
 
         // Posição (medalha na temporada finalizada)
         const pos = i + 1;
-        const entry = m.seriesIdx ? m.seriesIdx[t.ownerName] : null;
+        const entry = finalEntryOf(m.seriesIdx, t);
         if (entry && entry.trophy && pos <= 3) {
             drawMedal(ctx, 14 + 13, mid, pos, c);
         } else {
@@ -1273,7 +1273,7 @@ const LEGENDS_EXPORT_LIMIT = 10;   // Hall da Fama: só o top 10 na imagem
  * @returns {Promise<HTMLCanvasElement>}
  */
 async function drawLegendsCanvas() {
-    const all = legendsAggregator(getFinalizedSeasons());
+    const all = legendsAggregator(getFinalizedSeasons(), currentPlayerNames());
     const list = all.slice(0, LEGENDS_EXPORT_LIMIT);
     const c = exportPalette(null);
     const { crest, avatars } = await loadExportAssets(null, list.map(e => e.avatarId));

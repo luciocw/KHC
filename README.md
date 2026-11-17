@@ -21,7 +21,7 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 - **Copa KHC** (Ligas → aba Copa, `#/ligas/2026/copa`; em Ligas ficam só Elite, Copa e as Séries): mata-mata do site em paralelo às divisões (não conta para playoffs nem rebaixamento), com a pontuação de cada time na sua liga. Semana classificatória (12): os 32 maiores pontuadores avançam; semana 17: final e disputa do 3º lugar; chave por sorteio livre (`drawCup` com a semente de `KHC_CONFIG[ano].copa.seed`, reproduzível); 16 avos a final nas semanas 13–17; empate: pontos da semana anterior. Em teste em 2026 (`copa.test`), vale em 2027: com `test: false`, o fechamento (`derive-season.mjs`) grava o pódio da Copa (Pontos KHC) com a mesma conta do site (`resolveCup`); `--so-copa` confere a Copa sem fechar a temporada. Só calcula com todas as divisões carregadas ao vivo (senão mostra "Copa indisponível"). Exporta a fase aberta
 - **Lendas:** Hall da Fama por **Pontos KHC** (`KHC_POINTS` em `js/config.js`, em discussão até 2027), pela colocação final: Séries A–F 12/8/6/4/3/2/1 (1º ao 7º, todas iguais), Elite 14/10/7/5, Copa 10/7/5/2; Guilhotina, Premier e NBA não pontuam. 5º e 6º pela disputa do 5º lugar. Só temporadas fechadas. Desempate: títulos → aproveitamento V–D (temporada regular das divisões; sem playoffs, Elite e Copa) → título mais recente. O perfil mostra o "aproveitamento geral" (com a temporada atual e a Elite). Medalha só para 1º–3º. Baixar / Compartilhar geram PNG do top 10
 - **Perfil do jogador:** lateral no desktop, bottom sheet no celular
-- **Modelo de dados híbrido:** temporadas finalizadas vêm de JSON estático (`data/<ano>.json`); temporada ativa vem da Sleeper API em tempo real
+- **Modelo de dados híbrido:** temporadas finalizadas vêm **só** do JSON estático (`data/<ano>.json`, registro imutável: nomes e números da época, abre mesmo com o Sleeper fora do ar; Rodada e Chaveamento antigos ainda buscam os placares no Sleeper); temporada ativa vem da Sleeper API em tempo real. Jogador identificado pelo id do Sleeper (`userId` no JSON, `ownerId` ao vivo), com o nome como reserva: trocar de nome não perde histórico nem medalhas
 - **Estados:** carregando (skeleton), erro com "Tentar de novo", cache, falha parcial, vazio
 - **Mobile-first:** navegação inferior fixa < 1024px; contraste AA; alvos ≥ 44px
 
@@ -112,6 +112,10 @@ Quando a final e a disputa do 3º lugar terminam (semana 17), o site já mostra 
    O script lê as ligas de `js/config.js` e o chaveamento do Sleeper: 1º–4º pelos playoffs (troféus), 5º e 6º pela disputa do 5º lugar, o resto pela temporada regular; a Guilhotina sai pela ordem de corte, sem troféu nem Pontos KHC (Premier League e NBA não entram). Se alguma final ainda não tiver vencedor, ele para e avisa. Gera `data/2026.json`.
 
 2. **Commit + push.** O site passa a tratar 2026 como finalizada (status: 'final'), mostra medalhas, contribui pra Lendas e Career.
+
+## Testes
+
+`node --test tests/*.test.mjs` testa as contas que decidem resultado (Pontos KHC e desempates, Copa KHC, Chances), com o mesmo código do site e sem rede. O GitHub Actions (`.github/workflows/testes.yml`) roda a cada push e pull request.
 
 ## Como rodar localmente
 

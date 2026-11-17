@@ -24,9 +24,9 @@ let _finalIndexCacheSeason = null;
 
 /**
  * Índice da classificação final da temporada selecionada:
- * `{ seriesName: { user: { rank, trophy } } }`. Vazio se não finalizada.
- * Chave por usuário (display_name), igual no JSON e na Sleeper — o nome do
- * time pode mudar. Memoizado por temporada.
+ * `{ seriesName: { <userId ou nome>: { rank, trophy } } }`. Vazio se não
+ * finalizada. Chave pelo id permanente do Sleeper (o nome de exibição pode
+ * mudar) e, como reserva, pelo nome. Use finalEntryOf(). Memoizado por temporada.
  * @returns {Object<string, Object<string, {rank: number, trophy: (string|null)}>>}
  */
 function getFinalStandingsIndex() {
@@ -40,13 +40,21 @@ function getFinalStandingsIndex() {
         season.series.forEach(srs => {
             idx[srs.name] = {};
             (srs.teams || []).forEach(t => {
-                idx[srs.name][t.user] = { rank: t.rank, trophy: t.trophy || null };
+                const entry = { rank: t.rank, trophy: t.trophy || null };
+                if (t.userId) idx[srs.name][`id:${t.userId}`] = entry;
+                idx[srs.name][t.user] = entry;
             });
         });
     }
     _finalIndexCache = idx;
     _finalIndexCacheSeason = currentSeason;
     return idx;
+}
+
+/** Entrada da classificação final de um time (pelo id; senão, pelo nome). */
+function finalEntryOf(seriesIdx, t) {
+    if (!seriesIdx) return null;
+    return (t.ownerId && seriesIdx[`id:${t.ownerId}`]) || seriesIdx[t.ownerName] || null;
 }
 
 /**
@@ -58,7 +66,7 @@ function getFinalStandingsIndex() {
  */
 function sortByFinalStandings(teams, seriesIdx) {
     if (!seriesIdx) return teams;
-    const rankOf = t => (seriesIdx[t.ownerName] ? seriesIdx[t.ownerName].rank : Infinity);
+    const rankOf = t => (finalEntryOf(seriesIdx, t) ? finalEntryOf(seriesIdx, t).rank : Infinity);
     return teams
         .map((t, i) => ({ t, i }))
         .sort((a, b) => (rankOf(a.t) - rankOf(b.t)) || (a.i - b.i))
@@ -320,7 +328,7 @@ function renderLigas() {
     const n = teams.length;
 
     const rows = teams.map((t, i) =>
-        buildStandingsRow(t, i, n, z, seriesIdx ? seriesIdx[t.ownerName] : null, chances)).join('');
+        buildStandingsRow(t, i, n, z, finalEntryOf(seriesIdx, t), chances)).join('');
 
     const views = [['tabela', 'Tabela'], ...(chancesAvailable ? [['chances', 'Chances']] : []), ['chaveamento', 'Chaveamento']];
     const toggle = `<div class="view-switch" role="group" aria-label="O que mostrar">

@@ -1,0 +1,23 @@
+# Testes das contas que decidem resultado (Pontos KHC, Copa, Chances…).
+# Rodam a cada push e pull request; sem rede, só o código do site.
+name: Testes
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Contas
+        run: node --test tests/*.test.mjs
+      - name: Sintaxe dos scripts do site
+        run: for f in js/*.js js/*/*.js scripts/*.mjs; do node --check "$f"; done

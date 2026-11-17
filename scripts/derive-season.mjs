@@ -17,7 +17,10 @@
 // Para se a temporada não acabou (final ou 3º lugar sem vencedor).
 //
 // Saída: { id, status: 'final', series: [ { id, name, kind?, teams: [
-//   { rank, user, team, avatarId, w, l, t?, pts, ptsAgainst, ppts, trophy?, cut? } ] } ] }
+//   { rank, rosterId, userId, user, team, avatarId, w, l, t?, pts, ptsAgainst,
+//     ppts, trophy?, cut? } ] } ] }
+// O arquivo é o registro da temporada: o site mostra a temporada fechada só
+// com ele (nomes e números da época), e liga jogador por userId.
 
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -61,6 +64,8 @@ function rowOf(r, userById) {
     const s = r.settings || {};
     const row = {
         rosterId: r.roster_id,
+        // id permanente do Sleeper: liga o histórico ao jogador mesmo se ele trocar de nome
+        userId: r.owner_id ? String(r.owner_id) : null,
         user: user?.display_name ?? 'unknown',
         team: user ? teamNameOf(user) : 'unknown',
         // logo do time na liga (metadata.avatar); sem ele, a foto da conta
@@ -95,7 +100,8 @@ async function deriveLeague(league) {
     ]);
     const userById = new Map(users.map(u => [u.user_id, u]));
     const rows = rosters.map(r => rowOf(r, userById));
-    const clean = ({ rosterId, eliminated, ...rest }) => rest;
+    // rosterId fica (o site monta a temporada fechada só com este arquivo)
+    const clean = ({ eliminated, ...rest }) => rest;
 
     if (isGuillotine(league.tier)) {
         const alive = rows.filter(r => !r.eliminated);
@@ -147,7 +153,7 @@ async function deriveCup(cfg, copa) {
         rosters.forEach(r => {
             const k = `${l.tier}:${r.roster_id}`;
             keys.push(k);
-            const { rosterId, eliminated, w, l: losses, t, ptsAgainst, ppts, ...row } = rowOf(r, userById);
+            const { eliminated, w, l: losses, t, ptsAgainst, ppts, ...row } = rowOf(r, userById);
             rowByKey[k] = row;
         });
         for (let w = copa.qualifying - 1; w <= last; w++) {
