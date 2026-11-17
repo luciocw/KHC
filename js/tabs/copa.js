@@ -12,6 +12,8 @@
 //     semana da final, também a disputa do 3º lugar.
 //   - Empate (no corte ou num jogo): mais pontos na semana anterior; depois
 //     a ordem do sorteio.
+//   - Só calcula com todas as divisões carregadas ao vivo (sem uma delas,
+//     classificados e chave sairiam errados): senão, "Copa indisponível".
 //   - Configuração em KHC_CONFIG[ano].copa (config.js).
 //
 // Lê: appState.season, appState.leagues, appState.copaPhase
@@ -28,6 +30,18 @@ function resetCopaCache() {
 function copaConfig(season) {
     const c = (KHC_CONFIG[season || appState.season] || {}).copa;
     return c && c.qualifying && c.bracket ? c : null;
+}
+
+/**
+ * Divisões da temporada que não carregaram (ou vieram do cache de reserva).
+ * Sem todas, a Copa não calcula nada: classificados e chave sairiam errados.
+ * @returns {string[]} nomes curtos ("Série C")
+ */
+function copaMissingSeries() {
+    const tiers = ((KHC_CONFIG[appState.season] || {}).leagues || []).map(l => l.tier).filter(isRegularSeries);
+    const missing = tiers.filter(t => !appState.leagues.some(l => l.info.tier === t));
+    if (appState.isFromCache) return tiers.map(t => SERIES_META[t].short);
+    return missing.map(t => SERIES_META[t].short);
 }
 
 /** Ligas das divisões que entram na Copa. */
@@ -62,6 +76,7 @@ async function loadCopa(cfg) {
 function copaData() {
     const cfg = copaConfig();
     if (!cfg) return { status: 'off' };
+    if (copaMissingSeries().length) return { status: 'incomplete' };
     const key = `${appState.season}|${appState.lastUpdated || ''}`;
     if (_copa[key]) return _copa[key];
     const entry = _copa[key] = { status: 'loading' };
@@ -158,6 +173,16 @@ function renderCopa() {
     if (entry.status === 'loading') {
         const row = '<div class="skeleton-row"><span class="skeleton sk-avatar"></span><span class="sk-text"><span class="skeleton sk-line"></span><span class="skeleton sk-line sk-line--short"></span></span><span class="skeleton sk-num"></span></div>';
         return wrap(header('Carregando…', '') + `<div aria-busy="true">${row.repeat(8)}</div>`);
+    }
+    if (entry.status === 'incomplete') {
+        const missing = copaMissingSeries();
+        return wrap(header('', '') + stateHTML({
+            icon: 'alert', title: 'Copa indisponível agora',
+            text: appState.isFromCache
+                ? 'O Sleeper não respondeu e o site está com dados guardados. A Copa só aparece com todas as divisões ao vivo, para não mostrar classificados ou confrontos errados.'
+                : `${missing.join(' e ')} não carregou. A Copa só aparece com todas as divisões, para não mostrar classificados ou confrontos errados.`,
+            action: '<button type="button" class="btn" data-action="reload">Tentar de novo</button>'
+        }));
     }
     if (entry.status === 'error') {
         return wrap(header('', '') + stateHTML({

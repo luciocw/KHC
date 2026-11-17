@@ -18,7 +18,8 @@ function sleep(ms) {
 
 /**
  * Fetch com retry e exponential backoff
- * Retenta em caso de falha de rede ou erro 429 (rate limit)
+ * Retenta em caso de falha de rede, tempo esgotado (FETCH_TIMEOUT_MS), 429
+ * (rate limit) ou 5xx
  * @param {string} url - URL para fetch
  * @param {number} maxRetries - Número máximo de tentativas
  * @returns {Promise<Response>}
@@ -28,7 +29,15 @@ async function fetchWithRetry(url, maxRetries = MAX_RETRIES) {
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
-            const response = await fetch(url);
+            // tempo limite: Sleeper travado não deixa a tela em "carregando" para sempre
+            const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+            const timer = ctrl ? setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS) : null;
+            let response;
+            try {
+                response = await fetch(url, ctrl ? { signal: ctrl.signal } : undefined);
+            } finally {
+                if (timer) clearTimeout(timer);
+            }
 
             // Rate limit (429) ou falha do servidor (5xx): aguarda e tenta de novo
             if ((response.status === 429 || response.status >= 500) && attempt < maxRetries - 1) {
@@ -234,24 +243,53 @@ async function fetchRoundData(leagueId, week) {
  */
 async function fetchWeekScores(leagueId, week, opts = {}) {
     const key = `khc_wk_${leagueId}_${week}`;
+    let stale = null;
     if (!opts.live) {
         try {
-            const hit = localStorage.getItem(key);
-            if (hit) return JSON.parse(hit);
+            const hit = JSON.parse(localStorage.getItem(key) || 'null');
+            // Só vale guardado depois do prazo de correções de estatística;
+            // antes disso (ou formato antigo, sem data), busca de novo.
+            if (hit && hit.at && hit.p) {
+                if (hit.at >= weekSettledAt(week)) return hit.p;
+                stale = hit.p;
+            }
         } catch (e) { /* sem storage: segue para a rede */ }
     }
 
-    const res = await fetchWithRetry(`https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`);
-    if (!res.ok) throw new Error(getErrorMessage(res.status));
+    let res;
+    try {
+        res = await fetchWithRetry(`https://api.sleeper.app/v1/league/${leagueId}/matchups/${week}`);
+    } catch (e) {
+        if (stale) return stale;   // sem rede: o que já estava guardado
+        throw e;
+    }
+    if (!res.ok) {
+        if (stale) return stale;
+        throw new Error(getErrorMessage(res.status));
+    }
     const raw = await res.json();
     const out = {};
     (Array.isArray(raw) ? raw : []).forEach(m => {
         if (m && Number.isInteger(m.roster_id)) out[m.roster_id] = sanitizeNumber(m.points, 0, VALIDATION.MAX_POINTS, 0);
     });
     if (!opts.live) {
-        try { localStorage.setItem(key, JSON.stringify(out)); } catch (e) { /* cheio ou bloqueado */ }
+        try { localStorage.setItem(key, JSON.stringify({ at: Date.now(), p: out })); } catch (e) { /* cheio ou bloqueado */ }
     }
     return out;
+}
+
+/**
+ * A partir de quando os placares de uma semana já não mudam: segunda-feira
+ * do Monday Night + STAT_FIX_DAYS (o Sleeper aplica correções de estatística
+ * nos dias seguintes). Sem o calendário da NFL, nunca (sempre revalida).
+ * @param {number} week
+ * @returns {number} timestamp (ms)
+ */
+function weekSettledAt(week) {
+    const start = appState.nflState && Date.parse(appState.nflState.season_start_date);
+    if (!start) return Infinity;
+    // season_start_date = quarta da semana 1; a segunda do MNF é 5 dias depois
+    return start + ((week - 1) * 7 + 5 + STAT_FIX_DAYS) * 86400000;
 }
 
 /**

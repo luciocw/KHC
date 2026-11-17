@@ -152,6 +152,8 @@ const STATUS_TICK_MS = 60 * 1000; // atualiza o "há X min" da pílula de status
 // Retry configuration
 const MAX_RETRIES = 3;
 const RETRY_BASE_MS = 1000; // 1s, 2s, 4s (exponential)
+const FETCH_TIMEOUT_MS = 15000;   // tempo limite de cada requisição ao Sleeper
+const STAT_FIX_DAYS = 10;         // dias após o Monday Night em que placares ainda podem ser corrigidos
 
 // DOM element IDs (centralized for maintainability)
 const DOM_IDS = {
