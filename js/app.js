@@ -300,8 +300,12 @@ async function loadData() {
     Object.keys(_guillotine).forEach(k => delete _guillotine[k]);
     render();
 
-    const validLeagues = config ? config.leagues.filter(l => !l.id.includes('placeholder')) : [];
-    const settled = await Promise.allSettled(validLeagues.map(l => fetchLeagueData(l)));
+    // Temporada fechada: só o data/<ano>.json (registro imutável, sem Sleeper)
+    const archived = isSeasonFinalized(season) ? leaguesFromFinalizedSeason(getFinalizedSeason(season)) : null;
+    const validLeagues = archived ? [] : config ? config.leagues.filter(l => !l.id.includes('placeholder')) : [];
+    const settled = archived
+        ? archived.map(value => ({ status: 'fulfilled', value }))
+        : await Promise.allSettled(validLeagues.map(l => fetchLeagueData(l)));
     if (seq !== _loadSeq) return;
 
     const ok = [];
@@ -314,8 +318,8 @@ async function loadData() {
     let leagues = ok;
     if (ok.length) {
         appState.lastUpdated = Date.now();
-        // só guarda carga completa: uma parcial apagaria séries do cache
-        if (!failed.length) saveToCache(season, ok);
+        // só guarda carga completa (e ao vivo): uma parcial apagaria séries do cache
+        if (!failed.length && !archived) saveToCache(season, ok);
     } else {
         const cached = getFromCache(season);
         if (cached && Array.isArray(cached.data) && cached.data.length) {

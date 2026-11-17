@@ -8,6 +8,8 @@
       "teams": [
         {
           "rank": 1,
+          "rosterId": 6,
+          "userId": "1134186504622018560",
           "user": "Khrstxn",
           "team": "Dark Side - Satanás!!",
           "avatarId": "5df4aecbcc1c2efed40f757710a7416e",
@@ -20,6 +22,8 @@
         },
         {
           "rank": 2,
+          "rosterId": 4,
+          "userId": "1004801178061877248",
           "user": "RobsonF90",
           "team": "Gold and Run",
           "avatarId": "20ee1502f650788fce4495c29c0093bd",
@@ -32,6 +36,8 @@
         },
         {
           "rank": 3,
+          "rosterId": 2,
+          "userId": "472652687993729024",
           "user": "markinhosfc11",
           "team": "markinhosfc11",
           "avatarId": "5980016e7e8cce56e88422d32e0b41db",
@@ -44,6 +50,8 @@
         },
         {
           "rank": 4,
+          "rosterId": 9,
+          "userId": "1172908891022290944",
           "user": "LucioWagner",
           "team": "Los Pollos Hermanos",
           "avatarId": "https://sleepercdn.com/uploads/03f934280abb105434d7c06edf5aa8b2.jpg",
@@ -56,6 +64,8 @@
         },
         {
           "rank": 5,
+          "rosterId": 10,
+          "userId": "604443673312174080",
           "user": "ACosta13",
           "team": "ACosta13",
           "avatarId": "057b6b501c476f303eecac265ebc220b",
@@ -67,6 +77,8 @@
         },
         {
           "rank": 6,
+          "rosterId": 5,
+          "userId": "871897050596487168",
           "user": "VoliBEARS",
           "team": "VoliBEARS",
           "avatarId": "febae4b21b231a9e4714ba454fd71b29",
@@ -78,6 +90,8 @@
         },
         {
           "rank": 7,
+          "rosterId": 3,
+          "userId": "1008965235240140800",
           "user": "Gumagol971",
           "team": "Gumagol971",
           "avatarId": "a8215eb47314e0ce8391f0ae7ead0845",
@@ -89,6 +103,8 @@
         },
         {
           "rank": 8,
+          "rosterId": 7,
+          "userId": "1242576183174889472",
           "user": "BigFieldMS",
           "team": "BigFieldMS",
           "avatarId": "0f3d1443e519040cb9ec09b33642c4d7",
@@ -100,6 +116,8 @@
         },
         {
           "rank": 9,
+          "rosterId": 8,
+          "userId": "1134198414360940544",
           "user": "Caiocarbina",
           "team": "Caipiracicaba",
           "avatarId": "https://sleepercdn.com/uploads/a20bd7f34b57cd1eea8ee6fa4c37be77.jpg",
@@ -111,6 +129,8 @@
         },
         {
           "rank": 10,
+          "rosterId": 1,
+          "userId": "1133956049855578112",
           "user": "RiqueSantos",
           "team": "FAITHFUL RIQUE",
           "avatarId": "https://sleepercdn.com/uploads/8ebaf26dd834390ba13d06cf8be06c78.jpg",
@@ -128,6 +148,8 @@
       "teams": [
         {
           "rank": 1,
+          "rosterId": 1,
+          "userId": "999321137395908608",
           "user": "timbu2001",
           "team": "timbu2001",
           "avatarId": "482cc926e8edb35562aeb1ec88563b02",
@@ -140,6 +162,8 @@
         },
         {
           "rank": 2,
+          "rosterId": 7,
+          "userId": "1130277908171362304",
           "user": "Diogoashura",
           "team": "Diogoashura",
           "avatarId": "dc6b61498b164e32ca51a913ee518824",
@@ -152,6 +176,8 @@
         },
         {
           "rank": 3,
+          "rosterId": 9,
+          "userId": "464634604888780800",
           "user": "Dedi",
           "team": "GORDINHAS AJEITADAS",
           "avatarId": "4cd377c306da19621012531d8c7b0066",
@@ -164,6 +190,8 @@
         },
         {
           "rank": 4,
+          "rosterId": 4,
+          "userId": "1132703483456651264",
           "user": "Caofarejador",
           "team": "Cão Farejador",
           "avatarId": "https://sleepercdn.com/uploads/eb42ed91d0b69902a4ab76bd4eb3d193.jpg",
@@ -176,6 +204,8 @@
         },
         {
           "rank": 5,
+          "rosterId": 8,
+          "userId": "732773793147244544",
           "user": "lucianooliveira21",
           "team": "lucianooliveira21",
           "avatarId": "605aeddc58667c51735fd1a2a9e9d59e",
@@ -187,6 +217,8 @@
         },
         {
           "rank": 6,
+          "rosterId": 10,
+          "userId": "1093392871799058432",
           "user": "alb2106",
           "team": "21 Saints",
           "avatarId": "889698b8d789845c8f6c445c08a32d8c",
@@ -198,6 +230,8 @@
         },
         {
           "rank": 7,
+          "rosterId": 11,
+          "userId": "1128363124643590144",
           "user": "wladspfc",
           "team": "wladspfc",
           "avatarId": "fb58e2c039aad8c1f4688085392e382b",
@@ -209,6 +243,8 @@
         },
         {
           "rank": 8,
+          "rosterId": 2,
+          "userId": "1216557076579356672",
           "user": "SiaraBigheads",
           "team": "SiaraBigheads",
           "avatarId": "d7470960d78d1f135eb11f64c61fcb82",
@@ -220,6 +256,8 @@
         },
         {
           "rank": 9,
+          "rosterId": 5,
+          "userId": "1136697134088196096",
           "user": "RegisCarrara",
           "team": "RegisCarrara",
           "avatarId": "15d7cf259bc30eab8f6120f45f652fb6",
@@ -231,6 +269,8 @@
         },
         {
           "rank": 10,
+          "rosterId": 3,
+          "userId": "606553021815517184",
           "user": "renelutfi",
           "team": "Lutfi Lycans",
           "avatarId": "65142a4898264934cb71ac41050b397c",
@@ -242,6 +282,8 @@
         },
         {
           "rank": 11,
+          "rosterId": 6,
+          "userId": "1128447767824805888",
           "user": "Genys",
           "team": "Explosion Raiders",
           "avatarId": "3a8c84bb071809d7c19ddda7dcc4593c",
@@ -253,6 +295,8 @@
         },
         {
           "rank": 12,
+          "rosterId": 12,
+          "userId": "1250508065506078720",
           "user": "LucasMotaTMA",
           "team": "Amazonas Curupiras",
           "avatarId": "https://sleepercdn.com/uploads/4b8fa64ebd7d70b25abb2f4b5b9b40ae.jpg",

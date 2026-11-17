@@ -140,3 +140,30 @@ function unlockBodyScroll() {
         _scrollLockPrevOverflow = '';
     }
 }
+
+/**
+ * Ids permanentes do Sleeper de um jogador a partir do nome de exibição
+ * (temporadas carregadas e histórico). Liga o histórico mesmo se a pessoa
+ * trocou de nome: o link do perfil usa o nome atual.
+ * @param {string} username
+ * @returns {string[]}
+ */
+function playerIdsFor(username) {
+    const ids = new Set();
+    Object.values(appState.leaguesBySeason).forEach(leagues => (leagues || []).forEach(l => l.teams.forEach(t => {
+        if (t.ownerName === username && t.ownerId) ids.add(t.ownerId);
+    })));
+    getFinalizedSeasons().forEach(season => season.series.forEach(s => s.teams.forEach(t => {
+        if (t.user === username && t.userId) ids.add(String(t.userId));
+    })));
+    return [...ids];
+}
+
+/** userId → nome de exibição atual (das temporadas carregadas). */
+function currentPlayerNames() {
+    const names = {};
+    Object.values(appState.leaguesBySeason).forEach(leagues => (leagues || []).forEach(l => l.teams.forEach(t => {
+        if (t.ownerId && !names[t.ownerId]) names[t.ownerId] = t.ownerName;
+    })));
+    return names;
+}

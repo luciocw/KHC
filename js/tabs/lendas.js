@@ -70,7 +70,7 @@ function buildPodiumCol(entry, place) {
  * @returns {string} HTML
  */
 function renderLegends() {
-    const all = legendsAggregator(getFinalizedSeasons());
+    const all = legendsAggregator(getFinalizedSeasons(), currentPlayerNames());
     if (!all.length) {
         return stateHTML({ icon: 'crown', title: 'As lendas serão reveladas ao fim das temporadas.' });
     }

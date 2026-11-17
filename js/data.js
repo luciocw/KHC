@@ -92,6 +92,45 @@ function isSeasonFinalized(seasonId) {
     return _finalizedSeasons.some(s => String(s.id) === id);
 }
 
+/**
+ * Ligas de uma temporada fechada montadas só com data/<ano>.json (registro
+ * imutável: nomes e números da época, sem depender do Sleeper). Precisa do
+ * rosterId de cada time (arquivos gerados pelo derive-season atual); sem
+ * ele, devolve null e o site busca no Sleeper como antes.
+ * @param {Season} season
+ * @returns {Array|null} no formato de fetchLeagueData
+ */
+function leaguesFromFinalizedSeason(season) {
+    const cfg = KHC_CONFIG[String(season.id)];
+    if (!cfg) return null;
+    const out = [];
+    for (const s of season.series) {
+        if (s.kind === 'cup') continue;   // Copa: não é liga
+        const tier = seriesIdToTier(s.id);
+        const info = cfg.leagues.find(l => l.tier === tier);
+        if (!info) continue;
+        if (!(s.teams || []).every(t => Number.isInteger(t.rosterId))) return null;
+        const teams = s.teams.map(t => ({
+            teamId: t.rosterId,
+            leagueName: info.name,
+            leagueTier: tier,
+            teamName: sanitizeString(t.team || t.user, VALIDATION.MAX_TEAM_NAME_LENGTH, 'Time'),
+            ownerName: sanitizeString(t.user || '', VALIDATION.MAX_OWNER_NAME_LENGTH, ''),
+            ownerId: t.userId ? String(t.userId) : null,
+            avatar: t.avatarId || null,
+            wins: sanitizeNumber(t.w, 0, VALIDATION.MAX_WINS, 0),
+            losses: sanitizeNumber(t.l, 0, VALIDATION.MAX_LOSSES, 0),
+            ties: sanitizeNumber(t.t, 0, VALIDATION.MAX_WINS, 0),
+            fpts: sanitizeNumber(t.pts, 0, VALIDATION.MAX_POINTS, 0),
+            fptsAgainst: sanitizeNumber(t.ptsAgainst, 0, VALIDATION.MAX_POINTS, 0),
+            rosterSize: t.cut ? 0 : 1,
+            eliminated: t.cut || 0
+        })).sort((a, b) => (b.wins - a.wins) || (b.fpts - a.fpts));
+        out.push({ info: { ...info }, teams });
+    }
+    return out.length ? out : null;
+}
+
 /** Última semana de fantasy (final dos playoffs das séries). */
 const LAST_FANTASY_WEEK = REGULAR_SEASON_WEEKS + 3;
 

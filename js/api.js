@@ -398,6 +398,8 @@ async function fetchLeagueData(leagueInfo) {
                 leagueTier: sanitizeTier(leagueInfo.tier),
                 teamName: teamName,
                 ownerName: ownerName,
+                // id permanente do Sleeper (o nome de exibição pode mudar)
+                ownerId: /^\d+$/.test(String(r.owner_id || '')) ? String(r.owner_id) : null,
                 // logo do time nesta liga; sem ele, a foto da conta
                 avatar: leagueAvatarOf(user) || user.avatar || null,
                 wins: sanitizeNumber(settings.wins, 0, VALIDATION.MAX_WINS, 0),

@@ -413,15 +413,22 @@ function resolveCup(cfg, keys, scores, settings) {
  * `best` guarda o resultado que mais vale (empate → mais recente), usado no
  * rótulo "Campeão Série A 2025" / "5º Série B 2025".
  *
+ * Jogador identificado pelo id do Sleeper (userId), com o nome como reserva:
+ * quem trocou de nome soma tudo numa linha só, com o nome mais recente (ou o
+ * atual, de `currentNames`).
+ *
  * @param {Season[]} seasons
+ * @param {Object<string, string>} [currentNames]  userId → nome de exibição atual
  * @returns {LegendEntry[]}
  */
-function legendsAggregator(seasons) {
+function legendsAggregator(seasons, currentNames = {}) {
+    const keyOf = t => (t.userId ? `id:${t.userId}` : t.user);
+    const ordered = seasons.slice().sort((a, b) => b.id - a.id);   // mais recente primeiro: nome mais novo
     /** @type {Object<string, LegendEntry>} */
     const byUser = {};
     const record = {};   // user → { w, l } da carreira (desempate)
 
-    seasons.forEach(season => {
+    ordered.forEach(season => {
         if (season.status !== 'final') return;
         season.series.forEach(s => {
             const kind = pointsKindOf(s);
@@ -430,15 +437,17 @@ function legendsAggregator(seasons) {
                 // aproveitamento: só a temporada regular das divisões (14 jogos
                 // por ano para todos; Elite e Copa não entram, playoffs nunca)
                 if (kind === 'serie') {
-                    const r = record[t.user] || (record[t.user] = { w: 0, l: 0 });
+                    const r = record[keyOf(t)] || (record[keyOf(t)] = { w: 0, l: 0 });
                     r.w += t.w || 0;
                     r.l += t.l || 0;
                 }
                 const pts = pointsFor(kind, t.rank);
                 if (!t.trophy && !pts) return;
-                if (!byUser[t.user]) {
-                    byUser[t.user] = {
-                        user: t.user,
+                const key = keyOf(t);
+                if (!byUser[key]) {
+                    byUser[key] = {
+                        key,
+                        user: (t.userId && currentNames[t.userId]) || t.user,
                         avatarId: t.avatarId || null,
                         trophies: { gold: 0, silver: 0, bronze: 0, fourth: 0 },
                         points: 0,
@@ -446,7 +455,7 @@ function legendsAggregator(seasons) {
                         best: null
                     };
                 }
-                const entry = byUser[t.user];
+                const entry = byUser[key];
                 if (t.trophy) entry.trophies[t.trophy]++;
                 entry.points += pts;
                 if (t.trophy === 'gold') entry.lastTitle = Math.max(entry.lastTitle, season.id);
@@ -463,7 +472,7 @@ function legendsAggregator(seasons) {
         return r && r.w + r.l ? r.w / (r.w + r.l) : 0;
     };
     const list = Object.values(byUser);
-    list.forEach(e => { e.winPct = winPct(e.user); });
+    list.forEach(e => { e.winPct = winPct(e.key); });
     list.sort((a, b) =>
         (b.points - a.points) ||
         (b.trophies.gold - a.trophies.gold) ||
@@ -482,11 +491,16 @@ function legendsAggregator(seasons) {
  * em qualquer série. Um mesmo jogador pode aparecer duas vezes numa
  * temporada (sua série regular + Elite); ambas as linhas entram no history.
  *
+ * Casa as linhas pelo id permanente do Sleeper (`ids`), para o histórico
+ * não se perder se o jogador trocar de nome; o nome é a reserva.
+ *
  * @param {string} username
  * @param {Season[]} seasons
+ * @param {string[]} [ids]  ids do Sleeper desse jogador
  * @returns {Career}
  */
-function careerForUser(username, seasons) {
+function careerForUser(username, seasons, ids = []) {
+    const isHim = t => (t.userId && ids.includes(String(t.userId))) || t.user === username;
     const trophies = { gold: 0, silver: 0, bronze: 0, fourth: 0 };
     /** @type {CareerSeasonRow[]} */
     const history = [];
@@ -501,7 +515,7 @@ function careerForUser(username, seasons) {
 
     seasons.forEach(season => {
         season.series.forEach(s => {
-            const row = s.teams.find(t => t.user === username);
+            const row = s.teams.find(isHim);
             if (!row) return;
 
             /** @type {CareerSeasonRow} */
