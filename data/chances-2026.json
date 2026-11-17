@@ -889,6 +889,94 @@
    ]
   },
   {
+   "tier": "elite",
+   "afterWeek": 10,
+   "takenAt": "2026-11-17T21:45:14.875Z",
+   "backfilled": false,
+   "teams": [
+    {
+     "rosterId": 8,
+     "user": "Dedi",
+     "team": "GORDINHAS AJEITADAS",
+     "w": 8,
+     "l": 2,
+     "pf": 1685,
+     "playoffs": 1,
+     "releg": 0
+    },
+    {
+     "rosterId": 1,
+     "user": "LucioWagner",
+     "team": "Los Pollos Hermanos",
+     "w": 7,
+     "l": 3,
+     "pf": 1659.8,
+     "playoffs": 0.9985,
+     "releg": 0
+    },
+    {
+     "rosterId": 5,
+     "user": "markinhosfc11",
+     "team": "Poker do Neymar",
+     "w": 6,
+     "l": 4,
+     "pf": 1500.8,
+     "playoffs": 0.7932,
+     "releg": 0
+    },
+    {
+     "rosterId": 2,
+     "user": "Diogoashura",
+     "team": "Diogoashura",
+     "w": 6,
+     "l": 4,
+     "pf": 1440.7,
+     "playoffs": 0.6446,
+     "releg": 0
+    },
+    {
+     "rosterId": 7,
+     "user": "RobsonF90",
+     "team": "Fofura e Fé ",
+     "w": 4,
+     "l": 6,
+     "pf": 1480.7,
+     "playoffs": 0.3191,
+     "releg": 0
+    },
+    {
+     "rosterId": 4,
+     "user": "Khrstxn",
+     "team": "Public Enemy #1",
+     "w": 4,
+     "l": 6,
+     "pf": 1453,
+     "playoffs": 0.2417,
+     "releg": 0
+    },
+    {
+     "rosterId": 3,
+     "user": "Caofarejador",
+     "team": "Quack Attack",
+     "w": 3,
+     "l": 7,
+     "pf": 1326.4,
+     "playoffs": 0.0029,
+     "releg": 0
+    },
+    {
+     "rosterId": 6,
+     "user": "timbu2001",
+     "team": "Timbatível",
+     "w": 2,
+     "l": 8,
+     "pf": 1199.5,
+     "playoffs": 0,
+     "releg": 0
+    }
+   ]
+  },
+  {
    "tier": "serie-a",
    "afterWeek": 0,
    "takenAt": "2026-10-12T15:33:02.795Z",
@@ -1965,6 +2053,114 @@
      "pf": 1094.8,
      "playoffs": 0.096,
      "releg": 0.807
+    }
+   ]
+  },
+  {
+   "tier": "serie-a",
+   "afterWeek": 10,
+   "takenAt": "2026-11-17T21:45:14.875Z",
+   "backfilled": false,
+   "teams": [
+    {
+     "rosterId": 8,
+     "user": "VoliBEARS",
+     "team": "VoliBEARS",
+     "w": 8,
+     "l": 2,
+     "pf": 1474.9,
+     "playoffs": 1,
+     "releg": 0
+    },
+    {
+     "rosterId": 9,
+     "user": "timbu2001",
+     "team": "Timbatível",
+     "w": 7,
+     "l": 3,
+     "pf": 1438.6,
+     "playoffs": 0.9979,
+     "releg": 0
+    },
+    {
+     "rosterId": 5,
+     "user": "Khrstxn",
+     "team": "Public Enemy #1 ",
+     "w": 6,
+     "l": 4,
+     "pf": 1673.9,
+     "playoffs": 0.9948,
+     "releg": 0.0016
+    },
+    {
+     "rosterId": 10,
+     "user": "RobsonF90",
+     "team": "Fofura e Fé ",
+     "w": 5,
+     "l": 5,
+     "pf": 1393.6,
+     "playoffs": 0.7898,
+     "releg": 0.1025
+    },
+    {
+     "rosterId": 1,
+     "user": "RiqueSantos",
+     "team": "Imperius Rex FC",
+     "w": 5,
+     "l": 5,
+     "pf": 1358.4,
+     "playoffs": 0.7904,
+     "releg": 0.0951
+    },
+    {
+     "rosterId": 6,
+     "user": "ACosta13",
+     "team": "سانتا کروز",
+     "w": 5,
+     "l": 5,
+     "pf": 1245,
+     "playoffs": 0.5463,
+     "releg": 0.2843
+    },
+    {
+     "rosterId": 3,
+     "user": "Caipiracicaba",
+     "team": "Caipiracicaba",
+     "w": 4,
+     "l": 6,
+     "pf": 1348.2,
+     "playoffs": 0.4084,
+     "releg": 0.3967
+    },
+    {
+     "rosterId": 4,
+     "user": "Diogoashura",
+     "team": "Diogoashura",
+     "w": 4,
+     "l": 6,
+     "pf": 1250.5,
+     "playoffs": 0.2133,
+     "releg": 0.6106
+    },
+    {
+     "rosterId": 2,
+     "user": "LucioWagner",
+     "team": "Los Pollos Hermanos",
+     "w": 3,
+     "l": 7,
+     "pf": 1506.2,
+     "playoffs": 0.2128,
+     "releg": 0.6231
+    },
+    {
+     "rosterId": 7,
+     "user": "markinhosfc11",
+     "team": "Cruzeiro do Neymar SFC",
+     "w": 3,
+     "l": 7,
+     "pf": 1214.8,
+     "playoffs": 0.0463,
+     "releg": 0.8861
     }
    ]
   },
@@ -3049,6 +3245,114 @@
    ]
   },
   {
+   "tier": "serie-b",
+   "afterWeek": 10,
+   "takenAt": "2026-11-17T21:45:14.875Z",
+   "backfilled": false,
+   "teams": [
+    {
+     "rosterId": 7,
+     "user": "RegisCarrara",
+     "team": "RegisCarrara",
+     "w": 8,
+     "l": 2,
+     "pf": 1468.3,
+     "playoffs": 0.9996,
+     "releg": 0
+    },
+    {
+     "rosterId": 9,
+     "user": "Dedi",
+     "team": "GORDINHAS AJEITADAS",
+     "w": 7,
+     "l": 3,
+     "pf": 1693,
+     "playoffs": 0.9999,
+     "releg": 0
+    },
+    {
+     "rosterId": 4,
+     "user": "Caofarejador",
+     "team": "Quack Attack",
+     "w": 6,
+     "l": 4,
+     "pf": 1529.2,
+     "playoffs": 0.9796,
+     "releg": 0.0004
+    },
+    {
+     "rosterId": 6,
+     "user": "Genys",
+     "team": "Explosion Raiders ",
+     "w": 6,
+     "l": 4,
+     "pf": 1475.2,
+     "playoffs": 0.9495,
+     "releg": 0.0021
+    },
+    {
+     "rosterId": 8,
+     "user": "SiaraBigheads",
+     "team": "SiaraBigheads",
+     "w": 6,
+     "l": 4,
+     "pf": 1450.7,
+     "playoffs": 0.9234,
+     "releg": 0.0021
+    },
+    {
+     "rosterId": 10,
+     "user": "alb2106",
+     "team": "alb2106",
+     "w": 5,
+     "l": 5,
+     "pf": 1530.7,
+     "playoffs": 0.8666,
+     "releg": 0.0206
+    },
+    {
+     "rosterId": 5,
+     "user": "BigFieldMS",
+     "team": "BigFieldMS",
+     "w": 4,
+     "l": 6,
+     "pf": 1392.9,
+     "playoffs": 0.2565,
+     "releg": 0.1533
+    },
+    {
+     "rosterId": 1,
+     "user": "Ceara16",
+     "team": "Ceará Dolphins ",
+     "w": 3,
+     "l": 7,
+     "pf": 1264.7,
+     "playoffs": 0.0104,
+     "releg": 0.9372
+    },
+    {
+     "rosterId": 3,
+     "user": "wladspfc",
+     "team": "wladspfc",
+     "w": 3,
+     "l": 7,
+     "pf": 1262.4,
+     "playoffs": 0.014,
+     "releg": 0.8992
+    },
+    {
+     "rosterId": 2,
+     "user": "Gumagol971",
+     "team": "Gumagol971",
+     "w": 2,
+     "l": 8,
+     "pf": 1254.6,
+     "playoffs": 0.0005,
+     "releg": 0.9851
+    }
+   ]
+  },
+  {
    "tier": "serie-c",
    "afterWeek": 0,
    "takenAt": "2026-10-12T15:33:02.795Z",
@@ -4125,6 +4429,114 @@
      "pf": 942.4,
      "playoffs": 0.0003,
      "releg": 0.996
+    }
+   ]
+  },
+  {
+   "tier": "serie-c",
+   "afterWeek": 10,
+   "takenAt": "2026-11-17T21:45:14.875Z",
+   "backfilled": false,
+   "teams": [
+    {
+     "rosterId": 10,
+     "user": "joaoW7",
+     "team": "joaoW7",
+     "w": 8,
+     "l": 2,
+     "pf": 1577.5,
+     "playoffs": 1,
+     "releg": 0
+    },
+    {
+     "rosterId": 2,
+     "user": "ferpetucco",
+     "team": "San Andreas Chiefs",
+     "w": 7,
+     "l": 3,
+     "pf": 1670.5,
+     "playoffs": 1,
+     "releg": 0
+    },
+    {
+     "rosterId": 9,
+     "user": "ThiagoTTBNO",
+     "team": "Fogo na Bomba",
+     "w": 7,
+     "l": 3,
+     "pf": 1489.4,
+     "playoffs": 0.9982,
+     "releg": 0
+    },
+    {
+     "rosterId": 4,
+     "user": "DCMShow",
+     "team": "Mangue Chiefs 🦀",
+     "w": 7,
+     "l": 3,
+     "pf": 1457.8,
+     "playoffs": 0.9978,
+     "releg": 0
+    },
+    {
+     "rosterId": 6,
+     "user": "6U6U",
+     "team": "086 Football",
+     "w": 5,
+     "l": 5,
+     "pf": 1361.3,
+     "playoffs": 0.7026,
+     "releg": 0.1164
+    },
+    {
+     "rosterId": 3,
+     "user": "rdomok",
+     "team": "DMK Steel Curtain",
+     "w": 4,
+     "l": 6,
+     "pf": 1455.9,
+     "playoffs": 0.6826,
+     "releg": 0.1014
+    },
+    {
+     "rosterId": 8,
+     "user": "HadesX",
+     "team": "Pandemônio FC ",
+     "w": 4,
+     "l": 6,
+     "pf": 1410.7,
+     "playoffs": 0.45,
+     "releg": 0.2111
+    },
+    {
+     "rosterId": 7,
+     "user": "Buzzuh",
+     "team": "WI Redentor",
+     "w": 3,
+     "l": 7,
+     "pf": 1360.5,
+     "playoffs": 0.1527,
+     "releg": 0.6389
+    },
+    {
+     "rosterId": 1,
+     "user": "romanerinha",
+     "team": "romanerinha",
+     "w": 3,
+     "l": 7,
+     "pf": 1054.7,
+     "playoffs": 0.0161,
+     "releg": 0.9345
+    },
+    {
+     "rosterId": 5,
+     "user": "Inaciombn18",
+     "team": "Kelce Gremista ",
+     "w": 2,
+     "l": 8,
+     "pf": 1035,
+     "playoffs": 0,
+     "releg": 0.9977
     }
    ]
   },
@@ -5207,8 +5619,116 @@
      "releg": 0
     }
    ]
+  },
+  {
+   "tier": "serie-d",
+   "afterWeek": 10,
+   "takenAt": "2026-11-17T21:45:14.875Z",
+   "backfilled": false,
+   "teams": [
+    {
+     "rosterId": 8,
+     "user": "LeandroGaucho",
+     "team": "LeandroGaucho",
+     "w": 7,
+     "l": 3,
+     "pf": 1548.3,
+     "playoffs": 0.9998,
+     "releg": 0
+    },
+    {
+     "rosterId": 5,
+     "user": "VitorM05",
+     "team": "VitorM05",
+     "w": 7,
+     "l": 3,
+     "pf": 1497.2,
+     "playoffs": 0.9989,
+     "releg": 0
+    },
+    {
+     "rosterId": 1,
+     "user": "Rodolfo92",
+     "team": "New England Patriotas",
+     "w": 7,
+     "l": 3,
+     "pf": 1403.3,
+     "playoffs": 0.992,
+     "releg": 0
+    },
+    {
+     "rosterId": 4,
+     "user": "pedrocestaro",
+     "team": "Green N Gold",
+     "w": 6,
+     "l": 4,
+     "pf": 1622.5,
+     "playoffs": 0.994,
+     "releg": 0
+    },
+    {
+     "rosterId": 9,
+     "user": "YuriSpethmann",
+     "team": "Just Maried",
+     "w": 5,
+     "l": 5,
+     "pf": 1430.1,
+     "playoffs": 0.8135,
+     "releg": 0
+    },
+    {
+     "rosterId": 10,
+     "user": "polvorje",
+     "team": "polvorje",
+     "w": 5,
+     "l": 5,
+     "pf": 1366.2,
+     "playoffs": 0.68,
+     "releg": 0
+    },
+    {
+     "rosterId": 3,
+     "user": "Claudianosilva",
+     "team": "Claudianosilva",
+     "w": 4,
+     "l": 6,
+     "pf": 1276.8,
+     "playoffs": 0.1844,
+     "releg": 0
+    },
+    {
+     "rosterId": 7,
+     "user": "Elieser",
+     "team": "Elieser",
+     "w": 3,
+     "l": 7,
+     "pf": 1416.1,
+     "playoffs": 0.1958,
+     "releg": 0
+    },
+    {
+     "rosterId": 6,
+     "user": "DouglasHeinz",
+     "team": "DH8 Red&Gold",
+     "w": 3,
+     "l": 7,
+     "pf": 1363.5,
+     "playoffs": 0.0955,
+     "releg": 0
+    },
+    {
+     "rosterId": 2,
+     "user": "RafaCorreia49",
+     "team": "Correia49 KHC",
+     "w": 3,
+     "l": 7,
+     "pf": 1292.7,
+     "playoffs": 0.0461,
+     "releg": 0
+    }
+   ]
   }
  ],
  "results": {},
- "updatedAt": "2026-11-10T20:27:30.042Z"
+ "updatedAt": "2026-11-17T21:45:14.875Z"
 }
