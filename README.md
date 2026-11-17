@@ -18,7 +18,7 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 - **App na tela inicial:** manifest + ícones (`assets/app/`) — Android instala pelo Chrome, iPhone pelo Safari (Compartilhar → Adicionar à Tela de Início)
 - **Top Scorers:** filtro por série e "Incluir Elite" (desligado por padrão, evita time duplicado); Baixar / Compartilhar geram PNG da lista com o filtro atual (em "Todas", só o Top 20)
 - **Power Ranking:** tiers S Favoritos · A Candidatos · B Meio de tabela · C Pressionados · D Lanternas por posição (10/20/40/20/10%). PWR = 50% força (all-play semana a semana contra as Séries A–D) + 30% aproveitamento + 20% fase (últimas 3 semanas); sem Elite. Exporta PNG
-- **Copa KHC** (Ligas → aba Copa, `#/ligas/2026/copa`; em Ligas ficam só Elite, Copa e as Séries): mata-mata do site em paralelo às divisões (não conta para playoffs nem rebaixamento), com a pontuação de cada time na sua liga. Semana classificatória (12): os 32 maiores pontuadores avançam; semana 17: final e disputa do 3º lugar; chave por sorteio livre (`drawCup` com a semente de `KHC_CONFIG[ano].copa.seed`, reproduzível); 16 avos a final nas semanas 13–17; empate: pontos da semana anterior. Em teste em 2026 (`copa.test`), vale em 2027: com `test: false`, o fechamento (`derive-season.mjs`) grava o pódio da Copa (Pontos KHC) com a mesma conta do site (`resolveCup`); `--so-copa` confere a Copa sem fechar a temporada. Exporta a fase aberta
+- **Copa KHC** (Ligas → aba Copa, `#/ligas/2026/copa`; em Ligas ficam só Elite, Copa e as Séries): mata-mata do site em paralelo às divisões (não conta para playoffs nem rebaixamento), com a pontuação de cada time na sua liga. Semana classificatória (12): os 32 maiores pontuadores avançam; semana 17: final e disputa do 3º lugar; chave por sorteio livre (`drawCup` com a semente de `KHC_CONFIG[ano].copa.seed`, reproduzível); 16 avos a final nas semanas 13–17; empate: pontos da semana anterior. Em teste em 2026 (`copa.test`), vale em 2027: com `test: false`, o fechamento (`derive-season.mjs`) grava o pódio da Copa (Pontos KHC) com a mesma conta do site (`resolveCup`); `--so-copa` confere a Copa sem fechar a temporada. Só calcula com todas as divisões carregadas ao vivo (senão mostra "Copa indisponível"). Exporta a fase aberta
 - **Lendas:** Hall da Fama por **Pontos KHC** (`KHC_POINTS` em `js/config.js`, em discussão até 2027), pela colocação final: Séries A–F 12/8/6/4/3/2/1 (1º ao 7º, todas iguais), Elite 14/10/7/5, Copa 10/7/5/2; Guilhotina, Premier e NBA não pontuam. 5º e 6º pela disputa do 5º lugar. Só temporadas fechadas. Desempate: títulos → aproveitamento V–D (temporada regular das divisões; sem playoffs, Elite e Copa) → título mais recente. O perfil mostra o "aproveitamento geral" (com a temporada atual e a Elite). Medalha só para 1º–3º. Baixar / Compartilhar geram PNG do top 10
 - **Perfil do jogador:** lateral no desktop, bottom sheet no celular
 - **Modelo de dados híbrido:** temporadas finalizadas vêm de JSON estático (`data/<ano>.json`); temporada ativa vem da Sleeper API em tempo real
@@ -70,6 +70,10 @@ assets/
   logo/png/                 escudos por série (+ ui/ 160px, favicon)
   banners/                  og-image 1200×630, hero, header
 ```
+
+## Dados guardados no aparelho
+
+Placares de semanas encerradas ficam no `localStorage` (`khc_wk_*`) para não baixar de novo, mas só valem como definitivos depois de `STAT_FIX_DAYS` (10) dias do Monday Night: antes disso o site busca de novo, para pegar correções de estatística do Sleeper. Cada requisição ao Sleeper tem tempo limite (`FETCH_TIMEOUT_MS`, 15 s) e novas tentativas em falha de rede, 429 e 5xx.
 
 ## Registro semanal das chances
 

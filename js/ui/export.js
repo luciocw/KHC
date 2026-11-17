@@ -1445,7 +1445,7 @@ function exportTarget() {
     }
     if (appState.tab === 'ligas' && isCup(appState.series)) {
         const cp = copaData();
-        if (cp.status !== 'ready') return null;
+        if (cp.status !== 'ready') return null;   // inclui "incomplete" (falta divisão)
         const ph = copaModel(cp.data).current;
         return {
             key: `copa|${appState.season}|${ph}|${cp.data.fetchedAt}`,
