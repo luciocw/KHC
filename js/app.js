@@ -20,8 +20,8 @@ const TABS = [
     { id: 'regras',     label: 'Regras',      short: 'Regras', title: 'Regras',        icon: 'bookOpen', render: () => renderRules(), mobileInHeader: true },
     // Também na KHC (fora do menu): atalho no topo, Regras e o cartão da entressafra
     { id: 'premier',    label: 'Premier League', short: 'Premier', title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('premier'), hidden: true, also: true },
-    // Escondida, só por link: simulação da Copa no formato Champions para os donos
-    { id: 'copa-champions', label: 'Copa (simulação)', short: 'Copa', title: 'Copa KHC · formato Champions', icon: 'trophy', render: () => renderCopaSimPage(), hidden: true, needsData: true },
+    // Também na KHC: simulação da Copa no formato Champions (proposta 2027)
+    { id: 'copa-champions', label: 'Champions KHC', short: 'Champions', title: 'Também na KHC', icon: 'trophy', render: () => renderCopaSimPage(), hidden: true, also: true, needsData: true },
     { id: 'guilhotina', label: 'Guilhotina',     short: 'Guilhotina', title: 'Também na KHC', icon: 'trophy', render: () => renderGuillotinePage(), hidden: true, also: true, needsData: true },
     { id: 'nba',        label: 'NBA',            short: 'NBA',     title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('nba'),     hidden: true, also: true },
 ];
@@ -180,7 +180,7 @@ function renderShell() {
         : appState.tab === 'copa-champions' ? `Simulação · ${appState.season}`
         : `Temporada ${appState.season}`;
     // Também na KHC: seletor de temporada e pílula da NFL não se aplicam
-    document.getElementById(DOM_IDS.SEASON_SELECT).hidden = isAlso || appState.tab === 'copa-champions';
+    document.getElementById(DOM_IDS.SEASON_SELECT).hidden = isAlso;
     document.getElementById(DOM_IDS.STATUS).hidden = isAlso;
     const alsoLink = document.getElementById('alsoLink');
     if (isAlso) alsoLink.setAttribute('aria-current', 'page');

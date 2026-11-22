@@ -83,6 +83,7 @@ const RULES = [
         title: 'Também na KHC',
         items: [
             '<a href="#/guilhotina">KHC Guilhotina</a>: liga avulsa (entra quem quer). A cada rodada, quem faz menos pontos entre os vivos é cortado. Não soma Pontos KHC.',
+            '<a href="#/copa-champions">Champions KHC</a>: simulação de como a Copa KHC seria no formato Champions League (proposta para 2027), com os jogos reais da temporada. Não é oficial nem soma Pontos KHC.',
             '<a href="#/premier">Cocoricó Premier League</a>: fantasy de futebol no Sleeper, com a turma da KHC. Para a conversa não parar na entressafra da NFL.',
             '<a href="#/nba">National Burgundy Association</a>: fantasy de basquete no Sleeper, liga nova na temporada 2026/27 da NBA.',
         ]

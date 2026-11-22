@@ -36,6 +36,11 @@ function copaConfig(season) {
     return c.qualifying && c.bracket ? c : null;
 }
 
+/** Nome no cabeçalho: "Champions KHC" na simulação, senão "Copa KHC". */
+function copaTitle() {
+    return appState.tab === 'copa-champions' ? 'Champions KHC' : SERIES_META.copa.name;
+}
+
 /** Primeira e última semana com placar usado pela Copa. */
 function copaWeekRange(cfg) {
     if (cfg.format === 'ucl') {
@@ -180,7 +185,7 @@ function renderCopa() {
     const header = (subtitle, actions) => `<header class="card__hd">
             ${crestHTML('copa', 56)}
             <div class="grow">
-                <h2 class="display" id="series-title">${escapeHtml(meta.name)}</h2>
+                <h2 class="display" id="series-title">${escapeHtml(copaTitle())}</h2>
                 <p>${escapeHtml(subtitle)}</p>
             </div>
             ${actions}
@@ -296,14 +301,16 @@ function renderCopa() {
 }
 
 /**
- * Página escondida #/copa-champions: simulação do formato Champions com os
- * jogos da temporada (KHC_CONFIG[ano].copaSim), para os donos avaliarem.
+ * Champions KHC (#/copa-champions, em Também na KHC): simulação do formato
+ * Champions com os jogos da temporada (KHC_CONFIG[ano].copaSim).
  * @returns {string} HTML
  */
 function renderCopaSimPage() {
-    return `<div class="state-inline copa-notice" role="note">
+    return `${backToNflHTML()}
+        ${alsoTabsHTML('copa-champions')}
+        <div class="state-inline copa-notice" role="note">
             ${crestHTML('copa', 20)}
-            <span><b>Simulação para os donos:</b> como a Copa KHC ${escapeHtml(appState.season)} seria no formato Champions (proposta para 2027), com os jogos reais da temporada. Não é a Copa oficial nem soma Pontos KHC.</span>
+            <span><b>Simulação:</b> como a Copa KHC ${escapeHtml(appState.season)} seria no formato Champions (proposta para 2027), com os jogos reais da temporada. Não é a Copa oficial nem soma Pontos KHC.</span>
         </div>
         ${renderCopa()}`;
 }

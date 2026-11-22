@@ -1286,7 +1286,7 @@ async function drawUclCanvas(data) {
         const rows = m.table, ROW_H = 38, THEAD_H = 34, NOTE_H = 40;
         const { crest, avatars } = await loadExportAssets(meta, rows.map(r => r.entry.team.avatar));
         const H = EXPORT_HEAD_H + THEAD_H + rows.length * ROW_H + NOTE_H;
-        const { canvas, ctx } = startExportCard(H, c, crest, meta.name, `${test}Fase de liga · ${weeksLabel(ph.weeks)}`);
+        const { canvas, ctx } = startExportCard(H, c, crest, copaTitle(), `${test}Fase de liga · ${weeksLabel(ph.weeks)}`);
         let y = EXPORT_HEAD_H;
         hLine(ctx, 0, EXPORT_W, y + THEAD_H - 1, c.border);
         drawEyebrow(ctx, '#', 14, y + THEAD_H / 2, c);
@@ -1355,7 +1355,7 @@ async function drawUclCanvas(data) {
     const { crest, avatars } = await loadExportAssets(meta, sides.map(e => (e ? e.team.avatar : null)));
     const ROW_H = 76;
     const H = EXPORT_HEAD_H + games.length * ROW_H;
-    const { canvas, ctx } = startExportCard(H, c, crest, meta.name, subtitle);
+    const { canvas, ctx } = startExportCard(H, c, crest, copaTitle(), subtitle);
     const mid = EXPORT_W / 2;
     let y = EXPORT_HEAD_H;
     hLine(ctx, 0, EXPORT_W, y - 1, c.border);
@@ -1599,9 +1599,9 @@ function exportTarget() {
         const ph = ucl ? uclModel(cp.data).current : copaModel(cp.data).current;
         const view = ucl && ph === 0 ? `-${appState.copaLeagueView}${appState.copaLeagueView === 'jogos' ? `-s${appState.copaWeek || ''}` : ''}` : '';
         return {
-            key: `copa|${appState.season}|${ph}${view}|${cp.data.fetchedAt}`,
-            name: `khc-${appState.season}-copa-fase-${ph}${view}.png`,
-            title: `Copa KHC · ${appState.season}`,
+            key: `copa|${appState.tab}|${appState.season}|${ph}${view}|${cp.data.fetchedAt}`,
+            name: `khc-${appState.season}-${appState.tab === 'copa-champions' ? 'champions' : 'copa'}-fase-${ph}${view}.png`,
+            title: `${copaTitle()} · ${appState.season}`,
             draw: () => (ucl ? drawUclCanvas(cp.data) : drawCopaCanvas(cp.data))
         };
     }
