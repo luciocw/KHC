@@ -1592,7 +1592,7 @@ function exportTarget() {
             draw: () => drawAlsoCanvas(cfg, p.data)
         };
     }
-    if (appState.tab === 'ligas' && isCup(appState.series)) {
+    if ((appState.tab === 'ligas' && isCup(appState.series)) || appState.tab === 'copa-champions') {
         const cp = copaData();
         if (cp.status !== 'ready') return null;   // inclui "incomplete" (falta divisão)
         const ucl = copaConfig().format === 'ucl';

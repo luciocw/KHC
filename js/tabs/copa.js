@@ -28,7 +28,9 @@ function resetCopaCache() {
 
 /** Configuração da Copa na temporada (ou null). format 'ucl' = estilo Champions (copa-ucl.js). */
 function copaConfig(season) {
-    const c = (KHC_CONFIG[season || appState.season] || {}).copa;
+    const cfgYear = KHC_CONFIG[season || appState.season] || {};
+    // página escondida #/copa-champions: a simulação do formato Champions
+    const c = !season && appState.tab === 'copa-champions' ? cfgYear.copaSim : cfgYear.copa;
     if (!c) return null;
     if (c.format === 'ucl') return c.pots && c.leagueWeeks && c.knockout ? c : null;
     return c.qualifying && c.bracket ? c : null;
@@ -89,14 +91,14 @@ function copaData() {
     const cfg = copaConfig();
     if (!cfg) return { status: 'off' };
     if (copaMissingSeries().length) return { status: 'incomplete' };
-    const key = `${appState.season}|${appState.lastUpdated || ''}`;
+    const key = `${appState.season}|${cfg.format || 'classica'}|${appState.lastUpdated || ''}`;
     if (_copa[key]) return _copa[key];
     const entry = _copa[key] = { status: 'loading' };
     loadCopa(cfg)
         .then(data => { entry.status = 'ready'; entry.data = data; })
         .catch(() => { entry.status = 'error'; })
         .then(() => {
-            if (appState.tab === 'ligas' && appState.loadState === 'ready' && isCup(appState.series)) renderView();
+            if (appState.loadState === 'ready' && ((appState.tab === 'ligas' && isCup(appState.series)) || appState.tab === 'copa-champions')) renderView();
         });
     return entry;
 }
@@ -291,4 +293,17 @@ function renderCopa() {
         ${champ}
         ${body}
         <p class="chances-note">${escapeHtml(note)}</p>`);
+}
+
+/**
+ * Página escondida #/copa-champions: simulação do formato Champions com os
+ * jogos da temporada (KHC_CONFIG[ano].copaSim), para os donos avaliarem.
+ * @returns {string} HTML
+ */
+function renderCopaSimPage() {
+    return `<div class="state-inline copa-notice" role="note">
+            ${crestHTML('copa', 20)}
+            <span><b>Simulação para os donos:</b> como a Copa KHC ${escapeHtml(appState.season)} seria no formato Champions (proposta para 2027), com os jogos reais da temporada. Não é a Copa oficial nem soma Pontos KHC.</span>
+        </div>
+        ${renderCopa()}`;
 }
