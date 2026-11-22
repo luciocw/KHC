@@ -20,6 +20,8 @@ const TABS = [
     { id: 'regras',     label: 'Regras',      short: 'Regras', title: 'Regras',        icon: 'bookOpen', render: () => renderRules(), mobileInHeader: true },
     // Também na KHC (fora do menu): atalho no topo, Regras e o cartão da entressafra
     { id: 'premier',    label: 'Premier League', short: 'Premier', title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('premier'), hidden: true, also: true },
+    // Escondida, só por link: simulação da Copa no formato Champions para os donos
+    { id: 'copa-champions', label: 'Copa (simulação)', short: 'Copa', title: 'Copa KHC · formato Champions', icon: 'trophy', render: () => renderCopaSimPage(), hidden: true, needsData: true },
     { id: 'guilhotina', label: 'Guilhotina',     short: 'Guilhotina', title: 'Também na KHC', icon: 'trophy', render: () => renderGuillotinePage(), hidden: true, also: true, needsData: true },
     { id: 'nba',        label: 'NBA',            short: 'NBA',     title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('nba'),     hidden: true, also: true },
 ];
@@ -119,6 +121,11 @@ function applyHash(opts = {}) {
         appState.alsoView = route.alsoView;
         appState.alsoWeek = route.week;
     }
+    // Simulação da Copa: a temporada mais recente que tem uma
+    if (appState.tab === 'copa-champions') {
+        const y = Object.keys(KHC_CONFIG).sort().reverse().find(k => KHC_CONFIG[k].copaSim);
+        if (y) appState.season = y;
+    }
     // Guilhotina: sempre a da temporada mais recente que tem uma
     if (appState.tab === 'guilhotina') {
         const y = Object.keys(KHC_CONFIG).sort().reverse().find(k => KHC_CONFIG[k].leagues.some(l => isGuillotine(l.tier)));
@@ -170,9 +177,10 @@ function renderShell() {
         : appState.tab === 'premier' ? `Fantasy de futebol · ${PREMIER_LEAGUE.season}`
         : appState.tab === 'nba' ? `Fantasy de basquete · ${NBA_LEAGUE.season}`
         : appState.tab === 'guilhotina' ? `Liga avulsa · ${appState.season}`
+        : appState.tab === 'copa-champions' ? `Simulação · ${appState.season}`
         : `Temporada ${appState.season}`;
     // Também na KHC: seletor de temporada e pílula da NFL não se aplicam
-    document.getElementById(DOM_IDS.SEASON_SELECT).hidden = isAlso;
+    document.getElementById(DOM_IDS.SEASON_SELECT).hidden = isAlso || appState.tab === 'copa-champions';
     document.getElementById(DOM_IDS.STATUS).hidden = isAlso;
     const alsoLink = document.getElementById('alsoLink');
     if (isAlso) alsoLink.setAttribute('aria-current', 'page');
@@ -353,6 +361,19 @@ function bindEvents() {
     document.addEventListener('click', (e) => {
         const target = e.target instanceof Element ? e.target : null;
         if (!target) return;
+
+        const copaView = target.closest('[data-copa-view]');
+        if (copaView) {
+            appState.copaLeagueView = copaView.getAttribute('data-copa-view') === 'jogos' ? 'jogos' : 'tabela';
+            renderView();
+            return;
+        }
+        const copaWeek = target.closest('[data-copa-week]');
+        if (copaWeek) {
+            appState.copaWeek = Number(copaWeek.getAttribute('data-copa-week'));
+            renderView();
+            return;
+        }
 
         const copaBtn = target.closest('[data-copa-phase]');
         if (copaBtn) {

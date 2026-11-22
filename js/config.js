@@ -35,7 +35,15 @@ const KHC_CONFIG = {
         // Semana `qualifying`: todos os times das divisões jogam e os `bracket`
         // maiores pontuadores avançam; chave sorteada com `seed` (mesma semente =
         // mesmo sorteio); uma fase por semana até a final.
-        copa: { test: true, seed: 'Copa KHC 2026', qualifying: 12, bracket: 32 }
+        copa: { test: true, seed: 'Copa KHC 2026', qualifying: 12, bracket: 32 },
+        // Simulação do formato Champions (proposta 2027) com os jogos de 2026,
+        // só na página escondida #/copa-champions (não é a Copa oficial)
+        copaSim: {
+            format: 'ucl', test: true, seed: 'Copa KHC 2026',
+            pots: [['serie-a', 'serie-b'], ['serie-c', 'serie-d']], perPot: 3,
+            leagueWeeks: [3, 4, 5, 6, 7, 8],
+            knockout: { playoff: [9, 10], r16: [11, 12], qf: [13, 14], sf: [15, 16], final: [17] }
+        }
     }
 };
 
@@ -187,7 +195,9 @@ const appState = {
     season: Object.keys(KHC_CONFIG).sort().pop(),   // temporada mais recente configurada
     series: 'serie-a',        // tier selecionado nas abas Ligas e Rodada
     matchWeek: null,          // semana na aba Rodada (null = atual da liga)
-    copaPhase: null,          // fase aberta na Copa KHC (null = a da semana atual)
+    copaPhase: null,
+    copaLeagueView: 'tabela', // Copa estilo Champions: 'tabela' | 'jogos' da fase de liga
+    copaWeek: null,           // rodada aberta em "jogos" (null = a da semana atual)          // fase aberta na Copa KHC (null = a da semana atual)
     alsoView: 'tabela',       // Também na KHC: 'tabela' | 'rodada' (#/nba/rodada)
     alsoWeek: null,           // semana escolhida na Rodada de Também na KHC
     ligasViewChosen: false,   // escolheu a visão nesta sessão (vale sobre o padrão dos playoffs)

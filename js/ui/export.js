@@ -1265,6 +1265,155 @@ async function drawCopaCanvas(data) {
     return canvas;
 }
 
+/**
+ * Copa KHC estilo Champions: a tabela da fase de liga (zonas), os jogos de
+ * uma rodada da fase de liga, ou os confrontos de uma fase do mata-mata
+ * (pernas + agregado).
+ * @returns {Promise<HTMLCanvasElement>}
+ */
+async function drawUclCanvas(data) {
+    const m = uclModel(data);
+    const meta = SERIES_META.copa;
+    const c = exportPalette(meta);
+    const ph = m.phases[m.current];
+    const leagueColor = tier => cssToken(`--league-${SERIES_META[tier].league}`) || c.text2;
+    const tag = tier => SERIES_META[tier].short.toUpperCase().split('').join('\u200A');
+    const PAD = 16, AV = 28;
+    const test = m.cfg.test ? 'Teste · ' : '';
+
+    // Tabela da fase de liga
+    if (ph.key === 'liga' && appState.copaLeagueView !== 'jogos') {
+        const rows = m.table, ROW_H = 38, THEAD_H = 34, NOTE_H = 40;
+        const { crest, avatars } = await loadExportAssets(meta, rows.map(r => r.entry.team.avatar));
+        const H = EXPORT_HEAD_H + THEAD_H + rows.length * ROW_H + NOTE_H;
+        const { canvas, ctx } = startExportCard(H, c, crest, meta.name, `${test}Fase de liga · ${weeksLabel(ph.weeks)}`);
+        let y = EXPORT_HEAD_H;
+        hLine(ctx, 0, EXPORT_W, y + THEAD_H - 1, c.border);
+        drawEyebrow(ctx, '#', 14, y + THEAD_H / 2, c);
+        drawEyebrow(ctx, 'Time', 52, y + THEAD_H / 2, c);
+        ctx.textAlign = 'right';
+        drawEyebrow(ctx, 'V–E–D', EXPORT_W - 150, y + THEAD_H / 2, c);
+        drawEyebrow(ctx, 'Saldo', EXPORT_W - 70, y + THEAD_H / 2, c);
+        drawEyebrow(ctx, 'Pts', EXPORT_W - 14, y + THEAD_H / 2, c);
+        ctx.textAlign = 'left';
+        y += THEAD_H;
+        rows.forEach((r, i) => {
+            const top = y + i * ROW_H, mid = top + ROW_H / 2;
+            const z = uclZone(r.rank);
+            ctx.fillStyle = z === 'direct' ? c.promo : z === 'playoff' ? c.playoff : c.releg;
+            ctx.fillRect(0, top, 3, ROW_H);
+            if (z === 'direct') { ctx.fillStyle = c.promoBg; ctx.fillRect(3, top, EXPORT_W - 3, ROW_H); }
+            const cut = r.rank === 8 || r.rank === 24;
+            if (i < rows.length - 1) hLine(ctx, 0, EXPORT_W, top + ROW_H - 1, cut ? c.border2 : c.border, cut);
+            ctx.fillStyle = z === 'out' ? c.text3 : c.text2;
+            setFont(ctx, 900, 14, 'condensed');
+            ctx.fillText(String(r.rank), 14, mid);
+            drawAvatar(ctx, 52, mid - AV / 2, avatars[i], r.entry.team.teamName, c, AV);
+            ctx.fillStyle = z === 'out' ? c.text2 : c.text;
+            setFont(ctx, 700, 13);
+            const name = fitText(ctx, r.entry.team.teamName || '', EXPORT_W - 52 - AV - 10 - 300);
+            ctx.fillText(name, 52 + AV + 10, mid);
+            const nw = ctx.measureText(name).width;
+            setFont(ctx, 800, 10, 'condensed');
+            ctx.fillStyle = leagueColor(r.entry.tier);
+            ctx.fillText(tag(r.entry.tier), 52 + AV + 10 + nw + 8, mid);
+            ctx.textAlign = 'right';
+            setFont(ctx, 700, 13);
+            ctx.fillStyle = c.text2;
+            ctx.fillText(`${r.v}–${r.e}–${r.d}`, EXPORT_W - 150, mid);
+            const saldo = r.pf - r.pc;
+            ctx.fillText(`${saldo >= 0 ? '+' : ''}${fmtPts(saldo)}`, EXPORT_W - 70, mid);
+            ctx.fillStyle = c.text;
+            setFont(ctx, 900, 16, 'condensed');
+            ctx.fillText(String(r.pts), EXPORT_W - 14, mid);
+            ctx.textAlign = 'left';
+        });
+        y += rows.length * ROW_H;
+        hLine(ctx, 0, EXPORT_W, y, c.border);
+        ctx.fillStyle = c.text3;
+        setFont(ctx, 400, 12);
+        ctx.fillText(fitText(ctx, '1º–8º: direto às oitavas · 9º–24º: playoff · 25º em diante: eliminado. Vitória 3, empate 1.', EXPORT_W - 28), 14, y + NOTE_H / 2);
+        finishExportCard(ctx, H, c);
+        return canvas;
+    }
+
+    // Jogos (rodada da fase de liga ou fase do mata-mata)
+    let games, subtitle;
+    if (ph.key === 'liga') {
+        const weeks = m.cfg.leagueWeeks;
+        const wk = weeks.includes(appState.copaWeek) ? appState.copaWeek : weeks.find(w => w >= m.settings.leg) || weeks[weeks.length - 1];
+        const round = m.league.find(r => r.week === wk);
+        games = round.games.map(g => ({ a: g.a, b: g.b, ta: g.pa, tb: g.pb, status: g.status,
+            winner: g.status === 'final' && g.pa !== g.pb ? (g.pa > g.pb ? 'a' : 'b') : '', label: '' }));
+        subtitle = `${test}Fase de liga · rodada ${weeks.indexOf(wk) + 1} · semana ${wk}`;
+    } else {
+        const r = m.rounds.find(x => x.key === ph.key);
+        games = r.games.map(g => ({ ...g, legs: g.weeks.length > 1 ? [uclLegsText(g.legsA, g.weeks, m.settings.leg), uclLegsText(g.legsB, g.weeks, m.settings.leg)] : null }));
+        subtitle = `${test}${ph.name} · ${weeksLabel(ph.weeks)}`;
+    }
+    const sides = games.flatMap(g => [m.byKey[g.a], m.byKey[g.b]]);
+    const { crest, avatars } = await loadExportAssets(meta, sides.map(e => (e ? e.team.avatar : null)));
+    const ROW_H = 76;
+    const H = EXPORT_HEAD_H + games.length * ROW_H;
+    const { canvas, ctx } = startExportCard(H, c, crest, meta.name, subtitle);
+    const mid = EXPORT_W / 2;
+    let y = EXPORT_HEAD_H;
+    hLine(ctx, 0, EXPORT_W, y - 1, c.border);
+    games.forEach((g, gi) => {
+        const top = y + gi * ROW_H, cy = top + ROW_H / 2 + (g.label ? 7 : 0);
+        if (gi % 2 === 1) { ctx.fillStyle = c.surface2; ctx.fillRect(0, top, EXPORT_W, ROW_H); }
+        if (gi < games.length - 1) hLine(ctx, 0, EXPORT_W, top + ROW_H - 1, c.border);
+        if (g.label) {
+            ctx.fillStyle = g.label === 'Final' ? c.accent : c.text3;
+            setFont(ctx, 800, 10, 'condensed');
+            ctx.textAlign = 'center';
+            ctx.fillText(g.label.toUpperCase().split('').join('\u200A'), mid, top + 13);
+            ctx.textAlign = 'left';
+        }
+        [['a', m.byKey[g.a], avatars[gi * 2], g.ta, g.legs && g.legs[0]], ['b', m.byKey[g.b], avatars[gi * 2 + 1], g.tb, g.legs && g.legs[1]]].forEach(([k, e, img, total, legs]) => {
+            const left = k === 'a';
+            ctx.textAlign = left ? 'left' : 'right';
+            if (!e) {
+                ctx.fillStyle = c.text3;
+                setFont(ctx, 400, 13);
+                ctx.fillText('A definir', left ? PAD : EXPORT_W - PAD, cy);
+                ctx.textAlign = 'left';
+                return;
+            }
+            const state = g.winner ? (g.winner === k ? 'win' : 'lose') : '';
+            const avX = left ? PAD : EXPORT_W - PAD - AV;
+            drawAvatar(ctx, avX, cy - AV / 2, img, e.team.teamName, c, AV);
+            const nx = left ? avX + AV + 10 : avX - 10;
+            ctx.fillStyle = state === 'lose' ? c.text2 : c.text;
+            setFont(ctx, 700, 14);
+            ctx.fillText(fitText(ctx, e.team.teamName || '', mid - 80 - (PAD + AV + 10)), nx, cy - 8);
+            setFont(ctx, 800, 10, 'condensed');
+            ctx.fillStyle = leagueColor(e.tier);
+            ctx.fillText(tag(e.tier), nx, cy + 10);
+            if (g.status !== 'upcoming') {
+                ctx.textAlign = left ? 'right' : 'left';
+                ctx.fillStyle = state === 'win' ? c.text : state === 'lose' ? c.text3 : c.text2;
+                setFont(ctx, 900, 21, 'condensed');
+                ctx.fillText(fmtPts(total), left ? mid - 22 : mid + 22, cy - (legs ? 5 : 0));
+                if (legs) {
+                    ctx.fillStyle = c.text3;
+                    setFont(ctx, 400, 10);
+                    ctx.fillText(legs, left ? mid - 22 : mid + 22, cy + 13);
+                }
+            }
+            if (state === 'win') { ctx.fillStyle = c.accent; ctx.fillRect(left ? 0 : EXPORT_W - 3, top, 3, ROW_H); }
+            ctx.textAlign = 'left';
+        });
+        ctx.textAlign = 'center';
+        ctx.fillStyle = c.text3;
+        setFont(ctx, 700, 12);
+        ctx.fillText('×', mid, cy);
+        ctx.textAlign = 'left';
+    });
+    finishExportCard(ctx, H, c);
+    return canvas;
+}
+
 const LEGENDS_EXPORT_LIMIT = 10;   // Hall da Fama: só o top 10 na imagem
 
 /**
@@ -1443,15 +1592,17 @@ function exportTarget() {
             draw: () => drawAlsoCanvas(cfg, p.data)
         };
     }
-    if (appState.tab === 'ligas' && isCup(appState.series)) {
+    if ((appState.tab === 'ligas' && isCup(appState.series)) || appState.tab === 'copa-champions') {
         const cp = copaData();
         if (cp.status !== 'ready') return null;   // inclui "incomplete" (falta divisão)
-        const ph = copaModel(cp.data).current;
+        const ucl = copaConfig().format === 'ucl';
+        const ph = ucl ? uclModel(cp.data).current : copaModel(cp.data).current;
+        const view = ucl && ph === 0 ? `-${appState.copaLeagueView}${appState.copaLeagueView === 'jogos' ? `-s${appState.copaWeek || ''}` : ''}` : '';
         return {
-            key: `copa|${appState.season}|${ph}|${cp.data.fetchedAt}`,
-            name: `khc-${appState.season}-copa-fase-${ph}.png`,
+            key: `copa|${appState.season}|${ph}${view}|${cp.data.fetchedAt}`,
+            name: `khc-${appState.season}-copa-fase-${ph}${view}.png`,
             title: `Copa KHC · ${appState.season}`,
-            draw: () => drawCopaCanvas(cp.data)
+            draw: () => (ucl ? drawUclCanvas(cp.data) : drawCopaCanvas(cp.data))
         };
     }
     if (appState.tab === 'guilhotina') {

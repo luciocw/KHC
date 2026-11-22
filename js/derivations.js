@@ -399,6 +399,165 @@ function resolveCup(cfg, keys, scores, settings) {
     return { phases, qualifying, rounds, podium };
 }
 
+// --- COPA KHC · FORMATO CHAMPIONS (fase de liga + mata-mata em 2 semanas) ---
+
+/**
+ * Sorteio da fase de liga, estilo Champions League: potes por divisão
+ * (cfg.pots), cada time enfrenta `perPot` adversários de cada pote, nunca
+ * da própria divisão nem o mesmo duas vezes, um jogo por semana.
+ *
+ * Construção (garante as cotas sem tentativa e erro; cada pote com 2
+ * divisões de mesmo tamanho):
+ *   - jogos dentro do pote: sempre divisão × divisão do mesmo pote;
+ *   - 2 potes: perPot semanas internas + perPot semanas pote 1 × pote 2;
+ *   - 3 potes (perPot 2): 2 semanas internas + 4 semanas cruzadas com os
+ *     potes divididos em metades (P1a×P2a, P1b×P3b, P2b×P3a, …).
+ * Cada rodada de pareamento usa deslocamentos distintos sobre listas
+ * embaralhadas, então ninguém repete adversário. Mesma semente = mesmo sorteio.
+ *
+ * @param {Array<{key: string, tier: string}>} teams
+ * @param {{pots: string[][], perPot: number, seed: string}} cfg
+ * @returns {Array<Array<[string, string]>>} jogos de cada semana da fase de liga
+ */
+function drawUclLeague(teams, cfg) {
+    const rnd = seededRandom(seedFrom(`${cfg.seed}|liga`));
+    const shuffle = arr => {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(rnd() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    };
+    const byTier = t => teams.filter(x => x.tier === t).map(x => x.key).sort();
+    // pares a[i] × b[(i + d) % n], com deslocamentos d distintos (sem repetir adversário)
+    const pairings = (a, b, rounds) => {
+        if (a.length !== b.length) throw new Error('Copa: grupos de tamanhos diferentes no sorteio');
+        const n = a.length, A = shuffle(a), B = shuffle(b);
+        const offsets = shuffle([...Array(n).keys()]).slice(0, rounds);
+        return offsets.map(d => A.map((x, i) => [x, B[(i + d) % n]]));
+    };
+    const pots = cfg.pots.map(divs => divs.map(byTier));
+    // jogos internos do pote: divisão × divisão
+    const internal = pots.map(([d1, d2]) => pairings(d1, d2, cfg.perPot));
+    let weeks;
+    if (pots.length === 2) {
+        const p1 = pots[0].flat(), p2 = pots[1].flat();
+        const cross = pairings(p1, p2, cfg.perPot);
+        weeks = [
+            ...internal[0].map((g, i) => [...g, ...internal[1][i]]),
+            ...cross
+        ];
+    } else if (pots.length === 3 && cfg.perPot === 2) {
+        // metades de cada pote, misturando as duas divisões
+        const halves = pots.map(divs => {
+            const all = shuffle(divs.flat());
+            return [all.slice(0, all.length / 2), all.slice(all.length / 2)];
+        });
+        const [[p1a, p1b], [p2a, p2b], [p3a, p3b]] = halves;
+        const pick = (x, y) => pairings(x, y, 1)[0];
+        weeks = [
+            [...internal[0][0], ...internal[1][0], ...internal[2][0]],
+            [...internal[0][1], ...internal[1][1], ...internal[2][1]],
+            [...pick(p1a, p2a), ...pick(p1b, p3b), ...pick(p2b, p3a)],
+            [...pick(p1a, p2b), ...pick(p1b, p3a), ...pick(p2a, p3b)],
+            [...pick(p1a, p3a), ...pick(p1b, p2a), ...pick(p2b, p3b)],
+            [...pick(p1a, p3b), ...pick(p1b, p2b), ...pick(p2a, p3a)]
+        ];
+    } else {
+        throw new Error('Copa: formato de potes não suportado (2 potes, ou 3 potes com 2 jogos por pote)');
+    }
+    return shuffle(weeks);
+}
+
+/** Classificação da fase de liga: pontos (3/1/0), saldo, pontos feitos, vitórias, ordem do sorteio. */
+function uclTable(keys, games) {
+    const t = Object.fromEntries(keys.map((k, i) => [k, { key: k, order: i, j: 0, v: 0, e: 0, d: 0, pts: 0, pf: 0, pc: 0 }]));
+    games.forEach(g => {
+        if (g.status !== 'final') return;
+        const a = t[g.a], b = t[g.b];
+        a.j++; b.j++;
+        a.pf += g.pa; a.pc += g.pb; b.pf += g.pb; b.pc += g.pa;
+        if (g.pa > g.pb) { a.v++; b.d++; a.pts += 3; }
+        else if (g.pb > g.pa) { b.v++; a.d++; b.pts += 3; }
+        else { a.e++; b.e++; a.pts++; b.pts++; }
+    });
+    return Object.values(t).sort((x, y) =>
+        (y.pts - x.pts) || ((y.pf - y.pc) - (x.pf - x.pc)) || (y.pf - x.pf) || (y.v - x.v) || (x.order - y.order));
+}
+
+/**
+ * Copa KHC formato Champions, inteira a partir dos placares (mesma conta no
+ * site e no fechamento):
+ *   - fase de liga (cfg.leagueWeeks): sorteio drawUclLeague, tabela uclTable;
+ *   - 1º–8º direto às oitavas; 9º–24º no playoff (9×24, 10×23, …, 16×17);
+ *     25º+ fora;
+ *   - mata-mata em 2 semanas (soma dos pontos), chave fixa pela posição
+ *     (1º e 2º só se cruzam na final); empate no agregado: melhor posição
+ *     na fase de liga;
+ *   - semana final: final e disputa do 3º lugar (jogo único).
+ * @param {Object} cfg  KHC_CONFIG[ano].copa (format 'ucl')
+ * @param {Array<{key: string, tier: string}>} teams
+ * @param {Object<number, Object<string, number>>} scores  semana → id → pontos
+ * @param {{leg: number, lastScored: number}} settings
+ */
+function resolveUcl(cfg, teams, scores, settings) {
+    const status = w => (w <= settings.lastScored ? 'final' : w === settings.leg ? 'live' : 'upcoming');
+    const pts = (w, k) => (scores[w] && scores[w][k]) || 0;
+    const statusOf = weeks => (weeks.every(w => status(w) === 'final') ? 'final' : weeks.some(w => status(w) !== 'upcoming') ? 'live' : 'upcoming');
+
+    // Fase de liga
+    const draw = drawUclLeague(teams, cfg);
+    const league = cfg.leagueWeeks.map((week, i) => ({
+        week, status: status(week),
+        games: draw[i].map(([a, b]) => ({ a, b, pa: pts(week, a), pb: pts(week, b), status: status(week) }))
+    }));
+    const table = uclTable(teams.map(t => t.key).sort(), league.flatMap(r => r.games));
+    const leagueStatus = statusOf(cfg.leagueWeeks);
+    const seedOf = k => table.findIndex(r => r.key === k) + 1;
+
+    // Mata-mata (só com a fase de liga encerrada)
+    const rounds = [];
+    let podium = null;
+    if (leagueStatus === 'final') {
+        const seeds = table.map(r => r.key);
+        const tie = (a, b, weeks, label) => {
+            const legsA = weeks.map(w => pts(w, a)), legsB = weeks.map(w => pts(w, b));
+            const ta = legsA.reduce((x, y) => x + y, 0), tb = legsB.reduce((x, y) => x + y, 0);
+            const st = statusOf(weeks);
+            let winner = '';
+            if (st === 'final') winner = ta > tb ? 'a' : tb > ta ? 'b' : seedOf(a) < seedOf(b) ? 'a' : 'b';
+            return { a, b, legsA, legsB, ta, tb, weeks, status: st, winner, label };
+        };
+        const won = g => (g.winner === 'a' ? g.a : g.winner === 'b' ? g.b : null);
+        const lost = g => (g.winner === 'a' ? g.b : g.winner === 'b' ? g.a : null);
+        const ko = cfg.knockout;
+
+        // Playoff: jogo k = (8+k)º × (25−k)º
+        const playoff = Array.from({ length: 8 }, (_, i) => tie(seeds[8 + i], seeds[23 - i], ko.playoff, `${9 + i}º × ${24 - i}º`));
+        rounds.push({ key: 'playoff', name: 'Playoff', weeks: ko.playoff, status: statusOf(ko.playoff), games: playoff });
+
+        // Oitavas, em ordem de chave: 1º×(16/17), 8º×(9/24), 4º×(13/20), 5º×(12/21), 2º×(15/18), 7º×(10/23), 3º×(14/19), 6º×(11/22)
+        const order = [1, 8, 4, 5, 2, 7, 3, 6];
+        // o sº enfrenta o vencedor de (17−s)º × (16+s)º, que é o jogo 8−s do playoff
+        const r16 = order.map(s => tie(seeds[s - 1], won(playoff[8 - s]), ko.r16, `${s}º × vencedor ${17 - s}º/${16 + s}º`));
+        rounds.push({ key: 'r16', name: 'Oitavas de final', weeks: ko.r16, status: statusOf(ko.r16), games: r16 });
+
+        const next = (prev, weeks, name, key, label) => {
+            const games = [];
+            for (let i = 0; i < prev.length; i += 2) games.push(tie(won(prev[i]), won(prev[i + 1]), weeks, label(i / 2)));
+            rounds.push({ key, name, weeks, status: statusOf(weeks), games });
+            return games;
+        };
+        const qf = next(r16, ko.qf, 'Quartas de final', 'qf', i => `Quartas ${i + 1}`);
+        const sf = next(qf, ko.sf, 'Semifinal', 'sf', i => `Semifinal ${i + 1}`);
+        const fin = [tie(won(sf[0]), won(sf[1]), ko.final, 'Final'), tie(lost(sf[0]), lost(sf[1]), ko.final, 'Disputa do 3º lugar')];
+        rounds.push({ key: 'final', name: 'Final', weeks: ko.final, status: statusOf(ko.final), games: fin });
+        if (fin[0].winner && fin[1].winner) podium = [won(fin[0]), lost(fin[0]), won(fin[1]), lost(fin[1])];
+    }
+    return { league, table, leagueStatus, rounds, podium };
+}
+
 // --- LENDAS (cross-season trophy aggregation) ---
 
 /**
