@@ -13,7 +13,7 @@ const ctx = vm.createContext({ console });
 vm.runInContext(
     (await readFile(resolve(ROOT, 'js/config.js'), 'utf8')) + '\n' +
     (await readFile(resolve(ROOT, 'js/derivations.js'), 'utf8')) +
-    '\n;globalThis.__t = { KHC_POINTS, pointsFor, pointsKindOf, drawCup, cupPhases, resolveCup, legendsAggregator, careerForUser, simulateOdds, seedFrom, buildOddsInput, KHC_CONFIG, zonesForTest: null };',
+    '\n;globalThis.__t = { drawUclLeague, resolveUcl, uclTable, KHC_POINTS, pointsFor, pointsKindOf, drawCup, cupPhases, resolveCup, legendsAggregator, careerForUser, simulateOdds, seedFrom, buildOddsInput, KHC_CONFIG, zonesForTest: null };',
     ctx
 );
 const T = ctx.__t;
@@ -136,4 +136,70 @@ test('Chances: mesma semente = mesmo resultado; soma das chances = vagas', () =>
     const sumReleg = Object.values(a).reduce((s, o) => s + o.releg, 0);
     assert.ok(Math.abs(sumPlayoffs - 6) < 1e-6, `playoffs somam ${sumPlayoffs}`);
     assert.ok(Math.abs(sumReleg - 3) < 1e-6, `queda soma ${sumReleg}`);
+});
+
+// ---------------------------------------------------------------------------
+// Copa KHC · formato Champions
+// ---------------------------------------------------------------------------
+
+const uclTeams = divs => divs.flatMap(t => Array.from({ length: 10 }, (_, i) => ({ key: `${t}:${i}`, tier: t })));
+const UCL_KO = { playoff: [9, 10], r16: [11, 12], qf: [13, 14], sf: [15, 16], final: [17] };
+
+for (const [label, divs, pots, perPot] of [
+    ['40 times, 2 potes', ['serie-a', 'serie-b', 'serie-c', 'serie-d'], [['serie-a', 'serie-b'], ['serie-c', 'serie-d']], 3],
+    ['60 times, 3 potes', ['serie-a', 'serie-b', 'serie-c', 'serie-d', 'serie-e', 'serie-f'], [['serie-a', 'serie-b'], ['serie-c', 'serie-d'], ['serie-e', 'serie-f']], 2]
+]) {
+    test(`Champions: sorteio da fase de liga (${label})`, () => {
+        const teams = uclTeams(divs);
+        const tierOf = Object.fromEntries(teams.map(t => [t.key, t.tier]));
+        const potOf = k => pots.findIndex(p => p.includes(tierOf[k]));
+        const weeks = plain(T.drawUclLeague(teams, { pots, perPot, seed: 's' }));
+        assert.deepEqual(weeks, plain(T.drawUclLeague(teams, { pots, perPot, seed: 's' })), 'reproduzível');
+        assert.equal(weeks.length, pots.length * perPot);
+        const opp = {};
+        weeks.forEach(week => {
+            const seen = new Set(week.flat());
+            assert.equal(seen.size, teams.length, 'todos jogam toda semana, uma vez');
+            week.forEach(([a, b]) => {
+                assert.notEqual(tierOf[a], tierOf[b], 'nunca a própria divisão');
+                (opp[a] = opp[a] || []).push(b);
+                (opp[b] = opp[b] || []).push(a);
+            });
+        });
+        teams.forEach(t => {
+            assert.equal(new Set(opp[t.key]).size, opp[t.key].length, 'sem repetir adversário');
+            pots.forEach((_, i) => assert.equal(opp[t.key].filter(o => potOf(o) === i).length, perPot, 'cota por pote'));
+        });
+    });
+}
+
+test('Champions: tabela, playoff 9×24…16×17, chave pela posição e pódio', () => {
+    const divs = ['serie-a', 'serie-b', 'serie-c', 'serie-d'];
+    const teams = uclTeams(divs);
+    const cfg = { pots: [['serie-a', 'serie-b'], ['serie-c', 'serie-d']], perPot: 3, seed: 's', leagueWeeks: [3, 4, 5, 6, 7, 8], knockout: UCL_KO };
+    // força: quanto menor o índice, mais pontos (resultado previsível)
+    const strength = Object.fromEntries(teams.map((t, i) => [t.key, 200 - i * 3]));
+    const scores = {};
+    for (let w = 3; w <= 17; w++) scores[w] = Object.fromEntries(teams.map(t => [t.key, strength[t.key] + (w % 3)]));
+    const cup = plain(T.resolveUcl(cfg, teams, scores, { leg: 17, lastScored: 17 }));
+    assert.equal(cup.leagueStatus, 'final');
+    assert.equal(cup.table.length, 40);
+    cup.table.forEach(r => assert.equal(r.j, 6));
+    const seeds = cup.table.map(r => r.key);
+    const playoff = cup.rounds.find(r => r.key === 'playoff');
+    assert.deepEqual(playoff.games.map(g => [g.a, g.b]), Array.from({ length: 8 }, (_, i) => [seeds[8 + i], seeds[23 - i]]));
+    const r16 = cup.rounds.find(r => r.key === 'r16');
+    assert.deepEqual(r16.games.map(g => g.a), [1, 8, 4, 5, 2, 7, 3, 6].map(s => seeds[s - 1]));
+    // 1º e 2º em lados opostos: só podem se cruzar na final
+    const sf = cup.rounds.find(r => r.key === 'sf');
+    assert.equal(sf.games[0].a, seeds[0]);
+    assert.equal(sf.games[1].a, seeds[1]);
+    assert.equal(new Set(cup.podium).size, 4);
+    assert.equal(cup.podium[0], seeds[0], 'o mais forte vence');
+    // empate no agregado: melhor posição na fase de liga
+    const g = cup.rounds.flatMap(r => r.games).find(x => x.ta === x.tb && x.winner);
+    if (g) {
+        const pos = k => seeds.indexOf(k);
+        assert.equal(g.winner, pos(g.a) < pos(g.b) ? 'a' : 'b');
+    }
 });

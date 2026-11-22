@@ -26,10 +26,22 @@ function resetCopaCache() {
     Object.keys(_copa).forEach(k => delete _copa[k]);
 }
 
-/** Configuração da Copa na temporada (ou null). */
+/** Configuração da Copa na temporada (ou null). format 'ucl' = estilo Champions (copa-ucl.js). */
 function copaConfig(season) {
     const c = (KHC_CONFIG[season || appState.season] || {}).copa;
-    return c && c.qualifying && c.bracket ? c : null;
+    if (!c) return null;
+    if (c.format === 'ucl') return c.pots && c.leagueWeeks && c.knockout ? c : null;
+    return c.qualifying && c.bracket ? c : null;
+}
+
+/** Primeira e última semana com placar usado pela Copa. */
+function copaWeekRange(cfg) {
+    if (cfg.format === 'ucl') {
+        const ko = cfg.knockout;
+        return { first: cfg.leagueWeeks[0], start: cfg.leagueWeeks[0], last: ko.final[ko.final.length - 1] };
+    }
+    // a semana anterior à classificatória entra para o desempate
+    return { first: cfg.qualifying - 1, start: cfg.qualifying, last: cfg.qualifying + cupPhases(cfg).length - 1 };
 }
 
 /**
@@ -57,9 +69,9 @@ async function loadCopa(cfg) {
     const leagues = copaLeagues();
     if (!leagues.length) throw new Error('sem divisões');
     const settings = await fetchLeagueSettings(leagues[0].info.id);
-    const last = cfg.qualifying + cupPhases(cfg).length - 1;
+    const { first, last } = copaWeekRange(cfg);
     const weeks = [];
-    for (let w = cfg.qualifying - 1; w <= Math.min(last, settings.leg); w++) if (w >= 1) weeks.push(w);
+    for (let w = first; w <= Math.min(last, settings.leg); w++) if (w >= 1) weeks.push(w);
     const scores = {};
     await Promise.all(weeks.map(async w => {
         const live = w > settings.lastScored;
@@ -125,12 +137,15 @@ function copaModel(data) {
 function copaLineupNoticeHTML() {
     const cfg = copaConfig();
     if (!cfg || isSeasonOver()) return '';
-    const last = cfg.qualifying + cupPhases(cfg).length - 1;
+    const { start, last } = copaWeekRange(cfg);
     const week = appState.nflState ? sanitizeNumber(appState.nflState.display_week, 0, 30, 0) : 0;
     if (week > last) return '';
+    const when = cfg.format === 'ucl'
+        ? `fase de liga nas semanas ${start} a ${cfg.leagueWeeks[cfg.leagueWeeks.length - 1]}, final na ${last}`
+        : `classificatória na semana ${start} e final na ${last}`;
     return `<div class="state-inline copa-notice" role="note">
         ${crestHTML('copa', 20)}
-        <span><b>Copa KHC${cfg.test ? ' (teste)' : ''}:</b> classificatória na semana ${cfg.qualifying} e final na ${last}. Quem cair nos playoffs da sua liga continua escalando o time.</span>
+        <span><b>Copa KHC${cfg.test ? ' (teste)' : ''}:</b> ${when}. Quem cair nos playoffs da sua liga continua escalando o time.</span>
     </div>`;
 }
 
@@ -191,6 +206,8 @@ function renderCopa() {
             action: '<button type="button" class="btn" data-action="reload">Tentar de novo</button>'
         }));
     }
+
+    if (cfg.format === 'ucl') return wrap(renderCopaUcl(entry.data, header));
 
     const m = copaModel(entry.data);
     const ph = m.phases[m.current];

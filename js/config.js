@@ -187,7 +187,9 @@ const appState = {
     season: Object.keys(KHC_CONFIG).sort().pop(),   // temporada mais recente configurada
     series: 'serie-a',        // tier selecionado nas abas Ligas e Rodada
     matchWeek: null,          // semana na aba Rodada (null = atual da liga)
-    copaPhase: null,          // fase aberta na Copa KHC (null = a da semana atual)
+    copaPhase: null,
+    copaLeagueView: 'tabela', // Copa estilo Champions: 'tabela' | 'jogos' da fase de liga
+    copaWeek: null,           // rodada aberta em "jogos" (null = a da semana atual)          // fase aberta na Copa KHC (null = a da semana atual)
     alsoView: 'tabela',       // Também na KHC: 'tabela' | 'rodada' (#/nba/rodada)
     alsoWeek: null,           // semana escolhida na Rodada de Também na KHC
     ligasViewChosen: false,   // escolheu a visão nesta sessão (vale sobre o padrão dos playoffs)

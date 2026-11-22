@@ -34,8 +34,8 @@ const API = 'https://api.sleeper.app/v1/league';
 const ctx = vm.createContext({ console });
 vm.runInContext((await readFile(resolve(ROOT, 'js/config.js'), 'utf8'))
     + '\n' + (await readFile(resolve(ROOT, 'js/derivations.js'), 'utf8'))
-    + '\n;globalThis.__khc = { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases };', ctx);
-const { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases } = ctx.__khc;
+    + '\n;globalThis.__khc = { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases, resolveUcl };', ctx);
+const { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases, resolveUcl } = ctx.__khc;
 
 async function fetchJson(url) {
     for (let attempt = 0; attempt < 4; attempt++) {
@@ -143,7 +143,9 @@ async function deriveLeague(league) {
  */
 async function deriveCup(cfg, copa) {
     const leagues = cfg.leagues.filter(l => isRegularSeries(l.tier));
-    const last = copa.qualifying + cupPhases(copa).length - 1;
+    const ucl = copa.format === 'ucl';   // estilo Champions: fase de liga + mata-mata em 2 semanas
+    const first = ucl ? copa.leagueWeeks[0] : copa.qualifying - 1;
+    const last = ucl ? copa.knockout.final[copa.knockout.final.length - 1] : copa.qualifying + cupPhases(copa).length - 1;
     const info = await fetchJson(`${API}/${leagues[0].id}`);
     const settings = { leg: info.settings?.leg ?? 0, lastScored: info.settings?.last_scored_leg ?? 0 };
     const keys = [], scores = {}, rowByKey = {};
@@ -156,13 +158,15 @@ async function deriveCup(cfg, copa) {
             const { eliminated, w, l: losses, t, ptsAgainst, ppts, ...row } = rowOf(r, userById);
             rowByKey[k] = row;
         });
-        for (let w = copa.qualifying - 1; w <= last; w++) {
+        for (let w = first; w <= last; w++) {
             const raw = await fetchJson(`${API}/${l.id}/matchups/${w}`);
             scores[w] = scores[w] || {};
             raw.forEach(m => { if (Number.isInteger(m.roster_id)) scores[w][`${l.tier}:${m.roster_id}`] = Math.max(0, Number(m.points) || 0); });
         }
     }
-    const cup = resolveCup(copa, keys, scores, settings);
+    const cup = ucl
+        ? resolveUcl(copa, keys.map(k => ({ key: k, tier: k.split(':')[0] })), scores, settings)
+        : resolveCup(copa, keys, scores, settings);
     if (!cup.podium || cup.podium.length < 4) throw new Error('Copa KHC: a final ou a disputa do 3º lugar ainda não terminou');
     return {
         id: SERIES_META.copa.id, name: SERIES_META.copa.name, kind: 'cup',

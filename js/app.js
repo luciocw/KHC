@@ -354,6 +354,19 @@ function bindEvents() {
         const target = e.target instanceof Element ? e.target : null;
         if (!target) return;
 
+        const copaView = target.closest('[data-copa-view]');
+        if (copaView) {
+            appState.copaLeagueView = copaView.getAttribute('data-copa-view') === 'jogos' ? 'jogos' : 'tabela';
+            renderView();
+            return;
+        }
+        const copaWeek = target.closest('[data-copa-week]');
+        if (copaWeek) {
+            appState.copaWeek = Number(copaWeek.getAttribute('data-copa-week'));
+            renderView();
+            return;
+        }
+
         const copaBtn = target.closest('[data-copa-phase]');
         if (copaBtn) {
             appState.copaPhase = Number(copaBtn.getAttribute('data-copa-phase'));
