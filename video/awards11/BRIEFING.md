@@ -46,7 +46,8 @@ Conta que vou usar, após a rodada 11 (R = 3 rodadas restantes):
 2. **Public Enemy #1 4–1**, que **perdeu a invencibilidade**. Na S10 estava 4–0 "lado a lado com a vaca".
 3. Panela do Lebrão 3–2 · 4. joaoW7 3–2 · 5. Caipiracicaba 2–3 · 6. Dogmans 13 2–3 · 7. VitorM05 1–4 · 8. **rdomok 0–5**, o único sem vitória.
 - Eficiência: Cruise e Caipiracicaba têm 95%, a melhor da liga.
-- O Ditador Rique continua comissário e sem time.
+- **Citar que a vaca segue em cima da árvore** (Cruise 5–0), pedido do usuário.
+- O Ditador não joga a NBA nesta temporada. Não precisa citar isso em todo vídeo (pedido do usuário).
 
 ### Cocoricó Premier League · após a rodada 10
 

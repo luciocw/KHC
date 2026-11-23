@@ -28,7 +28,7 @@ Os avatares não vão para o git (`.gitignore`). O `fetch_rodada.py` baixa de no
 ## Elenco e regras da zoeira
 
 - **Imperius Rex FC** e **Public Enemy #1** são os donos das ligas KHC. Todo vídeo deve zoar os dois de alguma forma (um selo, uma legenda, o fim…), mesmo quando eles não são o assunto da semana.
-- O dono do **Imperius Rex FC** (RiqueSantos) tem o apelido de **"Ditador Rique Infantinno"**. Na Cocoricó Premier League, o time dele é o "North London Dictator" (torce pro Tottenham). É comissário da NBA (National Burgundy Association), mas não tem time lá.
+- O dono do **Imperius Rex FC** (RiqueSantos) tem o apelido de **"Ditador Rique Infantinno"**. Na Cocoricó Premier League, o time dele é o "North London Dictator" (torce pro Tottenham). É comissário da NBA (National Burgundy Association), mas não tem time lá nesta temporada. Isso já foi zoado: não precisa citar em todo vídeo.
 - **Caipiracicaba** tem o apelido de **"o Vigarista"** (inspirado no Dick Vigarista da Corrida Maluca). Use o apelido quando ele aparecer. **Menos ênfase nele:** só ganha cena ou prêmio próprio se houver algo marcante (derrota muito grande, vitória relevante). Fora isso, não citar sozinho.
 - **Toda Prévia e todo Awards falam de todas as ligas**: Elite, A, B, C, D, Guilhotina e, quando houver assunto, KHC NBA (Burgundy) e Cocoricó Premier League (`video/fetch_tambem.py`).
 - **Nos vídeos, cite sempre o nome do time, nunca o nome da pessoa** (os cards e prints trazem nomes; no vídeo vai o time: "Los Pollos Hermanos", não "Lucio").
