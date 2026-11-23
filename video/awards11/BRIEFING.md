@@ -60,3 +60,13 @@ Conta que vou usar, após a rodada 11 (R = 3 rodadas restantes):
 6. Up the Irons!! 4–0–6 · 7. Caipiracicaba 4–0–6 · 8. Arena do Grêmio 4–0–6 · 9. Inaciombn18 3–0–7 · 10. **Gumagol971 2–0–8**, lanterna. Ele também está em 10º na Série B, com 99% de queda: lanterna em duas ligas.
 - O Rodolfo92 lidera a NBA (5–0) e está no trio de cima da Cocoricó.
 
+## Especial: "PARABÉNS, DITADOR!" (aprovado pelo usuário)
+
+Fato (Sleeper, após a rodada 11 da Cocoricó): o North London Dictator está em **2º com 7–0–4**, empatado em vitórias com o ThreeColor dos Pampas e o Cruise Sport Club. Fica à frente só pelos pontos (1.113,5 contra 1.067,75 e 1.057,75). O líder, Forest Ceará, está com 8–0–3. **Rodar o fetch de novo antes de montar.**
+
+Roteiro (cerca de 5 s, tom de homenagem irônica):
+1. Festa exagerada: confete 8-bit, fanfarra e faixa dourada "HOMENAGEM OFICIAL DA KHC". O North London Dictator em destaque: **2º lugar · Cocoricó PL**.
+2. Medalha de **prata** sobe e trava no meio do caminho. Legenda: **"Para um torcedor do Tottenham, é praticamente um título."**
+3. Carimbo menor no canto: **"\*empatado com mais dois. Vice no desempate."**, com a tabelinha 7–0–4, 7–0–4 e 7–0–4.
+4. Fecho (opção A): **"Henrique I decreta: vice agora conta como título."** Retoma o decreto da Prévia S9.
+
