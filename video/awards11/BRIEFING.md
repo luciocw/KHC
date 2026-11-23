@@ -37,3 +37,21 @@ Conta que vou usar, após a rodada 11 (R = 3 rodadas restantes):
 - Gancho para a Prévia S12: "Faltam 3. Quem ainda escapa?".
 - **Copa KHC 2027:** avisar que em 2027 terá a **Copa KHC**, então os times já decididos (classificados ou rebaixados) devem seguir escalados pelos donos, porque podem estar na disputa. **Não explicar como será a Copa**, só que ela existe e que vale continuar escalando.
 - Lembrar também: Guilhotina, NBA e Cocoricó; zoar os donos; o Vigarista só se houver fato marcante; nomes de time, não de pessoa.
+
+## Também na KHC (prints do usuário)
+
+### National Burgundy Association · após a rodada 5
+
+1. **Cruise Basketball 5–0** (2133,7 PF), o único invicto. A vaca segue no alto da árvore.
+2. **Public Enemy #1 4–1**, que **perdeu a invencibilidade**. Na S10 estava 4–0 "lado a lado com a vaca".
+3. Panela do Lebrão 3–2 · 4. joaoW7 3–2 · 5. Caipiracicaba 2–3 · 6. Dogmans 13 2–3 · 7. VitorM05 1–4 · 8. **rdomok 0–5**, o único sem vitória.
+- Eficiência: Cruise e Caipiracicaba têm 95%, a melhor da liga.
+- O Ditador Rique continua comissário e sem time.
+
+### Cocoricó Premier League · após a rodada 10
+
+1. Forest Ceará 7–0–3 · 2. ThreeColor dos Pampas 7–0–3 · 3. Cruise Sport Club 7–0–3, **três empatados no topo**.
+4. Alvinegro Praiano 6–0–4 · 5. **North London Dictator 6–0–4**. É o Ditador, com o **menor PC da liga** (827,0): defesa de ditador.
+6. Up the Irons!! 4–0–6 · 7. Caipiracicaba 4–0–6 · 8. Arena do Grêmio 4–0–6 · 9. Inaciombn18 3–0–7 · 10. **Gumagol971 2–0–8**, lanterna. Ele também está em 10º na Série B, com 99% de queda: lanterna em duas ligas.
+- O Rodolfo92 lidera a NBA (5–0) e está no trio de cima da Cocoricó.
+
