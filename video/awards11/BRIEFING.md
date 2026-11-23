@@ -22,7 +22,11 @@ Conta que vou usar, após a rodada 11 (R = 3 rodadas restantes):
 - **Classificado (top k):** mesmo que o time X perca os 3, no máximo k−1 rivais conseguem chegar a **igualar ou passar** as vitórias atuais dele (rival: vitórias + 3). Empate conta como "pode passar", porque o desempate por pontos não dá 100%.
 - **Rebaixado:** mesmo que X vença os 3 (vitórias + 3), ainda há pelo menos 7 times com **mais** vitórias que isso **hoje**. Empate conta como "pode escapar".
 - **Fora dos playoffs:** mesmo vencendo os 3, pelo menos k rivais já têm **mais** vitórias hoje.
-- Confrontos diretos das rodadas 12–14 só deixam a conta mais apertada. Se eu não fechar com eles, a conta conservadora acima vale.
+- **Confrontos diretos contam (observação do usuário):** se dois perseguidores se enfrentam numa das rodadas restantes, os dois não podem ganhar os 3 jogos. Assim, 3 vitórias de vantagem podem bastar para classificar.
+- **Método:** testar **todos os resultados possíveis** das rodadas 12–14. São 5 jogos por rodada, 15 jogos e 2^15 = 32.768 cenários por série, então o cálculo é rápido e exato.
+  - **Classificado:** fica no top k em **todos** os cenários, mesmo com cada empate em vitórias decidido **contra** ele.
+  - **Rebaixado:** fica entre os 3 últimos em **todos** os cenários, mesmo com cada empate decidido **a favor** dele.
+  - Assim os confrontos diretos entram na conta, e o desempate por pontos nunca é presumido. Resultado: 100% ou nada.
 
 ### Dados estatísticos do site (o usuário pediu para usar)
 
