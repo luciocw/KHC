@@ -68,5 +68,5 @@ Roteiro (cerca de 5 s, tom de homenagem irônica):
 1. Festa exagerada: confete 8-bit, fanfarra e faixa dourada "HOMENAGEM OFICIAL DA KHC". O North London Dictator em destaque: **2º lugar · Cocoricó PL**.
 2. Medalha de **prata** sobe e trava no meio do caminho. Legenda: **"Para um torcedor do Tottenham, é praticamente um título."**
 3. Carimbo menor no canto: **"\*empatado com mais dois. Vice no desempate."**, com a tabelinha 7–0–4, 7–0–4 e 7–0–4.
-4. Fecho (opção A): **"Henrique I decreta: vice agora conta como título."** Retoma o decreto da Prévia S9.
+4. Fecho (opção A): **"Henrique I decreta: vice agora conta como título."** e, em seguida, **"Mesmo faltando 27 rodadas."** A Premier League tem 38 rodadas: 38 − 11 = 27. Retoma o decreto da Prévia S9.
 
