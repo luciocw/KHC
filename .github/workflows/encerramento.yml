@@ -1,8 +1,8 @@
-# Fecha uma temporada pelo GitHub, sem terminal (passo a passo em
-# docs/fechar-temporada.md): roda scripts/derive-season.mjs, confere os
-# testes e grava data/<ano>.json numa branch `fechamento-<ano>`. Nada vai
+# Encerra uma temporada pelo GitHub, sem terminal (passo a passo em
+# ENCERRAMENTO-TEMPORADA.md): roda scripts/derive-season.mjs, confere os
+# testes e grava data/<ano>.json numa branch `encerramento-<ano>`. Nada vai
 # para a main sozinho: o dono abre o pull request e faz o merge pelo site.
-name: Fechar temporada
+name: Encerrar temporada
 
 on:
   workflow_dispatch:
@@ -15,11 +15,11 @@ permissions:
   contents: write
 
 concurrency:
-  group: fechamento
+  group: encerramento
   cancel-in-progress: false
 
 jobs:
-  fechar:
+  encerrar:
     runs-on: ubuntu-latest
     env:
       ANO: ${{ github.event.inputs.season }}
@@ -34,26 +34,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Fechar a temporada (lê o Sleeper)
+      - name: Encerrar a temporada (lê o Sleeper)
         run: node scripts/derive-season.mjs "$ANO"
       - name: Testes das contas
         run: node --test tests/*.test.mjs
-      - name: Gravar na branch fechamento-${{ github.event.inputs.season }}
+      - name: Gravar na branch encerramento-${{ github.event.inputs.season }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898797+github-actions[bot]@users.noreply.github.com"
-          git checkout -b "fechamento-$ANO"
+          git checkout -b "encerramento-$ANO"
           git add "data/$ANO.json"
-          git commit -m "Fechamento da temporada $ANO"
-          git push -f origin "fechamento-$ANO"
+          git commit -m "Encerramento da temporada $ANO"
+          git push -f origin "encerramento-$ANO"
       - name: Próximo passo
         run: |
           {
-            echo "## Temporada $ANO fechada ✅"
+            echo "## Temporada $ANO encerrada ✅"
             echo
-            echo "O arquivo \`data/$ANO.json\` está na branch \`fechamento-$ANO\`. Falta colocar no site:"
+            echo "O arquivo \`data/$ANO.json\` está na branch \`encerramento-$ANO\`. Falta colocar no site:"
             echo
-            echo "1. Abra este link: https://github.com/${GITHUB_REPOSITORY}/compare/main...fechamento-$ANO?expand=1"
+            echo "1. Abra este link: https://github.com/${GITHUB_REPOSITORY}/compare/main...encerramento-$ANO?expand=1"
             echo "2. Clique em **Create pull request** (duas vezes)."
             echo "3. Espere o check **testes** ficar verde e clique em **Merge pull request** → **Confirm merge**."
           } >> "$GITHUB_STEP_SUMMARY"

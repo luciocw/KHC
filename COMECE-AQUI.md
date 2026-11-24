@@ -50,7 +50,7 @@ Para gravar, a máquina precisa de Node com Playwright/Chromium, `ffmpeg` e Pyth
 
 Grava o resultado final (classificação, troféus e todos os confrontos) no `data/<ano>.json`. O site passa a tratar o ano como fechado e soma os Pontos KHC nas Lendas.
 
-**Passo a passo para leigos em [`docs/fechar-temporada.md`](docs/fechar-temporada.md).** O caminho mais fácil é pelo GitHub, no navegador e sem terminal: **Actions → Fechar temporada → Run workflow**, digitar o ano e depois aprovar o pull request.
+**Passo a passo para leigos em [`ENCERRAMENTO-TEMPORADA.md`](ENCERRAMENTO-TEMPORADA.md).** O caminho mais fácil é pelo GitHub, no navegador e sem terminal: **Actions → Encerrar temporada → Run workflow**, digitar o ano e depois aprovar o pull request.
 
 ### Começo de temporada nova
 
