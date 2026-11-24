@@ -1,0 +1,121 @@
+{
+ "elite": {
+  "games_left": 12,
+  "classificados": [
+   "GORDINHAS AJEITADAS",
+   "Los Pollos Hermanos"
+  ],
+  "fora_dos_playoffs": [
+   "Timbatível"
+  ],
+  "rebaixados": [],
+  "salvos": [],
+  "vd": {
+   "Los Pollos Hermanos": 8,
+   "Diogoashura": 6,
+   "Quack Attack": 4,
+   "Public Enemy #1": 4,
+   "Poker do Neymar": 7,
+   "Timbatível": 2,
+   "Fofura e Fé": 4,
+   "GORDINHAS AJEITADAS": 9
+  }
+ },
+ "serie-a": {
+  "games_left": 15,
+  "classificados": [
+   "VoliBEARS"
+  ],
+  "fora_dos_playoffs": [],
+  "rebaixados": [],
+  "salvos": [
+   "VoliBEARS"
+  ],
+  "vd": {
+   "Imperius Rex FC": 6,
+   "Los Pollos Hermanos": 4,
+   "Caipiracicaba": 4,
+   "Diogoashura": 4,
+   "Public Enemy #1": 7,
+   "سانتا کروز": 6,
+   "Cruzeiro do Neymar SFC": 3,
+   "VoliBEARS": 9,
+   "Timbatível": 7,
+   "Fofura e Fé": 5
+  }
+ },
+ "serie-b": {
+  "games_left": 15,
+  "classificados": [
+   "RegisCarrara"
+  ],
+  "fora_dos_playoffs": [],
+  "rebaixados": [],
+  "salvos": [
+   "Explosion Raiders",
+   "GORDINHAS AJEITADAS",
+   "Quack Attack",
+   "RegisCarrara"
+  ],
+  "vd": {
+   "Ceará Dolphins": 3,
+   "Gumagol971": 2,
+   "wladspfc": 3,
+   "Quack Attack": 7,
+   "BigFieldMS": 5,
+   "Explosion Raiders": 7,
+   "RegisCarrara": 9,
+   "SiaraBigheads": 6,
+   "GORDINHAS AJEITADAS": 8,
+   "alb2106": 5
+  }
+ },
+ "serie-c": {
+  "games_left": 15,
+  "classificados": [
+   "San Andreas Chiefs",
+   "joaoW7"
+  ],
+  "fora_dos_playoffs": [
+   "Kelce Gremista"
+  ],
+  "rebaixados": [],
+  "salvos": [
+   "Fogo na Bomba",
+   "Mangue Chiefs 🦀",
+   "San Andreas Chiefs",
+   "joaoW7"
+  ],
+  "vd": {
+   "romanerinha": 3,
+   "San Andreas Chiefs": 8,
+   "DMK Steel Curtain": 5,
+   "Mangue Chiefs 🦀": 7,
+   "Kelce Gremista": 2,
+   "086 Football": 6,
+   "WI Redentor": 3,
+   "Pandemônio FC": 5,
+   "Fogo na Bomba": 7,
+   "joaoW7": 9
+  }
+ },
+ "serie-d": {
+  "games_left": 15,
+  "classificados": [],
+  "fora_dos_playoffs": [],
+  "rebaixados": [],
+  "salvos": [],
+  "vd": {
+   "New England Patriotas": 8,
+   "Correia49 KHC": 3,
+   "Claudianosilva": 5,
+   "Green N Gold": 6,
+   "VitorM05": 8,
+   "DH8 Red&Gold": 3,
+   "Elieser": 4,
+   "LeandroGaucho": 8,
+   "Just Maried": 5,
+   "polvorje": 5
+  }
+ }
+}
