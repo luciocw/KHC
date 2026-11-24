@@ -1,0 +1,59 @@
+# Encerra uma temporada pelo GitHub, sem terminal (passo a passo em
+# ENCERRAMENTO-TEMPORADA.md): roda scripts/derive-season.mjs, confere os
+# testes e grava data/<ano>.json numa branch `encerramento-<ano>`. Nada vai
+# para a main sozinho: o dono abre o pull request e faz o merge pelo site.
+name: Encerrar temporada
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        description: 'Ano da temporada (ex.: 2026)'
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: encerramento
+  cancel-in-progress: false
+
+jobs:
+  encerrar:
+    runs-on: ubuntu-latest
+    env:
+      ANO: ${{ github.event.inputs.season }}
+    steps:
+      - name: Conferir o ano
+        run: |
+          if ! [[ "$ANO" =~ ^[0-9]{4}$ ]]; then
+            echo "::error::Digite só o ano, com 4 números (ex.: 2026). Recebido: '$ANO'"
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Encerrar a temporada (lê o Sleeper)
+        run: node scripts/derive-season.mjs "$ANO"
+      - name: Testes das contas
+        run: node --test tests/*.test.mjs
+      - name: Gravar na branch encerramento-${{ github.event.inputs.season }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898797+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "encerramento-$ANO"
+          git add "data/$ANO.json"
+          git commit -m "Encerramento da temporada $ANO"
+          git push -f origin "encerramento-$ANO"
+      - name: Próximo passo
+        run: |
+          {
+            echo "## Temporada $ANO encerrada ✅"
+            echo
+            echo "O arquivo \`data/$ANO.json\` está na branch \`encerramento-$ANO\`. Falta colocar no site:"
+            echo
+            echo "1. Abra este link: https://github.com/${GITHUB_REPOSITORY}/compare/main...encerramento-$ANO?expand=1"
+            echo "2. Clique em **Create pull request** (duas vezes)."
+            echo "3. Espere o check **testes** ficar verde e clique em **Merge pull request** → **Confirm merge**."
+          } >> "$GITHUB_STEP_SUMMARY"

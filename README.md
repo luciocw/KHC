@@ -21,6 +21,7 @@ Site em **HTML/CSS/JS puro**: sem framework, sem build e sem backend. Publicado 
 | Documento | Conteúdo |
 |---|---|
 | [`COMECE-AQUI.md`](COMECE-AQUI.md) | Guia de entrada: mapa, rotina, acessos, pendências |
+| [`ENCERRAMENTO-TEMPORADA.md`](ENCERRAMENTO-TEMPORADA.md) | **Encerrar a temporada, passo a passo para leigos** (pelo GitHub, pelo Claude ou pelo terminal) |
 | [`docs/funcionalidades.md`](docs/funcionalidades.md) | Cada tela em detalhe, com endereço e arquivo |
 | [`docs/copa.md`](docs/copa.md) | Copa KHC (clássica e estilo Champions) e a simulação Champions KHC |
 | [`docs/lendas.md`](docs/lendas.md) | Pontos KHC, Lendas e desempates |
@@ -42,6 +43,4 @@ python3 -m http.server 8000      # e abra http://localhost:8000
 node --test tests/*.test.mjs     # testes das contas
 ```
 
-```bash
-node scripts/derive-season.mjs 2026   # fechar a temporada (depois da semana 17)
-```
+Encerrar a temporada (depois da semana 17): pelo GitHub em **Actions → Encerrar temporada**, ou com `node scripts/derive-season.mjs 2026`. Passo a passo em [`ENCERRAMENTO-TEMPORADA.md`](ENCERRAMENTO-TEMPORADA.md).
