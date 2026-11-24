@@ -55,6 +55,8 @@ Clique na linha vermelha, depois em **encerrar** e no passo que ficou com ❌, e
 | "Sleeper falhou" / "HTTP 5xx" | O Sleeper estava fora do ar. Tente de novo mais tarde |
 | Erro nos **Testes das contas** | Não faça o merge. Peça ajuda (ao Claude ou a quem cuida do código) e mande o print da mensagem |
 
+Se o resumo disser **"nada a fazer"**, a temporada já estava registrada exatamente assim no site: não há pull request para abrir. Se aparecer o aviso **"já tinha registro no site e este resultado é diferente"**, só faça o merge se a intenção for corrigir o registro.
+
 Rodar de novo não causa problema: o arquivo da branch `encerramento-<ano>` é simplesmente substituído.
 
 ---
