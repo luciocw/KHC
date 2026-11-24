@@ -1,6 +1,6 @@
 # Comece aqui
 
-Guia de entrada para quem vai assumir a KHC, seja uma pessoa ou uma IA. Em 10 minutos você sabe o que tem aqui, o que roda sozinho e o que precisa ser feito à mão. O detalhe de cada funcionalidade fica no [`README.md`](README.md).
+Guia de entrada para quem vai assumir a KHC, seja uma pessoa ou uma IA. Em 10 minutos você sabe o que tem aqui, o que roda sozinho e o que precisa ser feito à mão. O detalhe de cada parte está em [`docs/`](docs/), com o índice no [`README.md`](README.md).
 
 ## O que é
 
@@ -19,12 +19,13 @@ Este repositório tem duas coisas:
 | `js/derivations.js` | Todas as contas: Power Ranking, Chances, Copa, Champions e Lendas. Não depende da tela, e os testes rodam em cima dele |
 | `js/tabs/*.js` | Uma tela por arquivo. `regras.js` é a aba Regras, que explica as contas para o público |
 | `js/app.js`, `js/api.js`, `js/data.js` | Navegação, busca no Sleeper com cache, temporadas fechadas |
-| `data/<ano>.json` | Registro fechado de cada temporada (gerado por script, não editar à mão) |
+| `data/<ano>.json` | Registro fechado de cada temporada, com classificação, troféus e todos os confrontos (gerado por script, não editar à mão; formato em [`docs/dados.md`](docs/dados.md)) |
 | `data/chances-<ano>.json` | Chances de cada time após cada rodada (gravado sozinho pelo GitHub Actions) |
 | `scripts/derive-season.mjs` | Fecha a temporada e gera o `data/<ano>.json` |
 | `video/` | Motor dos vídeos e uma pasta por vídeo. **Índice dos vídeos de 2026 em [`video/README.md`](video/README.md)** |
 | `scripts/trilha/` | Trilhas 8-bit, uma por vídeo ([`scripts/trilha/README.md`](scripts/trilha/README.md)) |
 | `tests/contas.test.mjs` | Testes das contas, sem rede |
+| `docs/` | Documentação detalhada: funcionalidades, Copa, Lendas, dados, arquitetura |
 | `CLAUDE.md` | Regras da casa (valem para pessoas também) |
 | `.claude/skills/` | Passo a passo que o Claude segue para fazer vídeo (`video-khc`) e trilha (`trilha-khc`) |
 
@@ -43,21 +44,23 @@ Prévia (antes da rodada) e Awards (depois que ela fecha). O processo está em `
 
 Para gravar, a máquina precisa de Node com Playwright/Chromium, `ffmpeg` e Python 3 com `numpy`.
 
+**Som:** cada temporada tem um estilo de trilha, registrado em `video/README.md`. Em 2026 foi 8-bit estilo Super Mario; o de 2027 ainda será decidido.
+
 ### Fim da temporada (depois da semana 17)
 
-1. `node scripts/derive-season.mjs <ano>`: grava classificação final, troféus e os placares de todas as semanas (é deles que a Copa e a Champions KHC passam a sair, sem Sleeper).
+1. `node scripts/derive-season.mjs <ano>`: grava classificação final, troféus e os confrontos de todas as semanas. Com eles, Rodada, Chaveamento, Copa e Champions KHC da temporada passam a sair do arquivo, sem Sleeper.
 2. Commit do `data/<ano>.json` e merge na `main`. O site passa a tratar o ano como fechado e soma os Pontos KHC nas Lendas.
 
 ### Começo de temporada nova
 
-O Sleeper gera IDs novos para as ligas todo ano. Acrescente o ano em `KHC_CONFIG` (`js/config.js`) e revise os textos da aba Regras e da landing. O passo a passo está no README, em "Como atualizar quando a Sleeper renovar as ligas".
+O Sleeper gera IDs novos para as ligas todo ano. Acrescente o ano em `KHC_CONFIG` (`js/config.js`) e revise os textos da aba Regras e da landing. O passo a passo está em [`docs/dados.md`](docs/dados.md).
 
 ## Copa KHC e Champions KHC
 
 - **Copa KHC** (`copa` em `config.js`): mata-mata do site, classificatória na semana 12 e final na 17. Em 2026 roda **em teste** (`test: true`, não soma Pontos KHC) e vale para valer em 2027.
 - **Champions KHC** (`copaSim`, página `#/copa-champions`): simulação do formato Champions, uma proposta para 2027, refeita com os jogos reais de 2026. Não é oficial.
 - As duas usam a mesma conta do fechamento (`resolveCup` / `resolveUcl` em `derivations.js`), com sorteio por semente fixa: dá sempre o mesmo resultado, então qualquer um pode conferir.
-- Depois que 2026 fechar, as duas saem dos placares gravados no `data/2026.json` e continuam de pé mesmo que o Sleeper apague as ligas antigas.
+- Depois que 2026 fechar, as duas saem dos confrontos gravados no `data/2026.json` e continuam de pé mesmo que o Sleeper apague as ligas antigas. Detalhes em [`docs/copa.md`](docs/copa.md).
 
 ## Acessos de que você precisa
 
@@ -67,14 +70,13 @@ O Sleeper gera IDs novos para as ligas todo ano. Acrescente o ano em `KHC_CONFIG
 ## Como trabalhar
 
 - Mudanças por branch e pull request para a `main`. Use nomes de branch que digam o que está sendo feito.
-- Mudou regra ou conta? Atualize no mesmo PR a aba Regras (`js/tabs/regras.js`) e o `README.md`, rode `node --test tests/*.test.mjs` e acrescente um teste (ver `CLAUDE.md`).
+- Mudou regra ou conta? Atualize no mesmo PR a aba Regras (`js/tabs/regras.js`) e a documentação (`README.md` / `docs/`), rode `node --test tests/*.test.mjs` e acrescente um teste (ver `CLAUDE.md`).
 - Textos do site em português do Brasil.
 - Para rodar o site local: `python3 -m http.server 8000` e abra http://localhost:8000.
 
 ## Pendências conhecidas
 
-- **Os MP4 dos vídeos não ficam no git.** Dá para gravar de novo a partir de cada pasta (ver `video/README.md`), mas o arquivo publicado só existe onde foi compartilhado.
+- **Os MP4 dos vídeos não ficam guardados (decisão do dono).** O que fica é o que permite refazer: cenas, dados e trilha de cada vídeo, mais o estilo de som de cada temporada em `video/README.md`.
 - **Roteiros:** só 4 vídeos têm `BRIEFING.md`. Nos outros, a ideia das cenas está no `index.html` e nas mensagens de commit. Daqui em diante, salve o roteiro na pasta do vídeo.
 - **Awards da Semana 4:** só a trilha ficou (`scripts/trilha/awards4.py`). **Awards da Semana 9:** não foi feito.
-- **Rodada e Chaveamento de temporadas fechadas** ainda buscam os placares no Sleeper. Só a Copa e a Champions saem do arquivo.
 - **Botão "Quero jogar" da landing:** ainda sem destino, à espera do link de inscrição.

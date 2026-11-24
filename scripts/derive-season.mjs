@@ -14,17 +14,19 @@
 //   - Copa KHC (kind: 'cup', quando KHC_CONFIG[ano].copa não é teste): pódio
 //     1º–4º com a mesma conta do site (resolveCup). `--so-copa` só confere a
 //     Copa; `--classificatoria N` simula outra semana classificatória.
-//   - Placares de cada semana das divisões (weeklyScores): com eles, a Copa e
-//     a Champions KHC da temporada fechada saem do arquivo, sem Sleeper.
-//     `--so-placares` só acrescenta os placares a um data/<ano>.json que já
+//   - Confrontos de cada semana, chaveamento e configurações de cada liga
+//     (rounds, menos a Guilhotina): com eles, Rodada, Chaveamento, Copa e
+//     Champions KHC da temporada fechada saem do arquivo, sem Sleeper.
+//     `--so-placares` só acrescenta `rounds` a um data/<ano>.json que já
 //     existe (temporada fechada antes desta opção), sem mexer no resto.
 // Para se a temporada não acabou (final ou 3º lugar sem vencedor).
 //
 // Saída: { id, status: 'final', series: [ { id, name, kind?, teams: [
 //   { rank, rosterId, userId, user, team, avatarId, w, l, t?, pts, ptsAgainst,
 //     ppts, trophy?, cut? } ] } ],
-//   weeklyScores: { settings: { leg, lastScored },
-//     weeks: { "<semana>": { "<tier>:<rosterId>": pontos } } } }
+//   rounds: { "<tier>": { settings: { leg, lastScored, playoffStart, playoffTeams },
+//     bracket: [ { m, r, p, t1, t2, w, l, t1_from, t2_from } ],
+//     weeks: { "<semana>": [ [rosterId, matchupId|null, pontos] ] } } } }
 // O arquivo é o registro da temporada: o site mostra a temporada fechada só
 // com ele (nomes e números da época), e liga jogador por userId.
 
@@ -40,8 +42,8 @@ const API = 'https://api.sleeper.app/v1/league';
 const ctx = vm.createContext({ console });
 vm.runInContext((await readFile(resolve(ROOT, 'js/config.js'), 'utf8'))
     + '\n' + (await readFile(resolve(ROOT, 'js/derivations.js'), 'utf8'))
-    + '\n;globalThis.__khc = { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases, resolveUcl, REGULAR_SEASON_WEEKS };', ctx);
-const { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases, resolveUcl, REGULAR_SEASON_WEEKS } = ctx.__khc;
+    + '\n;globalThis.__khc = { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases, resolveUcl, REGULAR_SEASON_WEEKS, archivedCopaScores };', ctx);
+const { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases, resolveUcl, REGULAR_SEASON_WEEKS, archivedCopaScores } = ctx.__khc;
 
 // última semana de fantasy (final dos playoffs das séries)
 const LAST_WEEK = REGULAR_SEASON_WEEKS + 3;
@@ -145,25 +147,42 @@ async function deriveLeague(league) {
 }
 
 /**
- * Placares de todas as semanas (1 até a final) das divisões que entram na
- * Copa: semana → "<tier>:<rosterId>" → pontos. Vai para o data/<ano>.json.
+ * Registro de cada liga (menos a Guilhotina): configurações, chaveamento e
+ * confrontos de todas as semanas jogadas. Vai para o data/<ano>.json.
  * @param {Object} cfg  KHC_CONFIG[ano]
- * @returns {Promise<{settings: {leg: number, lastScored: number}, weeks: Object}>}
+ * @returns {Promise<Object<string, Object>>} tier → registro
  */
-async function fetchWeeklyScores(cfg) {
-    const leagues = cfg.leagues.filter(l => isRegularSeries(l.tier));
-    if (!leagues.length) throw new Error('sem divisões em js/config.js');
-    const info = await fetchJson(`${API}/${leagues[0].id}`);
-    const settings = { leg: info.settings?.leg ?? 0, lastScored: info.settings?.last_scored_leg ?? 0 };
-    const weeks = {};
-    for (let w = 1; w <= Math.min(LAST_WEEK, settings.leg || LAST_WEEK); w++) {
-        weeks[w] = {};
-        for (const l of leagues) {
-            const raw = await fetchJson(`${API}/${l.id}/matchups/${w}`);
-            raw.forEach(m => { if (Number.isInteger(m.roster_id)) weeks[w][`${l.tier}:${m.roster_id}`] = round2(Math.max(0, Number(m.points) || 0)); });
+async function fetchRounds(cfg) {
+    const rounds = {};
+    const int = v => (Number.isInteger(v) ? v : null);
+    const from = f => (f && Number.isInteger(f.w) ? { w: f.w } : f && Number.isInteger(f.l) ? { l: f.l } : null);
+    for (const l of cfg.leagues.filter(x => !isGuillotine(x.tier))) {
+        const base = `${API}/${l.id}`;
+        const [info, bracket] = await Promise.all([fetchJson(base), fetchJson(`${base}/winners_bracket`)]);
+        const st = info.settings || {};
+        const settings = { leg: st.leg ?? 0, lastScored: st.last_scored_leg ?? 0, playoffStart: st.playoff_week_start ?? REGULAR_SEASON_WEEKS + 1, playoffTeams: st.playoff_teams ?? 0 };
+        const weeks = {};
+        for (let w = 1; w <= Math.min(LAST_WEEK, settings.leg || LAST_WEEK); w++) {
+            const raw = await fetchJson(`${base}/matchups/${w}`);
+            weeks[w] = raw.filter(m => Number.isInteger(m.roster_id))
+                .sort((a, b) => a.roster_id - b.roster_id)
+                .map(m => [m.roster_id, int(m.matchup_id), round2(Math.max(0, Number(m.points) || 0))]);
         }
+        rounds[l.tier] = {
+            settings,
+            bracket: (bracket || []).filter(g => Number.isInteger(g.m)).map(g => ({
+                m: g.m, r: g.r, p: int(g.p), t1: int(g.t1), t2: int(g.t2), w: int(g.w), l: int(g.l),
+                t1_from: from(g.t1_from), t2_from: from(g.t2_from)
+            })),
+            weeks
+        };
     }
-    return { settings, weeks };
+    return rounds;
+}
+
+/** JSON com 2 espaços, mas cada confronto [rosterId, matchupId, pontos] numa linha só. */
+function toJson(obj) {
+    return JSON.stringify(obj, null, 2).replace(/\[\s+(-?[\d.]+|null),\s+(-?[\d.]+|null),\s+(-?[\d.]+|null)\s+\]/g, '[$1, $2, $3]') + '\n';
 }
 
 /**
@@ -171,13 +190,17 @@ async function fetchWeeklyScores(cfg) {
  * no histórico quando a Copa não é teste (soma Pontos KHC).
  * @param {Object} cfg  KHC_CONFIG[ano]
  * @param {Object} copa  cfg.copa (dá para sobrescrever a semana nos testes)
- * @param {Object} weekly  fetchWeeklyScores(cfg)
+ * @param {Object} rounds  fetchRounds(cfg)
  */
-async function deriveCup(cfg, copa, weekly) {
+async function deriveCup(cfg, copa, rounds) {
     const leagues = cfg.leagues.filter(l => isRegularSeries(l.tier));
     const ucl = copa.format === 'ucl';   // estilo Champions: fase de liga + mata-mata em 2 semanas
-    const settings = weekly.settings;
-    const scores = weekly.weeks;
+    const first = ucl ? copa.leagueWeeks[0] : copa.qualifying - 1;
+    const last = ucl ? copa.knockout.final[copa.knockout.final.length - 1] : copa.qualifying + cupPhases(copa).length - 1;
+    // mesma leitura do site para temporada fechada
+    const saved = archivedCopaScores({ rounds }, leagues.map(l => l.tier), first, last);
+    if (!saved) throw new Error('Copa KHC: faltam semanas da Copa nos confrontos do Sleeper');
+    const { settings, scores } = saved;
     const keys = [], rowByKey = {};
     for (const l of leagues) {
         const [users, rosters] = await Promise.all([fetchJson(`${API}/${l.id}/users`), fetchJson(`${API}/${l.id}/rosters`)]);
@@ -207,7 +230,7 @@ async function main() {
     const year = args.find(a => /^\d{4}$/.test(a));
     const outArg = args.indexOf('--saida');
     const onlyCup = args.includes('--so-copa');                 // conferir a Copa sem fechar a temporada
-    const onlyScores = args.includes('--so-placares');          // só acrescenta weeklyScores ao arquivo
+    const onlyScores = args.includes('--so-placares');          // só acrescenta rounds ao arquivo
     const qArg = args.indexOf('--classificatoria');              // teste: outra semana classificatória
     const cfg = year && KHC_CONFIG[year];
     if (!cfg) {
@@ -218,7 +241,7 @@ async function main() {
     if (onlyCup) {
         if (!cfg.copa) throw new Error(`${year} não tem Copa em js/config.js`);
         const copa = { ...cfg.copa, ...(qArg >= 0 ? { qualifying: Number(args[qArg + 1]) } : {}) };
-        const s = await deriveCup(cfg, copa, await fetchWeeklyScores(cfg));
+        const s = await deriveCup(cfg, copa, await fetchRounds(cfg));
         console.log(`Copa KHC ${year}${copa.test ? ' (teste)' : ''}, classificatória na semana ${copa.qualifying}:`);
         s.teams.forEach(t => console.log(`  ${t.rank}. ${t.user} (${t.team}) [${t.trophy}]`));
         return;
@@ -228,10 +251,11 @@ async function main() {
 
     if (onlyScores) {
         const snap = JSON.parse(await readFile(outPath, 'utf8'));
-        console.log(`Placares semana a semana de ${year}…`);
-        snap.weeklyScores = await fetchWeeklyScores(cfg);
-        await writeFile(outPath, JSON.stringify(snap, null, 2) + '\n');
-        console.log(`Salvo em ${outPath} (${Object.keys(snap.weeklyScores.weeks).length} semanas)`);
+        console.log(`Confrontos semana a semana de ${year}…`);
+        snap.rounds = await fetchRounds(cfg);
+        await writeFile(outPath, toJson(snap));
+        Object.entries(snap.rounds).forEach(([t, r]) => console.log(`  ${t}: ${Object.keys(r.weeks).length} semanas, ${r.bracket.length} jogos no chaveamento`));
+        console.log(`Salvo em ${outPath}`);
         return;
     }
 
@@ -242,16 +266,16 @@ async function main() {
         console.log(`  → ${league.name} (${league.id})`);
         series.push(await deriveLeague(league));
     }
-    // placares semana a semana: Copa e Champions KHC da temporada fechada sem Sleeper
-    console.log('  → placares semana a semana');
-    const weeklyScores = await fetchWeeklyScores(cfg);
+    // confrontos semana a semana: Rodada, Chaveamento, Copa e Champions KHC sem Sleeper
+    console.log('  → confrontos semana a semana');
+    const rounds = await fetchRounds(cfg);
     if (cfg.copa && !cfg.copa.test) {
         console.log('  → Copa KHC');
-        series.push(await deriveCup(cfg, cfg.copa, weeklyScores));
+        series.push(await deriveCup(cfg, cfg.copa, rounds));
     }
 
-    const snapshot = { id: Number(year), status: 'final', series, weeklyScores };
-    await writeFile(outPath, JSON.stringify(snapshot, null, 2) + '\n');
+    const snapshot = { id: Number(year), status: 'final', series, rounds };
+    await writeFile(outPath, toJson(snapshot));
     console.log(`\nSalvo em ${outPath}`);
 
     for (const s of series) {

@@ -13,7 +13,7 @@ const ctx = vm.createContext({ console });
 vm.runInContext(
     (await readFile(resolve(ROOT, 'js/config.js'), 'utf8')) + '\n' +
     (await readFile(resolve(ROOT, 'js/derivations.js'), 'utf8')) +
-    '\n;globalThis.__t = { archivedCopaScores, drawUclLeague, resolveUcl, uclTable, KHC_POINTS, pointsFor, pointsKindOf, drawCup, cupPhases, resolveCup, legendsAggregator, careerForUser, simulateOdds, seedFrom, buildOddsInput, KHC_CONFIG, zonesForTest: null };',
+    '\n;globalThis.__t = { archivedCopaScores, archivedLeague, archivedRound, archivedBracket, archivedSettings, drawUclLeague, resolveUcl, uclTable, KHC_POINTS, pointsFor, pointsKindOf, drawCup, cupPhases, resolveCup, legendsAggregator, careerForUser, simulateOdds, seedFrom, buildOddsInput, KHC_CONFIG, zonesForTest: null };',
     ctx
 );
 const T = ctx.__t;
@@ -205,31 +205,65 @@ test('Champions: tabela, playoff 9×24…16×17, chave pela posição e pódio',
 });
 
 // ---------------------------------------------------------------------------
-// Temporada fechada: Copa e Champions saem dos placares do data/<ano>.json
+// Temporada fechada: Rodada, Chaveamento, Copa e Champions saem dos confrontos
+// gravados no data/<ano>.json (rounds), sem Sleeper
 // ---------------------------------------------------------------------------
 
-test('Placares gravados no fechamento: mesma Champions que ao vivo, sem Sleeper', () => {
+test('Confrontos gravados: mesma Champions que com os placares do Sleeper', () => {
     const teams = uclTeams(['serie-a', 'serie-b', 'serie-c', 'serie-d']);
-    const weeks = {};
-    for (let w = 1; w <= 17; w++) weeks[String(w)] = Object.fromEntries(teams.map((t, i) => [t.key, 100 + w + i * 3]));
-    const season = { id: 2030, status: 'final', series: [], weeklyScores: { settings: { leg: 17, lastScored: 17 }, weeks } };
+    const tiers = ['serie-a', 'serie-b', 'serie-c', 'serie-d'];
+    const rounds = {};
+    tiers.forEach(t => {
+        const weeks = {};
+        for (let w = 1; w <= 17; w++) {
+            weeks[String(w)] = teams.filter(x => x.tier === t).map((x, i) => [Number(x.key.split(':')[1]), Math.floor(i / 2) + 1, 100 + w + teams.indexOf(x) * 3]);
+        }
+        rounds[t] = { settings: { leg: 17, lastScored: 17, playoffStart: 15, playoffTeams: 6 }, bracket: [], weeks };
+    });
+    const season = { id: 2030, status: 'final', series: [], rounds };
 
-    const got = plain(T.archivedCopaScores(season, 3, 17));
+    const got = plain(T.archivedCopaScores(season, tiers, 3, 17));
     assert.deepEqual(got.settings, { leg: 17, lastScored: 17 });
     assert.deepEqual(Object.keys(got.scores).map(Number), [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
-    assert.equal(got.scores[12][teams[1].key], 115);
+    assert.equal(got.scores[12][teams[1].key], 100 + 12 + 3);
 
-    // mesma conta que com os placares buscados no Sleeper
     const live = {};
-    for (let w = 3; w <= 17; w++) live[w] = { ...weeks[String(w)] };
+    for (let w = 3; w <= 17; w++) live[w] = Object.fromEntries(teams.map((x, i) => [x.key, 100 + w + i * 3]));
     const cfg = { pots: [['serie-a', 'serie-b'], ['serie-c', 'serie-d']], perPot: 3, seed: 's', leagueWeeks: [3, 4, 5, 6, 7, 8], knockout: UCL_KO };
     const fromFile = plain(T.resolveUcl(cfg, teams, got.scores, got.settings));
     assert.deepEqual(fromFile, plain(T.resolveUcl(cfg, teams, live, { leg: 17, lastScored: 17 })));
     assert.equal(fromFile.podium.length, 4);
 
-    // sem placares, ou faltando semana: null (o site volta a buscar no Sleeper)
-    assert.equal(T.archivedCopaScores({ id: 2025, status: 'final', series: [] }, 3, 17), null);
-    const partial = { ...season, weeklyScores: { ...season.weeklyScores, weeks: { ...weeks } } };
-    delete partial.weeklyScores.weeks['16'];
-    assert.equal(T.archivedCopaScores(partial, 3, 17), null);
+    // sem confrontos, divisão faltando ou semana faltando: null (o site busca no Sleeper)
+    assert.equal(T.archivedCopaScores({ id: 2025, status: 'final', series: [] }, tiers, 3, 17), null);
+    assert.equal(T.archivedCopaScores(season, [...tiers, 'serie-e'], 3, 17), null);
+    const partial = { ...season, rounds: { ...rounds, 'serie-b': { ...rounds['serie-b'], weeks: { ...rounds['serie-b'].weeks } } } };
+    delete partial.rounds['serie-b'].weeks['16'];
+    assert.equal(T.archivedCopaScores(partial, tiers, 3, 17), null);
+});
+
+test('2025 gravada: Rodada e Chaveamento saem do arquivo e batem com a classificação final', async () => {
+    const season = JSON.parse(await readFile(resolve(ROOT, 'data/2025.json'), 'utf8'));
+    for (const s of season.series) {
+        const tier = { A: 'serie-a', B: 'serie-b' }[s.id];
+        const lg = T.archivedLeague(season, tier);
+        assert.ok(lg, `${tier} gravada`);
+        const st = plain(T.archivedSettings(lg));
+        assert.equal(st.lastScored, 17);
+
+        // Rodada: semana 1 com todos os times, em pares
+        const r1 = plain(T.archivedRound(lg, 1));
+        assert.equal(r1.matchups.length, s.teams.length);
+        const ids = new Set(r1.matchups.map(m => m.matchupId));
+        assert.equal(ids.size, s.teams.length / 2);
+
+        // Chaveamento: final e 3º lugar com o mesmo pódio do registro
+        const br = plain(T.archivedBracket(lg, 17));
+        assert.equal(br.official, true);
+        const fin = br.games.find(g => g.p === 1), third = br.games.find(g => g.p === 3);
+        const rid = rank => s.teams.find(t => t.rank === rank).rosterId;
+        assert.deepEqual([fin.w, fin.l, third.w, third.l], [rid(1), rid(2), rid(3), rid(4)]);
+        assert.deepEqual(Object.keys(br.scores).map(Number), [15, 16, 17]);
+        assert.ok(br.scores[17][fin.w] > br.scores[17][fin.l], 'campeão fez mais pontos na final');
+    }
 });

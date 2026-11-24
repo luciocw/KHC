@@ -65,9 +65,11 @@
  * @property {Series[]} series         Séries da temporada
  * @property {number} [week]           Semana atual — só se status='active'
  * @property {number} [weeksTotal]     Total de semanas regulares — só se 'active'
- * @property {{settings: {leg: number, lastScored: number}, weeks: Object<string, Object<string, number>>}} [weeklyScores]
- *   Placares das divisões por semana ("serie-a:3" → pontos), gravados no
- *   fechamento: a Copa e a Champions KHC da temporada fechada saem daqui
+ * @property {Object<string, {settings: Object, bracket: Array, weeks: Object<string, Array<Array<number|null>>>}>} [rounds]
+ *   Por liga (tier): configurações, chaveamento e confrontos de cada semana
+ *   ([rosterId, matchupId, pontos]), gravados no fechamento. Rodada,
+ *   Chaveamento, Copa e Champions da temporada fechada saem daqui (ver
+ *   archivedLeague em derivations.js e docs/dados.md)
  */
 
 /**

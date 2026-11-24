@@ -9,9 +9,18 @@ Os vídeos são páginas HTML animadas, gravadas quadro a quadro pelo Chromium e
 - `render.cjs`: grava o vídeo (`--stills` gera PNGs para conferir quadros soltos).
 - `fonts/`: fontes embutidas nos vídeos (Archivo, Press Start 2P, Space Mono, Vazirmatn).
 
+## Estilo de som por temporada
+
+Os MP4 finais não ficam guardados (decisão do dono). O que fica é o que permite refazer cada vídeo: as cenas, os dados, a trilha e o estilo de som da temporada.
+
+| Temporada | Som |
+|---|---|
+| 2026 | 8-bit, estilo Super Mario: trilha de jogo de plataforma com swing (fase `plataforma` do `scripts/trilha/chiptune.py`, `Track(bpm=168, swing=0.12)`), música contínua, sem pratos e com efeitos sem chiado. Guilhotina com as fases de terror; dossiês e plantões com a fase `policial` |
+| 2027 | A decidir. Registre aqui antes do primeiro vídeo da temporada |
+
 ## Vídeos da temporada 2026
 
-Cada pasta tem as cenas (`index.html`) e os dados daquela semana, guardados como estavam (`data.json` das ligas, `guilhotina.json`, `tambem.json` com NBA e Cocoricó). Alguns têm também o roteiro combinado com o dono (`BRIEFING.md`) e o script que fez as contas da semana (`.py`). A trilha de cada vídeo fica em `scripts/trilha/<pasta>.py`. Os MP4 finais **não** estão no git: para ter o arquivo de novo, grave a pasta (comandos abaixo). O vídeo sai igual porque os dados ficaram salvos; só os logos dos times são baixados de novo.
+Cada pasta tem as cenas (`index.html`) e os dados daquela semana, guardados como estavam (`data.json` das ligas, `guilhotina.json`, `tambem.json` com NBA e Cocoricó). Alguns têm também o roteiro combinado com o dono (`BRIEFING.md`) e o script que fez as contas da semana (`.py`). A trilha de cada vídeo fica em `scripts/trilha/<pasta>.py`. Os MP4 finais não ficam guardados. Para ter o arquivo de novo, grave a pasta (comandos abaixo). O vídeo sai igual porque os dados ficaram salvos; só os logos dos times são baixados de novo.
 
 | Data | Pasta | Vídeo | Roteiro | Trilha |
 |---|---|---|---|---|

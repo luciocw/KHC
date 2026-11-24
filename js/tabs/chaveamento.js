@@ -13,7 +13,8 @@
 //     ordem da tabela do site (vitórias, depois pontos) e a chance de
 //     playoffs de cada time (tabs/chances.js).
 //   - Temporada regular encerrada: chaveamento oficial do Sleeper
-//     (winners_bracket), com placares das semanas de playoff.
+//     (winners_bracket), com placares das semanas de playoff. Temporada
+//     fechada: os mesmos dados, gravados no data/<ano>.json.
 //
 // Lê: appState.lastUpdated · Depende de: config, api, ui/helpers,
 //     tabs/rodada (lastWeekOf, playoffLabel)
@@ -74,6 +75,12 @@ function bracketFrom(f) {
  */
 async function loadBracket(league) {
     const id = league.info.id;
+    // Temporada fechada: chaveamento e placares gravados no data/<ano>.json
+    const archive = archivedLeagueOf(league);
+    if (archive) {
+        const saved = archivedBracket(archive, lastWeekOf(archivedSettings(archive)));
+        if (saved) return saved;
+    }
     const settings = await fetchLeagueSettings(id);
     const official = settings.lastScored >= settings.playoffStart - 1;
     let games = [];
