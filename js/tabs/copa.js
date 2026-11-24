@@ -75,8 +75,12 @@ function copaLeagues() {
 async function loadCopa(cfg) {
     const leagues = copaLeagues();
     if (!leagues.length) throw new Error('sem divisões');
-    const settings = await fetchLeagueSettings(leagues[0].info.id);
     const { first, last } = copaWeekRange(cfg);
+    // Temporada fechada: confrontos gravados no data/<ano>.json, sem Sleeper
+    const archived = isSeasonFinalized(appState.season)
+        ? archivedCopaScores(getFinalizedSeason(appState.season), leagues.map(l => l.info.tier), first, last) : null;
+    if (archived) return { ...archived, fetchedAt: Date.now() };
+    const settings = await fetchLeagueSettings(leagues[0].info.id);
     const weeks = [];
     for (let w = first; w <= Math.min(last, settings.leg); w++) if (w >= 1) weeks.push(w);
     const scores = {};

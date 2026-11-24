@@ -12,6 +12,8 @@
 //   - Botões Baixar / Compartilhar: os confrontos viram PNG (ui/export.js).
 //
 // Dados sob demanda (só a série/semana aberta), em memória; loadData() limpa.
+// Temporada fechada: confrontos gravados no data/<ano>.json (archivedLeague,
+// derivations.js), sem Sleeper; arquivo sem eles busca no Sleeper.
 // Lê: appState.leagues, appState.season, appState.series, appState.matchWeek
 // Depende de: config, sanitize, api, data, ui/helpers, tabs/ligas
 // =============================================================================
@@ -52,8 +54,15 @@ function weekStatus(settings, week) {
  * @param {Object} league
  * @returns {{status: ('loading'|'ready'|'error'), week?: number, settings?: Object, data?: Object}}
  */
+/** Registro da liga na temporada fechada aberta (ou null). */
+function archivedLeagueOf(league) {
+    return isSeasonFinalized() ? archivedLeague(getFinalizedSeason(appState.season), league.info.tier) : null;
+}
+
 function currentRound(league) {
     const id = league.info.id;
+    const archive = archivedLeagueOf(league);
+    if (archive && !_leagueSettings[id]) _leagueSettings[id] = { status: 'ready', data: archivedSettings(archive) };
     const st = _leagueSettings[id];
     if (!st) {
         _leagueSettings[id] = { status: 'loading' };
@@ -68,6 +77,8 @@ function currentRound(league) {
     const settings = st.data;
     const week = effectiveWeek(settings);
     const key = `${id}|${week}`;
+    const saved = archive && !_rounds[key] ? archivedRound(archive, week) : null;
+    if (saved) _rounds[key] = { status: 'ready', data: saved };
     const rd = _rounds[key];
     if (!rd) {
         _rounds[key] = { status: 'loading' };

@@ -1,139 +1,47 @@
 # Ultimate League KHC — Hub Oficial
 
-Hub central das ligas KHC (Elite, Séries A–D e Guilhotina) de Fantasy Football, com a Premier League e a NBA da turma em "Também na KHC".
-Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem backend. Deploy direto no GitHub Pages.
+Hub das ligas KHC de Fantasy Football no Sleeper: **Elite**, **Séries A–D** (com acesso e rebaixamento), **KHC Guilhotina** e **Copa KHC**, além da Cocoricó Premier League e da KHC NBA em "Também na KHC".
 
-## Funcionalidades
+Site em **HTML/CSS/JS puro**: sem framework, sem build e sem backend. Publicado pelo GitHub Pages em https://luciocw.github.io/KHC/.
 
-- **Landing (porta de entrada):** na 1ª visita pela raiz do site abre uma apresentação curta da KHC; "Ver as ligas" leva ao hub e, dali em diante, a raiz abre o hub direto. Links com endereço (`#/ligas/…`, compartilhados, app instalado) nunca passam pela landing, e quem já usava o hub também não. `#/inicio` abre a landing a qualquer momento (link de divulgação e botão em Regras). O botão "Quero jogar" ainda não tem destino: entra quando houver link de inscrição
-- **7 abas:** Ligas, Rodada, Top Scorers, Power Ranking, Lendas KHC, Temporadas, Regras (+ Também na KHC, fora do menu)
-- **Endereço por tela** (compartilhável): `#/ligas/2026/a`, `#/top/2026`, `#/jogador/<usuario>`
-- **Ligas:** uma série por vez, com zonas de acesso / playoffs / rebaixamento por temporada e medalhas (número dentro) na classificação final; botões Baixar / Compartilhar geram PNG da tabela; seletor **Tabela | Chances** com Playoffs % e Queda % (simulação do resto da temporada regular, calibrada com o histórico de ligas 10/6 do Sleeper, atualiza quando a rodada fecha)
-- **KHC Guilhotina** (`#/guilhotina`, em Também na KHC; o link antigo `#/ligas/<ano>/g` redireciona): vivos ordenados pela pontuação da semana, zona de corte quando todos já pontuaram, cortados com a rodada do corte; fora de Rodada, Top, Power e Chances; exporta PNG
-- **Chaveamento** (Ligas → Tabela | Chances | Chaveamento): playoffs de cada série. Elite: semis 1º×4º e 2º×3º (sem. 15), final e 3º lugar (16). Séries A–D: 1º e 2º folgam; quartas 4º×5º e 3º×6º (15), semis e 5º lugar (16), final e 3º lugar (17). Na temporada regular mostra a projeção pela tabela de hoje, com a chance de playoffs de cada time; depois, o chaveamento do Sleeper com placares. Nas semanas de playoff, Ligas abre direto no Chaveamento. Exporta em imagem
-- **Também na KHC** (`#/guilhotina`, `#/copa-champions`, `#/premier`, `#/nba`): página fora do menu, com abas por liga (Guilhotina, Champions KHC, Premier League, NBA), botão Voltar para a NFL e atalho discreto (ícone de grade) no topo; aparece em Regras e, na entressafra da NFL, como cartão na aba Ligas
-  - **Premier League** (`#/premier`): tabela da Cocoricó Premier League (V–E–D, PF, PC, eficiência de escalação) e exportar
-  - **NBA** (`#/nba`): KHC NBA League · National Burgundy Association, liga nova em 2026/27 (6 times). Mesma tabela, com V–D, e Rodada (`#/nba/rodada/<semana>`) com destaques e exportar, como a da NFL; antes do draft mostra só os times que já entraram
-- **Rodada:** confrontos e placar da semana por série (‹ semana ›), rótulos de playoff (Final, 3º lugar, Semifinal…) e exportação em PNG; destaques da semana (maior pontuação, maior vitória, jogo mais apertado)
-- **App na tela inicial:** manifest + ícones (`assets/app/`) — Android instala pelo Chrome, iPhone pelo Safari (Compartilhar → Adicionar à Tela de Início)
-- **Top Scorers:** filtro por série e "Incluir Elite" (desligado por padrão, evita time duplicado); Baixar / Compartilhar geram PNG da lista com o filtro atual (em "Todas", só o Top 20)
-- **Power Ranking:** tiers S Favoritos · A Candidatos · B Meio de tabela · C Pressionados · D Lanternas por posição (10/20/40/20/10%). PWR = 50% força (all-play semana a semana contra as Séries A–D) + 30% aproveitamento + 20% fase (últimas 3 semanas); sem Elite. Exporta PNG
-- **Copa KHC** (Ligas → aba Copa, `#/ligas/2026/copa`; em Ligas ficam só Elite, Copa e as Séries): mata-mata do site em paralelo às divisões (não conta para playoffs nem rebaixamento), com a pontuação de cada time na sua liga. Semana classificatória (12): os 32 maiores pontuadores avançam; semana 17: final e disputa do 3º lugar; chave por sorteio livre (`drawCup` com a semente de `KHC_CONFIG[ano].copa.seed`, reproduzível); 16 avos a final nas semanas 13–17; empate: pontos da semana anterior. Em teste em 2026 (`copa.test`), vale em 2027: com `test: false`, o fechamento (`derive-season.mjs`) grava o pódio da Copa (Pontos KHC) com a mesma conta do site (`resolveCup`); `--so-copa` confere a Copa sem fechar a temporada. Formato alternativo **estilo Champions** (`copa.format: 'ucl'`, proposta para 2027, em `js/tabs/copa-ucl.js` e `resolveUcl`): potes por divisão (`pots`), fase de liga em `leagueWeeks` com `perPot` jogos contra cada pote (nunca a própria divisão), tabela única (vitória 3, empate 1; saldo; pontos feitos), 1º–8º direto às oitavas, 9º–24º playoff, mata-mata em 2 semanas (soma; empate: melhor posição) e final + 3º lugar na semana 17. Simulação com os jogos de 2026 na aba **Champions KHC** de Também na KHC (`#/copa-champions`, `KHC_CONFIG[ano].copaSim`). Ex. 2027: `{ format: 'ucl', seed, pots: [['serie-a','serie-b'],['serie-c','serie-d'],['serie-e','serie-f']], perPot: 2, leagueWeeks: [3,4,5,6,7,8], knockout: { playoff: [9,10], r16: [11,12], qf: [13,14], sf: [15,16], final: [17] } }`. Só calcula com todas as divisões carregadas ao vivo (senão mostra "Copa indisponível"). Exporta a fase aberta
-- **Lendas:** Hall da Fama por **Pontos KHC** (`KHC_POINTS` em `js/config.js`, em discussão até 2027), pela colocação final: Séries A–F 12/8/6/4/3/2/1 (1º ao 7º, todas iguais), Elite 14/10/7/5, Copa 10/7/5/2; Guilhotina, Premier e NBA não pontuam. 5º e 6º pela disputa do 5º lugar. Só temporadas fechadas. Desempate: títulos → aproveitamento V–D (temporada regular das divisões; sem playoffs, Elite e Copa) → título mais recente. O perfil mostra o "aproveitamento geral" (com a temporada atual e a Elite). Medalha só para 1º–3º. Baixar / Compartilhar geram PNG do top 10
-- **Perfil do jogador:** lateral no desktop, bottom sheet no celular
-- **Modelo de dados híbrido:** temporadas finalizadas vêm **só** do JSON estático (`data/<ano>.json`, registro imutável: nomes e números da época, abre mesmo com o Sleeper fora do ar; Rodada e Chaveamento antigos ainda buscam os placares no Sleeper); temporada ativa vem da Sleeper API em tempo real. Jogador identificado pelo id do Sleeper (`userId` no JSON, `ownerId` ao vivo), com o nome como reserva: trocar de nome não perde histórico nem medalhas
-- **Estados:** carregando (skeleton), erro com "Tentar de novo", cache, falha parcial, vazio
-- **Mobile-first:** navegação inferior fixa < 1024px; contraste AA; alvos ≥ 44px
+> **Chegou agora?** Comece pelo [`COMECE-AQUI.md`](COMECE-AQUI.md): mapa do repositório, rotina da semana e do ano, acessos e o que está pendente.
 
-## Identidade visual
+## O que tem no site
 
-- Tokens (cores, ligas, zonas, medalhas, tiers, tipografia, espaço) no topo de `styles.css`, vindos do guia da marca
-- Fonte **Archivo** variável (eixo de largura: 125% títulos, 75% labels, 62% números)
-- `data-league="a|b|c|d|e|f|elite"` num container reaponta `--accent` para a cor da série
-- Escudos por série em `assets/logo/png/` (PNG 160px em `ui/` para a interface) e vetores oficiais em `assets/logo/svg/` (KHC, Elite, Séries A–F e Copa; o cabeçalho e o favicon usam o SVG); banners em `assets/banners/` (`og-image` usada no compartilhamento)
+- **Ligas:** tabela de cada série com zonas e medalhas, **Chances** de playoffs e de queda, e **Chaveamento** dos playoffs.
+- **Rodada:** confrontos e placares da semana, com destaques.
+- **Top Scorers** e **Power Ranking**.
+- **Copa KHC:** mata-mata do site em paralelo às divisões, e **Champions KHC**, a simulação do formato Champions.
+- **Lendas KHC:** Hall da Fama por Pontos KHC, mais o perfil de cada jogador.
+- **Temporadas**, **Regras** e **Também na KHC** (Guilhotina, Premier League e NBA).
+- Todas as telas exportam PNG, e o site pode ser instalado como app na tela inicial.
 
-## Stack
+## Documentação
 
-- HTML semântico + CSS variables + JS vanilla (sem `type="module"` — script tags em ordem)
-- SVG icons inline (registry em `js/icons.js`)
-- Sleeper API pública (sem auth)
-- Sem dependências runtime de terceiros
+| Documento | Conteúdo |
+|---|---|
+| [`COMECE-AQUI.md`](COMECE-AQUI.md) | Guia de entrada: mapa, rotina, acessos, pendências |
+| [`docs/funcionalidades.md`](docs/funcionalidades.md) | Cada tela em detalhe, com endereço e arquivo |
+| [`docs/copa.md`](docs/copa.md) | Copa KHC (clássica e estilo Champions) e a simulação Champions KHC |
+| [`docs/lendas.md`](docs/lendas.md) | Pontos KHC, Lendas e desempates |
+| [`docs/dados.md`](docs/dados.md) | De onde vêm os dados, formato do `data/<ano>.json`, fechar temporada, temporada nova, registro das chances |
+| [`docs/arquitetura.md`](docs/arquitetura.md) | Estrutura do código, identidade visual, decisões, como rodar e testar |
+| [`video/README.md`](video/README.md) | Vídeos curtos: motor, índice dos vídeos de 2026, regras da zoeira |
+| [`scripts/trilha/README.md`](scripts/trilha/README.md) | Trilhas 8-bit dos vídeos |
+| [`CLAUDE.md`](CLAUDE.md) | Regras da casa (valem para pessoas também) |
 
-## Estrutura
+Para o público, as regras ficam explicadas no próprio site, na aba **Regras** (`js/tabs/regras.js`).
 
-```
-index.html                  shell (header, page head, #view, bottom nav, drawer)
-styles.css                  tokens + componentes (organizado por === seções ===)
-data/
-  2025.json                 snapshot da temporada 2025 (classificação final + troféus)
-scripts/
-  derive-season.mjs         fecha a temporada: data/<ano>.json a partir da config e do Sleeper
-  snapshot-chances.mjs      registro semanal das chances (GitHub Actions)
-js/
-  landing.js                landing da 1ª visita e #/inicio (carregado no <head>)
-  config.js                 KHC_CONFIG (ligas + regras por ano), SERIES_META, appState
-  sanitize.js               escapeHtml, sanitizeAvatarUrl, sanitizeNumber, etc.
-  api.js                    fetch+retry, cache (localStorage), fetchLeagueData, fetchNflState, confrontos
-  data.js                   temporadas finalizadas (data/*.json)
-  derivations.js            powerRanking, tierForRank, simulateOdds, legendsAggregator, careerForUser
-  icons.js                  IconRegistry (SVG line 24px) + renderIcons()
-  types.js                  JSDoc typedefs
-  ui/
-    helpers.js              avatar, botão de time, escudo, medalha, pílula, scroll lock
-    drawer.js               perfil do jogador (focus trap, Esc, URL #/jogador/…)
-    export.js               imagens PNG (canvas) de cada tela, baixar e compartilhar
-  tabs/
-    ligas.js · chances.js · chaveamento.js · guilhotina.js · tambem.js · rodada.js · top-scorers.js · power-ranking.js · lendas.js · temporadas.js · regras.js
-  app.js                    roteamento por hash, loadData, render
-assets/
-  logo/svg/                 escudos oficiais em vetor (KHC, Elite, Séries A–F, Copa)
-  logo/png/                 escudos por série (+ ui/ 160px, favicon)
-  banners/                  og-image 1200×630, hero, header
-```
-
-## Dados guardados no aparelho
-
-Placares de semanas encerradas ficam no `localStorage` (`khc_wk_*`) para não baixar de novo, mas só valem como definitivos depois de `STAT_FIX_DAYS` (10) dias do Monday Night: antes disso o site busca de novo, para pegar correções de estatística do Sleeper. Cada requisição ao Sleeper tem tempo limite (`FETCH_TIMEOUT_MS`, 15 s) e novas tentativas em falha de rede, 429 e 5xx.
-
-## Registro semanal das chances
-
-`scripts/snapshot-chances.mjs` refaz a conta da visão **Chances** (mesmo código do site) e grava em `data/chances-<ano>.json` as chances de cada time após cada rodada encerrada e, quando a temporada regular fecha, o resultado final (quem foi aos playoffs e quem caiu). Serve para conferir se o modelo acerta. O GitHub Actions (`.github/workflows/chances.yml`) roda toda terça e quarta; também dá para rodar à mão em **Actions → Registro das chances → Run workflow** ou `node scripts/snapshot-chances.mjs 2026`.
-
-## Como atualizar quando a Sleeper renovar as ligas
-
-A cada ano, novos league IDs são gerados. Pra adicionar um novo ano:
-
-1. **Configurar a temporada nova** em `js/config.js` (ligas + regras):
-   ```js
-   '2027': {
-     rules: { promote: 3, relegate: 3, playoffTeams: 6, elitePlayoffTeams: 8 },
-     leagues: [
-       { id: '...', name: 'KHC Elite',      tier: 'elite' },
-       { id: '...', name: 'KHC Serie A',    tier: 'serie-a' },
-       { id: '...', name: 'KHC Serie B',    tier: 'serie-b' },
-       { id: '...', name: 'KHC Serie C',    tier: 'serie-c' },
-       { id: '...', name: 'KHC Serie D',    tier: 'serie-d' },
-       { id: '...', name: 'KHC Guilhotina', tier: 'guilhotina' },
-     ],
-   }
-   ```
-2. O seletor de temporada, as abas de série e as zonas saem da config automaticamente, e o site passa a abrir no ano mais recente. Séries novas (E, F) já têm cor e escudo em `SERIES_META` — use `tier: 'serie-e'` / `'serie-f'`. O chaveamento segue as vagas de playoff do Sleeper (4, 6 ou 8 times).
-3. Durante a temporada, o site puxa tudo da Sleeper API automaticamente.
-4. **Textos a revisar à mão:** as regras do ano (`js/tabs/regras.js`) e a landing (`index.html`, "Temporada 2026 em andamento").
-
-## Como "fechar" uma temporada (snapshot final)
-
-Quando a final e a disputa do 3º lugar terminam (semana 17), o site já mostra "Temporada encerrada" e abre no Chaveamento (pódio). Para gravar o histórico:
-
-1. **Rodar:**
-   ```bash
-   node scripts/derive-season.mjs 2026
-   ```
-   O script lê as ligas de `js/config.js` e o chaveamento do Sleeper: 1º–4º pelos playoffs (troféus), 5º e 6º pela disputa do 5º lugar, o resto pela temporada regular; a Guilhotina sai pela ordem de corte, sem troféu nem Pontos KHC (Premier League e NBA não entram). Se alguma final ainda não tiver vencedor, ele para e avisa. Gera `data/2026.json`.
-
-2. **Commit + push.** O site passa a tratar 2026 como finalizada (status: 'final'), mostra medalhas, contribui pra Lendas e Career.
-
-## Testes
-
-`node --test tests/*.test.mjs` testa as contas que decidem resultado (Pontos KHC e desempates, Copa KHC, Chances), com o mesmo código do site e sem rede. O GitHub Actions (`.github/workflows/testes.yml`) roda a cada push e pull request.
-
-## Como rodar localmente
-
-Por causa de `fetch('data/...json')`, o `file://` pode falhar (CORS). Use um servidor HTTP simples:
+## Começo rápido
 
 ```bash
-python3 -m http.server 8000
-# então abra http://localhost:8000
+python3 -m http.server 8000      # e abra http://localhost:8000
 ```
 
-## Deploy
+```bash
+node --test tests/*.test.mjs     # testes das contas
+```
 
-GitHub Pages serve diretamente da branch `main`. Commits pra `main` ficam no ar em ~30s.
-
-## Decisões de arquitetura
-
-- **Vanilla por escolha consciente** — o site é read-only, poucas abas, uma função de render por aba. Não há benefício em React/Vue/Next aqui. Bundle zero, dev server zero, deploy trivial.
-- **Sem `type="module"`** — script tags em ordem global. Funciona em qualquer browser, sem CORS fricção, sem build step.
-- **Híbrido JSON + live** — temporadas finalizadas são fato histórico imutável (JSON congelado, fast load). Ativa é dinâmica (Sleeper live, source of truth). O loader em `js/data.js` esconde a diferença.
-- **JSDoc em vez de TypeScript** — IDE pega autocomplete sem precisar de build. Tipos vivem em `js/types.js`.
-- **SVG inline em vez de sprite/font** — registry em `js/icons.js`, ícones customizáveis em runtime. Sem dependência externa.
+```bash
+node scripts/derive-season.mjs 2026   # fechar a temporada (depois da semana 17)
+```

@@ -18,4 +18,5 @@ Regras que o usuário já definiu:
 - Logos dos times por liga (`video/fetch_rodada.py`), não os avatares dos donos.
 - Trilha: 8-bit de plataforma com swing (`Track(bpm=168, swing=0.12)`), contínua, sem pratos, efeitos sem chiado.
 - Confira os confrontos reais antes de afirmar quem venceu quem.
+- Salve o roteiro combinado em `video/<pasta>/BRIEFING.md` e acrescente a linha do vídeo na tabela de `video/README.md`.
 - Entregue o MP4 com SendUserFile e faça commit na branch de trabalho.

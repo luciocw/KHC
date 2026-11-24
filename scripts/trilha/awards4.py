@@ -8,7 +8,10 @@ Canais no estilo de console 8-bit: dois pulsos (melodia e acordes), triângulo
 README-trilhaKHC. Gera um WAV estéreo 48 kHz com exatamente 56,0 s; a
 normalização para -14 LUFS é feita depois com ffmpeg.
 
-Uso: python3 scripts/trilha-semana4.py saida.wav
+Uso: python3 scripts/trilha/awards4.py saida.wav
+
+É a primeira trilha, anterior ao chiptune.py (não usa as fases prontas). A
+pasta do vídeo da Semana 4 não está no repositório: só a trilha ficou.
 """
 import sys
 import wave

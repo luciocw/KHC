@@ -486,6 +486,112 @@ function uclTable(keys, games) {
         (y.pts - x.pts) || ((y.pf - y.pc) - (x.pf - x.pc)) || (y.pf - x.pf) || (y.v - x.v) || (x.order - y.order));
 }
 
+// -----------------------------------------------------------------------------
+// Temporada fechada: confrontos gravados no data/<ano>.json (rounds)
+//
+// O fechamento (scripts/derive-season.mjs) grava, por liga (chave = tier):
+//   rounds[tier] = {
+//     settings: { leg, lastScored, playoffStart, playoffTeams },
+//     bracket:  [ { m, r, p, t1, t2, w, l, t1_from, t2_from } ]  (winners_bracket)
+//     weeks:    { "<semana>": [ [rosterId, matchupId|null, pontos], … ] }
+//   }
+// Com isso, Rodada, Chaveamento, Copa e Champions KHC de uma temporada
+// fechada não dependem do Sleeper. Arquivo sem `rounds` (ou sem a semana):
+// as funções abaixo devolvem null e o site busca no Sleeper, como antes.
+// -----------------------------------------------------------------------------
+
+/**
+ * Registro de uma liga na temporada fechada, ou null.
+ * @param {Season} season
+ * @param {string} tier
+ * @returns {Object|null}
+ */
+function archivedLeague(season, tier) {
+    const lg = season && season.rounds && season.rounds[tier];
+    return lg && lg.settings && lg.weeks ? lg : null;
+}
+
+/** Confrontos gravados de uma semana: [{rosterId, matchupId, points}] ou null. */
+function archivedWeek(lg, week) {
+    const rows = lg && lg.weeks && (lg.weeks[week] || lg.weeks[String(week)]);
+    if (!Array.isArray(rows)) return null;
+    return rows.filter(r => Array.isArray(r) && Number.isInteger(r[0])).map(r => ({
+        rosterId: r[0],
+        matchupId: Number.isInteger(r[1]) ? r[1] : null,
+        points: Math.max(0, Number(r[2]) || 0)
+    }));
+}
+
+/** Configurações da liga no formato de fetchLeagueSettings (api.js). */
+function archivedSettings(lg) {
+    const s = lg.settings;
+    const n = v => Math.max(0, Math.round(Number(v) || 0));
+    return { leg: n(s.leg), lastScored: n(s.lastScored), playoffStart: n(s.playoffStart) || 15, playoffTeams: n(s.playoffTeams), lastChopped: 0 };
+}
+
+/**
+ * Uma semana da Rodada no formato de fetchRoundData (api.js), ou null.
+ * @param {Object} lg  archivedLeague(...)
+ * @param {number} week
+ */
+function archivedRound(lg, week) {
+    const matchups = archivedWeek(lg, week);
+    if (!matchups) return null;
+    const bracket = (lg.bracket || []).filter(g => g && Number.isInteger(g.r) && Number.isInteger(g.t1) && Number.isInteger(g.t2))
+        .map(g => ({ r: g.r, t1: g.t1, t2: g.t2, p: Number.isInteger(g.p) ? g.p : null }));
+    return { week, fetchedAt: Date.now(), matchups, bracket };
+}
+
+/**
+ * Chaveamento no formato de loadBracket (tabs/chaveamento.js), ou null se
+ * faltar alguma semana de playoff.
+ * @param {Object} lg  archivedLeague(...)
+ * @param {number} lastWeek  última semana de playoff da liga
+ */
+function archivedBracket(lg, lastWeek) {
+    const settings = archivedSettings(lg);
+    const int = v => (Number.isInteger(v) ? v : null);
+    const from = f => (f && Number.isInteger(f.w) ? { w: f.w } : f && Number.isInteger(f.l) ? { l: f.l } : null);
+    const games = (lg.bracket || []).filter(g => g && Number.isInteger(g.m) && Number.isInteger(g.r)).map(g => ({
+        m: g.m, r: g.r, p: int(g.p), t1: int(g.t1), t2: int(g.t2), w: int(g.w), l: int(g.l),
+        t1_from: from(g.t1_from), t2_from: from(g.t2_from)
+    }));
+    const scores = {};
+    for (let w = settings.playoffStart; w <= Math.min(lastWeek, settings.leg); w++) {
+        const wk = archivedWeek(lg, w);
+        if (!wk) return null;
+        scores[w] = Object.fromEntries(wk.map(m => [m.rosterId, m.points]));
+    }
+    return { settings, official: settings.lastScored >= settings.playoffStart - 1, games, scores, fetchedAt: Date.now() };
+}
+
+/**
+ * Placares da Copa a partir dos confrontos gravados, no formato que
+ * resolveCup / resolveUcl recebem ("<tier>:<rosterId>" → pontos), ou null se
+ * faltar alguma divisão ou semana.
+ * @param {Season} season  temporada fechada
+ * @param {string[]} tiers  divisões que entram na Copa
+ * @param {number} first  primeira semana usada pela Copa
+ * @param {number} last   última semana usada pela Copa
+ * @returns {{settings: {leg: number, lastScored: number}, scores: Object<number, Object<string, number>>}|null}
+ */
+function archivedCopaScores(season, tiers, first, last) {
+    if (!tiers.length) return null;
+    const leagues = tiers.map(t => archivedLeague(season, t));
+    if (leagues.some(lg => !lg)) return null;
+    const scores = {};
+    for (let w = Math.max(1, first); w <= last; w++) {
+        scores[w] = {};
+        for (let i = 0; i < tiers.length; i++) {
+            const wk = archivedWeek(leagues[i], w);
+            if (!wk) return null;
+            wk.forEach(m => { scores[w][`${tiers[i]}:${m.rosterId}`] = m.points; });
+        }
+    }
+    const st = archivedSettings(leagues[0]);
+    return { settings: { leg: st.leg, lastScored: st.lastScored }, scores };
+}
+
 /**
  * Copa KHC formato Champions, inteira a partir dos placares (mesma conta no
  * site e no fechamento):
