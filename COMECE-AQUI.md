@@ -48,8 +48,9 @@ Para gravar, a máquina precisa de Node com Playwright/Chromium, `ffmpeg` e Pyth
 
 ### Fim da temporada (depois da semana 17)
 
-1. `node scripts/derive-season.mjs <ano>`: grava classificação final, troféus e os confrontos de todas as semanas. Com eles, Rodada, Chaveamento, Copa e Champions KHC da temporada passam a sair do arquivo, sem Sleeper.
-2. Commit do `data/<ano>.json` e merge na `main`. O site passa a tratar o ano como fechado e soma os Pontos KHC nas Lendas.
+Grava o resultado final (classificação, troféus e todos os confrontos) no `data/<ano>.json`. O site passa a tratar o ano como fechado e soma os Pontos KHC nas Lendas.
+
+**Passo a passo para leigos em [`docs/fechar-temporada.md`](docs/fechar-temporada.md).** O caminho mais fácil é pelo GitHub, no navegador e sem terminal: **Actions → Fechar temporada → Run workflow**, digitar o ano e depois aprovar o pull request.
 
 ### Começo de temporada nova
 

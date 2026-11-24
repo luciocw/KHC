@@ -32,6 +32,8 @@ As funções que leem `rounds` ficam em `js/derivations.js` (`archivedLeague`, `
 
 ## Fechar uma temporada
 
+> Passo a passo para leigos (pelo GitHub, sem terminal): [`fechar-temporada.md`](fechar-temporada.md). O botão **Actions → Fechar temporada** (`.github/workflows/fechamento.yml`) roda o mesmo script, confere os testes e grava o arquivo na branch `fechamento-<ano>`. A `main` só muda quando você aprova o pull request.
+
 Quando a final e a disputa do 3º lugar terminam (semana 17), o site já mostra "Temporada encerrada" e abre no Chaveamento (pódio). Para gravar o histórico:
 
 1. Rode:
