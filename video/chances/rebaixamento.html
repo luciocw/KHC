@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Luta contra a Queda</title>
+<link rel="stylesheet" href="../engine.css">
+<style>:root { --gold: #F2B705; }
+.end-k { position: absolute; left: 60px; top: 560px; font-family: Pixel; font-size: 40px; color: var(--orange); }
+.end-1 { position: absolute; left: 60px; right: 60px; top: 650px; font-weight: 900; font-size: 140px; line-height: .95; letter-spacing: -2px; }
+.end-2 { position: absolute; left: 60px; right: 60px; top: 1000px; font-weight: 900; font-size: 120px; line-height: .95; letter-spacing: -2px; color: var(--orange); }
+.end-logo { position: absolute; left: 50%; top: 1430px; width: 240px; height: 240px; margin-left: -120px; object-fit: contain; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="fx"></div>
+<script src="../engine.js"></script>
+<script>window.MODO = 'queda';</script>
+<script src="chances.js"></script>
+<script>
+window.addEventListener('chances-ready', async () => {
+const { leagueScene, intro, outro } = window.CH_API;
+const { LEAGUE } = KHC;
+// Transições e pausas mais longas: cada tabela fica 3 s parada para leitura.
+intro(5.5, 'Luta contra<br>a queda', '#EB4034');
+const K = 'O QUE CADA UM PRECISA · 100%';
+leagueScene(5.5, 9, 'serie-a', { kicker: K, sub: 'CAEM 3 · % DO SITE APÓS A R11', from: 4, stampTop: 1330, capTop: 1420,
+    stamp: 'Diogoashura × Cruzeiro na R12',
+    caption: ['Cruzeiro (96%): vencer 2 e torcer.', 'Los Pollos, Caipiracicaba e Diogoashura: 1 vitória e ajuda.'] });
+leagueScene(14.5, 9, 'serie-b', { kicker: K, sub: 'CAEM 3 · % DO SITE APÓS A R11', from: 4, stampTop: 1330, capTop: 1420,
+    stamp: 'Gumagol971: só vencendo os 3',
+    caption: ['Ceará Dolphins e wladspfc: 2 vitórias e ajuda.', 'wladspfc × BigFieldMS na R12.'] });
+leagueScene(23.5, 9, 'serie-c', { kicker: K, sub: 'CAEM 3 · % DO SITE APÓS A R11', from: 4, stampTop: 1330, capTop: 1420,
+    stamp: 'WI × romanerinha na R13',
+    caption: ['Kelce Gremista: só vencendo os 3.', 'WI Redentor e romanerinha: 2 e ajuda.'] });
+outro(32.5, 4, 'Ninguém<br>caiu.', 'Ainda.');
+[[5.5, 'serie-a'], [14.5, 'serie-b'], [23.5, 'serie-c'], [32.5, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
+KHC.fadeOut(36.05, 36.5);
+// Pausas de leitura. A mesma lista está em scripts/trilha/chances_queda.py.
+KHC.hold([[5.2, 1.5], [11.5, 3.0], [20.5, 3.0], [29.5, 3.0], [35.8, 0.5]]);
+KHC.start(36.5);
+await window.ready();
+window.loaded = true;
+});
+</script>
+</body>
+</html>

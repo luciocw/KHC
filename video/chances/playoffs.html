@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Corrida aos Playoffs</title>
+<link rel="stylesheet" href="../engine.css">
+<style>:root { --gold: #F2B705; }
+.end-k { position: absolute; left: 60px; top: 560px; font-family: Pixel; font-size: 40px; color: var(--orange); }
+.end-1 { position: absolute; left: 60px; right: 60px; top: 650px; font-weight: 900; font-size: 140px; line-height: .95; letter-spacing: -2px; }
+.end-2 { position: absolute; left: 60px; right: 60px; top: 1000px; font-weight: 900; font-size: 120px; line-height: .95; letter-spacing: -2px; color: var(--orange); }
+.end-logo { position: absolute; left: 50%; top: 1430px; width: 240px; height: 240px; margin-left: -120px; object-fit: contain; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="fx"></div>
+<script src="../engine.js"></script>
+<script>window.MODO = 'playoffs';</script>
+<script src="chances.js"></script>
+<script>
+window.addEventListener('chances-ready', async () => {
+const { leagueScene, intro, outro } = window.CH_API;
+const { LEAGUE } = KHC;
+// Transições e pausas mais longas: cada tabela fica 3 s parada para leitura.
+intro(6, 'Corrida aos<br>playoffs', '#3DD68C');
+const K = 'O QUE CADA UM PRECISA · 100%';
+leagueScene(6, 9, 'elite', { kicker: K, sub: 'TOP 4 · % DO SITE APÓS A R11',
+    stamp: 'Dono precisa de milagre',
+    caption: ['Poker precisa de 1 vitória. Diogoashura, de 2.', 'O Public Enemy (23%): vencer 2 e torcer.'] });
+leagueScene(15, 9, 'serie-a', { kicker: K, sub: 'TOP 6 · % DO SITE APÓS A R11',
+    stamp: '6 vagas · 9 vivos',
+    caption: ['Ditador e Santa Cruz: vencem 2 e entram.', 'Los Pollos (30%) já depende dos outros.'] });
+leagueScene(24, 9, 'serie-b', { kicker: K, sub: 'TOP 6 · % DO SITE APÓS A R11',
+    stamp: 'Siara: só os 3 garantem',
+    caption: ['Quack e Explosion: vencem 2 e entram.', 'alb2106 e BigFieldMS dependem dos outros.'] });
+leagueScene(33, 9, 'serie-c', { kicker: K, sub: 'TOP 6 · % DO SITE APÓS A R11',
+    stamp: 'Fogo × Mangue na R13',
+    caption: ['Fogo e Mangue: 1 vitória e estão dentro.', 'Kelce Gremista: eliminado.'] });
+leagueScene(42, 9, 'serie-d', { kicker: K, sub: 'TOP 6 · OS 3 PRIMEIROS SOBEM',
+    stamp: 'Ninguém garantido na D',
+    caption: ['Os 3 líderes precisam de 1 vitória.', 'E ainda se enfrentam: Leandro × Vitor na R13.'] });
+outro(51, 4, 'Faltam 3.', 'Quem pega a<br>última vaga?');
+[[6, 'elite'], [15, 'serie-a'], [24, 'serie-b'], [33, 'serie-c'], [42, 'serie-d'], [51, 'khc']].forEach(([p, lg]) => KHC.wipe(p, lg));
+KHC.fadeOut(54.55, 55);
+// Pausas de leitura. A mesma lista está em scripts/trilha/chances_playoffs.py.
+KHC.hold([[5.6, 1.5], [12.0, 3.0], [21.0, 3.0], [30.0, 3.0], [39.0, 3.0], [48.0, 3.0], [54.2, 0.5]]);
+KHC.start(55);
+await window.ready();
+window.loaded = true;
+});
+</script>
+</body>
+</html>
