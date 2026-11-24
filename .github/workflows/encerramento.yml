@@ -38,7 +38,23 @@ jobs:
         run: node scripts/derive-season.mjs "$ANO"
       - name: Testes das contas
         run: node --test tests/*.test.mjs
+      - name: Comparar com o registro da main
+        id: diff
+        run: |
+          if git ls-files --error-unmatch "data/$ANO.json" >/dev/null 2>&1; then
+            echo "existia=sim" >> "$GITHUB_OUTPUT"
+            if git diff --quiet -- "data/$ANO.json"; then echo "igual=sim" >> "$GITHUB_OUTPUT"; fi
+          fi
+      - name: Nada a fazer (registro já igual)
+        if: steps.diff.outputs.igual == 'sim'
+        run: |
+          {
+            echo "## Temporada $ANO: nada a fazer ✅"
+            echo
+            echo "O resultado lido agora no Sleeper é idêntico ao \`data/$ANO.json\` que já está no site. Nenhuma branch foi criada."
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Gravar na branch encerramento-${{ github.event.inputs.season }}
+        if: steps.diff.outputs.igual != 'sim'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898797+github-actions[bot]@users.noreply.github.com"
@@ -47,10 +63,17 @@ jobs:
           git commit -m "Encerramento da temporada $ANO"
           git push -f origin "encerramento-$ANO"
       - name: Próximo passo
+        if: steps.diff.outputs.igual != 'sim'
+        env:
+          EXISTIA: ${{ steps.diff.outputs.existia }}
         run: |
           {
             echo "## Temporada $ANO encerrada ✅"
             echo
+            if [ "$EXISTIA" = "sim" ]; then
+              echo "> ⚠️ **Atenção:** a temporada $ANO já tinha registro no site e este resultado é diferente. Só faça o merge se for de propósito (por exemplo, uma correção). Na dúvida, não faça o merge e peça ajuda."
+              echo
+            fi
             echo "O arquivo \`data/$ANO.json\` está na branch \`encerramento-$ANO\`. Falta colocar no site:"
             echo
             echo "1. Abra este link: https://github.com/${GITHUB_REPOSITORY}/compare/main...encerramento-$ANO?expand=1"
