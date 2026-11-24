@@ -1,5 +1,7 @@
 # Ultimate League KHC — Hub Oficial
 
+> **Chegou agora?** Comece pelo [`COMECE-AQUI.md`](COMECE-AQUI.md): mapa do repositório, rotina da semana e do ano, acessos e o que ainda está pendente.
+
 Hub central das ligas KHC (Elite, Séries A–D e Guilhotina) de Fantasy Football, com a Premier League e a NBA da turma em "Também na KHC".
 Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem backend. Deploy direto no GitHub Pages.
 
@@ -18,10 +20,10 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 - **App na tela inicial:** manifest + ícones (`assets/app/`) — Android instala pelo Chrome, iPhone pelo Safari (Compartilhar → Adicionar à Tela de Início)
 - **Top Scorers:** filtro por série e "Incluir Elite" (desligado por padrão, evita time duplicado); Baixar / Compartilhar geram PNG da lista com o filtro atual (em "Todas", só o Top 20)
 - **Power Ranking:** tiers S Favoritos · A Candidatos · B Meio de tabela · C Pressionados · D Lanternas por posição (10/20/40/20/10%). PWR = 50% força (all-play semana a semana contra as Séries A–D) + 30% aproveitamento + 20% fase (últimas 3 semanas); sem Elite. Exporta PNG
-- **Copa KHC** (Ligas → aba Copa, `#/ligas/2026/copa`; em Ligas ficam só Elite, Copa e as Séries): mata-mata do site em paralelo às divisões (não conta para playoffs nem rebaixamento), com a pontuação de cada time na sua liga. Semana classificatória (12): os 32 maiores pontuadores avançam; semana 17: final e disputa do 3º lugar; chave por sorteio livre (`drawCup` com a semente de `KHC_CONFIG[ano].copa.seed`, reproduzível); 16 avos a final nas semanas 13–17; empate: pontos da semana anterior. Em teste em 2026 (`copa.test`), vale em 2027: com `test: false`, o fechamento (`derive-season.mjs`) grava o pódio da Copa (Pontos KHC) com a mesma conta do site (`resolveCup`); `--so-copa` confere a Copa sem fechar a temporada. Formato alternativo **estilo Champions** (`copa.format: 'ucl'`, proposta para 2027, em `js/tabs/copa-ucl.js` e `resolveUcl`): potes por divisão (`pots`), fase de liga em `leagueWeeks` com `perPot` jogos contra cada pote (nunca a própria divisão), tabela única (vitória 3, empate 1; saldo; pontos feitos), 1º–8º direto às oitavas, 9º–24º playoff, mata-mata em 2 semanas (soma; empate: melhor posição) e final + 3º lugar na semana 17. Simulação com os jogos de 2026 na aba **Champions KHC** de Também na KHC (`#/copa-champions`, `KHC_CONFIG[ano].copaSim`). Ex. 2027: `{ format: 'ucl', seed, pots: [['serie-a','serie-b'],['serie-c','serie-d'],['serie-e','serie-f']], perPot: 2, leagueWeeks: [3,4,5,6,7,8], knockout: { playoff: [9,10], r16: [11,12], qf: [13,14], sf: [15,16], final: [17] } }`. Só calcula com todas as divisões carregadas ao vivo (senão mostra "Copa indisponível"). Exporta a fase aberta
+- **Copa KHC** (Ligas → aba Copa, `#/ligas/2026/copa`; em Ligas ficam só Elite, Copa e as Séries): mata-mata do site em paralelo às divisões (não conta para playoffs nem rebaixamento), com a pontuação de cada time na sua liga. Semana classificatória (12): os 32 maiores pontuadores avançam; semana 17: final e disputa do 3º lugar; chave por sorteio livre (`drawCup` com a semente de `KHC_CONFIG[ano].copa.seed`, reproduzível); 16 avos a final nas semanas 13–17; empate: pontos da semana anterior. Em teste em 2026 (`copa.test`), vale em 2027: com `test: false`, o fechamento (`derive-season.mjs`) grava o pódio da Copa (Pontos KHC) com a mesma conta do site (`resolveCup`); `--so-copa` confere a Copa sem fechar a temporada. Formato alternativo **estilo Champions** (`copa.format: 'ucl'`, proposta para 2027, em `js/tabs/copa-ucl.js` e `resolveUcl`): potes por divisão (`pots`), fase de liga em `leagueWeeks` com `perPot` jogos contra cada pote (nunca a própria divisão), tabela única (vitória 3, empate 1; saldo; pontos feitos), 1º–8º direto às oitavas, 9º–24º playoff, mata-mata em 2 semanas (soma; empate: melhor posição) e final + 3º lugar na semana 17. Simulação com os jogos de 2026 na aba **Champions KHC** de Também na KHC (`#/copa-champions`, `KHC_CONFIG[ano].copaSim`). Ex. 2027: `{ format: 'ucl', seed, pots: [['serie-a','serie-b'],['serie-c','serie-d'],['serie-e','serie-f']], perPot: 2, leagueWeeks: [3,4,5,6,7,8], knockout: { playoff: [9,10], r16: [11,12], qf: [13,14], sf: [15,16], final: [17] } }`. Na temporada em andamento, só calcula com todas as divisões carregadas ao vivo (senão mostra "Copa indisponível"). Em temporada fechada, a Copa e a Champions KHC usam os placares gravados no `data/<ano>.json` (`weeklyScores`, função `archivedCopaScores`) e não dependem do Sleeper; arquivo sem esses placares volta a buscar no Sleeper. Exporta a fase aberta
 - **Lendas:** Hall da Fama por **Pontos KHC** (`KHC_POINTS` em `js/config.js`, em discussão até 2027), pela colocação final: Séries A–F 12/8/6/4/3/2/1 (1º ao 7º, todas iguais), Elite 14/10/7/5, Copa 10/7/5/2; Guilhotina, Premier e NBA não pontuam. 5º e 6º pela disputa do 5º lugar. Só temporadas fechadas. Desempate: títulos → aproveitamento V–D (temporada regular das divisões; sem playoffs, Elite e Copa) → título mais recente. O perfil mostra o "aproveitamento geral" (com a temporada atual e a Elite). Medalha só para 1º–3º. Baixar / Compartilhar geram PNG do top 10
 - **Perfil do jogador:** lateral no desktop, bottom sheet no celular
-- **Modelo de dados híbrido:** temporadas finalizadas vêm **só** do JSON estático (`data/<ano>.json`, registro imutável: nomes e números da época, abre mesmo com o Sleeper fora do ar; Rodada e Chaveamento antigos ainda buscam os placares no Sleeper); temporada ativa vem da Sleeper API em tempo real. Jogador identificado pelo id do Sleeper (`userId` no JSON, `ownerId` ao vivo), com o nome como reserva: trocar de nome não perde histórico nem medalhas
+- **Modelo de dados híbrido:** temporadas finalizadas vêm **só** do JSON estático (`data/<ano>.json`, registro imutável: nomes e números da época, abre mesmo com o Sleeper fora do ar; a Copa e a Champions KHC saem dos placares semana a semana gravados nele; Rodada e Chaveamento antigos ainda buscam os placares no Sleeper); temporada ativa vem da Sleeper API em tempo real. Jogador identificado pelo id do Sleeper (`userId` no JSON, `ownerId` ao vivo), com o nome como reserva: trocar de nome não perde histórico nem medalhas
 - **Estados:** carregando (skeleton), erro com "Tentar de novo", cache, falha parcial, vazio
 - **Mobile-first:** navegação inferior fixa < 1024px; contraste AA; alvos ≥ 44px
 
@@ -44,11 +46,19 @@ Single-page app **vanilla HTML/CSS/JS** — sem framework, sem build step, sem b
 ```
 index.html                  shell (header, page head, #view, bottom nav, drawer)
 styles.css                  tokens + componentes (organizado por === seções ===)
+COMECE-AQUI.md              guia de entrada (pessoa ou IA que vai assumir)
+CLAUDE.md                   regras da casa para o Claude
 data/
   2025.json                 snapshot da temporada 2025 (classificação final + troféus)
+  chances-2026.json         chances de cada time após cada rodada (registro automático)
 scripts/
   derive-season.mjs         fecha a temporada: data/<ano>.json a partir da config e do Sleeper
   snapshot-chances.mjs      registro semanal das chances (GitHub Actions)
+  trilha/                   trilhas 8-bit dos vídeos (uma por vídeo + chiptune.py)
+video/                      vídeos curtos 9:16: motor + uma pasta por vídeo (índice em video/README.md)
+tests/contas.test.mjs       testes das contas (Pontos KHC, Copa, Champions, Chances)
+.github/workflows/          testes.yml (a cada push) e chances.yml (terça e quarta)
+.claude/skills/             video-khc e trilha-khc (passo a passo para o Claude)
 js/
   landing.js                landing da 1ª visita e #/inicio (carregado no <head>)
   config.js                 KHC_CONFIG (ligas + regras por ano), SERIES_META, appState
@@ -109,13 +119,13 @@ Quando a final e a disputa do 3º lugar terminam (semana 17), o site já mostra 
    ```bash
    node scripts/derive-season.mjs 2026
    ```
-   O script lê as ligas de `js/config.js` e o chaveamento do Sleeper: 1º–4º pelos playoffs (troféus), 5º e 6º pela disputa do 5º lugar, o resto pela temporada regular; a Guilhotina sai pela ordem de corte, sem troféu nem Pontos KHC (Premier League e NBA não entram). Se alguma final ainda não tiver vencedor, ele para e avisa. Gera `data/2026.json`.
+   O script lê as ligas de `js/config.js` e o chaveamento do Sleeper: 1º–4º pelos playoffs (troféus), 5º e 6º pela disputa do 5º lugar, o resto pela temporada regular; a Guilhotina sai pela ordem de corte, sem troféu nem Pontos KHC (Premier League e NBA não entram). Se alguma final ainda não tiver vencedor, ele para e avisa. Gera `data/2026.json`, com os placares de todas as semanas das divisões (`weeklyScores`): é deles que a Copa e a Champions KHC da temporada fechada saem, sem Sleeper. Para acrescentar só os placares a um arquivo que já existe: `node scripts/derive-season.mjs 2026 --so-placares`.
 
 2. **Commit + push.** O site passa a tratar 2026 como finalizada (status: 'final'), mostra medalhas, contribui pra Lendas e Career.
 
 ## Testes
 
-`node --test tests/*.test.mjs` testa as contas que decidem resultado (Pontos KHC e desempates, Copa KHC, Chances), com o mesmo código do site e sem rede. O GitHub Actions (`.github/workflows/testes.yml`) roda a cada push e pull request.
+`node --test tests/*.test.mjs` testa as contas que decidem resultado (Pontos KHC e desempates, Copa KHC, Champions KHC, placares gravados no fechamento, Chances), com o mesmo código do site e sem rede. O GitHub Actions (`.github/workflows/testes.yml`) roda a cada push e pull request.
 
 ## Como rodar localmente
 

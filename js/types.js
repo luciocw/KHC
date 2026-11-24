@@ -65,6 +65,9 @@
  * @property {Series[]} series         Séries da temporada
  * @property {number} [week]           Semana atual — só se status='active'
  * @property {number} [weeksTotal]     Total de semanas regulares — só se 'active'
+ * @property {{settings: {leg: number, lastScored: number}, weeks: Object<string, Object<string, number>>}} [weeklyScores]
+ *   Placares das divisões por semana ("serie-a:3" → pontos), gravados no
+ *   fechamento: a Copa e a Champions KHC da temporada fechada saem daqui
  */
 
 /**

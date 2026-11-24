@@ -13,7 +13,7 @@ const ctx = vm.createContext({ console });
 vm.runInContext(
     (await readFile(resolve(ROOT, 'js/config.js'), 'utf8')) + '\n' +
     (await readFile(resolve(ROOT, 'js/derivations.js'), 'utf8')) +
-    '\n;globalThis.__t = { drawUclLeague, resolveUcl, uclTable, KHC_POINTS, pointsFor, pointsKindOf, drawCup, cupPhases, resolveCup, legendsAggregator, careerForUser, simulateOdds, seedFrom, buildOddsInput, KHC_CONFIG, zonesForTest: null };',
+    '\n;globalThis.__t = { archivedCopaScores, drawUclLeague, resolveUcl, uclTable, KHC_POINTS, pointsFor, pointsKindOf, drawCup, cupPhases, resolveCup, legendsAggregator, careerForUser, simulateOdds, seedFrom, buildOddsInput, KHC_CONFIG, zonesForTest: null };',
     ctx
 );
 const T = ctx.__t;
@@ -202,4 +202,34 @@ test('Champions: tabela, playoff 9×24…16×17, chave pela posição e pódio',
         const pos = k => seeds.indexOf(k);
         assert.equal(g.winner, pos(g.a) < pos(g.b) ? 'a' : 'b');
     }
+});
+
+// ---------------------------------------------------------------------------
+// Temporada fechada: Copa e Champions saem dos placares do data/<ano>.json
+// ---------------------------------------------------------------------------
+
+test('Placares gravados no fechamento: mesma Champions que ao vivo, sem Sleeper', () => {
+    const teams = uclTeams(['serie-a', 'serie-b', 'serie-c', 'serie-d']);
+    const weeks = {};
+    for (let w = 1; w <= 17; w++) weeks[String(w)] = Object.fromEntries(teams.map((t, i) => [t.key, 100 + w + i * 3]));
+    const season = { id: 2030, status: 'final', series: [], weeklyScores: { settings: { leg: 17, lastScored: 17 }, weeks } };
+
+    const got = plain(T.archivedCopaScores(season, 3, 17));
+    assert.deepEqual(got.settings, { leg: 17, lastScored: 17 });
+    assert.deepEqual(Object.keys(got.scores).map(Number), [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
+    assert.equal(got.scores[12][teams[1].key], 115);
+
+    // mesma conta que com os placares buscados no Sleeper
+    const live = {};
+    for (let w = 3; w <= 17; w++) live[w] = { ...weeks[String(w)] };
+    const cfg = { pots: [['serie-a', 'serie-b'], ['serie-c', 'serie-d']], perPot: 3, seed: 's', leagueWeeks: [3, 4, 5, 6, 7, 8], knockout: UCL_KO };
+    const fromFile = plain(T.resolveUcl(cfg, teams, got.scores, got.settings));
+    assert.deepEqual(fromFile, plain(T.resolveUcl(cfg, teams, live, { leg: 17, lastScored: 17 })));
+    assert.equal(fromFile.podium.length, 4);
+
+    // sem placares, ou faltando semana: null (o site volta a buscar no Sleeper)
+    assert.equal(T.archivedCopaScores({ id: 2025, status: 'final', series: [] }, 3, 17), null);
+    const partial = { ...season, weeklyScores: { ...season.weeklyScores, weeks: { ...weeks } } };
+    delete partial.weeklyScores.weeks['16'];
+    assert.equal(T.archivedCopaScores(partial, 3, 17), null);
 });

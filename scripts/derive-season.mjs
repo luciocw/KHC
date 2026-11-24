@@ -14,11 +14,17 @@
 //   - Copa KHC (kind: 'cup', quando KHC_CONFIG[ano].copa não é teste): pódio
 //     1º–4º com a mesma conta do site (resolveCup). `--so-copa` só confere a
 //     Copa; `--classificatoria N` simula outra semana classificatória.
+//   - Placares de cada semana das divisões (weeklyScores): com eles, a Copa e
+//     a Champions KHC da temporada fechada saem do arquivo, sem Sleeper.
+//     `--so-placares` só acrescenta os placares a um data/<ano>.json que já
+//     existe (temporada fechada antes desta opção), sem mexer no resto.
 // Para se a temporada não acabou (final ou 3º lugar sem vencedor).
 //
 // Saída: { id, status: 'final', series: [ { id, name, kind?, teams: [
 //   { rank, rosterId, userId, user, team, avatarId, w, l, t?, pts, ptsAgainst,
-//     ppts, trophy?, cut? } ] } ] }
+//     ppts, trophy?, cut? } ] } ],
+//   weeklyScores: { settings: { leg, lastScored },
+//     weeks: { "<semana>": { "<tier>:<rosterId>": pontos } } } }
 // O arquivo é o registro da temporada: o site mostra a temporada fechada só
 // com ele (nomes e números da época), e liga jogador por userId.
 
@@ -34,8 +40,11 @@ const API = 'https://api.sleeper.app/v1/league';
 const ctx = vm.createContext({ console });
 vm.runInContext((await readFile(resolve(ROOT, 'js/config.js'), 'utf8'))
     + '\n' + (await readFile(resolve(ROOT, 'js/derivations.js'), 'utf8'))
-    + '\n;globalThis.__khc = { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases, resolveUcl };', ctx);
-const { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases, resolveUcl } = ctx.__khc;
+    + '\n;globalThis.__khc = { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases, resolveUcl, REGULAR_SEASON_WEEKS };', ctx);
+const { KHC_CONFIG, SERIES_META, TIER_ORDER, isGuillotine, isRegularSeries, VALIDATION, resolveCup, cupPhases, resolveUcl, REGULAR_SEASON_WEEKS } = ctx.__khc;
+
+// última semana de fantasy (final dos playoffs das séries)
+const LAST_WEEK = REGULAR_SEASON_WEEKS + 3;
 
 async function fetchJson(url) {
     for (let attempt = 0; attempt < 4; attempt++) {
@@ -136,19 +145,40 @@ async function deriveLeague(league) {
 }
 
 /**
+ * Placares de todas as semanas (1 até a final) das divisões que entram na
+ * Copa: semana → "<tier>:<rosterId>" → pontos. Vai para o data/<ano>.json.
+ * @param {Object} cfg  KHC_CONFIG[ano]
+ * @returns {Promise<{settings: {leg: number, lastScored: number}, weeks: Object}>}
+ */
+async function fetchWeeklyScores(cfg) {
+    const leagues = cfg.leagues.filter(l => isRegularSeries(l.tier));
+    if (!leagues.length) throw new Error('sem divisões em js/config.js');
+    const info = await fetchJson(`${API}/${leagues[0].id}`);
+    const settings = { leg: info.settings?.leg ?? 0, lastScored: info.settings?.last_scored_leg ?? 0 };
+    const weeks = {};
+    for (let w = 1; w <= Math.min(LAST_WEEK, settings.leg || LAST_WEEK); w++) {
+        weeks[w] = {};
+        for (const l of leagues) {
+            const raw = await fetchJson(`${API}/${l.id}/matchups/${w}`);
+            raw.forEach(m => { if (Number.isInteger(m.roster_id)) weeks[w][`${l.tier}:${m.roster_id}`] = round2(Math.max(0, Number(m.points) || 0)); });
+        }
+    }
+    return { settings, weeks };
+}
+
+/**
  * Copa KHC: pódio (1º–4º) com a mesma conta do site (resolveCup). Só entra
  * no histórico quando a Copa não é teste (soma Pontos KHC).
  * @param {Object} cfg  KHC_CONFIG[ano]
  * @param {Object} copa  cfg.copa (dá para sobrescrever a semana nos testes)
+ * @param {Object} weekly  fetchWeeklyScores(cfg)
  */
-async function deriveCup(cfg, copa) {
+async function deriveCup(cfg, copa, weekly) {
     const leagues = cfg.leagues.filter(l => isRegularSeries(l.tier));
     const ucl = copa.format === 'ucl';   // estilo Champions: fase de liga + mata-mata em 2 semanas
-    const first = ucl ? copa.leagueWeeks[0] : copa.qualifying - 1;
-    const last = ucl ? copa.knockout.final[copa.knockout.final.length - 1] : copa.qualifying + cupPhases(copa).length - 1;
-    const info = await fetchJson(`${API}/${leagues[0].id}`);
-    const settings = { leg: info.settings?.leg ?? 0, lastScored: info.settings?.last_scored_leg ?? 0 };
-    const keys = [], scores = {}, rowByKey = {};
+    const settings = weekly.settings;
+    const scores = weekly.weeks;
+    const keys = [], rowByKey = {};
     for (const l of leagues) {
         const [users, rosters] = await Promise.all([fetchJson(`${API}/${l.id}/users`), fetchJson(`${API}/${l.id}/rosters`)]);
         const userById = new Map(users.map(u => [u.user_id, u]));
@@ -158,11 +188,6 @@ async function deriveCup(cfg, copa) {
             const { eliminated, w, l: losses, t, ptsAgainst, ppts, ...row } = rowOf(r, userById);
             rowByKey[k] = row;
         });
-        for (let w = first; w <= last; w++) {
-            const raw = await fetchJson(`${API}/${l.id}/matchups/${w}`);
-            scores[w] = scores[w] || {};
-            raw.forEach(m => { if (Number.isInteger(m.roster_id)) scores[w][`${l.tier}:${m.roster_id}`] = Math.max(0, Number(m.points) || 0); });
-        }
     }
     const cup = ucl
         ? resolveUcl(copa, keys.map(k => ({ key: k, tier: k.split(':')[0] })), scores, settings)
@@ -182,19 +207,31 @@ async function main() {
     const year = args.find(a => /^\d{4}$/.test(a));
     const outArg = args.indexOf('--saida');
     const onlyCup = args.includes('--so-copa');                 // conferir a Copa sem fechar a temporada
+    const onlyScores = args.includes('--so-placares');          // só acrescenta weeklyScores ao arquivo
     const qArg = args.indexOf('--classificatoria');              // teste: outra semana classificatória
     const cfg = year && KHC_CONFIG[year];
     if (!cfg) {
-        console.error(`Uso: node scripts/derive-season.mjs <ano> [--saida caminho.json] [--so-copa [--classificatoria N]]\nAnos em js/config.js: ${Object.keys(KHC_CONFIG).join(', ')}`);
+        console.error(`Uso: node scripts/derive-season.mjs <ano> [--saida caminho.json] [--so-copa [--classificatoria N]] [--so-placares]\nAnos em js/config.js: ${Object.keys(KHC_CONFIG).join(', ')}`);
         process.exit(1);
     }
 
     if (onlyCup) {
         if (!cfg.copa) throw new Error(`${year} não tem Copa em js/config.js`);
         const copa = { ...cfg.copa, ...(qArg >= 0 ? { qualifying: Number(args[qArg + 1]) } : {}) };
-        const s = await deriveCup(cfg, copa);
+        const s = await deriveCup(cfg, copa, await fetchWeeklyScores(cfg));
         console.log(`Copa KHC ${year}${copa.test ? ' (teste)' : ''}, classificatória na semana ${copa.qualifying}:`);
         s.teams.forEach(t => console.log(`  ${t.rank}. ${t.user} (${t.team}) [${t.trophy}]`));
+        return;
+    }
+
+    const outPath = outArg >= 0 ? resolve(args[outArg + 1]) : resolve(ROOT, 'data', `${year}.json`);
+
+    if (onlyScores) {
+        const snap = JSON.parse(await readFile(outPath, 'utf8'));
+        console.log(`Placares semana a semana de ${year}…`);
+        snap.weeklyScores = await fetchWeeklyScores(cfg);
+        await writeFile(outPath, JSON.stringify(snap, null, 2) + '\n');
+        console.log(`Salvo em ${outPath} (${Object.keys(snap.weeklyScores.weeks).length} semanas)`);
         return;
     }
 
@@ -205,13 +242,15 @@ async function main() {
         console.log(`  → ${league.name} (${league.id})`);
         series.push(await deriveLeague(league));
     }
+    // placares semana a semana: Copa e Champions KHC da temporada fechada sem Sleeper
+    console.log('  → placares semana a semana');
+    const weeklyScores = await fetchWeeklyScores(cfg);
     if (cfg.copa && !cfg.copa.test) {
         console.log('  → Copa KHC');
-        series.push(await deriveCup(cfg, cfg.copa));
+        series.push(await deriveCup(cfg, cfg.copa, weeklyScores));
     }
 
-    const snapshot = { id: Number(year), status: 'final', series };
-    const outPath = outArg >= 0 ? resolve(args[outArg + 1]) : resolve(ROOT, 'data', `${year}.json`);
+    const snapshot = { id: Number(year), status: 'final', series, weeklyScores };
     await writeFile(outPath, JSON.stringify(snapshot, null, 2) + '\n');
     console.log(`\nSalvo em ${outPath}`);
 

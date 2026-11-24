@@ -487,6 +487,32 @@ function uclTable(keys, games) {
 }
 
 /**
+ * Placares da Copa guardados no fechamento (data/<ano>.json → weeklyScores),
+ * no formato que resolveCup / resolveUcl recebem. Com eles, a Copa e a
+ * Champions KHC de uma temporada fechada não dependem mais do Sleeper.
+ * Devolve null se o arquivo não tem os placares ou falta alguma semana
+ * (aí o site busca no Sleeper, como antes).
+ * @param {Season} season  temporada fechada
+ * @param {number} first  primeira semana usada pela Copa
+ * @param {number} last   última semana usada pela Copa
+ * @returns {{settings: {leg: number, lastScored: number}, scores: Object<number, Object<string, number>>}|null}
+ */
+function archivedCopaScores(season, first, last) {
+    const ws = season && season.weeklyScores;
+    if (!ws || !ws.weeks || !ws.settings) return null;
+    const scores = {};
+    for (let w = Math.max(1, first); w <= last; w++) {
+        const wk = ws.weeks[w] || ws.weeks[String(w)];
+        if (!wk || typeof wk !== 'object') return null;
+        scores[w] = {};
+        Object.entries(wk).forEach(([k, p]) => { scores[w][k] = Math.max(0, Number(p) || 0); });
+    }
+    const leg = Number(ws.settings.leg) || 0;
+    const lastScored = Number(ws.settings.lastScored) || 0;
+    return { settings: { leg, lastScored }, scores };
+}
+
+/**
  * Copa KHC formato Champions, inteira a partir dos placares (mesma conta no
  * site e no fechamento):
  *   - fase de liga (cfg.leagueWeeks): sorteio drawUclLeague, tabela uclTable;
