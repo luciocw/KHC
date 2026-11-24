@@ -1,0 +1,1519 @@
+{
+ "elite": {
+  "vagas": 4,
+  "caem": 0,
+  "jogos_restantes": 3,
+  "teams": [
+   {
+    "name": "GORDINHAS AJEITADAS",
+    "w": 9,
+    "l": 2,
+    "pf": 1838.54,
+    "pc": 1500.22,
+    "jogos": [
+     {
+      "vs": "Poker do Neymar",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "Diogoashura",
+      "w": 6,
+      "l": 5
+     },
+     {
+      "vs": "Quack Attack",
+      "w": 4,
+      "l": 7
+     }
+    ],
+    "playoffs": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    },
+    "queda": null
+   },
+   {
+    "name": "Los Pollos Hermanos",
+    "w": 8,
+    "l": 3,
+    "pf": 1831.52,
+    "pc": 1550.76,
+    "jogos": [
+     {
+      "vs": "Quack Attack",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "Timbatível",
+      "w": 2,
+      "l": 9
+     },
+     {
+      "vs": "Poker do Neymar",
+      "w": 7,
+      "l": 4
+     }
+    ],
+    "playoffs": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    },
+    "queda": null
+   },
+   {
+    "name": "Poker do Neymar",
+    "w": 7,
+    "l": 4,
+    "pf": 1644.64,
+    "pc": 1553.66,
+    "jogos": [
+     {
+      "vs": "GORDINHAS AJEITADAS",
+      "w": 9,
+      "l": 2
+     },
+     {
+      "vs": "Fofura e Fé",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "Los Pollos Hermanos",
+      "w": 8,
+      "l": 3
+     }
+    ],
+    "playoffs": {
+     "garante_com": 1,
+     "vivo_a_partir_de": 0
+    },
+    "queda": null
+   },
+   {
+    "name": "Diogoashura",
+    "w": 6,
+    "l": 5,
+    "pf": 1504.72,
+    "pc": 1589.72,
+    "jogos": [
+     {
+      "vs": "Fofura e Fé",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "GORDINHAS AJEITADAS",
+      "w": 9,
+      "l": 2
+     },
+     {
+      "vs": "Public Enemy #1",
+      "w": 4,
+      "l": 7
+     }
+    ],
+    "playoffs": {
+     "garante_com": 2,
+     "vivo_a_partir_de": 0
+    },
+    "queda": null
+   },
+   {
+    "name": "Public Enemy #1",
+    "w": 4,
+    "l": 7,
+    "pf": 1589.88,
+    "pc": 1746.9,
+    "jogos": [
+     {
+      "vs": "Timbatível",
+      "w": 2,
+      "l": 9
+     },
+     {
+      "vs": "Quack Attack",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "Diogoashura",
+      "w": 6,
+      "l": 5
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 2
+    },
+    "queda": null
+   },
+   {
+    "name": "Fofura e Fé",
+    "w": 4,
+    "l": 7,
+    "pf": 1579.92,
+    "pc": 1656.1,
+    "jogos": [
+     {
+      "vs": "Diogoashura",
+      "w": 6,
+      "l": 5
+     },
+     {
+      "vs": "Poker do Neymar",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "Timbatível",
+      "w": 2,
+      "l": 9
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 2
+    },
+    "queda": null
+   },
+   {
+    "name": "Quack Attack",
+    "w": 4,
+    "l": 7,
+    "pf": 1467.94,
+    "pc": 1500.04,
+    "jogos": [
+     {
+      "vs": "Los Pollos Hermanos",
+      "w": 8,
+      "l": 3
+     },
+     {
+      "vs": "Public Enemy #1",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "GORDINHAS AJEITADAS",
+      "w": 9,
+      "l": 2
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 2
+    },
+    "queda": null
+   },
+   {
+    "name": "Timbatível",
+    "w": 2,
+    "l": 9,
+    "pf": 1291.66,
+    "pc": 1651.42,
+    "jogos": [
+     {
+      "vs": "Public Enemy #1",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "Los Pollos Hermanos",
+      "w": 8,
+      "l": 3
+     },
+     {
+      "vs": "Fofura e Fé",
+      "w": 4,
+      "l": 7
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": null
+    },
+    "queda": null
+   }
+  ]
+ },
+ "serie-a": {
+  "vagas": 6,
+  "caem": 3,
+  "jogos_restantes": 3,
+  "teams": [
+   {
+    "name": "VoliBEARS",
+    "w": 9,
+    "l": 2,
+    "pf": 1629.08,
+    "pc": 1403.6,
+    "jogos": [
+     {
+      "vs": "Los Pollos Hermanos",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "Public Enemy #1",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "Cruzeiro do Neymar SFC",
+      "w": 3,
+      "l": 8
+     }
+    ],
+    "playoffs": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "Public Enemy #1",
+    "w": 7,
+    "l": 4,
+    "pf": 1865.18,
+    "pc": 1509.76,
+    "jogos": [
+     {
+      "vs": "Caipiracicaba",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "VoliBEARS",
+      "w": 9,
+      "l": 2
+     },
+     {
+      "vs": "Los Pollos Hermanos",
+      "w": 4,
+      "l": 7
+     }
+    ],
+    "playoffs": {
+     "garante_com": 1,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 1,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "Timbatível",
+    "w": 7,
+    "l": 4,
+    "pf": 1548.78,
+    "pc": 1499.64,
+    "jogos": [
+     {
+      "vs": "Fofura e Fé",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "Los Pollos Hermanos",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "Imperius Rex FC",
+      "w": 6,
+      "l": 5
+     }
+    ],
+    "playoffs": {
+     "garante_com": 1,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 1,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "Imperius Rex FC",
+    "w": 6,
+    "l": 5,
+    "pf": 1476.88,
+    "pc": 1598.74,
+    "jogos": [
+     {
+      "vs": "سانتا کروز",
+      "w": 6,
+      "l": 5
+     },
+     {
+      "vs": "Fofura e Fé",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "Timbatível",
+      "w": 7,
+      "l": 4
+     }
+    ],
+    "playoffs": {
+     "garante_com": 2,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 2,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "سانتا کروز",
+    "w": 6,
+    "l": 5,
+    "pf": 1363.88,
+    "pc": 1440.36,
+    "jogos": [
+     {
+      "vs": "Imperius Rex FC",
+      "w": 6,
+      "l": 5
+     },
+     {
+      "vs": "Diogoashura",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "Caipiracicaba",
+      "w": 4,
+      "l": 7
+     }
+    ],
+    "playoffs": {
+     "garante_com": 2,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 2,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "Fofura e Fé",
+    "w": 5,
+    "l": 6,
+    "pf": 1521.8,
+    "pc": 1568.6,
+    "jogos": [
+     {
+      "vs": "Timbatível",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "Imperius Rex FC",
+      "w": 6,
+      "l": 5
+     },
+     {
+      "vs": "Diogoashura",
+      "w": 4,
+      "l": 7
+     }
+    ],
+    "playoffs": {
+     "garante_com": 3,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 3,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "Los Pollos Hermanos",
+    "w": 4,
+    "l": 7,
+    "pf": 1636.62,
+    "pc": 1709.46,
+    "jogos": [
+     {
+      "vs": "VoliBEARS",
+      "w": 9,
+      "l": 2
+     },
+     {
+      "vs": "Timbatível",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "Public Enemy #1",
+      "w": 7,
+      "l": 4
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 1
+    },
+    "queda": {
+     "garante_com": null,
+     "vivo_a_partir_de": 1
+    }
+   },
+   {
+    "name": "Caipiracicaba",
+    "w": 4,
+    "l": 7,
+    "pf": 1465.04,
+    "pc": 1510.94,
+    "jogos": [
+     {
+      "vs": "Public Enemy #1",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "Cruzeiro do Neymar SFC",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "سانتا کروز",
+      "w": 6,
+      "l": 5
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 1
+    },
+    "queda": {
+     "garante_com": null,
+     "vivo_a_partir_de": 1
+    }
+   },
+   {
+    "name": "Diogoashura",
+    "w": 4,
+    "l": 7,
+    "pf": 1350.9,
+    "pc": 1520.66,
+    "jogos": [
+     {
+      "vs": "Cruzeiro do Neymar SFC",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "سانتا کروز",
+      "w": 6,
+      "l": 5
+     },
+     {
+      "vs": "Fofura e Fé",
+      "w": 5,
+      "l": 6
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 1
+    },
+    "queda": {
+     "garante_com": null,
+     "vivo_a_partir_de": 1
+    }
+   },
+   {
+    "name": "Cruzeiro do Neymar SFC",
+    "w": 3,
+    "l": 8,
+    "pf": 1300.62,
+    "pc": 1397.02,
+    "jogos": [
+     {
+      "vs": "Diogoashura",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "Caipiracicaba",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "VoliBEARS",
+      "w": 9,
+      "l": 2
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 2
+    },
+    "queda": {
+     "garante_com": null,
+     "vivo_a_partir_de": 2
+    }
+   }
+  ]
+ },
+ "serie-b": {
+  "vagas": 6,
+  "caem": 3,
+  "jogos_restantes": 3,
+  "teams": [
+   {
+    "name": "RegisCarrara",
+    "w": 9,
+    "l": 2,
+    "pf": 1622.12,
+    "pc": 1423.16,
+    "jogos": [
+     {
+      "vs": "Gumagol971",
+      "w": 2,
+      "l": 9
+     },
+     {
+      "vs": "wladspfc",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "BigFieldMS",
+      "w": 5,
+      "l": 6
+     }
+    ],
+    "playoffs": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "GORDINHAS AJEITADAS",
+    "w": 8,
+    "l": 3,
+    "pf": 1862.92,
+    "pc": 1614.94,
+    "jogos": [
+     {
+      "vs": "SiaraBigheads",
+      "w": 6,
+      "l": 5
+     },
+     {
+      "vs": "alb2106",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "Gumagol971",
+      "w": 2,
+      "l": 9
+     }
+    ],
+    "playoffs": {
+     "garante_com": 1,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "Quack Attack",
+    "w": 7,
+    "l": 4,
+    "pf": 1660.78,
+    "pc": 1524.28,
+    "jogos": [
+     {
+      "vs": "alb2106",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "Gumagol971",
+      "w": 2,
+      "l": 9
+     },
+     {
+      "vs": "wladspfc",
+      "w": 3,
+      "l": 8
+     }
+    ],
+    "playoffs": {
+     "garante_com": 2,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "Explosion Raiders",
+    "w": 7,
+    "l": 4,
+    "pf": 1587.28,
+    "pc": 1375.2,
+    "jogos": [
+     {
+      "vs": "Ceará Dolphins",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "BigFieldMS",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "SiaraBigheads",
+      "w": 6,
+      "l": 5
+     }
+    ],
+    "playoffs": {
+     "garante_com": 2,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "SiaraBigheads",
+    "w": 6,
+    "l": 5,
+    "pf": 1572.26,
+    "pc": 1586.24,
+    "jogos": [
+     {
+      "vs": "GORDINHAS AJEITADAS",
+      "w": 8,
+      "l": 3
+     },
+     {
+      "vs": "Ceará Dolphins",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "Explosion Raiders",
+      "w": 7,
+      "l": 4
+     }
+    ],
+    "playoffs": {
+     "garante_com": 3,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 1,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "alb2106",
+    "w": 5,
+    "l": 6,
+    "pf": 1683.99,
+    "pc": 1659.24,
+    "jogos": [
+     {
+      "vs": "Quack Attack",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "GORDINHAS AJEITADAS",
+      "w": 8,
+      "l": 3
+     },
+     {
+      "vs": "Ceará Dolphins",
+      "w": 3,
+      "l": 8
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 2,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "BigFieldMS",
+    "w": 5,
+    "l": 6,
+    "pf": 1534.24,
+    "pc": 1600.72,
+    "jogos": [
+     {
+      "vs": "wladspfc",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "Explosion Raiders",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "RegisCarrara",
+      "w": 9,
+      "l": 2
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 2,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "Ceará Dolphins",
+    "w": 3,
+    "l": 8,
+    "pf": 1394.82,
+    "pc": 1579.18,
+    "jogos": [
+     {
+      "vs": "Explosion Raiders",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "SiaraBigheads",
+      "w": 6,
+      "l": 5
+     },
+     {
+      "vs": "alb2106",
+      "w": 5,
+      "l": 6
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 2
+    },
+    "queda": {
+     "garante_com": null,
+     "vivo_a_partir_de": 2
+    }
+   },
+   {
+    "name": "wladspfc",
+    "w": 3,
+    "l": 8,
+    "pf": 1360.1,
+    "pc": 1656.92,
+    "jogos": [
+     {
+      "vs": "BigFieldMS",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "RegisCarrara",
+      "w": 9,
+      "l": 2
+     },
+     {
+      "vs": "Quack Attack",
+      "w": 7,
+      "l": 4
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 2
+    },
+    "queda": {
+     "garante_com": null,
+     "vivo_a_partir_de": 2
+    }
+   },
+   {
+    "name": "Gumagol971",
+    "w": 2,
+    "l": 9,
+    "pf": 1385.18,
+    "pc": 1643.82,
+    "jogos": [
+     {
+      "vs": "RegisCarrara",
+      "w": 9,
+      "l": 2
+     },
+     {
+      "vs": "Quack Attack",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "GORDINHAS AJEITADAS",
+      "w": 8,
+      "l": 3
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 3
+    },
+    "queda": {
+     "garante_com": null,
+     "vivo_a_partir_de": 3
+    }
+   }
+  ]
+ },
+ "serie-c": {
+  "vagas": 6,
+  "caem": 3,
+  "jogos_restantes": 3,
+  "teams": [
+   {
+    "name": "joaoW7",
+    "w": 9,
+    "l": 2,
+    "pf": 1707.46,
+    "pc": 1380.86,
+    "jogos": [
+     {
+      "vs": "Pandemônio FC",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "086 Football",
+      "w": 6,
+      "l": 5
+     },
+     {
+      "vs": "romanerinha",
+      "w": 3,
+      "l": 8
+     }
+    ],
+    "playoffs": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "San Andreas Chiefs",
+    "w": 8,
+    "l": 3,
+    "pf": 1812.24,
+    "pc": 1523.32,
+    "jogos": [
+     {
+      "vs": "Kelce Gremista",
+      "w": 2,
+      "l": 9
+     },
+     {
+      "vs": "Pandemônio FC",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "086 Football",
+      "w": 6,
+      "l": 5
+     }
+    ],
+    "playoffs": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "Fogo na Bomba",
+    "w": 7,
+    "l": 4,
+    "pf": 1608.94,
+    "pc": 1416.14,
+    "jogos": [
+     {
+      "vs": "DMK Steel Curtain",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "Mangue Chiefs 🦀",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "WI Redentor",
+      "w": 3,
+      "l": 8
+     }
+    ],
+    "playoffs": {
+     "garante_com": 1,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "Mangue Chiefs 🦀",
+    "w": 7,
+    "l": 4,
+    "pf": 1591.02,
+    "pc": 1585.6,
+    "jogos": [
+     {
+      "vs": "WI Redentor",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "Fogo na Bomba",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "Kelce Gremista",
+      "w": 2,
+      "l": 9
+     }
+    ],
+    "playoffs": {
+     "garante_com": 1,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 0,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "086 Football",
+    "w": 6,
+    "l": 5,
+    "pf": 1509.74,
+    "pc": 1642.16,
+    "jogos": [
+     {
+      "vs": "romanerinha",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "joaoW7",
+      "w": 9,
+      "l": 2
+     },
+     {
+      "vs": "San Andreas Chiefs",
+      "w": 8,
+      "l": 3
+     }
+    ],
+    "playoffs": {
+     "garante_com": 2,
+     "vivo_a_partir_de": 0
+    },
+    "queda": {
+     "garante_com": 1,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "DMK Steel Curtain",
+    "w": 5,
+    "l": 6,
+    "pf": 1597.5,
+    "pc": 1479.9,
+    "jogos": [
+     {
+      "vs": "Fogo na Bomba",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "Kelce Gremista",
+      "w": 2,
+      "l": 9
+     },
+     {
+      "vs": "Pandemônio FC",
+      "w": 5,
+      "l": 6
+     }
+    ],
+    "playoffs": {
+     "garante_com": 3,
+     "vivo_a_partir_de": 1
+    },
+    "queda": {
+     "garante_com": 2,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "Pandemônio FC",
+    "w": 5,
+    "l": 6,
+    "pf": 1567.52,
+    "pc": 1567.72,
+    "jogos": [
+     {
+      "vs": "joaoW7",
+      "w": 9,
+      "l": 2
+     },
+     {
+      "vs": "San Andreas Chiefs",
+      "w": 8,
+      "l": 3
+     },
+     {
+      "vs": "DMK Steel Curtain",
+      "w": 5,
+      "l": 6
+     }
+    ],
+    "playoffs": {
+     "garante_com": 3,
+     "vivo_a_partir_de": 1
+    },
+    "queda": {
+     "garante_com": 2,
+     "vivo_a_partir_de": 0
+    }
+   },
+   {
+    "name": "WI Redentor",
+    "w": 3,
+    "l": 8,
+    "pf": 1502.98,
+    "pc": 1651.48,
+    "jogos": [
+     {
+      "vs": "Mangue Chiefs 🦀",
+      "w": 7,
+      "l": 4
+     },
+     {
+      "vs": "romanerinha",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "Fogo na Bomba",
+      "w": 7,
+      "l": 4
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 3
+    },
+    "queda": {
+     "garante_com": null,
+     "vivo_a_partir_de": 2
+    }
+   },
+   {
+    "name": "romanerinha",
+    "w": 3,
+    "l": 8,
+    "pf": 1201.1,
+    "pc": 1475.68,
+    "jogos": [
+     {
+      "vs": "086 Football",
+      "w": 6,
+      "l": 5
+     },
+     {
+      "vs": "WI Redentor",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "joaoW7",
+      "w": 9,
+      "l": 2
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 3
+    },
+    "queda": {
+     "garante_com": null,
+     "vivo_a_partir_de": 2
+    }
+   },
+   {
+    "name": "Kelce Gremista",
+    "w": 2,
+    "l": 9,
+    "pf": 1112.16,
+    "pc": 1487.8,
+    "jogos": [
+     {
+      "vs": "San Andreas Chiefs",
+      "w": 8,
+      "l": 3
+     },
+     {
+      "vs": "DMK Steel Curtain",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "Mangue Chiefs 🦀",
+      "w": 7,
+      "l": 4
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": null
+    },
+    "queda": {
+     "garante_com": null,
+     "vivo_a_partir_de": 3
+    }
+   }
+  ]
+ },
+ "serie-d": {
+  "vagas": 6,
+  "caem": 0,
+  "jogos_restantes": 3,
+  "teams": [
+   {
+    "name": "LeandroGaucho",
+    "w": 8,
+    "l": 3,
+    "pf": 1666.28,
+    "pc": 1548.18,
+    "jogos": [
+     {
+      "vs": "Elieser",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "VitorM05",
+      "w": 8,
+      "l": 3
+     },
+     {
+      "vs": "New England Patriotas",
+      "w": 8,
+      "l": 3
+     }
+    ],
+    "playoffs": {
+     "garante_com": 1,
+     "vivo_a_partir_de": 0
+    },
+    "queda": null
+   },
+   {
+    "name": "VitorM05",
+    "w": 8,
+    "l": 3,
+    "pf": 1640.68,
+    "pc": 1491.56,
+    "jogos": [
+     {
+      "vs": "Just Maried",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "LeandroGaucho",
+      "w": 8,
+      "l": 3
+     },
+     {
+      "vs": "Claudianosilva",
+      "w": 5,
+      "l": 6
+     }
+    ],
+    "playoffs": {
+     "garante_com": 1,
+     "vivo_a_partir_de": 0
+    },
+    "queda": null
+   },
+   {
+    "name": "New England Patriotas",
+    "w": 8,
+    "l": 3,
+    "pf": 1559.64,
+    "pc": 1311.08,
+    "jogos": [
+     {
+      "vs": "polvorje",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "Just Maried",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "LeandroGaucho",
+      "w": 8,
+      "l": 3
+     }
+    ],
+    "playoffs": {
+     "garante_com": 1,
+     "vivo_a_partir_de": 0
+    },
+    "queda": null
+   },
+   {
+    "name": "Green N Gold",
+    "w": 6,
+    "l": 5,
+    "pf": 1761.36,
+    "pc": 1549.58,
+    "jogos": [
+     {
+      "vs": "DH8 Red&Gold",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "polvorje",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "Correia49 KHC",
+      "w": 3,
+      "l": 8
+     }
+    ],
+    "playoffs": {
+     "garante_com": 3,
+     "vivo_a_partir_de": 0
+    },
+    "queda": null
+   },
+   {
+    "name": "Just Maried",
+    "w": 5,
+    "l": 6,
+    "pf": 1549.86,
+    "pc": 1537.76,
+    "jogos": [
+     {
+      "vs": "VitorM05",
+      "w": 8,
+      "l": 3
+     },
+     {
+      "vs": "New England Patriotas",
+      "w": 8,
+      "l": 3
+     },
+     {
+      "vs": "DH8 Red&Gold",
+      "w": 3,
+      "l": 8
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 0
+    },
+    "queda": null
+   },
+   {
+    "name": "polvorje",
+    "w": 5,
+    "l": 6,
+    "pf": 1499.34,
+    "pc": 1540.96,
+    "jogos": [
+     {
+      "vs": "New England Patriotas",
+      "w": 8,
+      "l": 3
+     },
+     {
+      "vs": "Green N Gold",
+      "w": 6,
+      "l": 5
+     },
+     {
+      "vs": "Elieser",
+      "w": 4,
+      "l": 7
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 0
+    },
+    "queda": null
+   },
+   {
+    "name": "Claudianosilva",
+    "w": 5,
+    "l": 6,
+    "pf": 1410.96,
+    "pc": 1577.04,
+    "jogos": [
+     {
+      "vs": "Correia49 KHC",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "DH8 Red&Gold",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "VitorM05",
+      "w": 8,
+      "l": 3
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 0
+    },
+    "queda": null
+   },
+   {
+    "name": "Elieser",
+    "w": 4,
+    "l": 7,
+    "pf": 1552.6,
+    "pc": 1708.54,
+    "jogos": [
+     {
+      "vs": "LeandroGaucho",
+      "w": 8,
+      "l": 3
+     },
+     {
+      "vs": "Correia49 KHC",
+      "w": 3,
+      "l": 8
+     },
+     {
+      "vs": "polvorje",
+      "w": 5,
+      "l": 6
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 1
+    },
+    "queda": null
+   },
+   {
+    "name": "DH8 Red&Gold",
+    "w": 3,
+    "l": 8,
+    "pf": 1473.38,
+    "pc": 1669.82,
+    "jogos": [
+     {
+      "vs": "Green N Gold",
+      "w": 6,
+      "l": 5
+     },
+     {
+      "vs": "Claudianosilva",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "Just Maried",
+      "w": 5,
+      "l": 6
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 2
+    },
+    "queda": null
+   },
+   {
+    "name": "Correia49 KHC",
+    "w": 3,
+    "l": 8,
+    "pf": 1418.34,
+    "pc": 1597.92,
+    "jogos": [
+     {
+      "vs": "Claudianosilva",
+      "w": 5,
+      "l": 6
+     },
+     {
+      "vs": "Elieser",
+      "w": 4,
+      "l": 7
+     },
+     {
+      "vs": "Green N Gold",
+      "w": 6,
+      "l": 5
+     }
+    ],
+    "playoffs": {
+     "garante_com": null,
+     "vivo_a_partir_de": 2
+    },
+    "queda": null
+   }
+  ]
+ }
+}
