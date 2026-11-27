@@ -1785,3 +1785,35 @@ abbr[title] { text-decoration: none; cursor: help; }
     .ld-btn:hover { transform: none; }
     .ld-verdict span { animation: none; }
 }
+
+/* === BUSCA DE JOGADOR E SITUAÇÃO (ui/situacao.js) === */
+.psearch { position: relative; display: flex; flex-wrap: wrap; gap: var(--s-8); align-items: center; }
+.psearch__field { flex: 1 1 260px; display: flex; align-items: center; gap: var(--s-8); min-height: var(--tap); padding: 0 var(--s-12); border: 1px solid var(--border-2); border-radius: var(--r-md); background: var(--surface); color: var(--text-3); }
+.psearch__field:focus-within { border-color: var(--orange); }
+.psearch__field input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--text); font: inherit; font-size: 16px; }
+.psearch__field input::placeholder { color: var(--text-3); }
+.psearch__me { flex-shrink: 0; }
+.psearch__results { flex-basis: 100%; }
+.psearch__results:empty { display: none; }
+.psearch__list { list-style: none; margin: 0; padding: 4px; border: 1px solid var(--border-2); border-radius: var(--r-md); background: var(--surface); }
+.psearch__item { display: flex; align-items: center; gap: var(--s-12); width: 100%; padding: 8px 10px; border: 0; border-radius: var(--r-sm); background: none; color: var(--text); text-align: left; cursor: pointer; }
+.psearch__item:hover, .psearch__item:focus-visible { background: var(--surface-2); }
+.psearch__item .grow { min-width: 0; }
+.psearch__item b { display: block; font-size: var(--fs-14); }
+.psearch__item small { display: block; color: var(--text-3); font-size: var(--fs-12); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.psearch__pills { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; max-width: 50%; flex-shrink: 0; }
+.psearch__empty { margin: 0; padding: var(--s-12); color: var(--text-3); font-size: var(--fs-14); }
+.situation__hd { display: flex; align-items: center; justify-content: space-between; gap: var(--s-8); }
+.situation__me { border: 1px solid var(--border-2); border-radius: 999px; background: none; color: var(--text-2); font-size: var(--fs-12); font-weight: 700; padding: 4px 10px; cursor: pointer; }
+.situation__me.is-on { border-color: var(--zone-promo); color: var(--zone-promo); }
+.situation__list { list-style: none; margin: var(--s-8) 0 0; padding: 0; display: grid; gap: 6px; }
+.situation__row { display: flex; align-items: center; gap: var(--s-12); padding: 10px 12px; border-radius: var(--r-md); background: var(--surface-2); color: var(--text); text-decoration: none; box-shadow: inset 3px 0 0 transparent; }
+a.situation__row[href]:hover { background: var(--surface-3); }
+.situation__row .grow { min-width: 0; }
+.situation__row b { display: block; font-size: var(--fs-14); }
+.situation__row small { display: block; color: var(--text-3); font-size: var(--fs-12); }
+.situation__row small.eyebrow { margin-bottom: 2px; }
+.situation__row.is-up { box-shadow: inset 3px 0 0 var(--zone-promo); }
+.situation__row.is-down { box-shadow: inset 3px 0 0 var(--zone-releg); }
+.situation__row.is-out { box-shadow: inset 3px 0 0 var(--text-3); }
+.situation__row .crest { height: 28px; width: auto; flex-shrink: 0; }

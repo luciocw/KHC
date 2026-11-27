@@ -12,6 +12,7 @@ Site em **HTML/CSS/JS puro**: sem framework, sem build e sem backend. Publicado 
 - **Rodada:** confrontos e placares da semana, com destaques.
 - **Top Scorers** e **Power Ranking**.
 - **Copa KHC:** mata-mata do site em paralelo às divisões, e **Champions KHC**, a simulação do formato Champions.
+- **Busca "Como estou na KHC?"** (topo de Ligas): digite o usuário do Sleeper e veja a situação na temporada (divisão, chances, Elite, Guilhotina, Copa, Hall da Fama); "Minha situação" para quem se lembrar no aparelho.
 - **Lendas KHC:** Hall da Fama por Pontos KHC, mais o perfil de cada jogador.
 - **Temporadas**, **Regras** e **Também na KHC** (Guilhotina, Premier League e NBA).
 - Todas as telas exportam PNG, e o site pode ser instalado como app na tela inicial.

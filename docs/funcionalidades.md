@@ -22,7 +22,8 @@ Cada tela, com o endereço e o arquivo onde ela está. A Copa tem página própr
 - **Power Ranking** (`tabs/power-ranking.js`): tiers S Favoritos · A Candidatos · B Meio de tabela · C Pressionados · D Lanternas, por posição (10/20/40/20/10%). PWR = 50% força (all-play semana a semana contra as Séries A–D) + 30% aproveitamento + 20% fase (últimas 3 semanas). Sem Elite. Exporta PNG.
 - **Lendas KHC** (`tabs/lendas.js`): ver [`lendas.md`](lendas.md).
 - **Temporadas** (`tabs/temporadas.js`) e **Regras** (`tabs/regras.js`, que explica as contas para o público).
-- **Perfil do jogador** (`ui/drawer.js`): lateral no desktop, bottom sheet no celular.
+- **Perfil do jogador** (`ui/drawer.js`): lateral no desktop, bottom sheet no celular. No topo, **Situação em <ano>** (`ui/situacao.js`): posição, V–D e zona em cada divisão (com as chances de playoffs e queda), Elite, Guilhotina (vivo/cortado), Copa KHC (classificatória ou fase, adversário e placar; também no formato Champions) e o lugar no Hall da Fama. Botão "Lembrar: este sou eu" guarda o usuário no aparelho (`localStorage` `khc_me`).
+- **Busca "Como estou na KHC?"** (`ui/situacao.js`, topo de Ligas): usuário do Sleeper ou nome do time, sem diferenciar maiúsculas e acentos (inclui quem só está no histórico); Enter abre o primeiro resultado. Com usuário lembrado, aparece o atalho **Minha situação**.
 
 ## Também na KHC
 

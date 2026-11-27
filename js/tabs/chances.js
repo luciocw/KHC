@@ -69,6 +69,7 @@ function leagueOdds(league) {
         .catch(() => { entry.status = 'error'; })
         .then(() => {
             if (appState.tab === 'ligas' && appState.loadState === 'ready') renderView();
+            if (isPlayerDrawerOpen()) refreshPlayerDrawer();
         });
     return entry;
 }
