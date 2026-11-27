@@ -24,7 +24,6 @@ const TABS = [
     // Também na KHC (fora do menu): atalho no topo, Regras e o cartão da entressafra
     { id: 'premier',    label: 'Premier League', short: 'Premier', title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('premier'), hidden: true, also: true },
     // Champions KHC: a Copa no formato Champions (aberta pela página Início)
-    { id: 'copa-champions', label: 'Champions KHC', short: 'Champions', title: 'Champions KHC', icon: 'trophy', render: () => renderCopaSimPage(), hidden: true, also: true, needsData: true },
     { id: 'guilhotina', label: 'Guilhotina',     short: 'Guilhotina', title: 'Também na KHC', icon: 'trophy', render: () => renderGuillotinePage(), hidden: true, also: true, needsData: true },
     { id: 'nba',        label: 'NBA',            short: 'NBA',     title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('nba'),     hidden: true, also: true },
 ];
@@ -67,6 +66,11 @@ function parseHash() {
         let player = null;
         try { player = decodeURIComponent(parts.slice(1).join('/')); } catch (e) { player = null; }
         return { tab: null, season: null, tier: null, week: null, player };
+    }
+    // Link antigo da Champions (#/copa-champions) → aba Champions em Ligas
+    if (parts[0] === 'copa-champions') {
+        const y = Object.keys(KHC_CONFIG).sort().reverse().find(k => KHC_CONFIG[k].copa);
+        return { tab: 'ligas', season: y || null, tier: 'copa', week: null, player: null };
     }
     const tab = TAB_BY_ID[parts[0]] ? parts[0] : null;
     // Link antigo da Guilhotina dentro de Ligas (#/ligas/2026/g) → #/guilhotina
@@ -124,11 +128,6 @@ function applyHash(opts = {}) {
         appState.alsoView = route.alsoView;
         appState.alsoWeek = route.week;
     }
-    // Simulação da Copa: a temporada mais recente que tem uma
-    if (appState.tab === 'copa-champions') {
-        const y = Object.keys(KHC_CONFIG).sort().reverse().find(k => KHC_CONFIG[k].copaSim);
-        if (y) appState.season = y;
-    }
     // Guilhotina: sempre a da temporada mais recente que tem uma
     if (appState.tab === 'guilhotina') {
         const y = Object.keys(KHC_CONFIG).sort().reverse().find(k => KHC_CONFIG[k].leagues.some(l => isGuillotine(l.tier)));
@@ -180,7 +179,6 @@ function renderShell() {
         : appState.tab === 'premier' ? `Fantasy de futebol · ${PREMIER_LEAGUE.season}`
         : appState.tab === 'nba' ? `Fantasy de basquete · ${NBA_LEAGUE.season}`
         : appState.tab === 'guilhotina' ? `Liga avulsa · ${appState.season}`
-        : appState.tab === 'copa-champions' ? `Simulação · ${appState.season}`
         : `Temporada ${appState.season}`;
     // Também na KHC: seletor de temporada e pílula da NFL não se aplicam
     document.getElementById(DOM_IDS.SEASON_SELECT).hidden = isAlso;

@@ -1,10 +1,10 @@
 # Funcionalidades do site
 
-Cada tela, com o endereço e o arquivo onde ela está. A Copa tem página própria ([`copa.md`](copa.md)) e as Lendas também ([`lendas.md`](lendas.md)).
+Cada tela, com o endereço e o arquivo onde ela está. A Champions KHC tem página própria ([`copa.md`](copa.md)) e as Lendas também ([`lendas.md`](lendas.md)).
 
 ## Navegação
 
-- **6 abas no menu:** Ligas, Top Scorers, Power Ranking, Lendas KHC, Temporadas e Regras. Fora do menu: Início (página principal, pelo logo), Também na KHC (ícone de grade) e Champions KHC (pela Início).
+- **6 abas no menu:** Ligas, Top Scorers, Power Ranking, Lendas KHC, Temporadas e Regras. Fora do menu: Início (página principal, pelo logo), Também na KHC (ícone de grade). A Champions KHC é uma aba de Ligas.
 - **Endereço por tela** (dá para compartilhar): `#/ligas/2026/a`, `#/top/2026`, `#/jogador/<usuario>`. Roteamento em `js/app.js` (`hashFor` / `parseHash`).
 - **Landing** (`js/landing.js`): na 1ª visita pela raiz do site, abre uma apresentação curta da KHC. "Ver as ligas" leva ao hub e, dali em diante, a raiz abre o hub direto. Links com endereço (`#/ligas/…`, compartilhados ou do app instalado) nunca passam pela landing, e quem já usava o hub também não. `#/inicio` abre a landing a qualquer momento (link de divulgação e botão em Regras). O botão "Quero jogar" ainda não tem destino: entra quando houver link de inscrição.
 - **App na tela inicial:** manifest e ícones em `assets/app/`. No Android, instala pelo Chrome; no iPhone, pelo Safari (Compartilhar → Adicionar à Tela de Início).
@@ -18,11 +18,12 @@ Cada tela, com o endereço e o arquivo onde ela está. A Copa tem página própr
     - Elite: semis 1º×4º e 2º×3º (semana 15), final e 3º lugar (16).
     - Séries A–D: 1º e 2º folgam; quartas 4º×5º e 3º×6º (15), semis e 5º lugar (16), final e 3º lugar (17).
     - Na temporada regular mostra a projeção pela tabela de hoje, com a chance de playoffs de cada time; depois, o chaveamento do Sleeper com placares. Nas semanas de playoff, Ligas abre direto em Playoffs. Exporta em imagem.
+- **Champions KHC** (aba Champions em Ligas, `tabs/copa-ucl.js`): fase de liga, jogos por rodada e mata-mata; ver [`copa.md`](copa.md).
 - **Top Scorers** (`tabs/top-scorers.js`): filtro por série e "Incluir Elite" (desligado por padrão, para não duplicar time). Baixar e Compartilhar geram PNG da lista com o filtro atual; em "Todas", só o Top 20.
 - **Power Ranking** (`tabs/power-ranking.js`): tiers S Favoritos · A Candidatos · B Meio de tabela · C Pressionados · D Lanternas, por posição (10/20/40/20/10%). PWR = 50% força (all-play semana a semana contra as Séries A–D) + 30% aproveitamento + 20% fase (últimas 3 semanas). Sem Elite. Exporta PNG.
 - **Lendas KHC** (`tabs/lendas.js`): ver [`lendas.md`](lendas.md).
 - **Temporadas** (`tabs/temporadas.js`) e **Regras** (`tabs/regras.js`, que explica as contas para o público).
-- **Perfil do jogador** (`ui/drawer.js`): lateral no desktop, bottom sheet no celular. No topo, **Situação em <ano>** (`ui/situacao.js`): posição, V–D e zona em cada divisão (com as chances de playoffs e queda), Elite, Guilhotina (vivo/cortado), Copa KHC (classificatória ou fase, adversário e placar; também no formato Champions) e o lugar no Hall da Fama. Botão "Lembrar: este sou eu" guarda o usuário no aparelho (`localStorage` `khc_me`).
+- **Perfil do jogador** (`ui/drawer.js`): lateral no desktop, bottom sheet no celular. No topo, **Situação em <ano>** (`ui/situacao.js`): posição, V–D e zona em cada divisão (com as chances de playoffs e queda), Elite, Guilhotina (vivo/cortado), Champions KHC (posição na fase de liga ou fase do mata-mata, adversário e placar) e o lugar no Hall da Fama. Botão "Lembrar: este sou eu" guarda o usuário no aparelho (`localStorage` `khc_me`).
 - **Busca "Como estou na KHC?"** (`ui/situacao.js`, topo de Ligas): usuário do Sleeper ou nome do time, sem diferenciar maiúsculas e acentos (inclui quem só está no histórico); Enter abre o primeiro resultado. Com usuário lembrado, aparece o atalho **Minha situação**.
 
 ## Início (`#/hub`, página principal)

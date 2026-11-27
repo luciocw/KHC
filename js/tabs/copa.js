@@ -28,30 +28,26 @@ function resetCopaCache() {
 
 /** Configuração da Copa na temporada (ou null). format 'ucl' = estilo Champions (copa-ucl.js). */
 function copaConfig(season) {
-    const cfgYear = KHC_CONFIG[season || appState.season] || {};
-    // página escondida #/copa-champions: a simulação do formato Champions
-    const c = !season && appState.tab === 'copa-champions' ? cfgYear.copaSim : cfgYear.copa;
+    const c = (KHC_CONFIG[season || appState.season] || {}).copa;
     if (!c) return null;
     if (c.format === 'ucl') return c.pots && c.leagueWeeks && c.knockout ? c : null;
     return c.qualifying && c.bracket ? c : null;
 }
 
-/** Escudo: o da Champions KHC na página dela, senão o da Copa. */
+/** Escudo da Champions KHC. */
 function copaCrestHTML(height) {
-    if (appState.tab !== 'copa-champions') return crestHTML('copa', height);
-    const width = Math.round(height * 141 / 160);
-    return `<img class="crest" src="${CREST_PATH}${CHAMPIONS_CREST}" alt="" width="${width}" height="${height}">`;
+    return crestHTML('copa', height);
 }
 
-/** Nome no cabeçalho: "Champions KHC" na simulação, senão "Copa KHC". */
+/** Nome no cabeçalho: "Champions KHC". */
 function copaTitle() {
-    return appState.tab === 'copa-champions' ? 'Champions KHC' : SERIES_META.copa.name;
+    return SERIES_META.copa.name;
 }
 
-/** Configuração da Champions KHC (simulação no formato Champions), ou null. */
+/** Configuração da Champions KHC (formato Champions), ou null. */
 function championsConfig() {
-    const c = (KHC_CONFIG[appState.season] || {}).copaSim;
-    return c && c.format === 'ucl' && c.pots && c.leagueWeeks && c.knockout ? c : null;
+    const c = copaConfig();
+    return c && c.format === 'ucl' ? c : null;
 }
 
 /** Primeira e última semana com placar usado pela Copa. */
@@ -122,7 +118,7 @@ function copaData(cfg = copaConfig()) {
         .then(data => { entry.status = 'ready'; entry.data = data; })
         .catch(() => { entry.status = 'error'; })
         .then(() => {
-            if (appState.loadState === 'ready' && ((appState.tab === 'ligas' && isCup(appState.series)) || appState.tab === 'copa-champions' || appState.tab === 'hub')) renderView();
+            if (appState.loadState === 'ready' && ((appState.tab === 'ligas' && isCup(appState.series)) || appState.tab === 'hub')) renderView();
             if (isPlayerDrawerOpen()) refreshPlayerDrawer();
         });
     return entry;
@@ -297,18 +293,4 @@ function renderCopa() {
         ${champ}
         ${body}
         <p class="chances-note">${escapeHtml(note)}</p>`);
-}
-
-/**
- * Champions KHC (#/copa-champions, aberta pela página Início): simulação do
- * formato Champions com os jogos da temporada (KHC_CONFIG[ano].copaSim).
- * @returns {string} HTML
- */
-function renderCopaSimPage() {
-    return `${backToNflHTML()}
-        <div class="state-inline copa-notice" role="note">
-            ${copaCrestHTML(20)}
-            <span><b>Simulação:</b> como a Copa KHC ${escapeHtml(appState.season)} seria no formato Champions (proposta para 2027), com os jogos reais da temporada. Não é a Copa oficial nem soma Pontos KHC.</span>
-        </div>
-        ${renderCopa()}`;
 }

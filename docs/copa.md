@@ -1,10 +1,15 @@
-# Copa KHC e Champions KHC
+# Champions KHC (a Copa da KHC)
 
-Mata-mata do site em paralelo às divisões. Não conta para playoffs nem rebaixamento e usa a pontuação de cada time na sua liga na semana. Fica em Ligas → aba Copa (`#/ligas/2026/copa`); em Ligas, as abas são Elite, Copa e as Séries.
+Competição do site em paralelo às divisões, no formato Champions. Não conta para playoffs nem rebaixamento e usa a pontuação de cada time na sua liga na semana. Fica em Ligas → aba **Champions** (`#/ligas/2026/copa`; a chave interna continua `copa`); em Ligas, as abas são Elite, Champions e as Séries. O link antigo `#/copa-champions` abre essa aba.
+
+Nome, escudo (`escudo-champions.png`, SVG em `assets/logo/svg/escudo-champions.svg`) e rótulo vêm de `SERIES_META.copa`.
 
 Configuração em `KHC_CONFIG[ano].copa` (`js/config.js`). Tela em `js/tabs/copa.js` (formato clássico) e `js/tabs/copa-ucl.js` (formato Champions). As contas ficam em `js/derivations.js` (`drawCup`, `resolveCup`, `resolveUcl`) e são as mesmas que o fechamento da temporada usa.
 
-## Formato clássico (o de 2026)
+## Formato clássico (não usado hoje)
+
+O primeiro desenho da Copa, testado no começo de 2026 e substituído pelo formato Champions. O código segue funcionando: basta uma config sem `format`, `{ seed, qualifying, bracket }`.
+
 
 - **Semana classificatória (12):** os 32 maiores pontuadores avançam.
 - **Chave por sorteio livre:** `drawCup` com a semente de `copa.seed`. A mesma semente dá o mesmo sorteio, então qualquer um pode conferir.
@@ -12,7 +17,7 @@ Configuração em `KHC_CONFIG[ano].copa` (`js/config.js`). Tela em `js/tabs/copa
 - **Empate:** pontos da semana anterior.
 - Em **teste** em 2026 (`copa.test: true`) e valendo em 2027. Com `test: false`, o fechamento (`scripts/derive-season.mjs`) grava o pódio da Copa (Pontos KHC: 10/7/5/2) com a mesma conta do site. `--so-copa` confere a Copa sem fechar a temporada.
 
-## Formato Champions (proposta para 2027)
+## Formato Champions (o de 2026 e a proposta para 2027)
 
 `copa.format: 'ucl'`, em `js/tabs/copa-ucl.js` e `resolveUcl`.
 
@@ -32,9 +37,9 @@ copa: {
 }
 ```
 
-## Champions KHC (simulação)
+## 2026: simulação
 
-Página `#/copa-champions`, aberta pelo card **Champions KHC** da página Início (e pela aba Regras): mostra como a Copa de 2026 seria no formato Champions, com os jogos reais da temporada. A configuração fica em `KHC_CONFIG[ano].copaSim`. Não é oficial nem soma Pontos KHC. Tem escudo próprio, o da Copa com o nome novo: `assets/logo/svg/escudo-champions.svg` e os PNGs `escudo-champions.png` (constante `CHAMPIONS_CREST`).
+Em 2026 a Champions KHC roda como simulação (`test: true`) com os jogos reais da temporada: potes A+B e C+D, 3 jogos contra cada pote. Não soma Pontos KHC. Pendente para 2027: o fechamento (`scripts/derive-season.mjs`) ainda só grava o pódio do formato clássico; antes da primeira Champions oficial, falta gravar o pódio pelo `resolveUcl`.
 
 ## De onde vêm os placares
 

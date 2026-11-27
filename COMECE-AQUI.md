@@ -4,7 +4,7 @@ Guia de entrada para quem vai assumir a KHC, seja uma pessoa ou uma IA. Em 10 mi
 
 ## O que é
 
-A **KHC** é um grupo de ligas de Fantasy Football (NFL) no Sleeper: **Elite** e **Séries A–D** (com acesso e rebaixamento), **KHC Guilhotina**, a **Copa KHC** (mata-mata do site) e, em "Também na KHC", a Cocoricó Premier League e a KHC NBA.
+A **KHC** é um grupo de ligas de Fantasy Football (NFL) no Sleeper: **Elite** e **Séries A–D** (com acesso e rebaixamento), **KHC Guilhotina**, a **Champions KHC** (a Copa do site, formato Champions) e, em "Também na KHC", a Cocoricó Premier League e a KHC NBA.
 
 Este repositório tem duas coisas:
 
@@ -15,7 +15,7 @@ Este repositório tem duas coisas:
 
 | Onde | O quê |
 |---|---|
-| `js/config.js` | **Comece por aqui no código.** IDs das ligas no Sleeper por ano, regras do ano, Copa (`copa`), simulação da Champions (`copaSim`) e Pontos KHC |
+| `js/config.js` | **Comece por aqui no código.** IDs das ligas no Sleeper por ano, regras do ano, Champions KHC (`copa`) e Pontos KHC |
 | `js/derivations.js` | Todas as contas: Power Ranking, Chances, Copa, Champions e Lendas. Não depende da tela, e os testes rodam em cima dele |
 | `js/tabs/*.js` | Uma tela por arquivo. `regras.js` é a aba Regras, que explica as contas para o público |
 | `js/app.js`, `js/api.js`, `js/data.js` | Navegação, busca no Sleeper com cache, temporadas fechadas |
@@ -56,12 +56,11 @@ Grava o resultado final (classificação, troféus e todos os confrontos) no `da
 
 O Sleeper gera IDs novos para as ligas todo ano. Acrescente o ano em `KHC_CONFIG` (`js/config.js`) e revise os textos da aba Regras e da landing. O passo a passo está em [`docs/dados.md`](docs/dados.md).
 
-## Copa KHC e Champions KHC
+## Champions KHC
 
-- **Copa KHC** (`copa` em `config.js`): mata-mata do site, classificatória na semana 12 e final na 17. Em 2026 roda **em teste** (`test: true`, não soma Pontos KHC) e vale para valer em 2027.
-- **Champions KHC** (`copaSim`, página `#/copa-champions`): simulação do formato Champions, uma proposta para 2027, refeita com os jogos reais de 2026. Não é oficial.
-- As duas usam a mesma conta do fechamento (`resolveCup` / `resolveUcl` em `derivations.js`), com sorteio por semente fixa: dá sempre o mesmo resultado, então qualquer um pode conferir.
-- Depois que 2026 fechar, as duas saem dos confrontos gravados no `data/2026.json` e continuam de pé mesmo que o Sleeper apague as ligas antigas. Detalhes em [`docs/copa.md`](docs/copa.md).
+- **Champions KHC** (`copa` em `config.js`, `format: 'ucl'`; aba Champions em Ligas, `#/ligas/<ano>/copa`): a Copa da KHC no formato Champions. Em 2026 é simulação com os jogos reais (`test: true`, não soma Pontos KHC); proposta oficial para 2027. Antes dela, falta o fechamento gravar o pódio da Champions (ver `docs/copa.md`).
+- Usa a mesma conta do site e do fechamento (`resolveUcl` em `derivations.js`), com sorteio por semente fixa: dá sempre o mesmo resultado, então qualquer um pode conferir.
+- Depois que 2026 fechar, ela sai dos confrontos gravados no `data/2026.json` e continua de pé mesmo que o Sleeper apague as ligas antigas. Detalhes em [`docs/copa.md`](docs/copa.md).
 
 ## Acessos de que você precisa
 
