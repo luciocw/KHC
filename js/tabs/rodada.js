@@ -1,5 +1,7 @@
 // =============================================================================
-// TAB / RODADA — Confrontos da semana de uma série, com placar.
+// TAB / RODADA — Confrontos da semana de uma série, com placar. Mostrada
+// como a visão "Rodada" da aba Ligas (Tabela · Chances · Rodada · Playoffs);
+// a rota #/rodada/<ano>/<série>/<semana> continua valendo.
 //
 //   - Abas por série (iguais às da Ligas) e navegação de semana (‹ select ›).
 //   - Semana padrão: a atual da liga (settings.leg); temporada encerrada →
@@ -233,42 +235,26 @@ function matchesSkeletonHTML() {
 }
 
 /**
- * Renderiza a aba Rodada.
- * @returns {string} HTML
+ * Miolo da visão Rodada de uma série (dentro do card da aba Ligas): semana,
+ * destaques, confrontos e o botão de exportar.
+ * @param {Object} league
+ * @returns {{subtitle: string, nav: string, body: string, actions: string}}
  */
-function renderRodada() {
-    const leagues = sortLeagues(appState.leagues).filter(l => !isGuillotine(l.info.tier));
-    const tier = resolveSeriesTier(leagues);
-    if (!tier) {
-        return stateHTML({ icon: 'swords', title: 'Nada por aqui ainda', text: 'Nenhuma série desta temporada carregou.' });
-    }
-    appState.series = tier;
-    const league = leagues.find(l => l.info.tier === tier);
-    const meta = SERIES_META[tier];
+function roundViewHTML(league) {
+    const meta = SERIES_META[league.info.tier];
     const round = currentRound(league);
-
-    const tabs = leagues.map(l => {
-        const m = SERIES_META[l.info.tier];
-        const current = l.info.tier === tier;
-        return `<a href="${hashFor('rodada', appState.season, l.info.tier, appState.matchWeek)}" data-league="${m.league}"${current ? ' aria-current="page"' : ''}>
-            ${crestHTML(l.info.tier, 28)}<span>${escapeHtml(m.short)}</span></a>`;
-    }).join('');
-
-    const error = stateHTML({
-        icon: 'alert',
-        title: 'Não deu pra carregar os confrontos',
-        text: 'Verifique sua conexão e tente de novo.',
-        action: '<button type="button" class="btn" data-action="reload">Tentar de novo</button>'
-    });
-
     let subtitle = 'Carregando…';
-    let nav = '';
+    let nav = round.settings ? weekNavHTML(round.settings, round.week) : '';
     let body = matchesSkeletonHTML();
     let actions = '';
-    if (round.settings) nav = weekNavHTML(round.settings, round.week);
     if (round.status === 'error') {
-        body = error;
         subtitle = '';
+        body = stateHTML({
+            icon: 'alert',
+            title: 'Não deu pra carregar os confrontos',
+            text: 'Verifique sua conexão e tente de novo.',
+            action: '<button type="button" class="btn" data-action="reload">Tentar de novo</button>'
+        });
     } else if (round.status === 'ready') {
         const m = roundModel(league, round);
         subtitle = m.subtitle;
@@ -294,20 +280,14 @@ function renderRodada() {
             </div>`;
         }
     }
+    return { subtitle, nav, body, actions };
+}
 
-    return `
-        ${partialWarningHTML()}
-        <nav class="series-tabs" aria-label="Séries">${tabs}</nav>
-        <section class="card round" data-league="${meta.league}" aria-labelledby="round-title">
-            <header class="card__hd">
-                ${crestHTML(tier, 56)}
-                <div class="grow">
-                    <h2 class="display" id="round-title">${escapeHtml(meta.name)}</h2>
-                    <p>${escapeHtml(subtitle)}</p>
-                </div>
-                ${actions}
-            </header>
-            ${nav}
-            ${body}
-        </section>`;
+/**
+ * Rota #/rodada/<ano>/<série>/<semana>: a visão Rodada dentro da aba Ligas
+ * (links antigos continuam valendo).
+ * @returns {string} HTML
+ */
+function renderRodada() {
+    return renderLigas();
 }

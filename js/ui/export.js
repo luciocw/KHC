@@ -1638,7 +1638,7 @@ function exportTarget() {
         return {
             key: `chave|${appState.season}|${tier}|${b.data.fetchedAt}|${leagueOdds(league).status}`,
             name: `khc-${appState.season}-${tier}-chaveamento.png`,
-            title: `${seriesName} · Chaveamento · ${appState.season}`,
+            title: `${seriesName} · Playoffs · ${appState.season}`,
             draw: () => drawBracketCanvas(league, b.data)
         };
     }

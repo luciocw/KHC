@@ -14,7 +14,8 @@ const TABS = [
     // Página principal (abre primeiro; volta-se a ela pelo logo do topo, sem item no menu)
     { id: 'hub',        label: 'Início',      short: 'Início', title: 'Início',        icon: 'home',     render: () => renderHub(),           needsData: true, hidden: true },
     { id: 'ligas',      label: 'Ligas',       short: 'Ligas',  title: 'Classificação', icon: 'trophy',   render: () => renderLigas(),         needsData: true },
-    { id: 'rodada',     label: 'Rodada',      short: 'Rodada', title: 'Rodada',        icon: 'swords',   render: () => renderRodada(),        needsData: true },
+    // Rodada: visão dentro de Ligas (Tabela · Chances · Rodada · Playoffs); a rota segue valendo
+    { id: 'rodada',     label: 'Rodada',      short: 'Rodada', title: 'Classificação', icon: 'swords',   render: () => renderRodada(),        needsData: true, hidden: true },
     { id: 'top',        label: 'Top Scorers', short: 'Top',    title: 'Top Scorers',   icon: 'chart',    render: () => renderTopScorers(),    needsData: true },
     { id: 'power',      label: 'Power',       short: 'Power',  title: 'Power Ranking', icon: 'zap',      render: () => renderPowerRankings(), needsData: true },
     { id: 'lendas',     label: 'Lendas',      short: 'Lendas', title: 'Lendas KHC',    icon: 'crown',    render: () => renderLegends() },
@@ -151,7 +152,7 @@ function applyHash(opts = {}) {
 /** Abas (topo e inferior), seletor de temporada, título e status. */
 function renderShell() {
     const link = (t, label) => {
-        const current = t.id === appState.tab;
+        const current = t.id === appState.tab || (t.id === 'ligas' && appState.tab === 'rodada');
         return `<a href="${hashFor(t.id, appState.season, appState.series)}"${current ? ' aria-current="page"' : ''}>
             <span data-icon="${t.icon}" data-size="20"></span><span>${label}</span></a>`;
     };
@@ -409,10 +410,16 @@ function bindEvents() {
         const viewBtn = target.closest('[data-ligas-view]');
         if (viewBtn) {
             const v = viewBtn.getAttribute('data-ligas-view');
-            appState.ligasView = v === 'chances' || v === 'chaveamento' ? v : 'tabela';
             appState.ligasViewChosen = true;
+            // Rodada tem rota própria (#/rodada/…, com a semana)
+            if (v === 'rodada') {
+                location.hash = hashFor('rodada', appState.season, appState.series, appState.matchWeek);
+                return;
+            }
+            appState.ligasView = v === 'chances' || v === 'chaveamento' ? v : 'tabela';
             try { localStorage.setItem('khc_ligas_view', appState.ligasView); } catch (err) { /* sem storage */ }
-            renderView();
+            if (appState.tab === 'rodada') location.hash = hashFor('ligas', appState.season, appState.series);
+            else renderView();
             return;
         }
 

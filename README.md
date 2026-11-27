@@ -9,8 +9,7 @@ Site em **HTML/CSS/JS puro**: sem framework, sem build e sem backend. Publicado 
 ## O que tem no site
 
 - **Início** (página principal; o logo do topo leva a ela): destaque da semana e das ligas em slides, "Minha KHC" com as competições do usuário lembrado, e "Outras ligas".
-- **Ligas:** tabela de cada série com zonas e medalhas, **Chances** de playoffs e de queda, e **Chaveamento** dos playoffs.
-- **Rodada:** confrontos e placares da semana, com destaques.
+- **Ligas:** cada série com o seletor **Tabela · Chances · Rodada · Playoffs**: tabela com zonas e medalhas, chances de playoffs e de queda, confrontos e placares da semana com destaques, e o chaveamento dos playoffs.
 - **Top Scorers** e **Power Ranking**.
 - **Copa KHC:** mata-mata do site em paralelo às divisões, e **Champions KHC**, a simulação do formato Champions.
 - **Busca "Como estou na KHC?"** (topo de Ligas): digite o usuário do Sleeper e veja a situação na temporada (divisão, chances, Elite, Guilhotina, Copa, Hall da Fama); "Minha situação" para quem se lembrar no aparelho.

@@ -11,9 +11,10 @@
 //   - Lateral: líderes (ou campeões) das outras séries.
 //   - Busca "Como estou na KHC?" no topo (ui/situacao.js).
 //   - Aba Copa KHC (tabs/copa.js), quando a temporada tem copa configurada.
-//   - Seletor Tabela | Chances | Chaveamento: Chances troca PF/PC por
+//   - Seletor Tabela | Chances | Rodada | Playoffs: Chances troca PF/PC por
 //     Playoffs % e Queda % (tabs/chances.js), só com a temporada regular em
-//     andamento; Chaveamento mostra os playoffs (tabs/chaveamento.js).
+//     andamento; Rodada mostra os confrontos da semana (tabs/rodada.js, rota
+//     #/rodada/…); Playoffs mostra o chaveamento (tabs/chaveamento.js).
 //   - Botões Baixar / Compartilhar: a tabela vira PNG (js/ui/export.js).
 //
 // Lê: appState.leagues, appState.season, appState.series, appState.failedLeagues
@@ -308,22 +309,27 @@ function renderLigas() {
     appState.series = tier;
 
     const league = leagues.find(l => l.info.tier === tier);
+    // Visão Rodada (#/rodada/…): a mesma página, com os confrontos da semana
+    const isRound = appState.tab === 'rodada';
     // Copa KHC entra nas abas depois da Guilhotina (TIER_ORDER), quando configurada
-    // Guilhotina fica em "Também na KHC" (#/guilhotina): Ligas só com as divisões
+    // (não na Rodada: a Copa tem os jogos dela); Guilhotina fica em "Também na KHC"
     const tabTiers = leagues.map(l => l.info.tier).filter(t => !isGuillotine(t));
-    if (copaConfig()) tabTiers.push('copa');
+    if (copaConfig() && !isRound) tabTiers.push('copa');
     tabTiers.sort((a, b) => TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b));
     const tabs = tabTiers.map(t => {
         const m = SERIES_META[t];
         const current = t === tier;
-        return `<a href="${hashFor('ligas', appState.season, t)}" data-league="${m.league}"${current ? ' aria-current="page"' : ''}>
+        const href = isRound ? hashFor('rodada', appState.season, t, appState.matchWeek) : hashFor('ligas', appState.season, t);
+        return `<a href="${href}" data-league="${m.league}"${current ? ' aria-current="page"' : ''}>
             ${crestHTML(t, 28)}<span>${escapeHtml(m.short)}</span></a>`;
     }).join('');
     if (isCup(tier)) {
         return `${partialWarningHTML()}${playerSearchHTML()}${premierOffseasonCardHTML()}<nav class="series-tabs" aria-label="Séries">${tabs}</nav>${renderCopa()}`;
     }
 
-    const { meta, teams, z, finalized, seriesIdx, subtitle, view, odds, chancesAvailable } = standingsModel(league);
+    const model = standingsModel(league);
+    const { meta, teams, z, finalized, seriesIdx, subtitle, odds, chancesAvailable } = model;
+    const view = isRound ? 'rodada' : model.view;
     const chances = view === 'chances' ? odds : null;
     const finalIdx = finalized ? getFinalStandingsIndex() : {};
     const n = teams.length;
@@ -331,20 +337,21 @@ function renderLigas() {
     const rows = teams.map((t, i) =>
         buildStandingsRow(t, i, n, z, finalEntryOf(seriesIdx, t), chances)).join('');
 
-    const views = [['tabela', 'Tabela'], ...(chancesAvailable ? [['chances', 'Chances']] : []), ['chaveamento', 'Chaveamento']];
+    const views = [['tabela', 'Tabela'], ...(chancesAvailable ? [['chances', 'Chances']] : []), ['rodada', 'Rodada'], ['chaveamento', 'Playoffs']];
     const toggle = `<div class="view-switch" role="group" aria-label="O que mostrar">
             ${views.map(([v, label]) => `<button type="button" data-ligas-view="${v}" aria-pressed="${view === v}">${label}</button>`).join('')}
         </div>`;
     const bracket = view === 'chaveamento' ? bracketViewHTML(league) : null;
-    const cardSubtitle = bracket ? (bracket.subtitle === null ? '' : bracket.subtitle) : subtitle;
+    const round = view === 'rodada' ? roundViewHTML(league) : null;
+    const cardSubtitle = round ? round.subtitle : bracket ? (bracket.subtitle === null ? '' : bracket.subtitle) : subtitle;
     const cols = chances
         ? `<th scope="col" class="th-pct"><abbr title="Chance de ir aos playoffs">Playoffs</abbr></th>
                             ${z.down ? '<th scope="col" class="th-pct"><abbr title="Chance de rebaixamento">Queda</abbr></th>' : ''}`
         : `<th scope="col"><abbr title="Pontos feitos">PF</abbr></th>
                             <th scope="col" class="hide-mobile"><abbr title="Pontos contra">PC</abbr></th>`;
 
-    // Chaveamento usa a largura toda (sem a lateral de líderes)
-    const others = bracket ? '' : leagues.filter(l => l.info.tier !== tier && !isGuillotine(l.info.tier))
+    // Playoffs e Rodada usam a largura toda (sem a lateral de líderes)
+    const others = bracket || round ? '' : leagues.filter(l => l.info.tier !== tier && !isGuillotine(l.info.tier))
         .map(l => buildLeaderLink(l, finalized, finalIdx)).join('');
 
     return `
@@ -353,14 +360,14 @@ function renderLigas() {
         ${premierOffseasonCardHTML()}
         <nav class="series-tabs" aria-label="Séries">${tabs}</nav>
         <div class="${others ? 'grid-2' : ''}">
-            <section class="card" data-league="${meta.league}" aria-labelledby="series-title">
+            <section class="card${round ? ' round' : ''}" data-league="${meta.league}" aria-labelledby="series-title">
                 <header class="card__hd">
                     ${crestHTML(tier, 56)}
                     <div class="grow">
                         <h2 class="display" id="series-title">${escapeHtml(meta.name)}</h2>
                         <p>${escapeHtml(cardSubtitle)}</p>
                     </div>
-                    ${bracket && !bracket.ready ? '' : `<div class="export-actions" role="group" aria-label="Exportar tabela como imagem">
+                    ${round ? round.actions : bracket && !bracket.ready ? '' : `<div class="export-actions" role="group" aria-label="Exportar tabela como imagem">
                         <button type="button" class="export-btn" data-action="export-download" aria-label="Baixar tabela da ${escapeHtml(meta.name)} como imagem">
                             <span data-icon="download" data-size="18"></span><span class="export-btn__label">Baixar</span>
                         </button>
@@ -370,7 +377,7 @@ function renderLigas() {
                     </div>`}
                 </header>
                 ${toggle}
-                ${bracket ? bracket.html : `<div class="table-wrap">
+                ${round ? round.nav + round.body : bracket ? bracket.html : `<div class="table-wrap">
                     <table class="standings${chances ? ' standings--chances' : ''}">
                         <caption class="sr-only">Classificação da ${escapeHtml(meta.name)}</caption>
                         <thead><tr>
