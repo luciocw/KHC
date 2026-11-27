@@ -107,7 +107,7 @@ function copaData() {
         .then(data => { entry.status = 'ready'; entry.data = data; })
         .catch(() => { entry.status = 'error'; })
         .then(() => {
-            if (appState.loadState === 'ready' && ((appState.tab === 'ligas' && isCup(appState.series)) || appState.tab === 'copa-champions')) renderView();
+            if (appState.loadState === 'ready' && ((appState.tab === 'ligas' && isCup(appState.series)) || appState.tab === 'copa-champions' || appState.tab === 'hub')) renderView();
             if (isPlayerDrawerOpen()) refreshPlayerDrawer();
         });
     return entry;

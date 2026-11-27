@@ -20,6 +20,8 @@ const TABS = [
     { id: 'regras',     label: 'Regras',      short: 'Regras', title: 'Regras',        icon: 'bookOpen', render: () => renderRules(), mobileInHeader: true },
     // Também na KHC (fora do menu): atalho no topo, Regras e o cartão da entressafra
     { id: 'premier',    label: 'Premier League', short: 'Premier', title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('premier'), hidden: true, also: true },
+    // Protótipo da página inicial revitalizada (só por link, #/hub)
+    { id: 'hub', label: 'Início', short: 'Início', title: 'Início', icon: 'trophy', render: () => renderHub(), hidden: true, needsData: true },
     // Também na KHC: simulação da Copa no formato Champions (proposta 2027)
     { id: 'copa-champions', label: 'Champions KHC', short: 'Champions', title: 'Também na KHC', icon: 'trophy', render: () => renderCopaSimPage(), hidden: true, also: true, needsData: true },
     { id: 'guilhotina', label: 'Guilhotina',     short: 'Guilhotina', title: 'Também na KHC', icon: 'trophy', render: () => renderGuillotinePage(), hidden: true, also: true, needsData: true },
@@ -254,6 +256,8 @@ function renderView() {
     view.innerHTML = html;
     renderIcons(view);
 
+    if (appState.tab === 'hub') hubStartTimer();
+
     // Mantém a série selecionada visível na barra de séries (rola no celular).
     const active = view.querySelector('.series-tabs [aria-current="page"]');
     if (active) {
@@ -361,6 +365,19 @@ function bindEvents() {
     document.addEventListener('click', (e) => {
         const target = e.target instanceof Element ? e.target : null;
         if (!target) return;
+
+        const hubStep = target.closest('[data-hub-step]');
+        if (hubStep) {
+            hubGo((appState.hubSlide || 0) + Number(hubStep.getAttribute('data-hub-step')));
+            return;
+        }
+        const hubCard = target.closest('[data-hub-slide]');
+        if (hubCard) {
+            const hero = document.querySelector('.hub-hero');
+            if (hero) hero.dataset.paused = '1';   // escolheu um: para de passar sozinho
+            hubGo(Number(hubCard.getAttribute('data-hub-slide')));
+            return;
+        }
 
         const copaView = target.closest('[data-copa-view]');
         if (copaView) {
