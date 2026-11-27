@@ -34,7 +34,7 @@ copa: {
 
 ## Champions KHC (simulação)
 
-Página `#/copa-champions`, em Também na KHC: mostra como a Copa de 2026 seria no formato Champions, com os jogos reais da temporada. A configuração fica em `KHC_CONFIG[ano].copaSim`. Não é oficial nem soma Pontos KHC.
+Página `#/copa-champions`, aberta pelo card **Champions KHC** da página Início (e pela aba Regras): mostra como a Copa de 2026 seria no formato Champions, com os jogos reais da temporada. A configuração fica em `KHC_CONFIG[ano].copaSim`. Não é oficial nem soma Pontos KHC. Tem escudo próprio, o da Copa com o nome novo: `assets/logo/svg/escudo-champions.svg` e os PNGs `escudo-champions.png` (constante `CHAMPIONS_CREST`).
 
 ## De onde vêm os placares
 

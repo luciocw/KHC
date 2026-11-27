@@ -36,6 +36,13 @@ function copaConfig(season) {
     return c.qualifying && c.bracket ? c : null;
 }
 
+/** Escudo: o da Champions KHC na página dela, senão o da Copa. */
+function copaCrestHTML(height) {
+    if (appState.tab !== 'copa-champions') return crestHTML('copa', height);
+    const width = Math.round(height * 141 / 160);
+    return `<img class="crest" src="${CREST_PATH}${CHAMPIONS_CREST}" alt="" width="${width}" height="${height}">`;
+}
+
 /** Nome no cabeçalho: "Champions KHC" na simulação, senão "Copa KHC". */
 function copaTitle() {
     return appState.tab === 'copa-champions' ? 'Champions KHC' : SERIES_META.copa.name;
@@ -175,7 +182,7 @@ function renderCopa() {
     const meta = SERIES_META.copa;
     const entry = copaData();
     const header = (subtitle, actions) => `<header class="card__hd">
-            ${crestHTML('copa', 56)}
+            ${copaCrestHTML(56)}
             <div class="grow">
                 <h2 class="display" id="series-title">${escapeHtml(copaTitle())}</h2>
                 <p>${escapeHtml(subtitle)}</p>
@@ -293,15 +300,14 @@ function renderCopa() {
 }
 
 /**
- * Champions KHC (#/copa-champions, em Também na KHC): simulação do formato
- * Champions com os jogos da temporada (KHC_CONFIG[ano].copaSim).
+ * Champions KHC (#/copa-champions, aberta pela página Início): simulação do
+ * formato Champions com os jogos da temporada (KHC_CONFIG[ano].copaSim).
  * @returns {string} HTML
  */
 function renderCopaSimPage() {
     return `${backToNflHTML()}
-        ${alsoTabsHTML('copa-champions')}
         <div class="state-inline copa-notice" role="note">
-            ${crestHTML('copa', 20)}
+            ${copaCrestHTML(20)}
             <span><b>Simulação:</b> como a Copa KHC ${escapeHtml(appState.season)} seria no formato Champions (proposta para 2027), com os jogos reais da temporada. Não é a Copa oficial nem soma Pontos KHC.</span>
         </div>
         ${renderCopa()}`;

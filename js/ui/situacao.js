@@ -210,7 +210,7 @@ function copaSituationRow(username, ids) {
 function uclSituationRow(data, username, ids, cfg, title) {
     const m = uclModel(data, cfg);
     const isMe = e => e && (e.team.ownerName === username || (e.team.ownerId && ids.includes(e.team.ownerId)));
-    const row = (main, sub, tone) => ({ tier: 'copa', title: title || `Copa KHC${m.cfg.test ? ' (teste)' : ''}`, main, sub, tone, href: title ? '#/copa-champions' : hashFor('ligas', appState.season, 'copa') });
+    const row = (main, sub, tone) => ({ tier: 'copa', crest: title ? CHAMPIONS_CREST : null, title: title || `Copa KHC${m.cfg.test ? ' (teste)' : ''}`, main, sub, tone, href: title ? '#/copa-champions' : hashFor('ligas', appState.season, 'copa') });
     const pos = m.table.findIndex(r => isMe(r.entry));
     if (pos < 0) return null;
     const r = m.table[pos];

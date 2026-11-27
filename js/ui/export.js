@@ -1273,7 +1273,8 @@ async function drawCopaCanvas(data) {
  */
 async function drawUclCanvas(data) {
     const m = uclModel(data);
-    const meta = SERIES_META.copa;
+    // Champions KHC (página dela): o escudo com o nome novo
+    const meta = appState.tab === 'copa-champions' ? { ...SERIES_META.copa, crest: CHAMPIONS_CREST } : SERIES_META.copa;
     const c = exportPalette(meta);
     const ph = m.phases[m.current];
     const leagueColor = tier => cssToken(`--league-${SERIES_META[tier].league}`) || c.text2;

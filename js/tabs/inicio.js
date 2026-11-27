@@ -97,7 +97,7 @@ function hubSlides() {
             }
         }
         slides.push({
-            key: 'champions', tier: 'copa', league: 'copa', crest: SERIES_META.copa.crest,
+            key: 'champions', tier: 'copa', league: 'copa', crest: CHAMPIONS_CREST,
             eyebrow: `Champions KHC${cc.test ? ' · simulação' : ''}`,
             title: 'Champions',
             text,
@@ -160,7 +160,7 @@ function hubMineHTML() {
         if (cd.status === 'ready') {
             const r = uclSituationRow(cd.data, me, ids, cc, 'Champions KHC');
             if (r) rows.push(r);
-        } else if (cd.status === 'loading') rows.push({ tier: 'copa', title: 'Champions KHC', main: 'Carregando…', href: '#/copa-champions' });
+        } else if (cd.status === 'loading') rows.push({ tier: 'copa', crest: CHAMPIONS_CREST, title: 'Champions KHC', main: 'Carregando…', href: '#/copa-champions' });
     }
     const p = profileModel(me);
     const n = rows.length;
@@ -168,7 +168,7 @@ function hubMineHTML() {
     const nodes = rows.map((r, k) => {
         const ang = n === 1 ? 0 : -70 + (140 * k) / (n - 1);
         return `<a class="hub-node${r.tone ? ' is-' + r.tone : ''}" href="${r.href || '#'}" style="--ang:${ang}deg" data-league="${r.tier ? SERIES_META[r.tier].league : 'khc'}">
-            <span class="hub-node__dot">${r.tier ? `<img src="${CREST_PATH}${SERIES_META[r.tier].crest}" alt="" width="30" height="34">` : '★'}</span>
+            <span class="hub-node__dot">${r.tier ? `<img src="${CREST_PATH}${r.crest || SERIES_META[r.tier].crest}" alt="" width="30" height="34">` : '★'}</span>
             <span class="hub-node__text"><b>${escapeHtml(r.title)}</b><small>${escapeHtml(r.main)}</small></span>
         </a>`;
     }).join('');
