@@ -21,6 +21,8 @@ const KHC_CONFIG = {
             { id: '1249749216419397632', name: 'KHC Serie B', tier: 'serie-b' },
         ]
     },
+    // 2027: ao criar este bloco, ver o checklist em COMECE-AQUI.md
+    // (Pendências): Champions oficial e o pódio dela no fechamento.
     '2026': {
         rules: { promote: 3, relegate: 3, playoffTeams: 6, elitePlayoffTeams: 4 },
         leagues: [

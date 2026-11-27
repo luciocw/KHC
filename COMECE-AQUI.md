@@ -76,6 +76,12 @@ O Sleeper gera IDs novos para as ligas todo ano. Acrescente o ano em `KHC_CONFIG
 
 ## Pendências conhecidas
 
+- **Ao montar as ligas de 2027 (lembrar o dono):**
+  - IDs das ligas novas (Elite, A–F e Guilhotina) em `KHC_CONFIG['2027']`, em `js/config.js`;
+  - Champions KHC oficial: `copa` com `test: false` e os potes A+B, C+D e E+F (exemplo em `docs/copa.md`);
+  - **o fechamento ainda não grava o pódio da Champions** (campeão, vice, 3º e 4º para os Pontos KHC): ajustar `scripts/derive-season.mjs` para usar `resolveUcl` antes do fim de 2027;
+  - valores finais dos Pontos KHC (tirar o aviso `KHC_POINTS_DRAFT`).
+
 - **Os MP4 dos vídeos não ficam guardados (decisão do dono).** O que fica é o que permite refazer: cenas, dados e trilha de cada vídeo, mais o estilo de som de cada temporada em `video/README.md`.
 - **Roteiros:** só 4 vídeos têm `BRIEFING.md`. Nos outros, a ideia das cenas está no `index.html` e nas mensagens de commit. Daqui em diante, salve o roteiro na pasta do vídeo.
 - **Awards da Semana 4:** só a trilha ficou (`scripts/trilha/awards4.py`). **Awards da Semana 9:** não foi feito.
