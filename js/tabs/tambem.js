@@ -178,7 +178,7 @@ function alsoData(key) {
         .then(data => { entry.status = 'ready'; entry.data = data; entry.fetchedAt = Date.now(); })
         .catch(() => { entry.status = 'error'; })
         .then(() => {
-            if (appState.tab === key || (key === 'premier' && appState.tab === 'ligas' && isNflOffseason())) renderView();
+            if (appState.tab === key || appState.tab === 'hub' || (key === 'premier' && appState.tab === 'ligas' && isNflOffseason())) renderView();
         });
     return entry;
 }

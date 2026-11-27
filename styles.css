@@ -1978,3 +1978,19 @@ a.situation__row[href]:hover { background: var(--surface-3); }
     .hub-node:nth-of-type(odd) { margin-left: 24px; }
     .hub-node:nth-of-type(even) { margin-right: 24px; }
 }
+
+/* Início: outras ligas */
+.hub-others { margin-top: var(--s-16); }
+.hub-others h2 { margin: 0 0 var(--s-8); }
+.hub-others__list { display: grid; gap: var(--s-8); grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.hub-other {
+    display: flex; align-items: center; gap: var(--s-12); padding: 14px 16px; border-radius: 12px;
+    border: 1px solid var(--border); text-decoration: none; color: var(--text);
+    background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 60%), var(--surface);
+}
+.hub-other:hover { border-color: var(--accent); }
+.hub-other img { height: 44px; width: auto; flex-shrink: 0; }
+.hub-other img.is-round { border-radius: 50%; width: 44px; }
+.hub-other .grow { min-width: 0; }
+.hub-other b { display: block; font-size: var(--fs-14); }
+.hub-other small { display: block; color: var(--text-3); font-size: var(--fs-12); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

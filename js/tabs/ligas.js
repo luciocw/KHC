@@ -320,7 +320,7 @@ function renderLigas() {
             ${crestHTML(t, 28)}<span>${escapeHtml(m.short)}</span></a>`;
     }).join('');
     if (isCup(tier)) {
-        return `${partialWarningHTML()}${playerSearchHTML()}${premierOffseasonCardHTML()}${copaLineupNoticeHTML()}<nav class="series-tabs" aria-label="Séries">${tabs}</nav>${renderCopa()}`;
+        return `${partialWarningHTML()}${playerSearchHTML()}${premierOffseasonCardHTML()}<nav class="series-tabs" aria-label="Séries">${tabs}</nav>${renderCopa()}`;
     }
 
     const { meta, teams, z, finalized, seriesIdx, subtitle, view, odds, chancesAvailable } = standingsModel(league);
@@ -351,7 +351,6 @@ function renderLigas() {
         ${partialWarningHTML()}
         ${playerSearchHTML()}
         ${premierOffseasonCardHTML()}
-        ${copaLineupNoticeHTML()}
         <nav class="series-tabs" aria-label="Séries">${tabs}</nav>
         <div class="${others ? 'grid-2' : ''}">
             <section class="card" data-league="${meta.league}" aria-labelledby="series-title">

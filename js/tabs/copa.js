@@ -41,6 +41,12 @@ function copaTitle() {
     return appState.tab === 'copa-champions' ? 'Champions KHC' : SERIES_META.copa.name;
 }
 
+/** Configuração da Champions KHC (simulação no formato Champions), ou null. */
+function championsConfig() {
+    const c = (KHC_CONFIG[appState.season] || {}).copaSim;
+    return c && c.format === 'ucl' && c.pots && c.leagueWeeks && c.knockout ? c : null;
+}
+
 /** Primeira e última semana com placar usado pela Copa. */
 function copaWeekRange(cfg) {
     if (cfg.format === 'ucl') {
@@ -95,9 +101,11 @@ async function loadCopa(cfg) {
     return { settings, scores, fetchedAt: Date.now() };
 }
 
-/** Dados da Copa (dispara a busca na 1ª vez; re-renderiza ao terminar). */
-function copaData() {
-    const cfg = copaConfig();
+/**
+ * Dados da Copa (dispara a busca na 1ª vez; re-renderiza ao terminar).
+ * @param {Object} [cfg]  outra configuração (ex.: a da Champions KHC, na Início)
+ */
+function copaData(cfg = copaConfig()) {
     if (!cfg) return { status: 'off' };
     if (copaMissingSeries().length) return { status: 'incomplete' };
     const key = `${appState.season}|${cfg.format || 'classica'}|${appState.lastUpdated || ''}`;
@@ -138,27 +146,6 @@ function copaModel(data) {
     const auto = settings.leg < cfg.qualifying ? 0 : byWeek >= 0 ? byWeek : phases.length - 1;
     const current = appState.copaPhase !== null && appState.copaPhase >= 0 && appState.copaPhase < phases.length ? appState.copaPhase : auto;
     return { cfg, phases, entrants, qualifying, rounds, champion, current };
-}
-
-/**
- * Aviso discreto no topo de Ligas, Rodada e da aba Copa, da pré-temporada
- * até a final da Copa: datas e o lembrete de continuar escalando (quem cai
- * nos playoffs da sua liga ainda pode estar vivo na Copa).
- * @returns {string} HTML ('' fora da época)
- */
-function copaLineupNoticeHTML() {
-    const cfg = copaConfig();
-    if (!cfg || isSeasonOver()) return '';
-    const { start, last } = copaWeekRange(cfg);
-    const week = appState.nflState ? sanitizeNumber(appState.nflState.display_week, 0, 30, 0) : 0;
-    if (week > last) return '';
-    const when = cfg.format === 'ucl'
-        ? `fase de liga nas semanas ${start} a ${cfg.leagueWeeks[cfg.leagueWeeks.length - 1]}, final na ${last}`
-        : `classificatória na semana ${start} e final na ${last}`;
-    return `<div class="state-inline copa-notice" role="note">
-        ${crestHTML('copa', 20)}
-        <span><b>Copa KHC${cfg.test ? ' (teste)' : ''}:</b> ${when}. Quem cair nos playoffs da sua liga continua escalando o time.</span>
-    </div>`;
 }
 
 /** Subtítulo do card. */
