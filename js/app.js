@@ -421,6 +421,19 @@ function bindEvents() {
         if (e.target instanceof Element && e.target.closest('[data-action="export-share"]')) prefetchExport();
     });
 
+    // Busca de jogador (topo da aba Ligas): atualiza só os resultados
+    document.addEventListener('input', (e) => {
+        if (e.target && e.target.id === 'playerSearch') updatePlayerSearch(e.target.value);
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' || !e.target || e.target.id !== 'playerSearch') return;
+        const first = searchPlayers(e.target.value)[0];
+        if (first) {
+            e.preventDefault();
+            openPlayerDrawer(first.user);
+        }
+    });
+
     document.addEventListener('change', (e) => {
         if (e.target && e.target.matches && e.target.matches('[data-season-select]')) {
             const year = e.target.value;

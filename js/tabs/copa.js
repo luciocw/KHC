@@ -108,6 +108,7 @@ function copaData() {
         .catch(() => { entry.status = 'error'; })
         .then(() => {
             if (appState.loadState === 'ready' && ((appState.tab === 'ligas' && isCup(appState.series)) || appState.tab === 'copa-champions')) renderView();
+            if (isPlayerDrawerOpen()) refreshPlayerDrawer();
         });
     return entry;
 }

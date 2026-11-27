@@ -9,6 +9,7 @@
 //   - Temporada finalizada: ordem e medalhas pela classificação final
 //     (data/<ano>.json — 1º–4º pelos playoffs, 5º+ pela temporada regular).
 //   - Lateral: líderes (ou campeões) das outras séries.
+//   - Busca "Como estou na KHC?" no topo (ui/situacao.js).
 //   - Aba Copa KHC (tabs/copa.js), quando a temporada tem copa configurada.
 //   - Seletor Tabela | Chances | Chaveamento: Chances troca PF/PC por
 //     Playoffs % e Queda % (tabs/chances.js), só com a temporada regular em
@@ -319,7 +320,7 @@ function renderLigas() {
             ${crestHTML(t, 28)}<span>${escapeHtml(m.short)}</span></a>`;
     }).join('');
     if (isCup(tier)) {
-        return `${partialWarningHTML()}${premierOffseasonCardHTML()}${copaLineupNoticeHTML()}<nav class="series-tabs" aria-label="Séries">${tabs}</nav>${renderCopa()}`;
+        return `${partialWarningHTML()}${playerSearchHTML()}${premierOffseasonCardHTML()}${copaLineupNoticeHTML()}<nav class="series-tabs" aria-label="Séries">${tabs}</nav>${renderCopa()}`;
     }
 
     const { meta, teams, z, finalized, seriesIdx, subtitle, view, odds, chancesAvailable } = standingsModel(league);
@@ -348,6 +349,7 @@ function renderLigas() {
 
     return `
         ${partialWarningHTML()}
+        ${playerSearchHTML()}
         ${premierOffseasonCardHTML()}
         ${copaLineupNoticeHTML()}
         <nav class="series-tabs" aria-label="Séries">${tabs}</nav>

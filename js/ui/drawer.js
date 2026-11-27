@@ -210,6 +210,7 @@
                 <button type="button" class="icon-btn drawer__close" data-close-drawer aria-label="Fechar perfil">${IconRegistry.close({ size: 20 })}</button>
             </header>
             <div class="drawer__body">
+                ${situationHTML(username)}
                 <section aria-labelledby="drawer-conq"><h3 class="eyebrow" id="drawer-conq">Conquistas</h3>
                     <div class="tiles tiles--3">${trophyTiles}</div></section>
                 <section aria-labelledby="drawer-car"><h3 class="eyebrow" id="drawer-car">Carreira</h3>
@@ -310,6 +311,14 @@
     document.addEventListener('click', (e) => {
         const target = e.target instanceof Element ? e.target : null;
         if (!target) return;
+        const rememberBtn = target.closest('[data-remember-user]');
+        if (rememberBtn) {
+            const user = rememberBtn.getAttribute('data-remember-user');
+            rememberUser(rememberedUser() === user ? null : user);
+            refreshPlayerDrawer();
+            if (appState.tab === 'ligas') renderView();   // atalho "Minha situação"
+            return;
+        }
         if (target.closest('[data-close-drawer]')) {
             closePlayerDrawer();
             return;
@@ -321,7 +330,18 @@
         }
     });
 
+    /** Redesenha o perfil aberto (chances e Copa chegam depois). */
+    function refreshPlayerDrawer() {
+        if (!_isOpen || !_currentUser) return;
+        const content = document.getElementById('drawer-content');
+        const scroll = content.scrollTop;
+        content.innerHTML = renderDrawerContent(_currentUser);
+        renderIcons(content);
+        content.scrollTop = scroll;
+    }
+
     window.openPlayerDrawer = openPlayerDrawer;
+    window.refreshPlayerDrawer = refreshPlayerDrawer;
     window.closePlayerDrawer = closePlayerDrawer;
     window.isPlayerDrawerOpen = isPlayerDrawerOpen;
     window.profileModel = profileModel;
