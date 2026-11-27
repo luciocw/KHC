@@ -1829,7 +1829,7 @@ a.situation__row[href]:hover { background: var(--surface-3); }
     border: 1px solid var(--border);
     isolation: isolate;
     display: grid;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: 1fr auto auto;   /* texto · setas · cards */
 }
 /* textura: brilho na cor da liga + linhas de jarda + grão diagonal */
 .hub-hero__bg {
@@ -1878,7 +1878,8 @@ a.situation__row[href]:hover { background: var(--surface-3); }
 }
 .hub-hero__cta:hover { background: color-mix(in srgb, var(--accent) 30%, transparent); }
 .hub-hero__nav {
-    position: absolute; left: 40px; right: 40px; bottom: 186px;
+    position: relative; z-index: 1;   /* linha própria: os cards nunca cobrem as setas */
+    padding: 8px 40px 18px;
     display: flex; align-items: center; gap: 10px;
 }
 .hub-arrow {
@@ -1965,7 +1966,7 @@ a.situation__row[href]:hover { background: var(--surface-3); }
     .hub-hero__crest { right: -18%; top: 22%; height: 46%; opacity: .28; }
     .hub-hero__content { max-width: none; padding: 36px 20px 12px; align-self: start; }
     .hub-hero__title { font-size: clamp(56px, 18vw, 92px); }
-    .hub-hero__nav { left: 20px; right: 20px; bottom: 170px; }
+    .hub-hero__nav { padding: 6px 20px 14px; }
     .hub-count { font-size: 30px; }
     .hub-cards { padding: 0 20px 22px; }
     .hub-card { flex-basis: 140px; min-height: 124px; }

@@ -253,7 +253,13 @@ function hubGo(index) {
         hero.querySelectorAll('.hub-card').forEach((c, k) => {
             c.classList.toggle('is-active', k === i);
             c.setAttribute('aria-pressed', String(k === i));
-            if (k === i) c.parentElement.scrollTo({ left: c.offsetLeft - 16, behavior: 'smooth' });
+            if (k === i) {
+                // só rola se o card escolhido estiver fora da faixa visível
+                const row = c.parentElement;
+                const left = c.offsetLeft - row.offsetLeft, right = left + c.offsetWidth;
+                if (left < row.scrollLeft) row.scrollTo({ left: left - 16, behavior: 'smooth' });
+                else if (right > row.scrollLeft + row.clientWidth) row.scrollTo({ left: right - row.clientWidth + 16, behavior: 'smooth' });
+            }
         });
     };
     // "card que abre": transição nativa onde houver; senão, troca direta
