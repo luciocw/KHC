@@ -31,14 +31,12 @@ const KHC_CONFIG = {
             { id: '1370091129751474176', name: 'KHC Serie D', tier: 'serie-d' },
             { id: '1383129184330579968', name: 'KHC Guilhotina', tier: 'guilhotina' },
         ],
-        // Copa KHC (no site, não no Sleeper): teste em 2026, para valer em 2027.
-        // Semana `qualifying`: todos os times das divisões jogam e os `bracket`
-        // maiores pontuadores avançam; chave sorteada com `seed` (mesma semente =
-        // mesmo sorteio); uma fase por semana até a final.
-        copa: { test: true, seed: 'Copa KHC 2026', qualifying: 12, bracket: 32 },
-        // Champions KHC: simulação do formato Champions (proposta 2027) com os
-        // jogos de 2026, em Também na KHC (#/copa-champions); não é a oficial
-        copaSim: {
+        // Champions KHC (a Copa da KHC, no site, não no Sleeper): em 2026 é
+        // simulação do formato Champions (proposta 2027) com os jogos reais;
+        // não soma Pontos KHC. Aba "Champions" em Ligas (#/ligas/<ano>/copa).
+        // O formato clássico (mata-mata com classificatória) segue suportado:
+        // { seed, qualifying, bracket } sem `format`.
+        copa: {
             format: 'ucl', test: true, seed: 'Copa KHC 2026',
             pots: [['serie-a', 'serie-b'], ['serie-c', 'serie-d']], perPot: 3,
             leagueWeeks: [3, 4, 5, 6, 7, 8],
@@ -61,7 +59,7 @@ const SERIES_META = {
     'serie-f': { id: 'F',     name: 'Série F',   short: 'Série F', league: 'f',     crest: 'escudo-serie-f.png' },
     // Liga paralela: quem faz menos pontos na semana é cortado (sem V–D)
     'guilhotina': { id: 'G',  name: 'KHC Guilhotina', short: 'Guilhotina', league: 'g', crest: 'escudo-guilhotina.png', kind: 'guillotine' },
-    'copa':    { id: 'Copa', name: 'Copa KHC', short: 'Copa', league: 'copa', crest: 'escudo-copa.png', kind: 'cup' },
+    'copa':    { id: 'Copa', name: 'Champions KHC', short: 'Champions', league: 'copa', crest: 'escudo-champions.png', kind: 'cup' },
 };
 
 // Ordem de exibição (abas, filtros, histórico): ligas paralelas (Elite,

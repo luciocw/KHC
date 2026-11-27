@@ -175,7 +175,7 @@ function situationRows(username, ids) {
 function copaSituationRow(username, ids) {
     if (!copaConfig() || appState.season !== currentSeasonYear()) return null;
     const entry = copaData();
-    if (entry.status !== 'ready') return entry.status === 'loading' ? { tier: 'copa', title: 'Copa KHC', main: 'Carregando…' } : null;
+    if (entry.status !== 'ready') return entry.status === 'loading' ? { tier: 'copa', title: SERIES_META.copa.name, main: 'Carregando…' } : null;
     if (copaConfig().format === 'ucl') return uclSituationRow(entry.data, username, ids);
     const m = copaModel(entry.data);
     const isMe = e => e && (e.team.ownerName === username || (e.team.ownerId && ids.includes(e.team.ownerId)));
@@ -186,7 +186,7 @@ function copaSituationRow(username, ids) {
     if (q.status === 'upcoming') return row(`Classificatória na semana ${q.week}`, `Os ${q.cut} maiores pontuadores da semana avançam`);
     if (q.status === 'live') return row(`${qi + 1}º na classificatória (parcial) · ${fmtPts(q.rows[qi].points)} pts`, qi < q.cut ? 'Dentro dos classificados, por enquanto' : 'Fora dos classificados, por enquanto', qi < q.cut ? 'up' : 'down');
     if (qi >= q.cut) return row(`Eliminado na classificatória (${qi + 1}º)`, '', 'out');
-    if (m.champion && isMe(m.champion.winner)) return row('Campeão da Copa KHC!', '', 'up');
+    if (m.champion && isMe(m.champion.winner)) return row(`Campeão da ${SERIES_META.copa.name}!`, '', 'up');
     for (let i = m.rounds.length - 1; i >= 0; i--) {
         const r = m.rounds[i];
         const g = r.games.find(x => isMe(x.a && x.a.entry) || isMe(x.b && x.b.entry));
@@ -197,7 +197,7 @@ function copaSituationRow(username, ids) {
         if (g.winner) {
             const won = (g.winner === 'a') === meA;
             if (!won) return row(`Eliminado: ${r.name.toLowerCase()}${g.label === 'Disputa do 3º lugar' ? ' (3º lugar)' : ''}`, `${fmtPts(me.points)} × ${fmtPts(opp.points)} ${vs}`, 'out');
-            if (g.label === 'Disputa do 3º lugar') return row('3º lugar na Copa KHC', '', 'up');
+            if (g.label === 'Disputa do 3º lugar') return row(`3º lugar na ${SERIES_META.copa.name}`, '', 'up');
             return row(`Classificado: venceu ${r.name.toLowerCase()}`, `${fmtPts(me.points)} × ${fmtPts(opp.points)} ${vs}`, 'up');
         }
         const placar = r.status === 'upcoming' ? `semana ${r.week}` : `${fmtPts(me.points)} × ${fmtPts(opp ? opp.points : 0)}${r.status === 'live' ? ' (ao vivo)' : ''}`;
@@ -210,14 +210,14 @@ function copaSituationRow(username, ids) {
 function uclSituationRow(data, username, ids, cfg, title) {
     const m = uclModel(data, cfg);
     const isMe = e => e && (e.team.ownerName === username || (e.team.ownerId && ids.includes(e.team.ownerId)));
-    const row = (main, sub, tone) => ({ tier: 'copa', crest: title ? CHAMPIONS_CREST : null, title: title || `Copa KHC${m.cfg.test ? ' (teste)' : ''}`, main, sub, tone, href: title ? '#/copa-champions' : hashFor('ligas', appState.season, 'copa') });
+    const row = (main, sub, tone) => ({ tier: 'copa', title: title || `${SERIES_META.copa.name}${m.cfg.test ? ' (simulação)' : ''}`, main, sub, tone, href: hashFor('ligas', appState.season, 'copa') });
     const pos = m.table.findIndex(r => isMe(r.entry));
     if (pos < 0) return null;
     const r = m.table[pos];
     const zone = pos < 8 ? 'direto às oitavas' : pos < 24 ? 'playoff' : 'eliminado';
     if (m.leagueStatus !== 'final') return row(`${pos + 1}º na fase de liga · ${r.pts} pts (${r.v}–${r.e}–${r.d})`, `Hoje: ${zone}`, pos < 24 ? 'up' : 'down');
     if (pos >= 24) return row(`Eliminado na fase de liga (${pos + 1}º)`, '', 'out');
-    if (m.champion && isMe(m.champion.winner)) return row('Campeão da Copa KHC!', '', 'up');
+    if (m.champion && isMe(m.champion.winner)) return row(`Campeão da ${SERIES_META.copa.name}!`, '', 'up');
     for (let i = m.rounds.length - 1; i >= 0; i--) {
         const rd = m.rounds[i];
         const g = rd.games.find(x => isMe(m.byKey[x.a]) || isMe(m.byKey[x.b]));
@@ -229,7 +229,7 @@ function uclSituationRow(data, username, ids, cfg, title) {
         if (g.winner) {
             const won = (g.winner === 'a') === meA;
             if (!won) return row(`Eliminado: ${rd.name.toLowerCase()}`, `${fmtPts(mine)} × ${fmtPts(theirs)} ${vs}`, 'out');
-            if (g.label === 'Disputa do 3º lugar') return row('3º lugar na Copa KHC', '', 'up');
+            if (g.label === 'Disputa do 3º lugar') return row(`3º lugar na ${SERIES_META.copa.name}`, '', 'up');
             return row(`Classificado: venceu ${rd.name.toLowerCase()}`, `${fmtPts(mine)} × ${fmtPts(theirs)} ${vs}`, 'up');
         }
         return row(`${rd.name}: contra ${vs}`, rd.status === 'upcoming' ? weeksLabel(rd.weeks) : `${fmtPts(mine)} × ${fmtPts(theirs)} (soma${rd.status === 'live' ? ', ao vivo' : ''})`, '');

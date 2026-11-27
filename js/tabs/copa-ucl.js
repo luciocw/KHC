@@ -119,7 +119,7 @@ function renderCopaUcl(data, header) {
             }).join('');
             body = `${sub}<div class="table-wrap">
                     <table class="standings standings--compact ucl-table">
-                        <caption class="sr-only">Fase de liga da Copa KHC</caption>
+                        <caption class="sr-only">Fase de liga da ${escapeHtml(SERIES_META.copa.name)}</caption>
                         <thead><tr><th scope="col">#</th><th scope="col">Time</th><th scope="col">Série</th>
                             <th scope="col"><abbr title="Vitórias, empates e derrotas">V–E–D</abbr></th>
                             <th scope="col"><abbr title="Pontos na Copa: vitória 3, empate 1">Pts</abbr></th>
@@ -173,7 +173,7 @@ function renderCopaUcl(data, header) {
 
     const champ = m.champion ? `<div class="copa-champ">
             <span class="medal medal--1">1</span>
-            <span class="grow"><span class="eyebrow eyebrow--accent">Campeão da Copa KHC</span><b dir="auto">${escapeHtml(m.champion.winner.team.teamName)}</b>
+            <span class="grow"><span class="eyebrow eyebrow--accent">Campeão da ${escapeHtml(SERIES_META.copa.name)}</span><b dir="auto">${escapeHtml(m.champion.winner.team.teamName)}</b>
             <small>${escapeHtml(m.champion.winner.team.ownerName)} · vice: ${escapeHtml(m.champion.runnerUp.team.teamName)} · 3º: ${escapeHtml(m.champion.third.team.teamName)}</small></span>
         </div>` : '';
     const actions = exportable ? `<div class="export-actions" role="group" aria-label="Exportar a fase da Copa como imagem">
@@ -186,8 +186,8 @@ function renderCopaUcl(data, header) {
         </div>` : '';
     const potsText = m.cfg.pots.map((p, i) => `pote ${i + 1}: ${p.map(t => SERIES_META[t].short).join(' + ')}`).join(' · ');
     const nGames = m.cfg.leagueWeeks.length;
-    const note = `${m.cfg.test ? 'Simulação/teste: não soma Pontos KHC. ' : ''}Formato Champions: ${potsText}. Cada time joga ${nGames} vezes na fase de liga (${m.cfg.perPot} contra cada pote, nunca contra a própria divisão), com a pontuação da sua liga na semana. Vitória 3, empate 1; desempate: saldo, pontos feitos. Mata-mata em 2 semanas (soma), empate no agregado: melhor posição na fase de liga. Sorteio com a semente "${m.cfg.seed}".`;
-    const subtitle = `${m.cfg.test ? 'Teste · ' : ''}${m.entrants.length} times · ${ph.name} · ${weeksLabel(ph.weeks)} · ${statusText[phStatus] || ''}`;
+    const note = `${m.cfg.test ? 'Simulação com os jogos reais da temporada (proposta para 2027): não soma Pontos KHC. ' : ''}Formato Champions: ${potsText}. Cada time joga ${nGames} vezes na fase de liga (${m.cfg.perPot} contra cada pote, nunca contra a própria divisão), com a pontuação da sua liga na semana. Vitória 3, empate 1; desempate: saldo, pontos feitos. Mata-mata em 2 semanas (soma), empate no agregado: melhor posição na fase de liga. Sorteio com a semente "${m.cfg.seed}".`;
+    const subtitle = `${m.cfg.test ? 'Simulação · ' : ''}${m.entrants.length} times · ${ph.name} · ${weeksLabel(ph.weeks)} · ${statusText[phStatus] || ''}`;
 
     return `${header(subtitle, actions)}
         ${tabs}

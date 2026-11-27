@@ -1,6 +1,6 @@
 # Ultimate League KHC — Hub Oficial
 
-Hub das ligas KHC de Fantasy Football no Sleeper: **Elite**, **Séries A–D** (com acesso e rebaixamento), **KHC Guilhotina** e **Copa KHC**, além da Cocoricó Premier League e da KHC NBA em "Também na KHC".
+Hub das ligas KHC de Fantasy Football no Sleeper: **Elite**, **Séries A–D** (com acesso e rebaixamento), **KHC Guilhotina** e **Champions KHC**, além da Cocoricó Premier League e da KHC NBA em "Também na KHC".
 
 Site em **HTML/CSS/JS puro**: sem framework, sem build e sem backend. Publicado pelo GitHub Pages em https://luciocw.github.io/KHC/.
 
@@ -11,8 +11,8 @@ Site em **HTML/CSS/JS puro**: sem framework, sem build e sem backend. Publicado 
 - **Início** (página principal; o logo do topo leva a ela): destaque da semana e das ligas em slides, "Minha KHC" com as competições do usuário lembrado, e "Outras ligas".
 - **Ligas:** cada série com o seletor **Tabela · Chances · Rodada · Playoffs**: tabela com zonas e medalhas, chances de playoffs e de queda, confrontos e placares da semana com destaques, e o chaveamento dos playoffs.
 - **Top Scorers** e **Power Ranking**.
-- **Copa KHC:** mata-mata do site em paralelo às divisões, e **Champions KHC**, a simulação do formato Champions.
-- **Busca "Como estou na KHC?"** (topo de Ligas): digite o usuário do Sleeper e veja a situação na temporada (divisão, chances, Elite, Guilhotina, Copa, Hall da Fama); "Minha situação" para quem se lembrar no aparelho.
+- **Champions KHC:** a Copa da KHC no formato Champions, em paralelo às divisões (aba Champions em Ligas; em 2026, simulação com os jogos reais).
+- **Busca "Como estou na KHC?"** (topo de Ligas): digite o usuário do Sleeper e veja a situação na temporada (divisão, chances, Elite, Guilhotina, Champions, Hall da Fama); "Minha situação" para quem se lembrar no aparelho.
 - **Lendas KHC:** Hall da Fama por Pontos KHC, mais o perfil de cada jogador.
 - **Temporadas**, **Regras** e **Também na KHC** (Guilhotina, Premier League e NBA).
 - Todas as telas exportam PNG, e o site pode ser instalado como app na tela inicial.
@@ -24,7 +24,7 @@ Site em **HTML/CSS/JS puro**: sem framework, sem build e sem backend. Publicado 
 | [`COMECE-AQUI.md`](COMECE-AQUI.md) | Guia de entrada: mapa, rotina, acessos, pendências |
 | [`ENCERRAMENTO-TEMPORADA.md`](ENCERRAMENTO-TEMPORADA.md) | **Encerrar a temporada, passo a passo para leigos** (pelo GitHub, pelo Claude ou pelo terminal) |
 | [`docs/funcionalidades.md`](docs/funcionalidades.md) | Cada tela em detalhe, com endereço e arquivo |
-| [`docs/copa.md`](docs/copa.md) | Copa KHC (clássica e estilo Champions) e a simulação Champions KHC |
+| [`docs/copa.md`](docs/copa.md) | Champions KHC (formato Champions e o clássico) |
 | [`docs/lendas.md`](docs/lendas.md) | Pontos KHC, Lendas e desempates |
 | [`docs/dados.md`](docs/dados.md) | De onde vêm os dados, formato do `data/<ano>.json`, fechar temporada, temporada nova, registro das chances |
 | [`docs/arquitetura.md`](docs/arquitetura.md) | Estrutura do código, identidade visual, decisões, como rodar e testar |

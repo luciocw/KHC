@@ -240,6 +240,7 @@ async function main() {
 
     if (onlyCup) {
         if (!cfg.copa) throw new Error(`${year} não tem Copa em js/config.js`);
+        if (cfg.copa.format === 'ucl') throw new Error(`${year}: --so-copa é só para a Copa clássica (classificatória + mata-mata)`);
         const copa = { ...cfg.copa, ...(qArg >= 0 ? { qualifying: Number(args[qArg + 1]) } : {}) };
         const s = await deriveCup(cfg, copa, await fetchRounds(cfg));
         console.log(`Copa KHC ${year}${copa.test ? ' (teste)' : ''}, classificatória na semana ${copa.qualifying}:`);
@@ -269,7 +270,7 @@ async function main() {
     // confrontos semana a semana: Rodada, Chaveamento, Copa e Champions KHC sem Sleeper
     console.log('  → confrontos semana a semana');
     const rounds = await fetchRounds(cfg);
-    if (cfg.copa && !cfg.copa.test) {
+    if (cfg.copa && !cfg.copa.test && cfg.copa.format !== 'ucl') {
         console.log('  → Copa KHC');
         series.push(await deriveCup(cfg, cfg.copa, rounds));
     }

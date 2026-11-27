@@ -101,7 +101,7 @@ function hubSlides() {
             eyebrow: `Champions KHC${cc.test ? ' · simulação' : ''}`,
             title: 'Champions',
             text,
-            cta: { text: 'Ver a Champions', href: '#/copa-champions' },
+            cta: { text: 'Ver a Champions', href: hashFor('ligas', appState.season, 'copa') },
             card: { title: 'Champions KHC', sub }
         });
     }
@@ -160,7 +160,7 @@ function hubMineHTML() {
         if (cd.status === 'ready') {
             const r = uclSituationRow(cd.data, me, ids, cc, 'Champions KHC');
             if (r) rows.push(r);
-        } else if (cd.status === 'loading') rows.push({ tier: 'copa', crest: CHAMPIONS_CREST, title: 'Champions KHC', main: 'Carregando…', href: '#/copa-champions' });
+        } else if (cd.status === 'loading') rows.push({ tier: 'copa', crest: CHAMPIONS_CREST, title: 'Champions KHC', main: 'Carregando…', href: hashFor('ligas', appState.season, 'copa') });
     }
     const p = profileModel(me);
     const n = rows.length;

@@ -1273,14 +1273,13 @@ async function drawCopaCanvas(data) {
  */
 async function drawUclCanvas(data) {
     const m = uclModel(data);
-    // Champions KHC (página dela): o escudo com o nome novo
-    const meta = appState.tab === 'copa-champions' ? { ...SERIES_META.copa, crest: CHAMPIONS_CREST } : SERIES_META.copa;
+    const meta = SERIES_META.copa;
     const c = exportPalette(meta);
     const ph = m.phases[m.current];
     const leagueColor = tier => cssToken(`--league-${SERIES_META[tier].league}`) || c.text2;
     const tag = tier => SERIES_META[tier].short.toUpperCase().split('').join('\u200A');
     const PAD = 16, AV = 28;
-    const test = m.cfg.test ? 'Teste · ' : '';
+    const test = m.cfg.test ? 'Simulação · ' : '';
 
     // Tabela da fase de liga
     if (ph.key === 'liga' && appState.copaLeagueView !== 'jogos') {
@@ -1593,7 +1592,7 @@ function exportTarget() {
             draw: () => drawAlsoCanvas(cfg, p.data)
         };
     }
-    if ((appState.tab === 'ligas' && isCup(appState.series)) || appState.tab === 'copa-champions') {
+    if (appState.tab === 'ligas' && isCup(appState.series)) {
         const cp = copaData();
         if (cp.status !== 'ready') return null;   // inclui "incomplete" (falta divisão)
         const ucl = copaConfig().format === 'ucl';
@@ -1601,7 +1600,7 @@ function exportTarget() {
         const view = ucl && ph === 0 ? `-${appState.copaLeagueView}${appState.copaLeagueView === 'jogos' ? `-s${appState.copaWeek || ''}` : ''}` : '';
         return {
             key: `copa|${appState.tab}|${appState.season}|${ph}${view}|${cp.data.fetchedAt}`,
-            name: `khc-${appState.season}-${appState.tab === 'copa-champions' ? 'champions' : 'copa'}-fase-${ph}${view}.png`,
+            name: `khc-${appState.season}-${ucl ? 'champions' : 'copa'}-fase-${ph}${view}.png`,
             title: `${copaTitle()} · ${appState.season}`,
             draw: () => (ucl ? drawUclCanvas(cp.data) : drawCopaCanvas(cp.data))
         };

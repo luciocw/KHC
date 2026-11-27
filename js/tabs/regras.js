@@ -49,20 +49,19 @@ const RULES = [
     },
     {
         icon: 'trophy',
-        title: 'Copa KHC',
+        title: 'Champions KHC',
         lead: (() => {
             const y = Object.keys(KHC_CONFIG).sort().reverse().find(k => KHC_CONFIG[k].copa);
-            return y && KHC_CONFIG[y].copa.test ? `<b>Em teste em ${y}:</b> vale a partir de 2027.` : '';
+            return y && KHC_CONFIG[y].copa.test ? `<b>Simulação em ${y}</b>, com os jogos reais da temporada: o formato é a proposta para 2027 e não soma Pontos KHC agora.` : '';
         })(),
         items: [
-            'Competição à parte, como uma Copa do Brasil ao lado do Brasileirão: mesmos times, mas <b>não conta</b> para playoffs nem rebaixamento. Roda no site, com a pontuação de cada time na sua liga na semana.',
-            'Participam todos os times das divisões (Séries A–F). Elite e Guilhotina não entram.',
-            '<b>Semana 12 (classificatória):</b> todo mundo joga; os 32 maiores pontuadores avançam.',
-            '<b>Semanas 13 a 17:</b> mata-mata de jogo único (16 avos, oitavas, quartas, semifinal e, na semana 17, a final e a disputa do 3º lugar, junto com as finais das divisões).',
-            '<b>Sorteio livre:</b> qualquer divisão pode cruzar com qualquer outra, até a mesma. Sai com uma semente definida antes; com a mesma semente, o sorteio é sempre igual (dá para conferir).',
-            '<a href="#/copa-champions">Champions KHC</a>: a Copa no formato Champions League (fase de liga com potes, playoff e mata-mata em ida e volta), proposta para 2027. Em 2026, simulação com os jogos reais da temporada; não soma Pontos KHC.',
-            '<b>Empate:</b> passa quem fez mais pontos na semana anterior.',
-            'Nas semanas 15 a 17, quem já caiu na sua liga continua escalando o time para a Copa.',
+            'A Copa da KHC, no formato da Liga dos Campeões. Competição à parte, como uma Copa ao lado do campeonato: mesmos times, mas <b>não conta</b> para playoffs nem rebaixamento. Roda no site, com a pontuação de cada time na sua liga na semana. Fica em Ligas, na aba <a href="#/ligas/' + (Object.keys(KHC_CONFIG).sort().reverse().find(k => KHC_CONFIG[k].copa) || '') + '/copa">Champions</a>.',
+            'Participam todos os times das divisões. Elite e Guilhotina não entram.',
+            '<b>Fase de liga:</b> potes por divisão (2026: A+B e C+D; 2027: A+B, C+D e E+F). Cada time faz 6 jogos, divididos igualmente entre os potes, e nunca enfrenta a própria divisão. Vitória 3, empate 1; desempate: saldo e pontos feitos.',
+            '<b>Classificação:</b> do 1º ao 8º vão direto às oitavas; do 9º ao 24º jogam o playoff; do 25º em diante, eliminados.',
+            '<b>Mata-mata:</b> ida e volta em 2 semanas (vale a soma). Empate no agregado: passa quem foi melhor na fase de liga. Final e disputa do 3º lugar na semana 17, junto com as finais das divisões.',
+            '<b>Sorteio:</b> sai com uma semente definida antes; com a mesma semente, o sorteio é sempre igual (dá para conferir).',
+            'Quem já caiu na sua liga continua escalando o time para a Champions.',
         ]
     },
     {
@@ -73,7 +72,7 @@ const RULES = [
             'Pontos pela colocação final de cada temporada, somados no Hall da Fama (Lendas). Só entram temporadas fechadas: a atual entra depois da final.',
             `<b>Séries A–F</b> (do 1º ao ${KHC_POINTS.serie.length}º, quem não é rebaixado): ${pointsLine('serie')}. Todas valem igual: as divisões surgiram por ordem de inscrição, não por nível.`,
             `<b>KHC Elite</b> (liga só de classificados, acima das divisões): ${pointsLine('elite')}.`,
-            `<b>Copa KHC</b> (2027, com semifinal e final): ${pointsLine('copa')}.`,
+            `<b>Champions KHC</b> (a partir de 2027; 1º ao 4º pela final e disputa do 3º): ${pointsLine('copa')}.`,
             '<b>Colocação final:</b> 1º ao 4º pelos playoffs (final e disputa do 3º), 5º e 6º pela disputa do 5º lugar, 7º em diante pela temporada regular.',
             'KHC Guilhotina (liga avulsa), Premier League e NBA não pontuam.',
             '<b>Desempate:</b> mais títulos, depois melhor aproveitamento V–D, depois título mais recente. O aproveitamento (a % ao lado do nome nas Lendas) conta só a temporada regular das divisões nas temporadas fechadas: 14 jogos por ano para todos; playoffs, Elite e Copa não entram. O "aproveitamento geral" do perfil é outro número: inclui a temporada atual e a Elite.',
