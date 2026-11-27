@@ -195,6 +195,7 @@ const appState = {
     season: Object.keys(KHC_CONFIG).sort().pop(),   // temporada mais recente configurada
     series: 'serie-a',        // tier selecionado nas abas Ligas e Rodada
     matchWeek: null,          // semana na aba Rodada (null = atual da liga)
+    hubSlide: 0,              // destaque aberto na página Início (protótipo)
     copaPhase: null,
     copaLeagueView: 'tabela', // Copa estilo Champions: 'tabela' | 'jogos' da fase de liga
     copaWeek: null,           // rodada aberta em "jogos" (null = a da semana atual)          // fase aberta na Copa KHC (null = a da semana atual)
