@@ -3,13 +3,15 @@
 //
 //   - Destaque principal (inspirado em "Timed Card Opening"): fundo com
 //     textura nas cores da liga e o escudo grande; título condensado enorme.
-//     Passa sozinho pelos slides (semana, divisões, Copa, Elite, Guilhotina)
+//     Passa sozinho pelos slides (resumo da semana, Elite, divisões A–F,
+//     Champions KHC)
 //     com contador "01 / 07", setas e barra de progresso; pausa ao tocar e
 //     não anda sozinho com "reduzir movimento".
 //   - Cards em carrossel sobre o destaque: tocar abre o slide; o botão do
 //     slide leva à tabela.
 //   - "Minha KHC" (inspirado no menu circular): o jogador lembrado no centro
-//     e, em volta, as competições dele com a situação.
+//     e, em volta, as competições dele (divisões, Elite e Champions KHC).
+//   - "Outras ligas": Guilhotina, Cocoricó Premier League e NBA.
 //
 // Lê: appState.leagues, appState.hubSlide · Depende de: config, api,
 //   derivations, ui/helpers, ui/situacao, tabs/ligas, tabs/copa
@@ -41,7 +43,7 @@ function hubWeekTop() {
     return entry;
 }
 
-/** Slides do destaque: a semana, cada liga da temporada e a Copa. */
+/** Slides do destaque: resumo da semana, Elite, divisões e a Champions KHC. */
 function hubSlides() {
     const week = appState.nflState ? sanitizeNumber(appState.nflState.display_week, 0, 30, 0) : 0;
     const slides = [];
@@ -53,25 +55,15 @@ function hubSlides() {
         title: week ? `Semana ${week}` : 'KHC',
         text: wk && wk.status === 'ready' && wk.top
             ? `Maior pontuação até agora: ${wk.top.team.teamName} (${SERIES_META[wk.top.tier].short}), ${fmtPts(wk.top.pts)} pts.`
-            : 'Placares, tabelas, chances e a Copa da turma, num lugar só.',
+            : 'Placares, tabelas, chances e a Champions da turma, num lugar só.',
         cta: { text: 'Ver a rodada', href: hashFor('rodada', appState.season, 'serie-a') },
-        card: { title: 'Semana', sub: wk && wk.top ? `Destaque: ${wk.top.team.teamName}` : label }
+        card: { title: 'Resumo da semana', sub: wk && wk.top ? `Destaque: ${wk.top.team.teamName}` : label }
     });
-    sortLeagues(appState.leagues).forEach(l => {
+    // Divisões e Elite (E e F entram sozinhas quando configuradas); a
+    // Guilhotina fica em "Outras ligas"
+    sortLeagues(appState.leagues).filter(l => !isGuillotine(l.info.tier)).forEach(l => {
         const tier = l.info.tier;
         const meta = SERIES_META[tier];
-        if (isGuillotine(tier)) {
-            const alive = l.teams.filter(t => !isChopped(t));
-            slides.push({
-                key: tier, tier, league: meta.league, crest: meta.crest,
-                eyebrow: 'Liga avulsa · um corte por rodada',
-                title: meta.short,
-                text: `${alive.length} vivos de ${l.teams.length}. Quem faz menos pontos entre os vivos é cortado.`,
-                cta: { text: 'Ver os vivos', href: '#/guilhotina' },
-                card: { title: meta.short, sub: `${alive.length} vivos` }
-            });
-            return;
-        }
         const leader = l.teams[0];
         slides.push({
             key: tier, tier, league: meta.league, crest: meta.crest,
@@ -82,16 +74,35 @@ function hubSlides() {
             card: { title: meta.short, sub: leader ? `${leader.teamName} · ${leader.wins}–${leader.losses}` : '' }
         });
     });
-    const cfg = copaConfig();
-    if (cfg) {
-        const { start, last } = copaWeekRange(cfg);
-        slides.splice(1, 0, {
-            key: 'copa', tier: 'copa', league: 'copa', crest: SERIES_META.copa.crest,
-            eyebrow: `Copa KHC${cfg.test ? ' · teste' : ''}`,
-            title: 'Copa',
-            text: `Todas as divisões no mata-mata. Semanas ${start} a ${last}, final junto com as finais das séries.`,
-            cta: { text: 'Ver a Copa', href: hashFor('ligas', appState.season, 'copa') },
-            card: { title: 'Copa KHC', sub: `Semanas ${start}–${last}` }
+    // Champions KHC (a Copa no formato Champions)
+    const cc = championsConfig();
+    if (cc) {
+        const cd = copaData(cc);
+        let text = `Fase de liga nas semanas ${cc.leagueWeeks[0]} a ${cc.leagueWeeks[cc.leagueWeeks.length - 1]}, mata-mata em ida e volta e final na semana ${cc.knockout.final[0]}.`;
+        let sub = 'Formato Champions';
+        if (cd.status === 'ready') {
+            const m = uclModel(cd.data, cc);
+            const leg = m.settings.leg;
+            const ph = m.phases.find(p => leg <= p.weeks[p.weeks.length - 1]) || m.phases[m.phases.length - 1];
+            const leader = m.table[0] && m.table[0].entry;
+            if (m.champion) {
+                text = `Campeão: ${m.champion.winner.team.teamName}. Vice: ${m.champion.runnerUp.team.teamName}.`;
+                sub = `Campeão: ${m.champion.winner.team.teamName}`;
+            } else if (ph.key === 'liga') {
+                text = `Fase de liga em andamento. Líder: ${leader ? leader.team.teamName : '—'}. Os 8 primeiros vão direto às oitavas; do 9º ao 24º, playoff.`;
+                sub = `Fase de liga · ${weeksLabel(ph.weeks)}`;
+            } else {
+                text = `${ph.name} em ${ph.weeks.length > 1 ? 'ida e volta' : 'jogo único'} (${weeksLabel(ph.weeks)}). Melhor da fase de liga: ${leader ? leader.team.teamName : '—'}.`;
+                sub = `${ph.name} · ${weeksLabel(ph.weeks)}`;
+            }
+        }
+        slides.push({
+            key: 'champions', tier: 'copa', league: 'copa', crest: CHAMPIONS_CREST,
+            eyebrow: `Champions KHC${cc.test ? ' · simulação' : ''}`,
+            title: 'Champions',
+            text,
+            cta: { text: 'Ver a Champions', href: '#/copa-champions' },
+            card: { title: 'Champions KHC', sub }
         });
     }
     return slides;
@@ -141,16 +152,23 @@ function hubMineHTML() {
         </section>`;
     }
     const ids = playerIdsFor(me);
-    const rows = situationRows(me, ids);
-    const copa = copaSituationRow(me, ids);
-    if (copa) rows.push(copa);
+    // divisões e Elite (a Guilhotina fica em "Outras ligas") + Champions KHC
+    const rows = situationRows(me, ids).filter(r => !isGuillotine(r.tier));
+    const cc = championsConfig();
+    if (cc) {
+        const cd = copaData(cc);
+        if (cd.status === 'ready') {
+            const r = uclSituationRow(cd.data, me, ids, cc, 'Champions KHC');
+            if (r) rows.push(r);
+        } else if (cd.status === 'loading') rows.push({ tier: 'copa', crest: CHAMPIONS_CREST, title: 'Champions KHC', main: 'Carregando…', href: '#/copa-champions' });
+    }
     const p = profileModel(me);
     const n = rows.length;
     // nós num arco à direita do centro (de −70° a 70°)
     const nodes = rows.map((r, k) => {
         const ang = n === 1 ? 0 : -70 + (140 * k) / (n - 1);
         return `<a class="hub-node${r.tone ? ' is-' + r.tone : ''}" href="${r.href || '#'}" style="--ang:${ang}deg" data-league="${r.tier ? SERIES_META[r.tier].league : 'khc'}">
-            <span class="hub-node__dot">${r.tier ? `<img src="${CREST_PATH}${SERIES_META[r.tier].crest}" alt="" width="30" height="34">` : '★'}</span>
+            <span class="hub-node__dot">${r.tier ? `<img src="${CREST_PATH}${r.crest || SERIES_META[r.tier].crest}" alt="" width="30" height="34">` : '★'}</span>
             <span class="hub-node__text"><b>${escapeHtml(r.title)}</b><small>${escapeHtml(r.main)}</small></span>
         </a>`;
     }).join('');
@@ -168,6 +186,41 @@ function hubMineHTML() {
 }
 
 /**
+ * "Outras ligas": Guilhotina, Cocoricó Premier League e NBA, com o status
+ * de cada uma (e o do jogador lembrado na Guilhotina).
+ */
+function hubOthersHTML() {
+    const cards = [];
+    const g = appState.leagues.find(l => isGuillotine(l.info.tier));
+    if (g) {
+        const alive = g.teams.filter(t => !isChopped(t)).length;
+        const me = rememberedUser();
+        const ids = me ? playerIdsFor(me) : [];
+        const mine = me && g.teams.find(t => t.ownerName === me || (t.ownerId && ids.includes(t.ownerId)));
+        const you = mine ? ` · você: ${isChopped(mine) ? `cortado${mine.eliminated ? ` na ${mine.eliminated}` : ''}` : 'vivo'}` : '';
+        cards.push({ href: '#/guilhotina', league: 'g', img: `${CREST_PATH}${SERIES_META.guilhotina.crest}`, round: false, title: 'Guilhotina', sub: `${alive} vivos de ${g.teams.length}${you}` });
+    }
+    Object.values(ALSO_LEAGUES).forEach(cfg => {
+        const d = alsoData(cfg.key);
+        let sub = 'Carregando…';
+        if (d.status === 'ready') {
+            const lead = d.data.teams[0];
+            sub = isAlsoPreseason(d.data) ? 'Aguardando o draft' : lead ? `Líder: ${lead.teamName} · ${alsoRecord(cfg, lead)}` : '';
+        } else if (d.status === 'error') sub = '';
+        cards.push({ href: `#/${cfg.key}`, league: cfg.league, img: `${CREST_PATH}${cfg.crest}`, round: cfg.round, title: cfg.name, sub });
+    });
+    if (!cards.length) return '';
+    return `<section class="hub-others" aria-labelledby="hub-others-title">
+        <h2 class="eyebrow" id="hub-others-title">Outras ligas</h2>
+        <div class="hub-others__list">${cards.map(c => `<a class="hub-other" href="${c.href}" data-league="${c.league}">
+            <img class="${c.round ? 'is-round' : ''}" src="${c.img}" alt="" height="44">
+            <span class="grow"><b>${escapeHtml(c.title)}</b><small>${escapeHtml(c.sub)}</small></span>
+            <span aria-hidden="true">→</span>
+        </a>`).join('')}</div>
+    </section>`;
+}
+
+/**
  * Página Início (protótipo).
  * @returns {string} HTML
  */
@@ -181,7 +234,8 @@ function renderHub() {
             ${hubHeroHTML(slides, i)}
             <div class="hub-cards" role="group" aria-label="Escolher destaque">${hubCardsHTML(slides, i)}</div>
         </section>
-        ${hubMineHTML()}`;
+        ${hubMineHTML()}
+        ${hubOthersHTML()}`;
 }
 
 /** Troca o slide sem redesenhar a página (mantém a rolagem dos cards). */

@@ -297,7 +297,6 @@ function renderRodada() {
 
     return `
         ${partialWarningHTML()}
-        ${copaLineupNoticeHTML()}
         <nav class="series-tabs" aria-label="Séries">${tabs}</nav>
         <section class="card round" data-league="${meta.league}" aria-labelledby="round-title">
             <header class="card__hd">

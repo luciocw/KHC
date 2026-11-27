@@ -22,8 +22,8 @@ const TABS = [
     { id: 'premier',    label: 'Premier League', short: 'Premier', title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('premier'), hidden: true, also: true },
     // Protótipo da página inicial revitalizada (só por link, #/hub)
     { id: 'hub', label: 'Início', short: 'Início', title: 'Início', icon: 'trophy', render: () => renderHub(), hidden: true, needsData: true },
-    // Também na KHC: simulação da Copa no formato Champions (proposta 2027)
-    { id: 'copa-champions', label: 'Champions KHC', short: 'Champions', title: 'Também na KHC', icon: 'trophy', render: () => renderCopaSimPage(), hidden: true, also: true, needsData: true },
+    // Champions KHC: a Copa no formato Champions (aberta pela página Início)
+    { id: 'copa-champions', label: 'Champions KHC', short: 'Champions', title: 'Champions KHC', icon: 'trophy', render: () => renderCopaSimPage(), hidden: true, also: true, needsData: true },
     { id: 'guilhotina', label: 'Guilhotina',     short: 'Guilhotina', title: 'Também na KHC', icon: 'trophy', render: () => renderGuillotinePage(), hidden: true, also: true, needsData: true },
     { id: 'nba',        label: 'NBA',            short: 'NBA',     title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('nba'),     hidden: true, also: true },
 ];

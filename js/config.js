@@ -151,6 +151,7 @@ const NBA_LEAGUE = {
 };
 
 const CREST_PATH = 'assets/logo/png/ui/';
+const CHAMPIONS_CREST = 'escudo-champions.png';   // Champions KHC (o da Copa, com o nome novo)
 
 // --- CONSTANTES ---
 const CACHE_KEY = 'khc_league_cache';

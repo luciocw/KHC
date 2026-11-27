@@ -25,12 +25,20 @@ Cada tela, com o endereço e o arquivo onde ela está. A Copa tem página própr
 - **Perfil do jogador** (`ui/drawer.js`): lateral no desktop, bottom sheet no celular. No topo, **Situação em <ano>** (`ui/situacao.js`): posição, V–D e zona em cada divisão (com as chances de playoffs e queda), Elite, Guilhotina (vivo/cortado), Copa KHC (classificatória ou fase, adversário e placar; também no formato Champions) e o lugar no Hall da Fama. Botão "Lembrar: este sou eu" guarda o usuário no aparelho (`localStorage` `khc_me`).
 - **Busca "Como estou na KHC?"** (`ui/situacao.js`, topo de Ligas): usuário do Sleeper ou nome do time, sem diferenciar maiúsculas e acentos (inclui quem só está no histórico); Enter abre o primeiro resultado. Com usuário lembrado, aparece o atalho **Minha situação**.
 
+## Início (protótipo, `#/hub`)
+
+`tabs/inicio.js`: página inicial revitalizada, ainda só por link.
+
+- **Destaque principal:** fundo com textura nas cores da liga e o escudo grande, título condensado. Os slides passam sozinhos (resumo da semana, Elite, divisões A–F e Champions KHC), com contador, setas e barra de progresso. Pausa com o mouse em cima e para ao tocar num card; respeita "reduzir movimento".
+- **Cards em carrossel**, um por slide, que levam à tela de cada um.
+- **Minha KHC:** o usuário lembrado (`khc_me`) no centro e, em volta, as divisões, a Elite e a Champions KHC com a situação de cada uma. Sem usuário lembrado, a busca.
+- **Outras ligas:** Guilhotina (com o status do usuário lembrado), Cocoricó Premier League e National Burgundy Association.
+
 ## Também na KHC
 
 `tabs/tambem.js`: página fora do menu, com abas por liga, botão Voltar para a NFL e um atalho discreto (ícone de grade) no topo. Aparece em Regras e, na entressafra da NFL, como cartão na aba Ligas.
 
 - **KHC Guilhotina** (`#/guilhotina`, `tabs/guilhotina.js`; o link antigo `#/ligas/<ano>/g` redireciona): vivos ordenados pela pontuação da semana, zona de corte quando todos já pontuaram, e os cortados com a rodada do corte. Fica fora de Rodada, Top, Power e Chances. Exporta PNG.
-- **Champions KHC** (`#/copa-champions`): ver [`copa.md`](copa.md).
 - **Premier League** (`#/premier`): tabela da Cocoricó Premier League (V–E–D, PF, PC, eficiência de escalação) com exportação.
 - **NBA** (`#/nba`): KHC NBA League · National Burgundy Association, liga nova em 2026/27 (6 times). Mesma tabela, com V–D, e Rodada (`#/nba/rodada/<semana>`) com destaques e exportação, como a da NFL. Antes do draft, mostra só os times que já entraram.
 

@@ -35,8 +35,7 @@ function weeksLabel(weeks) {
  * Copa resolvida, com os times de cada id e a fase aberta.
  * @returns {Object}
  */
-function uclModel(data) {
-    const cfg = copaConfig();
+function uclModel(data, cfg = copaConfig()) {
     const { settings, scores } = data;
     const entrants = copaLeagues().flatMap(l => l.teams.map(t => ({ key: `${l.info.tier}:${t.teamId}`, tier: l.info.tier, team: t })));
     const byKey = Object.fromEntries(entrants.map(e => [e.key, e]));

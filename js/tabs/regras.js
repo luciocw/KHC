@@ -60,6 +60,7 @@ const RULES = [
             '<b>Semana 12 (classificatória):</b> todo mundo joga; os 32 maiores pontuadores avançam.',
             '<b>Semanas 13 a 17:</b> mata-mata de jogo único (16 avos, oitavas, quartas, semifinal e, na semana 17, a final e a disputa do 3º lugar, junto com as finais das divisões).',
             '<b>Sorteio livre:</b> qualquer divisão pode cruzar com qualquer outra, até a mesma. Sai com uma semente definida antes; com a mesma semente, o sorteio é sempre igual (dá para conferir).',
+            '<a href="#/copa-champions">Champions KHC</a>: a Copa no formato Champions League (fase de liga com potes, playoff e mata-mata em ida e volta), proposta para 2027. Em 2026, simulação com os jogos reais da temporada; não soma Pontos KHC.',
             '<b>Empate:</b> passa quem fez mais pontos na semana anterior.',
             'Nas semanas 15 a 17, quem já caiu na sua liga continua escalando o time para a Copa.',
         ]
@@ -83,7 +84,6 @@ const RULES = [
         title: 'Também na KHC',
         items: [
             '<a href="#/guilhotina">KHC Guilhotina</a>: liga avulsa (entra quem quer). A cada rodada, quem faz menos pontos entre os vivos é cortado. Não soma Pontos KHC.',
-            '<a href="#/copa-champions">Champions KHC</a>: simulação de como a Copa KHC seria no formato Champions League (proposta para 2027), com os jogos reais da temporada. Não é oficial nem soma Pontos KHC.',
             '<a href="#/premier">Cocoricó Premier League</a>: fantasy de futebol no Sleeper, com a turma da KHC. Para a conversa não parar na entressafra da NFL.',
             '<a href="#/nba">National Burgundy Association</a>: fantasy de basquete no Sleeper, liga nova na temporada 2026/27 da NBA.',
         ]
