@@ -25,9 +25,9 @@ Cada tela, com o endereço e o arquivo onde ela está. A Copa tem página própr
 - **Perfil do jogador** (`ui/drawer.js`): lateral no desktop, bottom sheet no celular. No topo, **Situação em <ano>** (`ui/situacao.js`): posição, V–D e zona em cada divisão (com as chances de playoffs e queda), Elite, Guilhotina (vivo/cortado), Copa KHC (classificatória ou fase, adversário e placar; também no formato Champions) e o lugar no Hall da Fama. Botão "Lembrar: este sou eu" guarda o usuário no aparelho (`localStorage` `khc_me`).
 - **Busca "Como estou na KHC?"** (`ui/situacao.js`, topo de Ligas): usuário do Sleeper ou nome do time, sem diferenciar maiúsculas e acentos (inclui quem só está no histórico); Enter abre o primeiro resultado. Com usuário lembrado, aparece o atalho **Minha situação**.
 
-## Início (protótipo, `#/hub`)
+## Início (`#/hub`, página principal)
 
-`tabs/inicio.js`: página inicial revitalizada, ainda só por link.
+`tabs/inicio.js`: a primeira página que abre (endereço vazio também cai nela). Não tem item no menu: volta-se a ela tocando no logo da KHC no topo, à esquerda.
 
 - **Destaque principal:** fundo com textura nas cores da liga e o escudo grande, título condensado. Os slides passam sozinhos (resumo da semana, Elite, divisões A–F e Champions KHC), com contador, setas e barra de progresso. Pausa com o mouse em cima e para ao tocar num card; respeita "reduzir movimento".
 - **Cards em carrossel**, um por slide, que levam à tela de cada um.

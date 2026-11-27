@@ -11,6 +11,8 @@
 // =============================================================================
 
 const TABS = [
+    // Página principal (abre primeiro; volta-se a ela pelo logo do topo, sem item no menu)
+    { id: 'hub',        label: 'Início',      short: 'Início', title: 'Início',        icon: 'home',     render: () => renderHub(),           needsData: true, hidden: true },
     { id: 'ligas',      label: 'Ligas',       short: 'Ligas',  title: 'Classificação', icon: 'trophy',   render: () => renderLigas(),         needsData: true },
     { id: 'rodada',     label: 'Rodada',      short: 'Rodada', title: 'Rodada',        icon: 'swords',   render: () => renderRodada(),        needsData: true },
     { id: 'top',        label: 'Top Scorers', short: 'Top',    title: 'Top Scorers',   icon: 'chart',    render: () => renderTopScorers(),    needsData: true },
@@ -20,8 +22,6 @@ const TABS = [
     { id: 'regras',     label: 'Regras',      short: 'Regras', title: 'Regras',        icon: 'bookOpen', render: () => renderRules(), mobileInHeader: true },
     // Também na KHC (fora do menu): atalho no topo, Regras e o cartão da entressafra
     { id: 'premier',    label: 'Premier League', short: 'Premier', title: 'Também na KHC', icon: 'trophy', render: () => renderAlso('premier'), hidden: true, also: true },
-    // Protótipo da página inicial revitalizada (só por link, #/hub)
-    { id: 'hub', label: 'Início', short: 'Início', title: 'Início', icon: 'trophy', render: () => renderHub(), hidden: true, needsData: true },
     // Champions KHC: a Copa no formato Champions (aberta pela página Início)
     { id: 'copa-champions', label: 'Champions KHC', short: 'Champions', title: 'Champions KHC', icon: 'trophy', render: () => renderCopaSimPage(), hidden: true, also: true, needsData: true },
     { id: 'guilhotina', label: 'Guilhotina',     short: 'Guilhotina', title: 'Também na KHC', icon: 'trophy', render: () => renderGuillotinePage(), hidden: true, also: true, needsData: true },
