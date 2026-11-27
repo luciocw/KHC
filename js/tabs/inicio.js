@@ -1,5 +1,5 @@
 // =============================================================================
-// TAB / INÍCIO (protótipo, #/hub) — página inicial revitalizada.
+// TAB / INÍCIO (#/hub) — página principal do site.
 //
 //   - Destaque principal (inspirado em "Timed Card Opening"): fundo com
 //     textura nas cores da liga e o escudo grande; título condensado enorme.
@@ -221,7 +221,7 @@ function hubOthersHTML() {
 }
 
 /**
- * Página Início (protótipo).
+ * Página Início (principal).
  * @returns {string} HTML
  */
 function renderHub() {

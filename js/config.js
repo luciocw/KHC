@@ -192,7 +192,7 @@ const VALIDATION = {
 // --- ESTADO DA APLICAÇÃO ---
 const appState = {
     // Navegação (espelhada na URL: #/<aba>/<ano>[/<série>[/<semana>]])
-    tab: 'ligas',
+    tab: 'hub',               // página principal: Início
     season: Object.keys(KHC_CONFIG).sort().pop(),   // temporada mais recente configurada
     series: 'serie-a',        // tier selecionado nas abas Ligas e Rodada
     matchWeek: null,          // semana na aba Rodada (null = atual da liga)
